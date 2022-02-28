@@ -7,7 +7,7 @@ This is the first development version of the user module, please don't install i
 ## Installation
 Follow the below steps to install the module via composer
 
-###Step 1
+### Step 1
 Run the following to install this library:
 
 ```bash
