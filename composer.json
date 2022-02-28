@@ -1,0 +1,63 @@
+{
+  "name": "pi/user",
+  "description": "Api base authentication and user management via laminas and pi engine",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "Pi",
+    "Pi Engine",
+    "Laminas",
+    "Laminas MVC",
+    "User management",
+    "User management",
+    "Psr",
+    "MultiTenant",
+    "SaaS"
+  ],
+  "homepage": "https://piengine.org",
+  "authors": [
+    {
+      "name": "Hossein Azizabadi Farahani",
+      "email": "hossein@azizabadi.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4 || ~8.0.0",
+    "ext-ctype": "*",
+    "ext-fileinfo": "*",
+    "ext-gd": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-pdo": "*",
+    "ext-spl": "*",
+    "lib-curl": "*",
+
+    "laminas/laminas-mvc": "^3.1.1",
+    "laminas/laminas-mvc-i18n": "^1.2.0",
+    "laminas/laminas-mvc-plugins": "^1.1.0",
+    "laminas/laminas-mvc-middleware": "^2.2",
+    "laminas/laminas-db": "^2.12.0",
+    "laminas/laminas-json": "^3.2",
+    "laminas/laminas-log": "^2.13.1",
+    "laminas/laminas-authentication": "^2.9",
+    "laminas/laminas-crypt": "^3.6",
+    "laminas/laminas-http": "^2.15",
+    "laminas/laminas-eventmanager": "^3.4",
+    "laminas/laminas-cache": "^3.1",
+    "laminas/laminas-cache-storage-adapter-redis": "^2.1",
+    "laminas/laminas-serializer": "^2.12",
+    "laminas/laminas-inputfilter": "^2.13",
+    "firebase/php-jwt": "^5.5"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "Pi\\User\\": "src/"
+    }
+  },
+
+  "suggest": {
+    "ext-apc": "for opcode cache and system persistent data",
+    "ext-discount": "for Markdown text parsing",
+    "ext-intl": "for i18n features"
+  }
+}
