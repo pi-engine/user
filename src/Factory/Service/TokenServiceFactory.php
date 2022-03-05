@@ -11,11 +11,12 @@ class TokenServiceFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
+     *
      * @return TokenService
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): TokenService
+    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): TokenService
     {
         return new TokenService(
             $container->get(CacheService::class)

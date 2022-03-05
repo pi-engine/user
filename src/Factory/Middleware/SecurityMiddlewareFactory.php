@@ -14,13 +14,14 @@ class SecurityMiddlewareFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
+     *
      * @return SecurityMiddleware
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SecurityMiddleware
+    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): SecurityMiddleware
     {
         return new SecurityMiddleware(
             $container->get(ResponseFactoryInterface::class),

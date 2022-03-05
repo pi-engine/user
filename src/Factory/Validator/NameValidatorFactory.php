@@ -13,13 +13,14 @@ class NameValidatorFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
+     *
      * @return NameValidator
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): NameValidator
+    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): NameValidator
     {
         return new NameValidator(
             $container->get(AccountService::class)

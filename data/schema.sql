@@ -16,3 +16,15 @@ CREATE TABLE `account`
     KEY `name` (`name`),
     KEY `status` (`status`)
 );
+
+CREATE TABLE `role`
+(
+    `id`      INT(10) UNSIGNED        NOT NULL AUTO_INCREMENT,
+    `name`    VARCHAR(255)                     DEFAULT NULL,
+    `title`   VARCHAR(128)                     DEFAULT NULL,
+    `status`  TINYINT(1) UNSIGNED     NOT NULL DEFAULT '1',
+    `section` ENUM ('front', 'admin') NOT NULL DEFAULT 'front',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`),
+    KEY `status` (`status`)
+);

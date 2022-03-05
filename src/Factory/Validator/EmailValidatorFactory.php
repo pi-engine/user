@@ -13,13 +13,14 @@ class EmailValidatorFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
+     *
      * @return EmailValidator
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): EmailValidator
+    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): EmailValidator
     {
         return new EmailValidator(
             $container->get(AccountService::class)
