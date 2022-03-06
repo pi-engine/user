@@ -22,7 +22,7 @@ class ValidationMiddlewareFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): ValidationMiddleware
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ValidationMiddleware
     {
         return new ValidationMiddleware(
             $container->get(ResponseFactoryInterface::class),

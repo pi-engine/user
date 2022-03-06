@@ -23,7 +23,7 @@ class LoginHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): LoginHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): LoginHandler
     {
         return new LoginHandler(
             $container->get(ResponseFactoryInterface::class),

@@ -16,7 +16,7 @@ class TokenServiceFactory implements FactoryInterface
      *
      * @return TokenService
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): TokenService
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): TokenService
     {
         return new TokenService(
             $container->get(CacheService::class)

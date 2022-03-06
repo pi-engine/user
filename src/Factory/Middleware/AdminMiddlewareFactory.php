@@ -21,7 +21,7 @@ class AdminMiddlewareFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): AdminMiddleware
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AdminMiddleware
     {
         return new AdminMiddleware(
             $container->get(ResponseFactoryInterface::class),

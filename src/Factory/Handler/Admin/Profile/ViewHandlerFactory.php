@@ -21,7 +21,7 @@ class ViewHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): ViewHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ViewHandler
     {
         return new ViewHandler(
             $container->get(ResponseFactoryInterface::class),

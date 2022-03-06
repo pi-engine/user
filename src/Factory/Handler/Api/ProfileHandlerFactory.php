@@ -23,7 +23,7 @@ class ProfileHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): ProfileHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ProfileHandler
     {
         return new ProfileHandler(
             $container->get(ResponseFactoryInterface::class),

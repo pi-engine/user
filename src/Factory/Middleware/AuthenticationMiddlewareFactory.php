@@ -23,7 +23,7 @@ class AuthenticationMiddlewareFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): AuthenticationMiddleware
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AuthenticationMiddleware
     {
         return new AuthenticationMiddleware(
             $container->get(ResponseFactoryInterface::class),

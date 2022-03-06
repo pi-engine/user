@@ -21,7 +21,7 @@ class AccountServiceFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): AccountService
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountService
     {
         return new AccountService(
             $container->get(AccountRepositoryInterface::class),

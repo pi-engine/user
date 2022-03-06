@@ -23,7 +23,7 @@ class RegisterHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): RegisterHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): RegisterHandler
     {
         return new RegisterHandler(
             $container->get(ResponseFactoryInterface::class),

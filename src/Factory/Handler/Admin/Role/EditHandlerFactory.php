@@ -21,7 +21,7 @@ class EditHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): EditHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): EditHandler
     {
         return new EditHandler(
             $container->get(ResponseFactoryInterface::class),

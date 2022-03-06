@@ -21,7 +21,7 @@ class SecurityMiddlewareFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): SecurityMiddleware
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SecurityMiddleware
     {
         return new SecurityMiddleware(
             $container->get(ResponseFactoryInterface::class),

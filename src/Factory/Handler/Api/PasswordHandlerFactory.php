@@ -23,7 +23,7 @@ class PasswordHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): PasswordHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): PasswordHandler
     {
         return new PasswordHandler(
             $container->get(ResponseFactoryInterface::class),

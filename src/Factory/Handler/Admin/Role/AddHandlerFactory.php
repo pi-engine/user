@@ -21,7 +21,7 @@ class AddHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): AddHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AddHandler
     {
         return new AddHandler(
             $container->get(ResponseFactoryInterface::class),

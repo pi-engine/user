@@ -23,7 +23,7 @@ class LogoutHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): LogoutHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): LogoutHandler
     {
         return new LogoutHandler(
             $container->get(ResponseFactoryInterface::class),

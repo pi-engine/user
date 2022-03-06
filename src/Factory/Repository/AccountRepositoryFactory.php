@@ -22,7 +22,7 @@ class AccountRepositoryFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): AccountRepository
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountRepository
     {
         return new AccountRepository(
             $container->get(AdapterInterface::class),

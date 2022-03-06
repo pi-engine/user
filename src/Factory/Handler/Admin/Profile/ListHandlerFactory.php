@@ -21,7 +21,7 @@ class ListHandlerFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): ListHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ListHandler
     {
         return new ListHandler(
             $container->get(ResponseFactoryInterface::class),

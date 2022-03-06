@@ -20,7 +20,7 @@ class IdentityValidatorFactory implements FactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, string $requestedName, array $options = null): IdentityValidator
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): IdentityValidator
     {
         return new IdentityValidator(
             $container->get(AccountService::class)

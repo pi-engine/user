@@ -122,7 +122,7 @@ return [
                     ],
                 ],
             ],
-            'admin' => [
+            /* 'admin' => [
                 'child_routes' => [
                     'user' => [
                         'child_routes' => [
@@ -177,7 +177,7 @@ return [
                         ],
                     ],
                 ],
-            ],
+            ], */
         ],
     ],
 
