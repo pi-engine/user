@@ -50,7 +50,6 @@ class LoginHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->authentication($params);
 
-
         return new JsonResponse($result);
     }
 }

@@ -16,29 +16,12 @@ class NameValidator extends AbstractValidator
     /** @var string */
     const TAKEN = 'nameTaken';
 
-    /**
-     * Message variables
-     * @var array
-     */
-    protected array $messageVariables
-        = [
-            'formatHint' => 'formatHint',
-        ];
-
-    /**
-     * Format hint
-     * @var string
-     */
-    protected string $formatHint;
-
-    /** @var array */
-    protected $messageTemplates = [];
-
     /** @var array */
     protected array $formatMessage = [];
 
     /**
      * Format pattern
+     *
      * @var array
      */
     protected array $formatPattern
@@ -53,6 +36,7 @@ class NameValidator extends AbstractValidator
 
     /**
      * Options
+     *
      * @var array
      */
     protected $options
@@ -65,6 +49,9 @@ class NameValidator extends AbstractValidator
     /** @var AccountService */
     protected AccountService $accountService;
 
+    /** @var array */
+    protected array $messageTemplates;
+
     /**
      * {@inheritDoc}
      */
@@ -75,7 +62,7 @@ class NameValidator extends AbstractValidator
         $this->accountService = $accountService;
         $this->options        = array_merge($this->options, $options);
 
-        $this->messageTemplates = $this->messageTemplates + [
+        $this->messageTemplates = [
                 self::INVALID  => 'Invalid name: %formatHint%',
                 self::RESERVED => 'Name is reserved',
                 self::TAKEN    => 'Name is already taken',
@@ -96,16 +83,14 @@ class NameValidator extends AbstractValidator
     /**
      * User name validate
      *
-     * @param  mixed     $value
-     * @param array|null $context
+     * @param string $value
      *
      * @return bool
      */
-    public function isValid($value, array $context = null): bool
+    public function isValid($value): bool
     {
         $this->setValue($value);
-        $format = empty($this->options['format'])
-            ? 'strict' : $this->options['format'];
+        $format = empty($this->options['format']) ? 'strict' : $this->options['format'];
         if (preg_match($this->formatPattern[$format], $value)) {
             $this->formatHint = $this->formatMessage[$format];
             $this->error(static::INVALID);
@@ -113,9 +98,7 @@ class NameValidator extends AbstractValidator
         }
 
         if (!empty($this->options['blacklist'])) {
-            $pattern = is_array($this->options['blacklist'])
-                ? implode('|', $this->options['blacklist'])
-                : $this->options['blacklist'];
+            $pattern = is_array($this->options['blacklist']) ? implode('|', $this->options['blacklist']) : $this->options['blacklist'];
             if (preg_match('/(' . $pattern . ')/', $value)) {
                 $this->error(static::RESERVED);
                 return false;
@@ -123,7 +106,8 @@ class NameValidator extends AbstractValidator
         }
 
         if ($this->options['check_duplication']) {
-            $isDuplicated = $this->accountService->isDuplicated('name', $value);
+            $userId = $this->options['user_id'] ?? 0;
+            $isDuplicated = $this->accountService->isDuplicated('name', $value, $userId);
             if ($isDuplicated) {
                 $this->error(static::TAKEN);
                 return false;

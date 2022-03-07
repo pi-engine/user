@@ -2,6 +2,7 @@
 
 namespace User\Handler\Api;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -39,27 +40,34 @@ class RegisterHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $requestBody = $request->getParsedBody();
 
-        var_dump([1,2,3,4,5,6]);
-        die;
-
+        $params = [
+            'name'       => $requestBody['name'],
+            'email'      => $requestBody['email'],
+            'identity'   => $requestBody['identity'],
+            'credential' => $requestBody['credential'],
+        ];
 
         $account = $this->accountService->addAccount($params);
 
-        $params = [
-            'field' => 'email',
-            'value' => '24745@me.com',
-
-        ];
-
-        $isDuplicated = $this->accountService->isDuplicated($params);
-
-        // Set result array
-        $result = [
-            'result' => 'true',
-            'data'   => $account,
-            'error'  => '',
-        ];
+        if (!empty($account)) {
+            $result = [
+                'result' => true,
+                'data'   => $account,
+                'error'  => '',
+            ];
+        } else {
+            // ToDo: use error handler for this part
+            $result = [
+                'result' => false,
+                'data'   => [],
+                'error'  => [
+                    'message' => 'Error to register user account',
+                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                ],
+            ];
+        }
 
         return new JsonResponse($result);
     }

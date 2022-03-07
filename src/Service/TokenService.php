@@ -30,7 +30,7 @@ class TokenService implements ServiceInterface
     public function generate($params): string
     {
         // Set cache key
-        $key = Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789');
+        $key = sprintf('user%s-%s', $params['user_id'], Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789'));
 
         // Set payload
         switch ($params['type']) {

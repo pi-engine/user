@@ -17,6 +17,7 @@ class AccountService implements ServiceInterface
      */
     protected TokenService $tokenService;
 
+
     public function __construct(
         AccountRepositoryInterface $accountRepository,
         TokenService $tokenService
@@ -97,7 +98,7 @@ class AccountService implements ServiceInterface
     public function addAccount($params): array
     {
         $params['credential']   = $this->generateCredential($params['credential']);
-        $params['status']       = 0;
+        $params['status']       = $this->userRegisterStatus();
         $params['time_created'] = time();
 
         $account = $this->accountRepository->addAccount($params);
@@ -107,7 +108,54 @@ class AccountService implements ServiceInterface
             'name'     => $account->getName(),
             'identity' => $account->getIdentity(),
             'email'    => $account->getEmail(),
+            'status'   => $account->getStatus(),
         ];
+    }
+
+    public function updateAccount($params, $account): array
+    {
+        // Clean up
+        foreach ($params as $key => $value) {
+            if (empty($value) || !isset($account[$key]) || $account[$key] == $value) {
+                unset($params[$key]);
+            }
+        }
+
+        if (!empty($params)) {
+            $this->accountRepository->updateAccount((int)$account['id'], $params);
+        }
+
+        return $this->getAccount(['id' => (int)$account['id']]);
+    }
+
+    public function updatePassword($params, $account): array
+    {
+        $hash = $this->accountRepository->getAccountCredential((int)$account['id']);
+
+        $bcrypt = new Bcrypt();
+        if ($bcrypt->verify($params['current_credential'], $hash)) {
+            $credential = $bcrypt->create($params['new_credential']);
+
+            $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
+
+            $result = [
+                'result' => true,
+                'data'   => [
+                    'message' => 'Password update successfully !'
+                ],
+                'error'  => '',
+            ];
+        } else {
+            $result = [
+                'result' => false,
+                'data'   => [],
+                'error'  => [
+                    'message' => 'Error to update password !'
+                ],
+            ];
+        }
+
+        return $result;
     }
 
     public function generateCredential($credential): string
@@ -116,13 +164,20 @@ class AccountService implements ServiceInterface
         return $bcrypt->create($credential);
     }
 
-    public function isDuplicated($type, $value): bool
+    public function isDuplicated($type, $value, $id = 0): bool
     {
-        return (bool) $this->accountRepository->count(
+        return (bool)$this->accountRepository->count(
             [
                 'field' => $type,
                 'value' => $value,
+                'id'    => $id,
             ]
         );
+    }
+
+    public function userRegisterStatus(): int
+    {
+        // ToDo: call it from config
+        return 1;
     }
 }

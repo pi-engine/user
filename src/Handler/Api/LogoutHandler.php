@@ -3,6 +3,7 @@
 namespace User\Handler\Api;
 
 use Laminas\Cache\Psr\SimpleCache\SimpleCacheDecorator;
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -39,14 +40,10 @@ class LogoutHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $requestBody = $request->getParsedBody();
 
+        $result = ['message' => 'This section is under development'];
 
-        $storage = $this->storageFactory->create('redis');
-        $cache   = new SimpleCacheDecorator($storage);
-
-        echo '<pre>';
-        var_dump($storage);
-        echo '</pre>';
-        die;
+        return new JsonResponse($result);
     }
 }

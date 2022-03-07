@@ -7,20 +7,22 @@ use Laminas\Validator\AbstractValidator;
 class PasswordValidator extends AbstractValidator
 {
     const TOO_SHORT = 'stringLengthTooShort';
-    const TOO_LONG  = 'stringLengthTooLong';
+    const TOO_LONG = 'stringLengthTooLong';
 
-    protected array $messageVariables
-        = [
-            'max' => 'max',
-            'min' => 'min',
-        ];
+    /** @var int */
+    protected int $max;
 
-    protected $max;
-    protected $min;
+    /** @var int */
+    protected int $min;
 
-    private array $messageTemplates;
+    /** @var array */
+    protected array $messageTemplates = [];
 
-    private $options;
+    /** @var array */
+    protected $options = [
+        'min' => 8,
+        'max' => 32,
+    ];
 
     public function __construct()
     {
@@ -35,38 +37,19 @@ class PasswordValidator extends AbstractValidator
     public function isValid($value): bool
     {
         $this->setValue($value);
-        $this->setConfigOption();
 
-        if (!empty($this->options['max'])
-            && $this->options['max'] < strlen($value)
-        ) {
-            $this->max = $this->options['max'];
+        if (!empty($this->options['max']) && $this->options['max'] < strlen($value)) {
+            $this->max = (int)$this->options['max'];
             $this->error(static::TOO_LONG);
             return false;
         }
-        if (!empty($this->options['min'])
-            && $this->options['min'] > strlen($value)
-        ) {
-            $this->min = $this->options['min'];
+
+        if (!empty($this->options['min']) && $this->options['min'] > strlen($value)) {
+            $this->min = (int)$this->options['min'];
             $this->error(static::TOO_SHORT);
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * Set username validator according to config
-     *
-     * @return $this
-     */
-    public function setConfigOption()
-    {
-        $this->options = [
-            'min' => 8,
-            'max' => 32,
-        ];
-
-        return $this;
     }
 }

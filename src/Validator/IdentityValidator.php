@@ -78,16 +78,14 @@ class IdentityValidator extends AbstractValidator
     /**
      * identity validate
      *
-     * @param  mixed     $value
-     * @param array|null $context
+     * @param string $value
      *
      * @return bool
      */
-    public function isValid($value, array $context = null): bool
+    public function isValid($value): bool
     {
         $this->setValue($value);
-        $format = empty($this->options['format'])
-            ? 'strict' : $this->options['format'];
+        $format = empty($this->options['format']) ? 'strict' : $this->options['format'];
         if (preg_match($this->formatPattern[$format], $value)) {
             $this->formatHint = $this->formatMessage[$format];
             $this->error(static::INVALID);
@@ -95,9 +93,7 @@ class IdentityValidator extends AbstractValidator
         }
 
         if (!empty($this->options['blacklist'])) {
-            $pattern = is_array($this->options['blacklist'])
-                ? implode('|', $this->options['blacklist'])
-                : $this->options['blacklist'];
+            $pattern = is_array($this->options['blacklist']) ? implode('|', $this->options['blacklist']) : $this->options['blacklist'];
             if (preg_match('/(' . $pattern . ')/', $value)) {
                 $this->error(static::RESERVED);
                 return false;
@@ -105,7 +101,8 @@ class IdentityValidator extends AbstractValidator
         }
 
         if ($this->options['check_duplication']) {
-            $isDuplicated = $this->accountService->isDuplicated('identity', $value);
+            $userId = $this->options['user_id'] ?? 0;
+            $isDuplicated = $this->accountService->isDuplicated('identity', $value, $userId);
             if ($isDuplicated) {
                 $this->error(static::TAKEN);
                 return false;

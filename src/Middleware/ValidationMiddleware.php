@@ -55,6 +55,7 @@ class ValidationMiddleware implements MiddlewareInterface
         // Get information from request
         $routeMatch = $request->getAttribute('Laminas\Router\RouteMatch');
         $parsedBody = $request->getParsedBody();
+        $account    = $request->getAttribute('account');
 
         // Check parsedBody
         switch ($routeMatch->getMatchedRouteName()) {
@@ -64,6 +65,14 @@ class ValidationMiddleware implements MiddlewareInterface
 
             case 'user/register':
                 $this->registerIsValid($parsedBody);
+                break;
+
+            case 'user/edit':
+                $this->editIsValid($parsedBody, $account);
+                break;
+
+            case 'user/password':
+                $this->passwordIsValid($parsedBody, $account);
                 break;
         }
 
@@ -82,7 +91,21 @@ class ValidationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    public function loginIsValid($params)
+    protected function setErrorHandler($inputFilter): array
+    {
+        $message = [];
+        foreach ($inputFilter->getInvalidInput() as $error) {
+            $message[$error->getName()] = implode(', ', $error->getMessages());
+        }
+
+        return $this->validationResult = [
+            'status'  => false,
+            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+            'message' => $message,
+        ];
+    }
+
+    protected function loginIsValid($params)
     {
         $identity = new Input('identity');
         $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService, ['check_duplication' => false]));
@@ -96,16 +119,7 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            $message = [];
-            foreach ($inputFilter->getInvalidInput() as $error) {
-                $message[] = implode(', ', $error->getMessages());
-            }
-
-            return $this->validationResult = [
-                'status'  => false,
-                'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-                'message' => implode(', ', $message),
-            ];
+            return $this->setErrorHandler($inputFilter);
         }
     }
 
@@ -131,16 +145,54 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            $message = [];
-            foreach ($inputFilter->getInvalidInput() as $error) {
-                $message[] = implode(', ', $error->getMessages());
-            }
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
 
-            return $this->validationResult = [
-                'status'  => false,
-                'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-                'message' => implode(', ', $message),
-            ];
+    protected function editIsValid($params, $account)
+    {
+        $inputFilter = new InputFilter();
+
+        if (isset($params['email']) && !empty($params['email'])) {
+            $email = new Input('email');
+            $email->getValidatorChain()->attach(new EmailValidator($this->accountService, ['user_id' => $account['id']]));
+            $inputFilter->add($email);
+        }
+
+        if (isset($params['name']) && !empty($params['name'])) {
+            $name = new Input('name');
+            $name->getValidatorChain()->attach(new NameValidator($this->accountService, ['user_id' => $account['id']]));
+            $inputFilter->add($name);
+        }
+
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $identity = new Input('identity');
+            $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService, ['user_id' => $account['id']]));
+            $inputFilter->add($identity);
+        }
+
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function passwordIsValid($params, $account)
+    {
+        $currentCredential = new Input('current_credential');
+        $currentCredential->getValidatorChain()->attach(new PasswordValidator());
+
+        $newCredential = new Input('new_credential');
+        $newCredential->getValidatorChain()->attach(new PasswordValidator());
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($currentCredential);
+        $inputFilter->add($newCredential);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
         }
     }
 }

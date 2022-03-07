@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
 
-class ProfileHandler implements RequestHandlerInterface
+class UpdateHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -39,12 +39,14 @@ class ProfileHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account = $request->getAttribute('account');
+        $requestBody    = $request->getParsedBody();
+        $account        = $request->getAttribute('account');
+        $updatedAccount = $this->accountService->updateAccount($requestBody, $account);
 
         // Set result array
         $result = [
             'result' => true,
-            'data'   => $account,
+            'data'   => $updatedAccount,
             'error'  => '',
         ];
 

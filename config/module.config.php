@@ -37,13 +37,14 @@ return [
             Handler\Api\RegisterHandler::class           => Factory\Handler\Api\RegisterHandlerFactory::class,
             Handler\Api\RefreshHandler::class            => Factory\Handler\Api\RefreshHandlerFactory::class,
             Handler\Api\PasswordHandler::class           => Factory\Handler\Api\PasswordHandlerFactory::class,
+            Handler\Api\UpdateHandler::class             => Factory\Handler\Api\UpdateHandlerFactory::class,
             Handler\ErrorHandler::class                  => Factory\Handler\ErrorHandlerFactory::class,
         ],
     ],
 
     'router' => [
         'routes' => [
-            'user'  => [
+            'user' => [
                 'type'         => Literal::class,
                 'options'      => [
                     'route'    => '/user',
@@ -102,6 +103,36 @@ return [
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
                                     Handler\Api\ProfileHandler::class
+                                ),
+                            ],
+                        ],
+                    ],
+                    'edit'     => [
+                        'type'    => Literal::class,
+                        'options' => [
+                            'route'    => '/update',
+                            'defaults' => [
+                                'controller' => PipeSpec::class,
+                                'middleware' => new PipeSpec(
+                                    Middleware\SecurityMiddleware::class,
+                                    Middleware\AuthenticationMiddleware::class,
+                                    Middleware\ValidationMiddleware::class,
+                                    Handler\Api\UpdateHandler::class
+                                ),
+                            ],
+                        ],
+                    ],
+                    'password' => [
+                        'type'    => Literal::class,
+                        'options' => [
+                            'route'    => '/password',
+                            'defaults' => [
+                                'controller' => PipeSpec::class,
+                                'middleware' => new PipeSpec(
+                                    Middleware\SecurityMiddleware::class,
+                                    Middleware\AuthenticationMiddleware::class,
+                                    Middleware\ValidationMiddleware::class,
+                                    Handler\Api\PasswordHandler::class
                                 ),
                             ],
                         ],

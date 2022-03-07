@@ -42,7 +42,7 @@ class EmailValidator extends EmailAddress
 
         $this->messageTemplates = [
             self::RESERVED => 'User email is reserved',
-            self::USED  => 'User email is already used',
+            self::USED     => 'User email is already used',
         ];
 
         parent::__construct($this->options);
@@ -51,12 +51,11 @@ class EmailValidator extends EmailAddress
     /**
      * User name validate
      *
-     * @param mixed      $value
-     * @param array|null $context
+     * @param string $value
      *
      * @return bool
      */
-    public function isValid($value, array $context = null): bool
+    public function isValid($value): bool
     {
         $this->setValue($value);
 
@@ -74,7 +73,8 @@ class EmailValidator extends EmailAddress
         }
 
         if ($this->options['check_duplication']) {
-            $isDuplicated = $this->accountService->isDuplicated('email', $value);
+            $userId       = $this->options['user_id'] ?? 0;
+            $isDuplicated = $this->accountService->isDuplicated('email', $value, $userId);
             if ($isDuplicated) {
                 $this->error(static::USED);
                 return false;

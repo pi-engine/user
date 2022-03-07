@@ -9,13 +9,14 @@ use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
-use Laminas\Db\ResultSet\ResultSet;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Predicate\Expression;
 use Laminas\Db\Sql\Sql;
+use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
 use User\Model\Account;
+use User\Model\Credential;
 
 class AccountRepository implements AccountRepositoryInterface
 {
@@ -69,7 +70,6 @@ class AccountRepository implements AccountRepositoryInterface
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
-
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             throw new RuntimeException(
                 sprintf(
@@ -95,6 +95,38 @@ class AccountRepository implements AccountRepositoryInterface
         return $account;
     }
 
+    public function getAccountCredential(int $userId): string
+    {
+        $sql       = new Sql($this->db);
+        $select    = $sql->select('account')->where(['id' => $userId]);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            throw new RuntimeException(
+                sprintf(
+                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
+                    $userId
+                )
+            );
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, new Credential(''));
+        $resultSet->initialize($result);
+        $account = $resultSet->current();
+
+        if (!$account) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Account with identifier "%s" not found.',
+                    $userId
+                )
+            );
+        }
+
+        return $account->getCredential();
+    }
+
     public function addAccount(array $params = []): Account
     {
         $insert = new Insert('account');
@@ -113,6 +145,23 @@ class AccountRepository implements AccountRepositoryInterface
         $id = $result->getGeneratedValue();
 
         return $this->getAccount(['id' => $id]);
+    }
+
+    public function updateAccount(int $userId, array $params = []): Void
+    {
+        $update = new Update('account');
+        $update->set($params);
+        $update->where(['id' => $userId]);
+
+        $sql = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $result = $statement->execute();
+
+        if (! $result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post update operation'
+            );
+        }
     }
 
     public function count(array $params = []): int
