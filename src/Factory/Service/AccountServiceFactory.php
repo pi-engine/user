@@ -8,6 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\AccountRepositoryInterface;
 use User\Service\AccountService;
+use User\Service\CacheService;
 use User\Service\TokenService;
 
 class AccountServiceFactory implements FactoryInterface
@@ -25,7 +26,8 @@ class AccountServiceFactory implements FactoryInterface
     {
         return new AccountService(
             $container->get(AccountRepositoryInterface::class),
-            $container->get(TokenService::class)
+            $container->get(TokenService::class),
+            $container->get(CacheService::class)
         );
     }
 }

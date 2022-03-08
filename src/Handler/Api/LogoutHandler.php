@@ -2,7 +2,6 @@
 
 namespace User\Handler\Api;
 
-use Laminas\Cache\Psr\SimpleCache\SimpleCacheDecorator;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -40,9 +39,17 @@ class LogoutHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $tokenId     = $request->getAttribute('token_id');
+        $account     = $request->getAttribute('account');
         $requestBody = $request->getParsedBody();
 
-        $result = ['message' => 'This section is under development'];
+        $params = [
+            'user_id'     => $account['id'],
+            'token_id'    => $tokenId,
+            'all_session' => $requestBody['all_session'] ?? 0,
+        ];
+
+        $result = $this->accountService->logout($params);
 
         return new JsonResponse($result);
     }

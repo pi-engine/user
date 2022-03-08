@@ -3,6 +3,7 @@
 namespace User\Service;
 
 use Laminas\Crypt\Password\Bcrypt;
+use Psr\SimpleCache\InvalidArgumentException;
 use User\Repository\AccountRepositoryInterface;
 
 class AccountService implements ServiceInterface
@@ -17,13 +18,19 @@ class AccountService implements ServiceInterface
      */
     protected TokenService $tokenService;
 
+    /**
+     * @var CacheService
+     */
+    protected CacheService $cacheService;
 
     public function __construct(
         AccountRepositoryInterface $accountRepository,
-        TokenService $tokenService
+        TokenService $tokenService,
+        CacheService $cacheService
     ) {
         $this->accountRepository = $accountRepository;
         $this->tokenService      = $tokenService;
+        $this->cacheService = $cacheService;
     }
 
     public function authentication($params): array
@@ -68,13 +75,13 @@ class AccountService implements ServiceInterface
             );
 
             $result = [
-                'result' => 'true',
+                'result' => true,
                 'data'   => $account,
                 'error'  => '',
             ];
         } else {
             $result = [
-                'result' => 'false',
+                'result' => false,
                 'data'   => [],
                 'error'  => 'error in login',
             ];
@@ -156,6 +163,47 @@ class AccountService implements ServiceInterface
         }
 
         return $result;
+    }
+
+    public function refreshToken($params): array
+    {
+        $accessToken = $this->tokenService->generate(
+            [
+                'user_id' => $params['user_id'],
+                'type'    => 'access',
+                'roles'   => [
+                    'member',
+                ],
+            ]
+        );
+
+        // Set result array
+        return [
+            'result' => true,
+            'data'   => [
+                'access_token' => $accessToken,
+            ],
+            'error'  => '',
+        ];
+    }
+
+    public function logout($params): array
+    {
+        if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
+            $this->cacheService->removeKeys($params['user_id']);
+            $message = 'You are logout successfully from this session !';
+        } else {
+            $this->cacheService->removeKey($params['token_id']);
+            $message = 'You are logout successfully from all of your sessions !';
+        }
+
+        return [
+            'result' => true,
+            'data'   => [
+                'message' => $message,
+            ],
+            'error'  => '',
+        ];
     }
 
     public function generateCredential($credential): string

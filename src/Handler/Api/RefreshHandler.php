@@ -41,24 +41,11 @@ class RefreshHandler implements RequestHandlerInterface
     {
         $account = $request->getAttribute('account');
 
-        $accessToken = $this->tokenService->generate(
-            [
-                'user_id' => $account['id'],
-                'type'    => 'access',
-                'roles'   => [
-                    'member',
-                ],
-            ]
-        );
-
-        // Set result array
-        $result = [
-            'result' => 'true',
-            'data'   => [
-                'access_token' => $accessToken,
-            ],
-            'error'  => '',
+        $params = [
+            'user_id' => $account['id'],
         ];
+
+        $result = $this->accountService->refreshToken($params);
 
         // Set result
         return new JsonResponse($result);

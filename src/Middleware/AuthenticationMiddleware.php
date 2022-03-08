@@ -45,12 +45,14 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Get request body
-        $requestBody = $request->getParsedBody();
-        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
+        // Get token
+        $token = $request->getHeaderLine('token');
+
+        // get route match
+        $routeMatch = $request->getAttribute('Laminas\Router\RouteMatch');
 
         // Check token set
-        if (!isset($requestBody['token']) || empty($requestBody['token'])) {
+        if (empty($token)) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
                 [
@@ -62,14 +64,14 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // parse token
-        $token = $this->tokenService->parse($requestBody['token']);
+        $tokenParsed = $this->tokenService->parse($token);
 
         // Check parsed token
-        if (!$token['status']) {
+        if (!$tokenParsed['status']) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
                 [
-                    'message' => $token['message'],
+                    'message' => $tokenParsed['message'],
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ]
             );
@@ -78,7 +80,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // Check token type
         $type = ($routeMatch->getMatchedRouteName() == 'user/refresh') ? 'refresh' : 'access';
-        if ($token['type'] != $type) {
+        if ($tokenParsed['type'] != $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
                 [
@@ -90,7 +92,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Get account
-        $account = $this->accountService->getAccount(['id' => $token['user_id']]);
+        $account = $this->accountService->getAccount(['id' => $tokenParsed['user_id']]);
 
         // Check user is found
         if (empty($account)) {
@@ -106,6 +108,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // Set attribute
         $request = $request->withAttribute('account', $account);
+        $request = $request->withAttribute('token_id', $tokenParsed['id']);
         return $handler->handle($request);
     }
 }

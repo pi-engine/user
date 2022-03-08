@@ -34,7 +34,7 @@ class ErrorHandler implements RequestHandlerInterface
         // Set result
         return new JsonResponse(
             [
-                'result' => 'false',
+                'result' => false,
                 'data'   => [],
                 'error'  => $error,
             ],

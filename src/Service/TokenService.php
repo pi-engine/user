@@ -10,14 +10,10 @@ use Laminas\Math\Rand;
 
 class TokenService implements ServiceInterface
 {
-    /**
-     * @var Config
-     */
+    /* @var Config */
     protected Config $config;
 
-    /**
-     * @var CacheService
-     */
+    /* @var CacheService */
     protected CacheService $cacheService;
 
     public function __construct(
@@ -29,14 +25,16 @@ class TokenService implements ServiceInterface
 
     public function generate($params): string
     {
-        // Set cache key
-        $key = sprintf('user%s-%s', $params['user_id'], Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789'));
+        // Get key
+        $key = $this->key($params);
+
+        // Get ttl
+        $ttl = $this->ttl($params);
 
         // Set payload
         switch ($params['type']) {
             default:
             case 'access':
-                $ttl     = $this->config->jwt->exp_access;
                 $payload = [
                     'id'    => $key,
                     'uid'   => $params['user_id'],
@@ -48,7 +46,6 @@ class TokenService implements ServiceInterface
                 break;
 
             case 'refresh':
-                $ttl     = $this->config->jwt->exp_refresh;
                 $payload = [
                     'id'   => $key,
                     'uid'  => $params['user_id'],
@@ -61,6 +58,7 @@ class TokenService implements ServiceInterface
 
         // Set to cache
         $this->cacheService->setCache($key, $payload, $ttl);
+        $this->cacheService->manageUserKey($params['user_id'], $key);
 
         return JWT::encode($payload, $this->config->jwt->secret, 'HS256');
     }
@@ -91,6 +89,38 @@ class TokenService implements ServiceInterface
                 'status'  => false,
                 'message' => $e->getMessage(),
             ];
+        }
+    }
+
+    public function key($params): string
+    {
+        switch ($params['type']) {
+            default:
+            case 'access':
+                return sprintf(
+                    'user-access-%s-%s',
+                    $params['user_id'],
+                    Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789')
+                );
+
+            case 'refresh':
+                return sprintf(
+                    'user-refresh-%s-%s',
+                    $params['user_id'],
+                    Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789')
+                );
+        }
+    }
+
+    public function ttl($params)
+    {
+        switch ($params['type']) {
+            default:
+            case 'access':
+                return $this->config->jwt->exp_access;
+
+            case 'refresh':
+                return $this->config->jwt->exp_refresh;
         }
     }
 }
