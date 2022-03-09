@@ -42,12 +42,13 @@ class ValidationMiddleware implements MiddlewareInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        AccountService $accountService
+        AccountService $accountService,
+        ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->errorHandler    = new ErrorHandler($this->responseFactory, $this->streamFactory);
+        $this->errorHandler    = $errorHandler;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

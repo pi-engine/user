@@ -8,6 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use User\Handler\ErrorHandler;
 use User\Middleware\ValidationMiddleware;
 use User\Service\AccountService;
 
@@ -27,7 +28,8 @@ class ValidationMiddlewareFactory implements FactoryInterface
         return new ValidationMiddleware(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(AccountService::class)
+            $container->get(AccountService::class),
+            $container->get(ErrorHandler::class)
         );
     }
 }

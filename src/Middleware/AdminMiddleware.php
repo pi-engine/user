@@ -25,16 +25,16 @@ class AdminMiddleware implements MiddlewareInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
+        ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->errorHandler    = new ErrorHandler($this->responseFactory, $this->streamFactory);
+        $this->errorHandler    = $errorHandler;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // ToDo : check admin
-
+        // ToDo : check admin access
         return $handler->handle($request);
     }
 }

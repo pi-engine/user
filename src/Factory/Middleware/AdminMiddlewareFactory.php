@@ -8,6 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use User\Handler\ErrorHandler;
 use User\Middleware\AdminMiddleware;
 
 class AdminMiddlewareFactory implements FactoryInterface
@@ -25,7 +26,8 @@ class AdminMiddlewareFactory implements FactoryInterface
     {
         return new AdminMiddleware(
             $container->get(ResponseFactoryInterface::class),
-            $container->get(StreamFactoryInterface::class)
+            $container->get(StreamFactoryInterface::class),
+            $container->get(ErrorHandler::class)
         );
     }
 }

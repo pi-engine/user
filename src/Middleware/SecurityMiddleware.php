@@ -21,19 +21,20 @@ class SecurityMiddleware implements MiddlewareInterface
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
-    public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory)
+    public function __construct(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+        ErrorHandler $errorHandler
+    )
     {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->errorHandler    = new ErrorHandler($this->responseFactory, $this->streamFactory);
+        $this->errorHandler    = $errorHandler;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // ToDo : check security
-        //var_dump($_POST);
-
-
+        // ToDo : check request security
         return $handler->handle($request);
     }
 }
