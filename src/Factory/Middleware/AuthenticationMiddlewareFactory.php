@@ -8,6 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use User\Handler\ErrorHandler;
 use User\Middleware\AuthenticationMiddleware;
 use User\Service\AccountService;
 use User\Service\TokenService;
@@ -29,7 +30,8 @@ class AuthenticationMiddlewareFactory implements FactoryInterface
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
-            $container->get(TokenService::class)
+            $container->get(TokenService::class),
+            $container->get(ErrorHandler::class)
         );
     }
 }

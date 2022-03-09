@@ -34,13 +34,14 @@ class AuthenticationMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
-        TokenService $tokenService
+        TokenService $tokenService,
+        ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
         $this->tokenService    = $tokenService;
-        $this->errorHandler    = new ErrorHandler($this->responseFactory, $this->streamFactory);
+        $this->errorHandler    = $errorHandler;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

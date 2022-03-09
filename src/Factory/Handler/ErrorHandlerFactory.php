@@ -8,7 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\ErrorHandler;
+use User\Handler\ErrorHandler;
 
 class ErrorHandlerFactory implements FactoryInterface
 {
