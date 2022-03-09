@@ -47,6 +47,7 @@
     "laminas/laminas-cache-storage-adapter-redis": "^2.1",
     "laminas/laminas-serializer": "^2.12",
     "laminas/laminas-inputfilter": "^2.13",
+    "laminas/laminas-permissions-rbac": "^3.2",
     "firebase/php-jwt": "^5.5"
   },
 
