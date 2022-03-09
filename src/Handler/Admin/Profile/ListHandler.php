@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use User\Service\AccountService;
 
 class ListHandler implements RequestHandlerInterface
 {
@@ -17,20 +18,30 @@ class ListHandler implements RequestHandlerInterface
     /** @var StreamFactoryInterface */
     protected StreamFactoryInterface $streamFactory;
 
+    /** @var AccountService */
+    protected AccountService $accountService;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
+        AccountService $accountService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
+        $this->accountService  = $accountService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
+        $result      = $this->accountService->getAccountList($requestBody);
 
-        $result = ['message' => 'This section is under development'];
-
-        return new JsonResponse($result);
+        return new JsonResponse(
+            [
+                'result' => true,
+                'data'   => $result,
+                'error'  => [],
+            ]
+        );
     }
 }

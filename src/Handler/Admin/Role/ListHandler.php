@@ -19,7 +19,7 @@ class ListHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
+        StreamFactoryInterface $streamFactory
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -29,7 +29,7 @@ class ListHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
 
-        $result = ['message' => 'This section is under development'];
+        $result = ['message' => 'Role list section is under development'];
 
         return new JsonResponse($result);
     }

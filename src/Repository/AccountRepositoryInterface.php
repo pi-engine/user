@@ -3,11 +3,14 @@
 namespace User\Repository;
 
 use Laminas\Authentication\AuthenticationService;
+use Laminas\Db\ResultSet\HydratingResultSet;
 use User\Model\Account;
 
 interface AccountRepositoryInterface
 {
-    public function getAccounts($params = []);
+    public function getAccountList($params = []): HydratingResultSet;
+
+    public function getAccountCount($params = []): int;
 
     public function getAccount(array $params = []): Account;
 

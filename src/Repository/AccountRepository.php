@@ -45,12 +45,12 @@ class AccountRepository implements AccountRepositoryInterface
         $this->accountPrototype = $accountPrototype;
     }
 
-    public function getAccounts($params = [])
+    public function getAccountList($params = []): HydratingResultSet
     {
-        // TODO: Implement getAccounts() method.
+        $where = [];
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account');
+        $select    = $sql->select('account')->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -60,13 +60,41 @@ class AccountRepository implements AccountRepositoryInterface
 
         $resultSet = new HydratingResultSet($this->hydrator, $this->accountPrototype);
         $resultSet->initialize($result);
+
         return $resultSet;
+    }
+
+    public function getAccountCount($params = []): int
+    {
+        // Set where
+        $columns = ['count' => new Expression('count(*)')];
+        $where   = [];
+
+        $sql       = new Sql($this->db);
+        $select    = $sql->select('account')->columns($columns)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $row       = $statement->execute()->current();
+
+        return (int)$row['count'];
     }
 
     public function getAccount(array $params = []): Account
     {
+        // Set
+        $where = [];
+        if (isset($params['id']) && (int)$params['id'] > 0) {
+            $where['id'] = (int)$params['id'];
+        } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            $where['identity'] = $params['identity'];
+        } elseif (isset($params['email']) && !empty($params['email'])) {
+            $where['email'] = $params['email'];
+        }
+        if (isset($params['status']) && (int)$params['status'] > 0) {
+            $where['status'] = (int)$params['status'];
+        }
+
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account')->where(['id' => $params['id']]);
+        $select    = $sql->select('account')->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -147,17 +175,17 @@ class AccountRepository implements AccountRepositoryInterface
         return $this->getAccount(['id' => $id]);
     }
 
-    public function updateAccount(int $userId, array $params = []): Void
+    public function updateAccount(int $userId, array $params = []): void
     {
         $update = new Update('account');
         $update->set($params);
         $update->where(['id' => $userId]);
 
-        $sql = new Sql($this->db);
+        $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
-        if (! $result instanceof ResultInterface) {
+        if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
                 'Database error occurred during blog post update operation'
             );

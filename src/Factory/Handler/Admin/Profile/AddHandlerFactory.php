@@ -9,6 +9,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\Admin\Profile\AddHandler;
+use User\Service\AccountService;
 
 class AddHandlerFactory implements FactoryInterface
 {
@@ -25,7 +26,8 @@ class AddHandlerFactory implements FactoryInterface
     {
         return new AddHandler(
             $container->get(ResponseFactoryInterface::class),
-            $container->get(StreamFactoryInterface::class)
+            $container->get(StreamFactoryInterface::class),
+            $container->get(AccountService::class)
         );
     }
 }

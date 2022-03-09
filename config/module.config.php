@@ -44,7 +44,8 @@ return [
 
     'router' => [
         'routes' => [
-            'user' => [
+            // Api section
+            'api'   => [
                 'type'         => Literal::class,
                 'options'      => [
                     'route'    => '/user',
@@ -153,62 +154,156 @@ return [
                     ],
                 ],
             ],
-            /* 'admin' => [
+            // Admin section
+            'admin' => [
+                'type'         => Literal::class,
+                'options'      => [
+                    'route'    => '/admin/user',
+                    'defaults' => [],
+                ],
                 'child_routes' => [
-                    'user' => [
+                    // Admin profile section
+                    'profile' => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/profile',
+                            'defaults' => [],
+                        ],
                         'child_routes' => [
-                            'profile' => [
-                                'type'         => Literal::class,
-                                'options'      => [
-                                    'route'    => '/admin/user/profile',
-                                    'defaults' => [],
-                                ],
-                                'child_routes' => [
-                                    'list' => [
-                                        'type'    => Literal::class,
-                                        'options' => [
-                                            'route'    => '/list',
-                                            'defaults' => [
-                                                'controller' => PipeSpec::class,
-                                                'middleware' => new PipeSpec(
-                                                    Middleware\SecurityMiddleware::class,
-                                                    Middleware\AuthenticationMiddleware::class,
-                                                    Middleware\AdminMiddleware::class,
-                                                    Handler\Admin\Profile\ListHandler::class
-                                                ),
-                                            ],
-                                        ],
+                            'list' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/list',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Profile\ListHandler::class
+                                        ),
                                     ],
                                 ],
                             ],
-                            'role'    => [
-                                'type'         => Literal::class,
-                                'options'      => [
-                                    'route'    => '/admin/user/role',
-                                    'defaults' => [],
+                            'add' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/add',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Profile\AddHandler::class
+                                        ),
+                                    ],
                                 ],
-                                'child_routes' => [
-                                    'list' => [
-                                        'type'    => Literal::class,
-                                        'options' => [
-                                            'route'    => '/list',
-                                            'defaults' => [
-                                                'controller' => PipeSpec::class,
-                                                'middleware' => new PipeSpec(
-                                                    Middleware\SecurityMiddleware::class,
-                                                    Middleware\AuthenticationMiddleware::class,
-                                                    Middleware\AdminMiddleware::class,
-                                                    Handler\Admin\Role\ListHandler::class
-                                                ),
-                                            ],
-                                        ],
+                            ],
+                            'edit' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/edit',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Profile\EditHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'password' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/password',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Profile\PasswordHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'view' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/view',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Profile\ViewHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    // Admin role section
+                    'role' => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/role',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'list' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/list',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Role\ListHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'add' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/add',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Role\AddHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'edit' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/edit',
+                                    'defaults' => [
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AdminMiddleware::class,
+                                            Handler\Admin\Role\EditHandler::class
+                                        ),
                                     ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-            ], */
+            ],
         ],
     ],
 

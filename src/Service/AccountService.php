@@ -30,10 +30,10 @@ class AccountService implements ServiceInterface
     ) {
         $this->accountRepository = $accountRepository;
         $this->tokenService      = $tokenService;
-        $this->cacheService = $cacheService;
+        $this->cacheService      = $cacheService;
     }
 
-    public function authentication($params): array
+    public function login($params): array
     {
         // Do login
         $authentication = $this->accountRepository->authentication();
@@ -90,15 +90,63 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
+    public function logout($params): array
+    {
+        if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
+            $this->cacheService->removeKeys($params['user_id']);
+            $message = 'You are logout successfully from this session !';
+        } else {
+            $this->cacheService->removeKey($params['token_id']);
+            $message = 'You are logout successfully from all of your sessions !';
+        }
+
+        return [
+            'result' => true,
+            'data'   => [
+                'message' => $message,
+            ],
+            'error'  => '',
+        ];
+    }
+
     public function getAccount($params): array
     {
         $account = $this->accountRepository->getAccount($params);
+        return $this->canonizeAccount($account);
+    }
+
+    public function getAccountList($params): array
+    {
+        $limit  = (int)$params['limit'] ?? 10;
+        $page   = (int)$params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ($page - 1) * $limit;
+
+        // Set params
+        $listParams = [
+            'page'   => $page,
+            'limit'  => $limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->accountRepository->getAccountList($listParams);
+        foreach ($rowSet as $row) {
+            $list[] = $this->canonizeAccount($row);
+        }
+
+        // Get count
+        $count = $this->accountRepository->getAccountCount($listParams);
 
         return [
-            'id'       => $account->getId(),
-            'name'     => $account->getName(),
-            'identity' => $account->getIdentity(),
-            'email'    => $account->getEmail(),
+            'list'      => $list,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
         ];
     }
 
@@ -109,14 +157,7 @@ class AccountService implements ServiceInterface
         $params['time_created'] = time();
 
         $account = $this->accountRepository->addAccount($params);
-
-        return [
-            'id'       => $account->getId(),
-            'name'     => $account->getName(),
-            'identity' => $account->getIdentity(),
-            'email'    => $account->getEmail(),
-            'status'   => $account->getStatus(),
-        ];
+        return $this->canonizeAccount($account);
     }
 
     public function updateAccount($params, $account): array
@@ -148,7 +189,7 @@ class AccountService implements ServiceInterface
             $result = [
                 'result' => true,
                 'data'   => [
-                    'message' => 'Password update successfully !'
+                    'message' => 'Password update successfully !',
                 ],
                 'error'  => '',
             ];
@@ -157,12 +198,31 @@ class AccountService implements ServiceInterface
                 'result' => false,
                 'data'   => [],
                 'error'  => [
-                    'message' => 'Error to update password !'
+                    'message' => 'Error to update password !',
                 ],
             ];
         }
 
         return $result;
+    }
+
+    public function canonizeAccount($account)
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'       => $account->getId(),
+                'name'     => $account->getName(),
+                'identity' => $account->getIdentity(),
+                'email'    => $account->getEmail(),
+                'status'   => $account->getStatus(),
+            ];
+        }
+
+        return $account;
     }
 
     public function refreshToken($params): array
@@ -182,25 +242,6 @@ class AccountService implements ServiceInterface
             'result' => true,
             'data'   => [
                 'access_token' => $accessToken,
-            ],
-            'error'  => '',
-        ];
-    }
-
-    public function logout($params): array
-    {
-        if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
-            $this->cacheService->removeKeys($params['user_id']);
-            $message = 'You are logout successfully from this session !';
-        } else {
-            $this->cacheService->removeKey($params['token_id']);
-            $message = 'You are logout successfully from all of your sessions !';
-        }
-
-        return [
-            'result' => true,
-            'data'   => [
-                'message' => $message,
             ],
             'error'  => '',
         ];

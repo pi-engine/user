@@ -92,7 +92,12 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Get account
-        $account = $this->accountService->getAccount(['id' => $tokenParsed['user_id']]);
+        $account = $this->accountService->getAccount(
+            [
+                'id'     => $tokenParsed['user_id'],
+                'status' => 1,
+            ]
+        );
 
         // Check user is found
         if (empty($account)) {
