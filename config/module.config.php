@@ -8,11 +8,16 @@ use Laminas\Router\Http\Literal;
 return [
     'service_manager' => [
         'aliases'   => [
-            Repository\AccountRepositoryInterface::class => Repository\AccountRepository::class,
-            Service\ServiceInterface::class              => Service\AccountService::class,
+            Repository\AccountRepositoryInterface::class     => Repository\AccountRepository::class,
+            Repository\AccountRoleRepositoryInterface::class => Repository\AccountRoleRepository::class,
+            Repository\ProfileRepositoryInterface::class     => Repository\ProfileRepository::class,
+            Repository\RoleRepositoryInterface::class        => Repository\RoleRepository::class,
         ],
         'factories' => [
             Repository\AccountRepository::class          => Factory\Repository\AccountRepositoryFactory::class,
+            Repository\AccountRoleRepository::class      => Factory\Repository\AccountRoleRepositoryFactory::class,
+            Repository\ProfileRepository::class          => Factory\Repository\ProfileRepositoryFactory::class,
+            Repository\RoleRepository::class             => Factory\Repository\RoleRepositoryFactory::class,
             Service\AccountService::class                => Factory\Service\AccountServiceFactory::class,
             Service\TokenService::class                  => Factory\Service\TokenServiceFactory::class,
             Service\CacheService::class                  => Factory\Service\CacheServiceFactory::class,
@@ -170,7 +175,7 @@ return [
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'list' => [
+                            'list'     => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/list',
@@ -185,7 +190,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'add' => [
+                            'add'      => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/add',
@@ -200,7 +205,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'edit' => [
+                            'edit'     => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/edit',
@@ -230,7 +235,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'view' => [
+                            'view'     => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/view',
@@ -248,7 +253,7 @@ return [
                         ],
                     ],
                     // Admin role section
-                    'role' => [
+                    'role'    => [
                         'type'         => Literal::class,
                         'options'      => [
                             'route'    => '/role',
@@ -270,7 +275,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'add' => [
+                            'add'  => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/add',

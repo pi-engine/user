@@ -35,14 +35,21 @@ class AccountRepository implements AccountRepositoryInterface
      */
     private Account $accountPrototype;
 
+    /**
+     * @var Credential
+     */
+    private Credential $credentialPrototype;
+
     public function __construct(
         AdapterInterface $db,
         HydratorInterface $hydrator,
-        Account $accountPrototype
+        Account $accountPrototype,
+        Credential $credentialPrototype
     ) {
-        $this->db               = $db;
-        $this->hydrator         = $hydrator;
-        $this->accountPrototype = $accountPrototype;
+        $this->db                  = $db;
+        $this->hydrator            = $hydrator;
+        $this->accountPrototype    = $accountPrototype;
+        $this->credentialPrototype = $credentialPrototype;
     }
 
     public function getAccountList($params = []): HydratingResultSet
@@ -139,7 +146,7 @@ class AccountRepository implements AccountRepositoryInterface
             );
         }
 
-        $resultSet = new HydratingResultSet($this->hydrator, new Credential(''));
+        $resultSet = new HydratingResultSet($this->hydrator, $this->credentialPrototype);
         $resultSet->initialize($result);
         $account = $resultSet->current();
 

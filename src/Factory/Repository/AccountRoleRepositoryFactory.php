@@ -8,28 +8,26 @@ use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Account;
-use User\Model\Credential;
-use User\Repository\AccountRepository;
+use User\Model\AccountRole;
+use User\Repository\AccountRoleRepository;
 
-class AccountRepositoryFactory implements FactoryInterface
+class AccountRoleRepositoryFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return AccountRepository
+     * @return AccountRoleRepository
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountRepository
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountRoleRepository
     {
-        return new AccountRepository(
+        return new AccountRoleRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new Account('', '', ''),
-            new Credential('')
+            new AccountRole('', '', '')
         );
     }
 }
