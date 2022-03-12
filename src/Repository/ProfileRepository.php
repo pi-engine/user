@@ -28,8 +28,8 @@ class ProfileRepository implements AccountRoleRepositoryInterface
         HydratorInterface $hydrator,
         Profile $profilePrototype
     ) {
-        $this->db                   = $db;
-        $this->hydrator             = $hydrator;
+        $this->db               = $db;
+        $this->hydrator         = $hydrator;
         $this->profilePrototype = $profilePrototype;
     }
 }

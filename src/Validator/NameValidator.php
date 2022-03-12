@@ -63,10 +63,10 @@ class NameValidator extends AbstractValidator
         $this->options        = array_merge($this->options, $options);
 
         $this->messageTemplates = [
-                self::INVALID  => 'Invalid name: %formatHint%',
-                self::RESERVED => 'Name is reserved',
-                self::TAKEN    => 'Name is already taken',
-            ];
+            self::INVALID  => 'Invalid name: %formatHint%',
+            self::RESERVED => 'Name is reserved',
+            self::TAKEN    => 'Name is already taken',
+        ];
 
         $this->formatMessage = [
             'strict'       => 'Only alphabetic and digits are allowed',
@@ -106,7 +106,7 @@ class NameValidator extends AbstractValidator
         }
 
         if ($this->options['check_duplication']) {
-            $userId = $this->options['user_id'] ?? 0;
+            $userId       = $this->options['user_id'] ?? 0;
             $isDuplicated = $this->accountService->isDuplicated('name', $value, $userId);
             if ($isDuplicated) {
                 $this->error(static::TAKEN);

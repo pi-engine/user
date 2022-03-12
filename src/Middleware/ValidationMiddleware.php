@@ -60,19 +60,19 @@ class ValidationMiddleware implements MiddlewareInterface
 
         // Check parsedBody
         switch ($routeMatch->getMatchedRouteName()) {
-            case 'user/login':
+            case 'api/login':
                 $this->loginIsValid($parsedBody);
                 break;
 
-            case 'user/register':
+            case 'api/register':
                 $this->registerIsValid($parsedBody);
                 break;
 
-            case 'user/edit':
+            case 'api/edit':
                 $this->editIsValid($parsedBody, $account);
                 break;
 
-            case 'user/password':
+            case 'api/password':
                 $this->passwordIsValid($parsedBody, $account);
                 break;
         }

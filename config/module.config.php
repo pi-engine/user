@@ -8,14 +8,14 @@ use Laminas\Router\Http\Literal;
 return [
     'service_manager' => [
         'aliases'   => [
-            Repository\AccountRepositoryInterface::class     => Repository\AccountRepository::class,
-            Repository\AccountRoleRepositoryInterface::class => Repository\AccountRoleRepository::class,
-            Repository\ProfileRepositoryInterface::class     => Repository\ProfileRepository::class,
-            Repository\RoleRepositoryInterface::class        => Repository\RoleRepository::class,
+            Repository\AccountRepositoryInterface::class    => Repository\AccountRepository::class,
+            Repository\PermissionRepositoryInterface::class => Repository\PermissionRepository::class,
+            Repository\ProfileRepositoryInterface::class    => Repository\ProfileRepository::class,
+            Repository\RoleRepositoryInterface::class       => Repository\RoleRepository::class,
         ],
         'factories' => [
             Repository\AccountRepository::class          => Factory\Repository\AccountRepositoryFactory::class,
-            Repository\AccountRoleRepository::class      => Factory\Repository\AccountRoleRepositoryFactory::class,
+            Repository\PermissionRepository::class       => Factory\Repository\PermissionRepositoryFactory::class,
             Repository\ProfileRepository::class          => Factory\Repository\ProfileRepositoryFactory::class,
             Repository\RoleRepository::class             => Factory\Repository\RoleRepositoryFactory::class,
             Service\AccountService::class                => Factory\Service\AccountServiceFactory::class,

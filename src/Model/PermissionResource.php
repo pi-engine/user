@@ -2,7 +2,7 @@
 
 namespace User\Model;
 
-class Profile
+class PermissionResource
 {
     private $id;
 

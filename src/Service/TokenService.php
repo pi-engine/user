@@ -23,7 +23,7 @@ class TokenService implements ServiceInterface
         $this->cacheService = $cacheService;
     }
 
-    public function generate($params): string
+    public function generate($params): array
     {
         // Get key
         $key = $this->key($params);
@@ -32,35 +32,19 @@ class TokenService implements ServiceInterface
         $ttl = $this->ttl($params);
 
         // Set payload
-        switch ($params['type']) {
-            default:
-            case 'access':
-                $payload = [
-                    'id'    => $key,
-                    'uid'   => $params['user_id'],
-                    'iat'   => time(),
-                    'exp'   => time() + $ttl,
-                    'type'  => $params['type'],
-                    'roles' => $params['roles'],
-                ];
-                break;
+        $payload = [
+            'id'   => $key,
+            'uid'  => $params['user_id'],
+            'iat'  => time(),
+            'exp'  => time() + $ttl,
+            'type' => $params['type'],
+        ];
 
-            case 'refresh':
-                $payload = [
-                    'id'   => $key,
-                    'uid'  => $params['user_id'],
-                    'iat'  => time(),
-                    'exp'  => time() + $ttl,
-                    'type' => $params['type'],
-                ];
-                break;
-        }
-
-        // Set to cache
-        $this->cacheService->setCache($key, $payload, $ttl);
-        $this->cacheService->manageUserKey($params['user_id'], $key);
-
-        return JWT::encode($payload, $this->config->jwt->secret, 'HS256');
+        return [
+            'token'   => JWT::encode($payload, $this->config->jwt->secret, 'HS256'),
+            'key'     => $key,
+            'payload' => $payload,
+        ];
     }
 
     public function parse($token): array
@@ -69,9 +53,16 @@ class TokenService implements ServiceInterface
             $decoded = JWT::decode($token, new Key($this->config->jwt->secret, 'HS256'));
 
             // Get data from cache
-            $cacheCheck = $this->cacheService->getCache($decoded->id);
+            $cacheUser = $this->cacheService->getUser((int) $decoded->uid);
 
-            if (isset($cacheCheck['id']) && $cacheCheck['exp'] > time()) {
+            if ($decoded->type == 'access' && in_array($decoded->id, $cacheUser['access_keys'])) {
+                return [
+                    'status'  => true,
+                    'id'      => $decoded->id,
+                    'user_id' => $decoded->uid,
+                    'type'    => $decoded->type,
+                ];
+            } elseif ($decoded->type == 'refresh' && in_array($decoded->id, $cacheUser['refresh_keys'])) {
                 return [
                     'status'  => true,
                     'id'      => $decoded->id,

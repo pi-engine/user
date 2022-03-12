@@ -3,4 +3,5 @@
 namespace User\Repository;
 
 interface ProfileRepositoryInterface
-{}
+{
+}

@@ -18,9 +18,9 @@ interface AccountRepositoryInterface
 
     public function addAccount(array $params = []): Account;
 
-    public function updateAccount(int $userId, array $params = []): Void;
+    public function updateAccount(int $userId, array $params = []): void;
 
     public function count(array $params = []): int;
 
-    public function authentication() : AuthenticationService;
+    public function authentication(): AuthenticationService;
 }

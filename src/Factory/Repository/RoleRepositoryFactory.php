@@ -9,6 +9,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Model\Role;
+use User\Model\RoleAccount;
 use User\Repository\RoleRepository;
 
 class RoleRepositoryFactory implements FactoryInterface
@@ -27,7 +28,8 @@ class RoleRepositoryFactory implements FactoryInterface
         return new RoleRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new Role('', '', '')
+            new Role('', '', ''),
+            new RoleAccount('', '', '')
         );
     }
 }

@@ -8,21 +8,20 @@ use User\Repository\AccountRepositoryInterface;
 
 class AccountService implements ServiceInterface
 {
-    /**
-     * @var AccountRepositoryInterface
-     */
+    /* @var AccountRepositoryInterface */
     protected AccountRepositoryInterface $accountRepository;
 
-    /**
-     * @var TokenService
-     */
+    /* @var TokenService */
     protected TokenService $tokenService;
 
-    /**
-     * @var CacheService
-     */
+    /* @var CacheService */
     protected CacheService $cacheService;
 
+    /**
+     * @param AccountRepositoryInterface $accountRepository
+     * @param TokenService               $tokenService
+     * @param CacheService               $cacheService
+     */
     public function __construct(
         AccountRepositoryInterface $accountRepository,
         TokenService $tokenService,
@@ -33,9 +32,15 @@ class AccountService implements ServiceInterface
         $this->cacheService      = $cacheService;
     }
 
+    /**
+     * @param $params
+     *
+     * @return array
+     * @throws InvalidArgumentException
+     */
     public function login($params): array
     {
-        // Do login
+        // Do log in
         $authentication = $this->accountRepository->authentication();
         $adapter        = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
@@ -52,27 +57,52 @@ class AccountService implements ServiceInterface
                 ]
             );
 
+            // Get roles
+            $account['roles'] = ['member', 'admin'];
+
             // Generate access token
-            $account['access_token'] = $this->tokenService->generate(
+            $accessToken = $this->tokenService->generate(
                 [
                     'user_id' => $account['id'],
                     'type'    => 'access',
-                    'roles'   => [
-                        'member',
-                    ],
+                    'roles'   => $account['roles'],
                 ]
             );
 
             // Generate refresh token
-            $account['refresh_token'] = $this->tokenService->generate(
+            $refreshToken = $this->tokenService->generate(
                 [
                     'user_id' => $account['id'],
                     'type'    => 'refresh',
-                    'roles'   => [
-                        'member',
-                    ],
+                    'roles'   => $account['roles'],
                 ]
             );
+
+            // Set extra info
+            $account['last_login']    = time();
+            $account['access_token']  = $accessToken['token'];
+            $account['refresh_token'] = $refreshToken['token'];
+
+            // Get from cache if exist
+            $user = $this->cacheService->getUser($account['id']);
+
+            // Set/Update user data to cache
+            $this->cacheService->setUser($account['id'], [
+                'account'      => [
+                    'id'         => $account['id'],
+                    'name'       => $account['name'],
+                    'email'      => $account['email'],
+                    'identity'   => $account['identity'],
+                    'last_login' => $account['last_login'],
+                ],
+                'roles'        => $account['roles'],
+                'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
+                    ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
+                    : [$accessToken['key']],
+                'refresh_keys' => (isset($user['refresh_keys']) && !empty($user['refresh_keys']))
+                    ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
+                    : [$refreshToken['key']],
+            ]);
 
             $result = [
                 'result' => true,
@@ -93,11 +123,11 @@ class AccountService implements ServiceInterface
     public function logout($params): array
     {
         if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
-            $this->cacheService->removeKeys($params['user_id']);
-            $message = 'You are logout successfully from this session !';
-        } else {
-            $this->cacheService->removeKey($params['token_id']);
+            $this->cacheService->deleteUser($params['user_id']);
             $message = 'You are logout successfully from all of your sessions !';
+        } else {
+            $this->cacheService->removeItem($params['user_id'], 'access_keys', $params['token_id']);
+            $message = 'You are logout successfully from this session !';
         }
 
         return [
@@ -237,11 +267,14 @@ class AccountService implements ServiceInterface
             ]
         );
 
+        // Update cache
+        $this->cacheService->addItem($params['user_id'], 'access_keys', $accessToken['key']);
+
         // Set result array
         return [
             'result' => true,
             'data'   => [
-                'access_token' => $accessToken,
+                'access_token' => $accessToken['token'],
             ],
             'error'  => '',
         ];

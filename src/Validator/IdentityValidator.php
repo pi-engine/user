@@ -57,11 +57,11 @@ class IdentityValidator extends AbstractValidator
         $this->accountService = $accountService;
         $this->options        = array_merge($this->options, $options);
 
-        $this->messageTemplates =  [
-                self::INVALID  => 'Invalid identity: %formatHint%',
-                self::RESERVED => 'Identity is reserved',
-                self::TAKEN    => 'Identity is already taken',
-            ];
+        $this->messageTemplates = [
+            self::INVALID  => 'Invalid identity: %formatHint%',
+            self::RESERVED => 'Identity is reserved',
+            self::TAKEN    => 'Identity is already taken',
+        ];
 
         $this->formatMessage = [
             'strict'       => 'Only alphabetic and digits are allowed',
@@ -101,7 +101,7 @@ class IdentityValidator extends AbstractValidator
         }
 
         if ($this->options['check_duplication']) {
-            $userId = $this->options['user_id'] ?? 0;
+            $userId       = $this->options['user_id'] ?? 0;
             $isDuplicated = $this->accountService->isDuplicated('identity', $value, $userId);
             if ($isDuplicated) {
                 $this->error(static::TAKEN);

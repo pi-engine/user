@@ -19,10 +19,11 @@ class PasswordValidator extends AbstractValidator
     protected array $messageTemplates = [];
 
     /** @var array */
-    protected $options = [
-        'min' => 8,
-        'max' => 32,
-    ];
+    protected $options
+        = [
+            'min' => 8,
+            'max' => 32,
+        ];
 
     public function __construct()
     {

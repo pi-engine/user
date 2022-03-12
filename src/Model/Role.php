@@ -17,11 +17,11 @@ class Role
         $status = null,
         $id = null
     ) {
-        $this->name     = $name;
-        $this->title = $title;
-        $this->section    = $section;
-        $this->status   = $status;
-        $this->id       = $id;
+        $this->name    = $name;
+        $this->title   = $title;
+        $this->section = $section;
+        $this->status  = $status;
+        $this->id      = $id;
     }
 
     /**

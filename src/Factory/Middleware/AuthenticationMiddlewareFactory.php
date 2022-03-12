@@ -11,6 +11,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
 use User\Middleware\AuthenticationMiddleware;
 use User\Service\AccountService;
+use User\Service\CacheService;
 use User\Service\TokenService;
 
 class AuthenticationMiddlewareFactory implements FactoryInterface
@@ -31,6 +32,7 @@ class AuthenticationMiddlewareFactory implements FactoryInterface
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
             $container->get(TokenService::class),
+            $container->get(CacheService::class),
             $container->get(ErrorHandler::class)
         );
     }

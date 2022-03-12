@@ -19,9 +19,8 @@ class ErrorHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory
-    )
-    {
+        StreamFactoryInterface $streamFactory
+    ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
     }

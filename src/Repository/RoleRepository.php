@@ -5,6 +5,7 @@ namespace User\Repository;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\HydratorInterface;
 use User\Model\Role;
+use User\Model\RoleAccount;
 
 class RoleRepository implements RoleRepositoryInterface
 {
@@ -23,13 +24,21 @@ class RoleRepository implements RoleRepositoryInterface
      */
     private Role $rolePrototype;
 
+    /**
+     * @var RoleAccount
+     */
+    private RoleAccount $roleAccountPrototype;
+
+
     public function __construct(
         AdapterInterface $db,
         HydratorInterface $hydrator,
-        Role $rolePrototype
+        Role $rolePrototype,
+        RoleAccount $roleAccountPrototype
     ) {
         $this->db                   = $db;
         $this->hydrator             = $hydrator;
-        $this->rolePrototype = $rolePrototype;
+        $this->rolePrototype        = $rolePrototype;
+        $this->roleAccountPrototype = $roleAccountPrototype;
     }
 }

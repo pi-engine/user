@@ -11,6 +11,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
 use User\Service\AccountService;
+use User\Service\CacheService;
 use User\Service\TokenService;
 
 class AuthenticationMiddleware implements MiddlewareInterface
@@ -27,6 +28,9 @@ class AuthenticationMiddleware implements MiddlewareInterface
     /** @var TokenService */
     protected TokenService $tokenService;
 
+    /** @var CacheService */
+    protected CacheService $cacheService;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -35,12 +39,14 @@ class AuthenticationMiddleware implements MiddlewareInterface
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
         TokenService $tokenService,
+        CacheService $cacheService,
         ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
         $this->tokenService    = $tokenService;
+        $this->cacheService    = $cacheService;
         $this->errorHandler    = $errorHandler;
     }
 
@@ -79,8 +85,9 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
+
         // Check token type
-        $type = ($routeMatch->getMatchedRouteName() == 'user/refresh') ? 'refresh' : 'access';
+        $type = ($routeMatch->getMatchedRouteName() == 'api/refresh') ? 'refresh' : 'access';
         if ($tokenParsed['type'] != $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
@@ -92,16 +99,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
-        // Get account
-        $account = $this->accountService->getAccount(
-            [
-                'id'     => $tokenParsed['user_id'],
-                'status' => 1,
-            ]
-        );
+        // Get account data from cache
+        $user = $this->cacheService->getUser($tokenParsed['user_id']);
 
         // Check user is found
-        if (empty($account)) {
+        if (empty($user['account'])) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute('error',
                 [
@@ -113,7 +115,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Set attribute
-        $request = $request->withAttribute('account', $account);
+        $request = $request->withAttribute('account', $user['account']);
+        $request = $request->withAttribute('roles', $user['roles']);
         $request = $request->withAttribute('token_id', $tokenParsed['id']);
         return $handler->handle($request);
     }

@@ -25,8 +25,7 @@ class SecurityMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         ErrorHandler $errorHandler
-    )
-    {
+    ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->errorHandler    = $errorHandler;

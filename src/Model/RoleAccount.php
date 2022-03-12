@@ -2,7 +2,7 @@
 
 namespace User\Model;
 
-class AccountRole
+class RoleAccount
 {
     private        $id;
     private int    $user_id;
