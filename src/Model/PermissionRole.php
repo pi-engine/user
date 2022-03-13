@@ -4,12 +4,24 @@ namespace User\Model;
 
 class PermissionRole
 {
-    private $id;
+    private        $id;
+    private string $resource;
+    private string $section;
+    private string $module;
+    private string $role;
 
     public function __construct(
+        $resource,
+        $section,
+        $module,
+        $role,
         $id = null
     ) {
-        $this->id = $id;
+        $this->resource = $resource;
+        $this->section  = $section;
+        $this->module   = $module;
+        $this->role     = $role;
+        $this->id       = $id;
     }
 
     /**
@@ -18,5 +30,37 @@ class PermissionRole
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResource(): string
+    {
+        return $this->resource;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSection(): string
+    {
+        return $this->section;
+    }
+
+    /**
+     * @return string
+     */
+    public function getModule(): string
+    {
+        return $this->module;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRole(): string
+    {
+        return $this->role;
     }
 }

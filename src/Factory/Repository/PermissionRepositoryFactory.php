@@ -28,8 +28,8 @@ class PermissionRepositoryFactory implements FactoryInterface
         return new PermissionRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new PermissionResource(),
-            new PermissionRole()
+            new PermissionResource('', '','','', ''),
+            new PermissionRole('', '','','')
         );
     }
 }

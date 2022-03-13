@@ -49,12 +49,12 @@ CREATE TABLE `role_account`
 
 CREATE TABLE `permission_resource`
 (
-    `id`      INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `section` VARCHAR(64)      NOT NULL DEFAULT '',
-    `module`  VARCHAR(64)      NOT NULL DEFAULT '',
-    `name`    VARCHAR(64)      NOT NULL DEFAULT '',
-    `title`   VARCHAR(255)     NOT NULL DEFAULT '',
-    `type`    VARCHAR(64)      NOT NULL DEFAULT '',
+    `id`      INT(10) UNSIGNED          NOT NULL AUTO_INCREMENT,
+    `title`   VARCHAR(255)              NOT NULL DEFAULT '',
+    `section` ENUM ('api', 'admin')     NOT NULL,
+    `module`  VARCHAR(64)               NOT NULL DEFAULT '',
+    `name`    VARCHAR(64)               NOT NULL DEFAULT '',
+    `type`    ENUM ('system', 'custom') NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `resource_name` (`section`, `module`, `name`, `type`)
 );
@@ -63,8 +63,8 @@ CREATE TABLE `permission_rule`
 (
     `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `resource` VARCHAR(64)           NOT NULL DEFAULT '',
-    `module`   VARCHAR(64)           NOT NULL DEFAULT '',
     `section`  ENUM ('api', 'admin') NOT NULL,
+    `module`   VARCHAR(64)           NOT NULL DEFAULT '',
     `role`     VARCHAR(64)           NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `section_module_perm` (`section`, `module`, `resource`, `role`)
