@@ -74,25 +74,6 @@ class RoleRepository implements RoleRepositoryInterface
         return $resultSet;
     }
 
-    public function getUserRoleList($params = []): HydratingResultSet
-    {
-        $where = [];
-
-        $sql       = new Sql($this->db);
-        $select    = $sql->select('role_account')->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
-            return [];
-        }
-
-        $resultSet = new HydratingResultSet($this->hydrator, $this->roleAccountPrototype);
-        $resultSet->initialize($result);
-
-        return $resultSet;
-    }
-
     public function getRole(array $params = []): Role
     {
         // Set
@@ -133,6 +114,74 @@ class RoleRepository implements RoleRepositoryInterface
         return $role;
     }
 
+    public function addRole(array $params = []): Role
+    {
+        $insert = new Insert('role');
+        $insert->values($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post insert operation'
+            );
+        }
+
+        $id = $result->getGeneratedValue();
+
+        return $this->getRole(['id' => $id]);
+    }
+
+    public function updateRole(string $roleName, array $params = []): void
+    {
+        $update = new Update('role');
+        $update->set($params);
+        $update->where(['name' => $roleName]);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
+    }
+
+    public function deleteRole(string $roleName): void
+    {
+        // Delete from role table
+        $delete = new Delete('role');
+        $delete->where(['role' => $roleName]);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
+
+        // Delete from role_account table
+        $delete = new Delete('role_account');
+        $delete->where(['role' => $roleName]);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
+    }
+
     public function getUserRole($userId, $section = ''): HydratingResultSet
     {
         // Set
@@ -161,30 +210,16 @@ class RoleRepository implements RoleRepositoryInterface
         return $resultSet;
     }
 
-    public function addRole(array $params = []): Role
+    public function addUserRole(int $userId, string $roleName, string $section = 'api'): void
     {
-        $insert = new Insert('role');
-        $insert->values($params);
+        $value = [
+            'user_id' => $userId,
+            'role'    => $roleName,
+            'section' => $section,
+        ];
 
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getRole(['id' => $id]);
-    }
-
-    public function addUserRole(array $params = []): RoleAccount
-    {
         $insert = new Insert('role_account');
-        $insert->values($params);
+        $insert->values($value);
 
         $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($insert);
@@ -193,27 +228,6 @@ class RoleRepository implements RoleRepositoryInterface
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
                 'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getUserRole(['id' => $id]);
-    }
-
-    public function updateRole(string $roleName, array $params = []): void
-    {
-        $update = new Update('role');
-        $update->set($params);
-        $update->where(['name' => $roleName]);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($update);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during update operation'
             );
         }
     }

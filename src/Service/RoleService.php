@@ -24,6 +24,8 @@ class RoleService implements ServiceInterface
             ],
         ];
 
+    protected array $sectionList = ['api', 'admin'];
+
     /**
      * @param RoleRepositoryInterface $roleRepository
      * @param CacheService            $cacheService
@@ -36,12 +38,11 @@ class RoleService implements ServiceInterface
         $this->cacheService   = $cacheService;
     }
 
-    public function getRoleListLight($section = ''): array
+    public function getRoleListLight(): array
     {
-        $roles = $this->cacheService->getItem('roles');
+        $roles = $this->cacheService->getItem('roles-light');
         if (empty($roles)) {
             $listParams = [
-                'section' => $section,
                 'status' => 1,
             ];
 
@@ -52,7 +53,7 @@ class RoleService implements ServiceInterface
                 $list[] = $row->getName();
             }
 
-            $roles = $this->cacheService->setItem('roles', $list);
+            $roles = $this->cacheService->setItem('roles-light', $list);
         }
 
         return $roles;
@@ -64,7 +65,7 @@ class RoleService implements ServiceInterface
         if (empty($roles)) {
             $listParams = [
                 'section' => 'api',
-                'status' => 1,
+                'status'  => 1,
             ];
 
             // Get list
@@ -86,7 +87,7 @@ class RoleService implements ServiceInterface
         if (empty($roles)) {
             $listParams = [
                 'section' => 'admin',
-                'status' => 1,
+                'status'  => 1,
             ];
 
             // Get list
@@ -108,7 +109,7 @@ class RoleService implements ServiceInterface
         if (empty($roles)) {
             $listParams = [
                 'section' => $section,
-                'status' => 1,
+                'status'  => 1,
             ];
 
             // Get list
@@ -122,30 +123,6 @@ class RoleService implements ServiceInterface
         }
 
         return $roles;
-    }
-
-    public function getUserRole($userId): array
-    {
-        $list   = [];
-        $rowSet = $this->roleRepository->getUserRole($userId);
-        foreach ($rowSet as $row) {
-            $list[] = $row->getRole();
-        }
-
-        return $list;
-    }
-
-    public function assignDefaultRoles(int $userId): void
-    {
-        foreach ($this->defaultRoles as $role) {
-            $params = [
-                'user_id' => $userId,
-                'role'    => $role['name'],
-                'section' => $role['section'],
-            ];
-
-            $this->roleRepository->addUserRole($params);
-        }
     }
 
     public function canonizeRole($role)
@@ -165,6 +142,40 @@ class RoleService implements ServiceInterface
         }
 
         return $role;
+    }
+
+    public function addDefaultRoles(int $userId): void
+    {
+        foreach ($this->defaultRoles as $role) {
+            $this->roleRepository->addUserRole($userId, $role['name'], $role['section']);
+        }
+    }
+
+    public function getUserRole($userId): array
+    {
+        $list   = [];
+        $rowSet = $this->roleRepository->getUserRole($userId);
+        foreach ($rowSet as $row) {
+            $list[] = $row->getRole();
+        }
+
+        return $list;
+    }
+
+    public function addUserRole(int $userId, string $roleName, string $section = 'api'): void
+    {
+        $roleList = $this->getRoleListLight();
+        if (in_array($roleName, $roleList) && in_array($section, $this->sectionList)) {
+            $this->roleRepository->addUserRole($userId, $roleName, $section);
+        }
+    }
+
+    public function deleteUserRole(int $userId, string $roleName): void
+    {
+        $roleList = $this->getRoleListLight();
+        if (in_array($roleName, $roleList)) {
+            $this->roleRepository->deleteUserRole($userId, $roleName);
+        }
     }
 
     public function canonizeUserRole($userRole)
