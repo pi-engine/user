@@ -55,26 +55,38 @@ class ValidationMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Get information from request
-        $routeMatch = $request->getAttribute('Laminas\Router\RouteMatch');
-        $parsedBody = $request->getParsedBody();
-        $account    = $request->getAttribute('account');
+        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
+        $parsedBody  = $request->getParsedBody();
+        $account     = $request->getAttribute('account');
+        $routeParams = $routeMatch->getParams();
 
         // Check parsedBody
-        switch ($routeMatch->getMatchedRouteName()) {
-            case 'api/login':
+        switch ($routeParams['validation']) {
+            case 'login':
                 $this->loginIsValid($parsedBody);
                 break;
 
-            case 'api/register':
+            case 'add':
                 $this->registerIsValid($parsedBody);
                 break;
 
-            case 'api/edit':
+            case 'edit':
                 $this->editIsValid($parsedBody, $account);
                 break;
 
-            case 'api/password':
+            case 'password':
                 $this->passwordIsValid($parsedBody, $account);
+                break;
+
+            default:
+                $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+                $request = $request->withAttribute('error',
+                    [
+                        'message' => 'Validator not set !',
+                        'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                    ]
+                );
+                return $this->errorHandler->handle($request);
                 break;
         }
 

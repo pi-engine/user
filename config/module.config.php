@@ -24,10 +24,9 @@ return [
             Service\ProfileService::class                  => Factory\Service\ProfileServiceFactory::class,
             Service\RoleService::class                     => Factory\Service\RoleServiceFactory::class,
             Middleware\AuthenticationMiddleware::class     => Factory\Middleware\AuthenticationMiddlewareFactory::class,
-            Middleware\AuthorizationApiMiddleware::class   => Factory\Middleware\AuthorizationApiMiddlewareFactory::class,
+            Middleware\AuthorizationMiddleware::class   => Factory\Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\SecurityMiddleware::class           => Factory\Middleware\SecurityMiddlewareFactory::class,
             Middleware\ValidationMiddleware::class         => Factory\Middleware\ValidationMiddlewareFactory::class,
-            Middleware\AuthorizationAdminMiddleware::class => Factory\Middleware\AuthorizationAdminMiddlewareFactory::class,
             Validator\EmailValidator::class                => Factory\Validator\EmailValidatorFactory::class,
             Validator\IdentityValidator::class             => Factory\Validator\IdentityValidatorFactory::class,
             Validator\NameValidator::class                 => Factory\Validator\NameValidatorFactory::class,
@@ -65,8 +64,14 @@ return [
                         'options' => [
                             'route'    => '/login',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'login',
+                                'permissions' => 'user_login',
+                                'validation'  => 'login',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\LoginHandler::class
@@ -79,11 +84,16 @@ return [
                         'options' => [
                             'route'    => '/logout',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'logout',
+                                'permissions' => 'user_logout',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
-                                    Middleware\AuthorizationApiMiddleware::class,
+                                    Middleware\AuthorizationMiddleware::class,
                                     Handler\Api\LogoutHandler::class
                                 ),
                             ],
@@ -94,8 +104,14 @@ return [
                         'options' => [
                             'route'    => '/register',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'register',
+                                'permissions' => 'user_register',
+                                'validation'  => 'add',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\RegisterHandler::class
@@ -108,11 +124,16 @@ return [
                         'options' => [
                             'route'    => '/profile',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'profile',
+                                'permissions' => 'user_profile',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
-                                    Middleware\AuthorizationApiMiddleware::class,
+                                    Middleware\AuthorizationMiddleware::class,
                                     Handler\Api\ProfileHandler::class
                                 ),
                             ],
@@ -123,11 +144,17 @@ return [
                         'options' => [
                             'route'    => '/update',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'update',
+                                'permissions' => 'user_update',
+                                'validation'  => 'edit',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
-                                    Middleware\AuthorizationApiMiddleware::class,
+                                    Middleware\AuthorizationMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\UpdateHandler::class
                                 ),
@@ -139,11 +166,17 @@ return [
                         'options' => [
                             'route'    => '/password',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'password',
+                                'permissions' => 'user_password',
+                                'validation'  => 'password',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
-                                    Middleware\AuthorizationApiMiddleware::class,
+                                    Middleware\AuthorizationMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\PasswordHandler::class
                                 ),
@@ -155,11 +188,16 @@ return [
                         'options' => [
                             'route'    => '/refresh',
                             'defaults' => [
-                                'controller' => PipeSpec::class,
-                                'middleware' => new PipeSpec(
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'refresh',
+                                'permissions' => 'user_refresh',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
-                                    Middleware\AuthorizationApiMiddleware::class,
+                                    Middleware\AuthorizationMiddleware::class,
                                     Handler\Api\RefreshHandler::class
                                 ),
                             ],
@@ -186,13 +224,18 @@ return [
                             'list'     => [
                                 'type'    => Literal::class,
                                 'options' => [
-                                    'route'    => '/list',
-                                    'defaults' => [
+                                    'route'       => '/list',
+                                    'module'      => 'user',
+                                    'section'     => 'admin',
+                                    'package'     => 'profile',
+                                    'handler'     => 'list',
+                                    'permissions' => 'user_profile_list',
+                                    'defaults'    => [
                                         'controller' => PipeSpec::class,
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Profile\ListHandler::class
                                         ),
                                     ],
@@ -203,11 +246,18 @@ return [
                                 'options' => [
                                     'route'    => '/add',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'add',
+                                        'permissions' => 'user_profile_add',
+                                        'validation'  => 'add',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
                                             Handler\Admin\Profile\AddHandler::class
                                         ),
                                     ],
@@ -218,11 +268,18 @@ return [
                                 'options' => [
                                     'route'    => '/edit',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'edit',
+                                        'permissions' => 'user_profile_edit',
+                                        'validation'  => 'edit',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
                                             Handler\Admin\Profile\EditHandler::class
                                         ),
                                     ],
@@ -233,11 +290,18 @@ return [
                                 'options' => [
                                     'route'    => '/password',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'password',
+                                        'permissions' => 'user_profile_password',
+                                        'validation'  => 'password',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
                                             Handler\Admin\Profile\PasswordHandler::class
                                         ),
                                     ],
@@ -248,11 +312,16 @@ return [
                                 'options' => [
                                     'route'    => '/view',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'view',
+                                        'permissions' => 'user_profile_view',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Profile\ViewHandler::class
                                         ),
                                     ],
@@ -273,11 +342,16 @@ return [
                                 'options' => [
                                     'route'    => '/list',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'role',
+                                        'handler'     => 'list',
+                                        'permissions' => 'user_role_list',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Role\ListHandler::class
                                         ),
                                     ],
@@ -288,11 +362,16 @@ return [
                                 'options' => [
                                     'route'    => '/add',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'role',
+                                        'handler'     => 'add',
+                                        'permissions' => 'user_role_add',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Role\AddHandler::class
                                         ),
                                     ],
@@ -303,11 +382,16 @@ return [
                                 'options' => [
                                     'route'    => '/edit',
                                     'defaults' => [
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'role',
+                                        'handler'     => 'edit',
+                                        'permissions' => 'user_role_edit',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationAdminMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Role\EditHandler::class
                                         ),
                                     ],

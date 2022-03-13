@@ -12,7 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
 use User\Service\RoleService;
 
-class AuthorizationApiMiddleware implements MiddlewareInterface
+class AuthorizationMiddleware implements MiddlewareInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
