@@ -1,12 +1,13 @@
 {
   "name": "pi/user",
-  "description": "Api base authentication and user management via laminas and pi engine",
+  "description": "Api base authentication and user management module via laminas and pi",
   "license": "BSD-3-Clause",
   "keywords": [
     "Pi",
     "Pi Engine",
     "Laminas",
     "Laminas MVC",
+    "Laminas Module",
     "User management",
     "User management",
     "Psr",
@@ -49,9 +50,7 @@
     "laminas/laminas-inputfilter": "^2.13",
     "laminas/laminas-permissions-rbac": "^3.2",
     "laminas/laminas-i18n": "^2.14",
-    "firebase/php-jwt": "^5.5",
-    "psr/http-client": "^1.0",
-    "psr/http-factory": "^1.0"
+    "firebase/php-jwt": "^5.5"
   },
 
   "autoload": {
