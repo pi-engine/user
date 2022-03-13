@@ -14,36 +14,39 @@ return [
             Repository\RoleRepositoryInterface::class       => Repository\RoleRepository::class,
         ],
         'factories' => [
-            Repository\AccountRepository::class          => Factory\Repository\AccountRepositoryFactory::class,
-            Repository\PermissionRepository::class       => Factory\Repository\PermissionRepositoryFactory::class,
-            Repository\ProfileRepository::class          => Factory\Repository\ProfileRepositoryFactory::class,
-            Repository\RoleRepository::class             => Factory\Repository\RoleRepositoryFactory::class,
-            Service\AccountService::class                => Factory\Service\AccountServiceFactory::class,
-            Service\TokenService::class                  => Factory\Service\TokenServiceFactory::class,
-            Service\CacheService::class                  => Factory\Service\CacheServiceFactory::class,
-            Middleware\AuthenticationMiddleware::class   => Factory\Middleware\AuthenticationMiddlewareFactory::class,
-            Middleware\SecurityMiddleware::class         => Factory\Middleware\SecurityMiddlewareFactory::class,
-            Middleware\ValidationMiddleware::class       => Factory\Middleware\ValidationMiddlewareFactory::class,
-            Middleware\AdminMiddleware::class            => Factory\Middleware\AdminMiddlewareFactory::class,
-            Validator\EmailValidator::class              => Factory\Validator\EmailValidatorFactory::class,
-            Validator\IdentityValidator::class           => Factory\Validator\IdentityValidatorFactory::class,
-            Validator\NameValidator::class               => Factory\Validator\NameValidatorFactory::class,
-            Handler\Admin\Profile\AddHandler::class      => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
-            Handler\Admin\Profile\EditHandler::class     => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
-            Handler\Admin\Profile\ListHandler::class     => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
-            Handler\Admin\Profile\PasswordHandler::class => Factory\Handler\Admin\Profile\PasswordHandlerFactory::class,
-            Handler\Admin\Profile\ViewHandler::class     => Factory\Handler\Admin\Profile\ViewHandlerFactory::class,
-            Handler\Admin\Role\AddHandler::class         => Factory\Handler\Admin\Role\AddHandlerFactory::class,
-            Handler\Admin\Role\EditHandler::class        => Factory\Handler\Admin\Role\EditHandlerFactory::class,
-            Handler\Admin\Role\ListHandler::class        => Factory\Handler\Admin\Role\ListHandlerFactory::class,
-            Handler\Api\ProfileHandler::class            => Factory\Handler\Api\ProfileHandlerFactory::class,
-            Handler\Api\LoginHandler::class              => Factory\Handler\Api\LoginHandlerFactory::class,
-            Handler\Api\LogoutHandler::class             => Factory\Handler\Api\LogoutHandlerFactory::class,
-            Handler\Api\RegisterHandler::class           => Factory\Handler\Api\RegisterHandlerFactory::class,
-            Handler\Api\RefreshHandler::class            => Factory\Handler\Api\RefreshHandlerFactory::class,
-            Handler\Api\PasswordHandler::class           => Factory\Handler\Api\PasswordHandlerFactory::class,
-            Handler\Api\UpdateHandler::class             => Factory\Handler\Api\UpdateHandlerFactory::class,
-            Handler\ErrorHandler::class                  => Factory\Handler\ErrorHandlerFactory::class,
+            Repository\AccountRepository::class            => Factory\Repository\AccountRepositoryFactory::class,
+            Repository\PermissionRepository::class         => Factory\Repository\PermissionRepositoryFactory::class,
+            Repository\ProfileRepository::class            => Factory\Repository\ProfileRepositoryFactory::class,
+            Repository\RoleRepository::class               => Factory\Repository\RoleRepositoryFactory::class,
+            Service\AccountService::class                  => Factory\Service\AccountServiceFactory::class,
+            Service\TokenService::class                    => Factory\Service\TokenServiceFactory::class,
+            Service\CacheService::class                    => Factory\Service\CacheServiceFactory::class,
+            Service\ProfileService::class                  => Factory\Service\ProfileServiceFactory::class,
+            Service\RoleService::class                     => Factory\Service\RoleServiceFactory::class,
+            Middleware\AuthenticationMiddleware::class     => Factory\Middleware\AuthenticationMiddlewareFactory::class,
+            Middleware\AuthorizationApiMiddleware::class   => Factory\Middleware\AuthorizationApiMiddlewareFactory::class,
+            Middleware\SecurityMiddleware::class           => Factory\Middleware\SecurityMiddlewareFactory::class,
+            Middleware\ValidationMiddleware::class         => Factory\Middleware\ValidationMiddlewareFactory::class,
+            Middleware\AuthorizationAdminMiddleware::class => Factory\Middleware\AuthorizationAdminMiddlewareFactory::class,
+            Validator\EmailValidator::class                => Factory\Validator\EmailValidatorFactory::class,
+            Validator\IdentityValidator::class             => Factory\Validator\IdentityValidatorFactory::class,
+            Validator\NameValidator::class                 => Factory\Validator\NameValidatorFactory::class,
+            Handler\Admin\Profile\AddHandler::class        => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
+            Handler\Admin\Profile\EditHandler::class       => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
+            Handler\Admin\Profile\ListHandler::class       => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
+            Handler\Admin\Profile\PasswordHandler::class   => Factory\Handler\Admin\Profile\PasswordHandlerFactory::class,
+            Handler\Admin\Profile\ViewHandler::class       => Factory\Handler\Admin\Profile\ViewHandlerFactory::class,
+            Handler\Admin\Role\AddHandler::class           => Factory\Handler\Admin\Role\AddHandlerFactory::class,
+            Handler\Admin\Role\EditHandler::class          => Factory\Handler\Admin\Role\EditHandlerFactory::class,
+            Handler\Admin\Role\ListHandler::class          => Factory\Handler\Admin\Role\ListHandlerFactory::class,
+            Handler\Api\ProfileHandler::class              => Factory\Handler\Api\ProfileHandlerFactory::class,
+            Handler\Api\LoginHandler::class                => Factory\Handler\Api\LoginHandlerFactory::class,
+            Handler\Api\LogoutHandler::class               => Factory\Handler\Api\LogoutHandlerFactory::class,
+            Handler\Api\RegisterHandler::class             => Factory\Handler\Api\RegisterHandlerFactory::class,
+            Handler\Api\RefreshHandler::class              => Factory\Handler\Api\RefreshHandlerFactory::class,
+            Handler\Api\PasswordHandler::class             => Factory\Handler\Api\PasswordHandlerFactory::class,
+            Handler\Api\UpdateHandler::class               => Factory\Handler\Api\UpdateHandlerFactory::class,
+            Handler\ErrorHandler::class                    => Factory\Handler\ErrorHandlerFactory::class,
         ],
     ],
 
@@ -80,6 +83,7 @@ return [
                                 'middleware' => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
+                                    Middleware\AuthorizationApiMiddleware::class,
                                     Handler\Api\LogoutHandler::class
                                 ),
                             ],
@@ -108,6 +112,7 @@ return [
                                 'middleware' => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
+                                    Middleware\AuthorizationApiMiddleware::class,
                                     Handler\Api\ProfileHandler::class
                                 ),
                             ],
@@ -122,6 +127,7 @@ return [
                                 'middleware' => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
+                                    Middleware\AuthorizationApiMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\UpdateHandler::class
                                 ),
@@ -137,6 +143,7 @@ return [
                                 'middleware' => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
+                                    Middleware\AuthorizationApiMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\PasswordHandler::class
                                 ),
@@ -152,6 +159,7 @@ return [
                                 'middleware' => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
+                                    Middleware\AuthorizationApiMiddleware::class,
                                     Handler\Api\RefreshHandler::class
                                 ),
                             ],
@@ -184,7 +192,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Profile\ListHandler::class
                                         ),
                                     ],
@@ -199,7 +207,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Profile\AddHandler::class
                                         ),
                                     ],
@@ -214,7 +222,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Profile\EditHandler::class
                                         ),
                                     ],
@@ -229,7 +237,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Profile\PasswordHandler::class
                                         ),
                                     ],
@@ -244,7 +252,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Profile\ViewHandler::class
                                         ),
                                     ],
@@ -269,7 +277,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Role\ListHandler::class
                                         ),
                                     ],
@@ -284,7 +292,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Role\AddHandler::class
                                         ),
                                     ],
@@ -299,7 +307,7 @@ return [
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AdminMiddleware::class,
+                                            Middleware\AuthorizationAdminMiddleware::class,
                                             Handler\Admin\Role\EditHandler::class
                                         ),
                                     ],

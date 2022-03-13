@@ -8,18 +8,21 @@ class Account
     private string $name;
     private string $identity;
     private string $email;
+    private string $mobile;
     private        $status;
 
     public function __construct(
         $name,
         $identity,
         $email,
+        $mobile,
         $status = null,
         $id = null
     ) {
         $this->name     = $name;
         $this->identity = $identity;
         $this->email    = $email;
+        $this->mobile    = $mobile;
         $this->status   = $status;
         $this->id       = $id;
     }
@@ -54,6 +57,14 @@ class Account
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMobile(): string
+    {
+        return $this->mobile;
     }
 
     /**

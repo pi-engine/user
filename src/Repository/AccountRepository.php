@@ -194,7 +194,7 @@ class AccountRepository implements AccountRepositoryInterface
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
-                'Database error occurred during blog post update operation'
+                'Database error occurred during update operation'
             );
         }
     }

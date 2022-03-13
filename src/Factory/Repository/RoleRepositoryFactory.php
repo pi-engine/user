@@ -29,7 +29,7 @@ class RoleRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new Role('', '', ''),
-            new RoleAccount('', '', '')
+            new RoleAccount(0, '', '')
         );
     }
 }

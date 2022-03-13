@@ -11,6 +11,9 @@ class AccountService implements ServiceInterface
     /* @var AccountRepositoryInterface */
     protected AccountRepositoryInterface $accountRepository;
 
+    /* @var RoleService */
+    protected RoleService $roleService;
+
     /* @var TokenService */
     protected TokenService $tokenService;
 
@@ -24,10 +27,12 @@ class AccountService implements ServiceInterface
      */
     public function __construct(
         AccountRepositoryInterface $accountRepository,
+        RoleService $roleService,
         TokenService $tokenService,
         CacheService $cacheService
     ) {
         $this->accountRepository = $accountRepository;
+        $this->roleService       = $roleService;
         $this->tokenService      = $tokenService;
         $this->cacheService      = $cacheService;
     }
@@ -58,7 +63,7 @@ class AccountService implements ServiceInterface
             );
 
             // Get roles
-            $account['roles'] = ['member', 'admin'];
+            $account['roles'] = $this->roleService->getUserRole($account['id']);
 
             // Generate access token
             $accessToken = $this->tokenService->generate(
@@ -187,7 +192,12 @@ class AccountService implements ServiceInterface
         $params['time_created'] = time();
 
         $account = $this->accountRepository->addAccount($params);
-        return $this->canonizeAccount($account);
+        $account = $this->canonizeAccount($account);
+
+        // Set user roles
+        $this->roleService->assignDefaultRoles((int) $account['id']);
+
+        return $account;
     }
 
     public function updateAccount($params, $account): array
@@ -236,7 +246,7 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
-    public function canonizeAccount($account)
+    public function canonizeAccount($account): array
     {
         if (empty($account)) {
             return [];

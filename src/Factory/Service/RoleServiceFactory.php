@@ -6,29 +6,25 @@ use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Repository\AccountRepositoryInterface;
-use User\Service\AccountService;
+use User\Repository\RoleRepositoryInterface;
 use User\Service\CacheService;
 use User\Service\RoleService;
-use User\Service\TokenService;
 
-class AccountServiceFactory implements FactoryInterface
+class RoleServiceFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return AccountService
+     * @return RoleService
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountService
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): RoleService
     {
-        return new AccountService(
-            $container->get(AccountRepositoryInterface::class),
-            $container->get(RoleService::class),
-            $container->get(TokenService::class),
+        return new RoleService(
+            $container->get(RoleRepositoryInterface::class),
             $container->get(CacheService::class)
         );
     }

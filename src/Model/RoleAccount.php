@@ -5,17 +5,17 @@ namespace User\Model;
 class RoleAccount
 {
     private        $id;
-    private int    $user_id;
+    private ?int   $user_id;
     private string $role;
     private string $section;
 
     public function __construct(
-        $userId,
+        $user_id,
         $role,
         $section,
         $id = null
     ) {
-        $this->user_id = $userId;
+        $this->user_id = $user_id;
         $this->role    = $role;
         $this->section = $section;
         $this->id      = $id;
@@ -32,7 +32,7 @@ class RoleAccount
     /**
      * @return int
      */
-    public function getUserId(): int
+    public function getUserId(): ?int
     {
         return $this->user_id;
     }

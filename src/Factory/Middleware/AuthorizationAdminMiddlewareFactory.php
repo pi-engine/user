@@ -9,24 +9,26 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
-use User\Middleware\AdminMiddleware;
+use User\Middleware\AuthorizationAdminMiddleware;
+use User\Service\RoleService;
 
-class AdminMiddlewareFactory implements FactoryInterface
+class AuthorizationAdminMiddlewareFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return AdminMiddleware
+     * @return AuthorizationAdminMiddleware
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AdminMiddleware
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AuthorizationAdminMiddleware
     {
-        return new AdminMiddleware(
+        return new AuthorizationAdminMiddleware(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
+            $container->get(RoleService::class),
             $container->get(ErrorHandler::class)
         );
     }

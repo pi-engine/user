@@ -53,16 +53,26 @@ class TokenService implements ServiceInterface
             $decoded = JWT::decode($token, new Key($this->config->jwt->secret, 'HS256'));
 
             // Get data from cache
-            $cacheUser = $this->cacheService->getUser((int) $decoded->uid);
+            $cacheUser = $this->cacheService->getUser((int)$decoded->uid);
 
-            if ($decoded->type == 'access' && in_array($decoded->id, $cacheUser['access_keys'])) {
+            if (
+                !empty($decoded)
+                && !empty($cacheUser)
+                && $decoded->type == 'access'
+                && in_array($decoded->id, $cacheUser['access_keys'])
+            ) {
                 return [
                     'status'  => true,
                     'id'      => $decoded->id,
                     'user_id' => $decoded->uid,
                     'type'    => $decoded->type,
                 ];
-            } elseif ($decoded->type == 'refresh' && in_array($decoded->id, $cacheUser['refresh_keys'])) {
+            } elseif (
+                !empty($decoded)
+                && !empty($cacheUser)
+                && $decoded->type == 'refresh'
+                && in_array($decoded->id, $cacheUser['refresh_keys'])
+            ) {
                 return [
                     'status'  => true,
                     'id'      => $decoded->id,

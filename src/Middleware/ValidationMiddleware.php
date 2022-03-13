@@ -15,6 +15,7 @@ use User\Handler\ErrorHandler;
 use User\Service\AccountService;
 use User\Validator\EmailValidator;
 use User\Validator\IdentityValidator;
+use User\Validator\MobileValidator;
 use User\Validator\NameValidator;
 use User\Validator\PasswordValidator;
 
@@ -143,6 +144,17 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->add($name);
         $inputFilter->add($identity);
         $inputFilter->add($credential);
+
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $option = [];
+            if (isset($params['country']) && !empty($params['country'])) {
+                $option['country'] = $params['country'];
+            }
+            $mobile = new Input('mobile');
+            $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
+            $inputFilter->add($mobile);
+        }
+
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
@@ -170,6 +182,12 @@ class ValidationMiddleware implements MiddlewareInterface
             $identity = new Input('identity');
             $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService, ['user_id' => $account['id']]));
             $inputFilter->add($identity);
+        }
+
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $mobile = new Input('mobile');
+            $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, ['user_id' => $account['id']]));
+            $inputFilter->add($mobile);
         }
 
         $inputFilter->setData($params);

@@ -14,6 +14,8 @@ class CacheService implements ServiceInterface
 
     protected string $userKeyPattern = 'user-%s';
 
+    protected string $roleKeyPattern = 'roles-list';
+
     public array $userValuePattern
         = [
             'account'      => [],
@@ -41,6 +43,23 @@ class CacheService implements ServiceInterface
         );
         $cache->addPlugin(new Serializer());
         $this->cache = new SimpleCacheDecorator($cache);
+    }
+
+    public function setItem(string $key, array $value = []): array
+    {
+        $this->cache->set($key, $value);
+
+        return $value;
+    }
+
+    public function getItem($key): array
+    {
+        $list = [];
+        if ($this->cache->has($key)) {
+            $list = $this->cache->get($key);
+        }
+
+        return $list;
     }
 
     public function getUser(int $userId): array
