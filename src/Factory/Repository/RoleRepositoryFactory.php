@@ -8,8 +8,8 @@ use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Role\Role;
 use User\Model\Role\Account;
+use User\Model\Role\Role;
 use User\Repository\RoleRepository;
 
 class RoleRepositoryFactory implements FactoryInterface

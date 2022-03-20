@@ -195,7 +195,7 @@ class AccountService implements ServiceInterface
         $account = $this->canonizeAccount($account);
 
         // Set user roles
-        $this->roleService->addDefaultRoles((int) $account['id']);
+        $this->roleService->addDefaultRoles((int)$account['id']);
 
         return $account;
     }

@@ -12,8 +12,8 @@ $result = [
     'config' => false,
 ];
 
-$config           = new Config(include realpath(__DIR__ . '/../../../config/autoload/global.php'));
-$adapter          = new Adapter($config->db->toArray());
-$install          = new Remove($adapter);
+$config  = new Config(include realpath(__DIR__ . '/../../../config/autoload/global.php'));
+$adapter = new Adapter($config->db->toArray());
+$install = new Remove($adapter);
 echo $install->database();
 echo $install->config();

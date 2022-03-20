@@ -29,9 +29,9 @@ class PermissionRepositoryFactory implements FactoryInterface
         return new PermissionRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new Resource('', '','','', ''),
-            new Role('', '','',''),
-            new Page('', '','','','','','','','')
+            new Resource('', '', '', '', ''),
+            new Role('', '', '', ''),
+            new Page('', '', '', '', '', '', '', '', '')
         );
     }
 }

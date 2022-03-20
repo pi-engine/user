@@ -4,7 +4,6 @@ namespace User\Factory\Installer;
 
 use Interop\Container\ContainerInterface;
 use Laminas\Db\Adapter\AdapterInterface;
-use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;

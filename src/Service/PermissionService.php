@@ -14,14 +14,14 @@ class PermissionService implements ServiceInterface
 
     /**
      * @param PermissionRepositoryInterface $permissionRepository
-     * @param CacheService            $cacheService
+     * @param CacheService                  $cacheService
      */
     public function __construct(
         PermissionRepositoryInterface $permissionRepository,
         CacheService $cacheService
     ) {
         $this->permissionRepository = $permissionRepository;
-        $this->cacheService   = $cacheService;
+        $this->cacheService         = $cacheService;
     }
 
 }

@@ -32,7 +32,6 @@
     "ext-pdo": "*",
     "ext-spl": "*",
     "lib-curl": "*",
-
     "laminas/laminas-mvc": "^3.1.1",
     "laminas/laminas-mvc-i18n": "^1.2.0",
     "laminas/laminas-mvc-plugins": "^1.1.0",
@@ -52,13 +51,11 @@
     "laminas/laminas-i18n": "^2.14",
     "firebase/php-jwt": "^5.5"
   },
-
   "autoload": {
     "psr-4": {
       "User\\": "vendor/pi/user/src/"
     }
   },
-
   "scripts": {
     "post-install-cmd": [
       "php -r 'if (file_exists(\"bin/post-install.php\")) include \"bin/post-install.php\";'"
@@ -70,7 +67,6 @@
       "php -r 'if (file_exists(\"bin/post-remove.php\")) include \"bin/post-remove.php\";'"
     ]
   },
-
   "suggest": {
     "ext-apc": "for opcode cache and system persistent data",
     "ext-discount": "for Markdown text parsing",

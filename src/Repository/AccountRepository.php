@@ -22,6 +22,7 @@ class AccountRepository implements AccountRepositoryInterface
 {
     /**
      * Account Table name
+     *
      * @var string
      */
     private string $tableAccount = 'account';

@@ -2,6 +2,7 @@
 
 namespace User\Repository;
 
+use InvalidArgumentException;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
@@ -10,10 +11,9 @@ use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
-use User\Model\Role\Role;
-use User\Model\Role\Account;
 use RuntimeException;
-use InvalidArgumentException;
+use User\Model\Role\Account;
+use User\Model\Role\Role;
 
 class RoleRepository implements RoleRepositoryInterface
 {

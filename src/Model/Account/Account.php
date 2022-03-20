@@ -4,12 +4,12 @@ namespace User\Model\Account;
 
 class Account
 {
-    private        $id;
-    private string $name;
-    private string $identity;
-    private string $email;
-    private string $mobile;
-    private        $status;
+    private         $id;
+    private string  $name;
+    private ?string $identity;
+    private ?string $email;
+    private ?string $mobile;
+    private         $status;
 
     public function __construct(
         $name,
@@ -22,7 +22,7 @@ class Account
         $this->name     = $name;
         $this->identity = $identity;
         $this->email    = $email;
-        $this->mobile    = $mobile;
+        $this->mobile   = $mobile;
         $this->status   = $status;
         $this->id       = $id;
     }
@@ -62,7 +62,7 @@ class Account
     /**
      * @return string
      */
-    public function getMobile(): string
+    public function getMobile(): ?string
     {
         return $this->mobile;
     }
