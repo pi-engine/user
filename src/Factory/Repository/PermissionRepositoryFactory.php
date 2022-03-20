@@ -8,6 +8,7 @@ use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use User\Model\PermissionPage;
 use User\Model\PermissionResource;
 use User\Model\PermissionRole;
 use User\Repository\PermissionRepository;
@@ -29,7 +30,8 @@ class PermissionRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new PermissionResource('', '','','', ''),
-            new PermissionRole('', '','','')
+            new PermissionRole('', '','',''),
+            new PermissionPage('', '','','','','','','','')
         );
     }
 }

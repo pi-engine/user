@@ -51,7 +51,7 @@ CREATE TABLE `permission_resource`
 (
     `id`      INT(10) UNSIGNED          NOT NULL AUTO_INCREMENT,
     `title`   VARCHAR(255)              NOT NULL DEFAULT '',
-    `section` ENUM ('api', 'admin')     NOT NULL,
+    `section` ENUM ('api', 'admin')     NOT NULL DEFAULT 'api',
     `module`  VARCHAR(64)               NOT NULL DEFAULT '',
     `name`    VARCHAR(64)               NOT NULL DEFAULT '',
     `type`    ENUM ('system', 'custom') NOT NULL,
@@ -63,11 +63,27 @@ CREATE TABLE `permission_rule`
 (
     `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `resource` VARCHAR(64)           NOT NULL DEFAULT '',
-    `section`  ENUM ('api', 'admin') NOT NULL,
+    `section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
     `module`   VARCHAR(64)           NOT NULL DEFAULT '',
     `role`     VARCHAR(64)           NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `section_module_perm` (`section`, `module`, `resource`, `role`)
+);
+
+CREATE TABLE `permission_page`
+(
+    `id`          INT(8) UNSIGNED         NOT NULL AUTO_INCREMENT,
+    `title`       VARCHAR(64)             NOT NULL DEFAULT '',
+    `section`     ENUM ('api', 'admin')   NOT NULL DEFAULT 'api',
+    `module`      VARCHAR(64)             NOT NULL DEFAULT '',
+    `package`     VARCHAR(64)             NOT NULL DEFAULT '',
+    `handler`     VARCHAR(64)             NOT NULL DEFAULT '',
+    `resource`    VARCHAR(64)             NOT NULL DEFAULT '',
+    `cache_type`  ENUM ('page', 'action') NOT NULL,
+    `cache_ttl`   INT(10)                 NOT NULL DEFAULT '0', # positive: for cache TTL; negative: for inheritance
+    `cache_level` VARCHAR(64)             NOT NULL DEFAULT '',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `mca` (`section`, `module`, `package`, `handler`)
 );
 
 
