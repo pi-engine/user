@@ -17,12 +17,12 @@ class Update implements InstallerInterface
         $this->db = $db;
     }
 
-    public function database($version = ''): bool
+    public function database($version = ''): string
     {
-        return true;
+        return 'User module database update successfully !';
     }
 
-    public function config($file = ''): bool
+    public function config($file = ''): string
     {
         return true;
     }

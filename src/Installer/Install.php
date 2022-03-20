@@ -17,22 +17,22 @@ class Install implements InstallerInterface
         $this->db = $db;
     }
 
-    public function database($version = ''): bool
+    public function database($version = ''): string
     {
         // Set and check
         $sqlFile = realpath(__DIR__ . '/../../data/schema.sql');
         if (!file_exists($sqlFile)) {
-            return false;
+            return 'Error to find or read schema.sql';
+
         }
 
-        // read query
-        $sql = file_get_contents($sqlFile);
+        $sql       = file_get_contents($sqlFile);
         $statement = $this->db->createStatement($sql);
         $statement->execute();
-        return true;
+        return 'User module database install successfully !';
     }
 
-    public function config($file = ''): bool
+    public function config($file = ''): string
     {
         return true;
     }

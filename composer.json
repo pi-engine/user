@@ -65,6 +65,9 @@
     ],
     "post-update-cmd": [
       "php -r 'if (file_exists(\"bin/post-update.php\")) include \"bin/post-update.php\";'"
+    ],
+    "post-package-uninstall": [
+      "php -r 'if (file_exists(\"bin/post-remove.php\")) include \"bin/post-remove.php\";'"
     ]
   },
 

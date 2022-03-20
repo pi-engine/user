@@ -1,17 +1,19 @@
 <?php
 
+use Laminas\Config\Config;
+use Laminas\Db\Adapter\Adapter;
 use User\Installer\Update;
 
 // Composer autoloading
-include __DIR__ . '/../../../vendor/autoload.php';
+include realpath(__DIR__ . '/../../../vendor/autoload.php');
 
 $result = [
     'init'   => false,
     'config' => false,
 ];
 
-$install          = new Update();
-$result['init']   = $install->init();
-$result['config'] = $install->manageConfig();
-
-var_dump($result);
+$config           = new Config(include realpath(__DIR__ . '/../../../config/autoload/global.php'));
+$adapter          = new Adapter($config->db->toArray());
+$install          = new Update($adapter);
+echo $install->database();
+echo $install->config();
