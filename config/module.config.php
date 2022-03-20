@@ -14,6 +14,9 @@ return [
             Repository\RoleRepositoryInterface::class       => Repository\RoleRepository::class,
         ],
         'factories' => [
+            Installer\Install::class                      => Factory\Installer\InstallFactory::class,
+            Installer\Update::class                       => Factory\Installer\UpdateFactory::class,
+            Installer\Remove::class                       => Factory\Installer\RemoveFactory::class,
             Repository\AccountRepository::class           => Factory\Repository\AccountRepositoryFactory::class,
             Repository\PermissionRepository::class        => Factory\Repository\PermissionRepositoryFactory::class,
             Repository\ProfileRepository::class           => Factory\Repository\ProfileRepositoryFactory::class,
@@ -219,7 +222,7 @@ return [
                 ],
                 'child_routes' => [
                     // Admin profile section
-                    'profile' => [
+                    'profile'    => [
                         'type'         => Literal::class,
                         'options'      => [
                             'route'    => '/profile',
@@ -335,7 +338,7 @@ return [
                         ],
                     ],
                     // Admin role section
-                    'role'    => [
+                    'role'       => [
                         'type'         => Literal::class,
                         'options'      => [
                             'route'    => '/role',
@@ -405,14 +408,14 @@ return [
                         ],
                     ],
                     // Admin permission section
-                    'permission'    => [
+                    'permission' => [
                         'type'         => Literal::class,
                         'options'      => [
                             'route'    => '/permission',
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'list' => [
+                            'list'   => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/list',
@@ -432,7 +435,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'view'  => [
+                            'view'   => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/view',

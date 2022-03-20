@@ -59,6 +59,15 @@
     }
   },
 
+  "scripts": {
+    "post-install-cmd": [
+      "php -r 'if (file_exists(\"bin/post-install.php\")) include \"bin/post-install.php\";'"
+    ],
+    "post-update-cmd": [
+      "php -r 'if (file_exists(\"bin/post-update.php\")) include \"bin/post-update.php\";'"
+    ]
+  },
+
   "suggest": {
     "ext-apc": "for opcode cache and system persistent data",
     "ext-discount": "for Markdown text parsing",

@@ -1,4 +1,4 @@
-CREATE TABLE `account`
+CREATE TABLE IF NOT EXISTS `account`
 (
     `id`             INT(10) UNSIGNED    NOT NULL AUTO_INCREMENT,
     `name`           VARCHAR(255)                 DEFAULT NULL,
@@ -18,14 +18,14 @@ CREATE TABLE `account`
     KEY `status` (`status`)
 );
 
-CREATE TABLE `profile`
+CREATE TABLE IF NOT EXISTS `profile`
 (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `role`
+CREATE TABLE IF NOT EXISTS `role`
 (
     `id`      INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `name`    VARCHAR(255)                   DEFAULT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `role`
     KEY `status` (`status`)
 );
 
-CREATE TABLE `role_account`
+CREATE TABLE IF NOT EXISTS `role_account`
 (
     `id`      INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `user_id` INT(10) UNSIGNED      NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE `role_account`
     UNIQUE KEY `section_user` (`section`, `user_id`, `role`)
 );
 
-CREATE TABLE `permission_resource`
+CREATE TABLE IF NOT EXISTS `permission_resource`
 (
     `id`      INT(10) UNSIGNED          NOT NULL AUTO_INCREMENT,
     `title`   VARCHAR(255)              NOT NULL DEFAULT '',
@@ -59,7 +59,7 @@ CREATE TABLE `permission_resource`
     UNIQUE KEY `resource_name` (`section`, `module`, `name`, `type`)
 );
 
-CREATE TABLE `permission_rule`
+CREATE TABLE IF NOT EXISTS `permission_rule`
 (
     `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `resource` VARCHAR(64)           NOT NULL DEFAULT '',
@@ -70,7 +70,7 @@ CREATE TABLE `permission_rule`
     UNIQUE KEY `section_module_perm` (`section`, `module`, `resource`, `role`)
 );
 
-CREATE TABLE `permission_page`
+CREATE TABLE IF NOT EXISTS `permission_page`
 (
     `id`          INT(8) UNSIGNED         NOT NULL AUTO_INCREMENT,
     `title`       VARCHAR(64)             NOT NULL DEFAULT '',
@@ -86,6 +86,6 @@ CREATE TABLE `permission_page`
     UNIQUE KEY `mca` (`section`, `module`, `package`, `handler`)
 );
 
-INSERT INTO `role` (`id`, `name`, `title`, `status`, `section`)
+/* INSERT INTO `role` (`id`, `name`, `title`, `status`, `section`)
 VALUES (NULL, 'member', 'Member', '1', 'api'),
-       (NULL, 'admin', 'Admin', '1', 'admin');
+       (NULL, 'admin', 'Admin', '1', 'admin'); */
