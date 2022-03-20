@@ -86,7 +86,6 @@ CREATE TABLE `permission_page`
     UNIQUE KEY `mca` (`section`, `module`, `package`, `handler`)
 );
 
-
 INSERT INTO `role` (`id`, `name`, `title`, `status`, `section`)
 VALUES (NULL, 'member', 'Member', '1', 'api'),
        (NULL, 'admin', 'Admin', '1', 'admin');

@@ -47,13 +47,13 @@ Open `data/schema.sql` and create tablas in your database
 
 ## 3. List of TODO tasks for this module
 
+* [ ] Admin handler: profile section (add, edit, list, password, view)
+* [ ] Admin handler: Role section (add, edit, list)
+* [ ] Admin handler: Permission section (add, edit, list)
 * [ ] Rbac Authorization
 * [ ] Handler (as web service) for check email, mobile, identity and password validation in registration
 * [ ] Handler (as web service) for check strong password
 * [ ] DTO
-* [ ] Admin handler: profile section (add, edit, list, password, view)
-* [ ] Admin handler: Role section (add, edit, list)
-* [ ] Admin handler: Permission section
 * [ ] Profile model, repository, service and ...
 * [ ] Write test cases and make test
 * [ ] Write documents, (in-file, extra)
