@@ -8,7 +8,7 @@ use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Profile;
+use User\Model\Profile\Profile;
 use User\Repository\ProfileRepository;
 
 class ProfileRepositoryFactory implements FactoryInterface

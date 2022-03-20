@@ -8,8 +8,8 @@ use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Role;
-use User\Model\RoleAccount;
+use User\Model\Role\Role;
+use User\Model\Role\Account;
 use User\Repository\RoleRepository;
 
 class RoleRepositoryFactory implements FactoryInterface
@@ -29,7 +29,7 @@ class RoleRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new Role('', '', ''),
-            new RoleAccount(0, '', '')
+            new Account(0, '', '')
         );
     }
 }

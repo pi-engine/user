@@ -1,30 +1,27 @@
 <?php
 
-namespace User\Model;
+namespace User\Model\Permission;
 
-class PermissionResource
+class Role
 {
     private        $id;
-    private string $title;
+    private string $resource;
     private string $section;
     private string $module;
-    private string $name;
-    private string $type;
+    private string $role;
 
     public function __construct(
-        $title,
+        $resource,
         $section,
         $module,
-        $name,
-        $type,
+        $role,
         $id = null
     ) {
-        $this->title   = $title;
-        $this->section = $section;
-        $this->module  = $module;
-        $this->name    = $name;
-        $this->type    = $type;
-        $this->id      = $id;
+        $this->resource = $resource;
+        $this->section  = $section;
+        $this->module   = $module;
+        $this->role     = $role;
+        $this->id       = $id;
     }
 
     /**
@@ -38,9 +35,9 @@ class PermissionResource
     /**
      * @return string
      */
-    public function getTitle(): string
+    public function getResource(): string
     {
-        return $this->title;
+        return $this->resource;
     }
 
     /**
@@ -62,16 +59,8 @@ class PermissionResource
     /**
      * @return string
      */
-    public function getName(): string
+    public function getRole(): string
     {
-        return $this->name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType(): string
-    {
-        return $this->type;
+        return $this->role;
     }
 }

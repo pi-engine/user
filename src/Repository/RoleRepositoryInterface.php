@@ -3,8 +3,7 @@
 namespace User\Repository;
 
 use Laminas\Db\ResultSet\HydratingResultSet;
-use User\Model\Role;
-use User\Model\RoleAccount;
+use User\Model\Role\Role;
 
 interface RoleRepositoryInterface
 {

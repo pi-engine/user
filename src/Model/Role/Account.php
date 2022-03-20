@@ -1,8 +1,8 @@
 <?php
 
-namespace User\Model;
+namespace User\Model\Role;
 
-class RoleAccount
+class Account
 {
     private        $id;
     private ?int   $user_id;

@@ -8,8 +8,8 @@ use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Account;
-use User\Model\Credential;
+use User\Model\Account\Account;
+use User\Model\Account\Credential;
 use User\Repository\AccountRepository;
 
 class AccountRepositoryFactory implements FactoryInterface

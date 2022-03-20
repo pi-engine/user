@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Model;
+namespace User\Model\Account;
 
 class Account
 {

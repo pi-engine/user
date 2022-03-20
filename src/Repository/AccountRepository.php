@@ -15,8 +15,8 @@ use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
-use User\Model\Account;
-use User\Model\Credential;
+use User\Model\Account\Account;
+use User\Model\Account\Credential;
 
 class AccountRepository implements AccountRepositoryInterface
 {

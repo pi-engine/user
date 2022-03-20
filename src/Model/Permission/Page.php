@@ -1,8 +1,8 @@
 <?php
 
-namespace User\Model;
+namespace User\Model\Permission;
 
-class PermissionPage
+class Page
 {
     private        $id;
     private string $title;

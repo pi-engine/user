@@ -4,7 +4,7 @@ namespace User\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\HydratorInterface;
-use User\Model\Profile;
+use User\Model\Profile\Profile;
 
 class ProfileRepository implements AccountRoleRepositoryInterface
 {
