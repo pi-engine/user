@@ -9,6 +9,12 @@ use User\Model\Profile;
 class ProfileRepository implements AccountRoleRepositoryInterface
 {
     /**
+     * Profile Table name
+     * @var string
+     */
+    private string $tableProfile = 'profile';
+
+    /**
      * @var AdapterInterface
      */
     private AdapterInterface $db;

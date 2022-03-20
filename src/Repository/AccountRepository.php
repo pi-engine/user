@@ -21,6 +21,12 @@ use User\Model\Credential;
 class AccountRepository implements AccountRepositoryInterface
 {
     /**
+     * Account Table name
+     * @var string
+     */
+    private string $tableAccount = 'account';
+
+    /**
      * @var AdapterInterface
      */
     private AdapterInterface $db;
@@ -57,7 +63,7 @@ class AccountRepository implements AccountRepositoryInterface
         $where = [];
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account')->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
+        $select    = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -78,7 +84,7 @@ class AccountRepository implements AccountRepositoryInterface
         $where   = [];
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account')->columns($columns)->where($where);
+        $select    = $sql->select($this->tableAccount)->columns($columns)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $row       = $statement->execute()->current();
 
@@ -101,7 +107,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account')->where($where);
+        $select    = $sql->select($this->tableAccount)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -133,7 +139,7 @@ class AccountRepository implements AccountRepositoryInterface
     public function getAccountCredential(int $userId): string
     {
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account')->where(['id' => $userId]);
+        $select    = $sql->select($this->tableAccount)->where(['id' => $userId]);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -164,7 +170,7 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function addAccount(array $params = []): Account
     {
-        $insert = new Insert('account');
+        $insert = new Insert($this->tableAccount);
         $insert->values($params);
 
         $sql       = new Sql($this->db);
@@ -184,7 +190,7 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function updateAccount(int $userId, array $params = []): void
     {
-        $update = new Update('account');
+        $update = new Update($this->tableAccount);
         $update->set($params);
         $update->where(['id' => $userId]);
 
@@ -209,7 +215,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select('account')->columns($columns)->where($where);
+        $select    = $sql->select($this->tableAccount)->columns($columns)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $row       = $statement->execute()->current();
 
@@ -221,7 +227,7 @@ class AccountRepository implements AccountRepositoryInterface
         // Call authAdapter
         $authAdapter = new CallbackCheckAdapter(
             $this->db,
-            'account',
+            $this->tableAccount,
             'identity',
             'credential',
             function ($hash, $password) {

@@ -11,6 +11,24 @@ use User\Model\PermissionRole;
 class PermissionRepository implements PermissionRepositoryInterface
 {
     /**
+     * Permission resource Table name
+     * @var string
+     */
+    private string $tablePermissionResource = 'permission_resource';
+
+    /**
+     * Permission rule Table name
+     * @var string
+     */
+    private string $tablePermissionRule = 'permission_rule';
+
+    /**
+     * Permission page Table name
+     * @var string
+     */
+    private string $tablePermissionPage = 'permission_page';
+
+    /**
      * @var AdapterInterface
      */
     private AdapterInterface $db;
