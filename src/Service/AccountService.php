@@ -59,11 +59,15 @@ class AccountService implements ServiceInterface
                     'name',
                     'email',
                     'identity',
+                    'status',
                 ]
             );
 
+            // Canonize account
+            $account = $this->canonizeAccount($account);
+
             // Get roles
-            $account['roles'] = $this->roleService->getUserRole($account['id']);
+            $account['roles'] = $this->roleService->getRoleAccount($account['id']);
 
             // Generate access token
             $accessToken = $this->tokenService->generate(
@@ -254,11 +258,19 @@ class AccountService implements ServiceInterface
 
         if (is_object($account)) {
             $account = [
-                'id'       => $account->getId(),
-                'name'     => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email'    => $account->getEmail(),
-                'status'   => $account->getStatus(),
+                'id'         => $account->getId(),
+                'name'       => $account->getName(),
+                'identity'   => $account->getIdentity(),
+                'email'      => $account->getEmail(),
+                'status'     => $account->getStatus(),
+            ];
+        } else {
+            $account = [
+                'id'         => $account['id'],
+                'name'       => $account['name'],
+                'email'      => $account['email'],
+                'identity'   => $account['identity'],
+                'status'     => $account['status'],
             ];
         }
 

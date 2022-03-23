@@ -40,7 +40,7 @@ class Account
     /**
      * @return string
      */
-    public function getRole(): string
+    public function getRoleResource(): string
     {
         return $this->role;
     }

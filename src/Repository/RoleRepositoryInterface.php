@@ -3,23 +3,23 @@
 namespace User\Repository;
 
 use Laminas\Db\ResultSet\HydratingResultSet;
-use User\Model\Role\Role;
+use User\Model\Role\Resource;
 
 interface RoleRepositoryInterface
 {
-    public function getRoleList($params = []): HydratingResultSet;
+    public function getRoleResourceList($params = []): HydratingResultSet;
 
-    public function getRole(array $params = []): Role;
+    public function getRoleResource(array $params = []): Resource;
 
-    public function addRole(array $params = []): Role;
+    public function addRoleResource(array $params = []): Resource;
 
-    public function updateRole(string $roleName, array $params = []): void;
+    public function updateRoleResource(string $roleName, array $params = []): void;
 
-    public function deleteRole(string $roleName): void;
+    public function deleteRoleResource(string $roleName): void;
 
-    public function getUserRole($userId, $section = ''): HydratingResultSet;
+    public function getRoleAccount($userId, $section = ''): HydratingResultSet;
 
-    public function addUserRole(int $userId, string $roleName, string $section = 'api'): void;
+    public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void;
 
-    public function deleteUserRole(int $userId, string $roleName): void;
+    public function deleteRoleAccount(int $userId, string $roleName): void;
 }

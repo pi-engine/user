@@ -56,18 +56,19 @@ CREATE TABLE IF NOT EXISTS `permission_resource`
     `name`    VARCHAR(64)               NOT NULL DEFAULT '',
     `type`    ENUM ('system', 'custom') NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `resource_name` (`section`, `module`, `name`, `type`)
+    UNIQUE KEY `name` (`name`)
 );
 
-CREATE TABLE IF NOT EXISTS `permission_rule`
+CREATE TABLE IF NOT EXISTS `permission_role`
 (
     `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `resource` VARCHAR(64)           NOT NULL DEFAULT '',
     `section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
     `module`   VARCHAR(64)           NOT NULL DEFAULT '',
     `role`     VARCHAR(64)           NOT NULL,
+    `name`     VARCHAR(64)           NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `section_module_perm` (`section`, `module`, `resource`, `role`)
+    UNIQUE KEY `name` (`name`)
 );
 
 CREATE TABLE IF NOT EXISTS `permission_page`
@@ -79,11 +80,12 @@ CREATE TABLE IF NOT EXISTS `permission_page`
     `package`     VARCHAR(64)             NOT NULL DEFAULT '',
     `handler`     VARCHAR(64)             NOT NULL DEFAULT '',
     `resource`    VARCHAR(64)             NOT NULL DEFAULT '',
+    `name`        VARCHAR(64)             NOT NULL DEFAULT '',
     `cache_type`  ENUM ('page', 'action') NOT NULL,
     `cache_ttl`   INT(10)                 NOT NULL DEFAULT '0', # positive: for cache TTL; negative: for inheritance
     `cache_level` VARCHAR(64)             NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `mca` (`section`, `module`, `package`, `handler`)
+    UNIQUE KEY `name` (`name`)
 );
 
 /* INSERT INTO `role` (`id`, `name`, `title`, `status`, `section`)

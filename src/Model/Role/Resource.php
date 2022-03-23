@@ -2,7 +2,7 @@
 
 namespace User\Model\Role;
 
-class Role
+class Resource
 {
     private        $id;
     private string $name;

@@ -13,7 +13,7 @@ use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
 use User\Model\Role\Account;
-use User\Model\Role\Role;
+use User\Model\Role\Resource;
 
 class RoleRepository implements RoleRepositoryInterface
 {
@@ -22,14 +22,14 @@ class RoleRepository implements RoleRepositoryInterface
      *
      * @var string
      */
-    private string $tableRole = 'role';
+    private string $tableRoleResource = 'role_resource';
 
     /**
      * Role Account Table name
      *
      * @var string
      */
-    private string $tableaccount = 'role_account';
+    private string $tableRoleAccount = 'role_account';
 
     /**
      * @var AdapterInterface
@@ -42,9 +42,9 @@ class RoleRepository implements RoleRepositoryInterface
     private HydratorInterface $hydrator;
 
     /**
-     * @var Role
+     * @var Resource
      */
-    private Role $rolePrototype;
+    private Resource $rolePrototype;
 
     /**
      * @var Account
@@ -54,7 +54,7 @@ class RoleRepository implements RoleRepositoryInterface
     public function __construct(
         AdapterInterface $db,
         HydratorInterface $hydrator,
-        Role $rolePrototype,
+        Resource $rolePrototype,
         Account $accountPrototype
     ) {
         $this->db               = $db;
@@ -63,7 +63,7 @@ class RoleRepository implements RoleRepositoryInterface
         $this->accountPrototype = $accountPrototype;
     }
 
-    public function getRoleList($params = []): HydratingResultSet
+    public function getRoleResourceList($params = []): HydratingResultSet
     {
         $where = [];
         if (isset($params['section']) && !empty($params['section'])) {
@@ -74,7 +74,7 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableRole)->where($where);
+        $select    = $sql->select($this->tableRoleResource)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -88,7 +88,7 @@ class RoleRepository implements RoleRepositoryInterface
         return $resultSet;
     }
 
-    public function getRole(array $params = []): Role
+    public function getRoleResource(array $params = []): Resource
     {
         // Set
         $where = [];
@@ -99,7 +99,7 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableRole)->where($where);
+        $select    = $sql->select($this->tableRoleResource)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -128,9 +128,9 @@ class RoleRepository implements RoleRepositoryInterface
         return $role;
     }
 
-    public function addRole(array $params = []): Role
+    public function addRoleResource(array $params = []): Resource
     {
-        $insert = new Insert($this->tableRole);
+        $insert = new Insert($this->tableRoleResource);
         $insert->values($params);
 
         $sql       = new Sql($this->db);
@@ -145,12 +145,12 @@ class RoleRepository implements RoleRepositoryInterface
 
         $id = $result->getGeneratedValue();
 
-        return $this->getRole(['id' => $id]);
+        return $this->getRoleResource(['id' => $id]);
     }
 
-    public function updateRole(string $roleName, array $params = []): void
+    public function updateRoleResource(string $roleName, array $params = []): void
     {
-        $update = new Update($this->tableRole);
+        $update = new Update($this->tableRoleResource);
         $update->set($params);
         $update->where(['name' => $roleName]);
 
@@ -165,10 +165,10 @@ class RoleRepository implements RoleRepositoryInterface
         }
     }
 
-    public function deleteRole(string $roleName): void
+    public function deleteRoleResource(string $roleName): void
     {
         // Delete from role table
-        $delete = new Delete($this->tableRole);
+        $delete = new Delete($this->tableRoleResource);
         $delete->where(['role' => $roleName]);
 
         $sql       = new Sql($this->db);
@@ -182,7 +182,7 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         // Delete from role_account table
-        $delete = new Delete($this->tableaccount);
+        $delete = new Delete($this->tableRoleAccount);
         $delete->where(['role' => $roleName]);
 
         $sql       = new Sql($this->db);
@@ -196,7 +196,7 @@ class RoleRepository implements RoleRepositoryInterface
         }
     }
 
-    public function getUserRole($userId, $section = ''): HydratingResultSet
+    public function getRoleAccount($userId, $section = ''): HydratingResultSet
     {
         // Set
         $where = ['user_id' => $userId];
@@ -205,7 +205,7 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableaccount)->where($where);
+        $select    = $sql->select($this->tableRoleAccount)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -224,7 +224,7 @@ class RoleRepository implements RoleRepositoryInterface
         return $resultSet;
     }
 
-    public function addUserRole(int $userId, string $roleName, string $section = 'api'): void
+    public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void
     {
         $value = [
             'user_id' => $userId,
@@ -232,7 +232,7 @@ class RoleRepository implements RoleRepositoryInterface
             'section' => $section,
         ];
 
-        $insert = new Insert($this->tableaccount);
+        $insert = new Insert($this->tableRoleAccount);
         $insert->values($value);
 
         $sql       = new Sql($this->db);
@@ -246,9 +246,9 @@ class RoleRepository implements RoleRepositoryInterface
         }
     }
 
-    public function deleteUserRole(int $userId, string $roleName): void
+    public function deleteRoleAccount(int $userId, string $roleName): void
     {
-        $delete = new Delete($this->tableaccount);
+        $delete = new Delete($this->tableRoleAccount);
         $delete->where(['user_id' => $userId, 'role' => $roleName]);
 
         $sql       = new Sql($this->db);
