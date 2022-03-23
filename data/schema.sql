@@ -54,9 +54,10 @@ CREATE TABLE IF NOT EXISTS `permission_resource`
     `section` ENUM ('api', 'admin')     NOT NULL DEFAULT 'api',
     `module`  VARCHAR(64)               NOT NULL DEFAULT '',
     `name`    VARCHAR(64)               NOT NULL DEFAULT '',
-    `type`    ENUM ('system', 'custom') NOT NULL,
+    `type`    ENUM ('system', 'custom') NOT NULL DEFAULT 'system',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name` (`name`),
+    UNIQUE KEY `key` (`section`, `module`, `name`, `type`)
 );
 
 CREATE TABLE IF NOT EXISTS `permission_role`
@@ -68,7 +69,8 @@ CREATE TABLE IF NOT EXISTS `permission_role`
     `role`     VARCHAR(64)           NOT NULL,
     `name`     VARCHAR(64)           NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name` (`name`),
+    UNIQUE KEY `key` (`resource`, `section`, `module`, `role`, `name`)
 );
 
 CREATE TABLE IF NOT EXISTS `permission_page`
@@ -81,11 +83,12 @@ CREATE TABLE IF NOT EXISTS `permission_page`
     `handler`     VARCHAR(64)             NOT NULL DEFAULT '',
     `resource`    VARCHAR(64)             NOT NULL DEFAULT '',
     `name`        VARCHAR(64)             NOT NULL DEFAULT '',
-    `cache_type`  ENUM ('page', 'action') NOT NULL,
+    `cache_type`  ENUM ('page', 'action') NOT NULL DEFAULT 'page',
     `cache_ttl`   INT(10)                 NOT NULL DEFAULT '0', # positive: for cache TTL; negative: for inheritance
     `cache_level` VARCHAR(64)             NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name` (`name`),
+    UNIQUE KEY `key` (`section`, `module`, `package`, `handler`, `resource`, `name`)
 );
 
 /* INSERT INTO `role` (`id`, `name`, `title`, `status`, `section`)

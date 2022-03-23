@@ -4,17 +4,17 @@ namespace User\Model\Permission;
 
 class Page
 {
-    private        $id;
-    private string $title;
-    private string $section;
-    private string $module;
-    private string $package;
-    private string $handler;
-    private string $resource;
-    private string $name;
-    private string $cache_type;
-    private int    $cache_ttl;
-    private string $cache_level;
+    private         $id;
+    private string  $title;
+    private string  $section;
+    private string  $module;
+    private string  $package;
+    private string  $handler;
+    private string  $resource;
+    private string  $name;
+    private ?string $cache_type;
+    private ?int    $cache_ttl;
+    private ?string $cache_level;
 
     public function __construct(
         $title,
@@ -118,7 +118,7 @@ class Page
     /**
      * @return int
      */
-    public function getCacheTtl(): int
+    public function getCacheTtl(): ?int
     {
         return $this->cache_ttl;
     }

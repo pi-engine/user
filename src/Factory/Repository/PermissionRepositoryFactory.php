@@ -31,7 +31,7 @@ class PermissionRepositoryFactory implements FactoryInterface
             new ReflectionHydrator(),
             new Resource('', '', '', '', ''),
             new Role('', '', '', '', ''),
-            new Page('', '', '', '', '', '', '', '', '', '')
+            new Page('', '', '', '', '', '', '', '', 0, '')
         );
     }
 }

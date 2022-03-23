@@ -23,7 +23,7 @@ class Role
         $this->section  = $section;
         $this->module   = $module;
         $this->role     = $role;
-        $this->name        = $name;
+        $this->name     = $name;
         $this->id       = $id;
     }
 
@@ -62,7 +62,7 @@ class Role
     /**
      * @return string
      */
-    public function getRoleResource(): string
+    public function getRole(): string
     {
         return $this->role;
     }

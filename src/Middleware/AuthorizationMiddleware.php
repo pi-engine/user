@@ -3,6 +3,7 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Laminas\Permissions\Rbac\Rbac;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -10,6 +11,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
+use User\Service\CacheService;
+use User\Service\PermissionService;
 use User\Service\RoleService;
 
 class AuthorizationMiddleware implements MiddlewareInterface
@@ -23,6 +26,9 @@ class AuthorizationMiddleware implements MiddlewareInterface
     /** @var RoleService */
     protected RoleService $roleService;
 
+    /** @var PermissionService */
+    protected PermissionService $permissionService;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -30,12 +36,14 @@ class AuthorizationMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         RoleService $roleService,
+        PermissionService $permissionService,
         ErrorHandler $errorHandler
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->roleService     = $roleService;
-        $this->errorHandler    = $errorHandler;
+        $this->responseFactory   = $responseFactory;
+        $this->streamFactory     = $streamFactory;
+        $this->roleService       = $roleService;
+        $this->permissionService = $permissionService;
+        $this->errorHandler      = $errorHandler;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -54,6 +62,32 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
         // Check section
         if (empty($userRoles)) {
+            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request = $request->withAttribute('error',
+                [
+                    'message' => 'You dont have access to this area !',
+                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                ]
+            );
+            return $this->errorHandler->handle($request);
+        }
+
+        // Get route params
+        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
+        $routeParams = $routeMatch->getParams();
+
+        // Set page name
+        $pageName = sprintf(
+            '%s-%s-%s-%s',
+            $routeParams['section'],
+            $routeParams['module'],
+            $routeParams['package'],
+            $routeParams['handler']
+        );
+
+        // Get and check access
+        $access = $this->permissionService->checkPermission($pageName, $userRoles);
+        if (!$access) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
                 [

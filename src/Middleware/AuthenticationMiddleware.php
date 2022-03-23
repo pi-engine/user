@@ -57,6 +57,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // get route match
         $routeMatch = $request->getAttribute('Laminas\Router\RouteMatch');
+        $routeParams = $routeMatch->getParams();
 
         // Check token set
         if (empty($token)) {
@@ -87,7 +88,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
 
         // Check token type
-        $type = ($routeMatch->getMatchedRouteName() == 'api/refresh') ? 'refresh' : 'access';
+        $type = ($routeParams['module'] == 'user' && $routeParams['handler'] == 'refresh') ? 'refresh' : 'access';
         if ($tokenParsed['type'] != $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
