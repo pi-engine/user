@@ -11,6 +11,7 @@ class Page
     private string $package;
     private string $handler;
     private string $resource;
+    private string $name;
     private string $cache_type;
     private int    $cache_ttl;
     private string $cache_level;
@@ -22,6 +23,7 @@ class Page
         $package,
         $handler,
         $resource,
+        $name,
         $cache_type,
         $cache_ttl,
         $cache_level,
@@ -33,6 +35,7 @@ class Page
         $this->package     = $package;
         $this->handler     = $handler;
         $this->resource    = $resource;
+        $this->name        = $name;
         $this->cache_type  = $cache_type;
         $this->cache_ttl   = $cache_ttl;
         $this->cache_level = $cache_level;
@@ -94,6 +97,14 @@ class Page
     public function getResource(): string
     {
         return $this->resource;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**

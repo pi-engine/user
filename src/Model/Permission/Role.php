@@ -9,18 +9,21 @@ class Role
     private string $section;
     private string $module;
     private string $role;
+    private string $name;
 
     public function __construct(
         $resource,
         $section,
         $module,
         $role,
+        $name,
         $id = null
     ) {
         $this->resource = $resource;
         $this->section  = $section;
         $this->module   = $module;
         $this->role     = $role;
+        $this->name        = $name;
         $this->id       = $id;
     }
 
@@ -59,8 +62,16 @@ class Role
     /**
      * @return string
      */
-    public function getRole(): string
+    public function getRoleResource(): string
     {
         return $this->role;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 }
