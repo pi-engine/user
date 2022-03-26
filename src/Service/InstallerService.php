@@ -4,9 +4,6 @@ namespace User\Service;
 
 class InstallerService implements ServiceInterface
 {
-    /** @var PermissionService */
-    protected PermissionService $permissionService;
-
     public function __construct() {}
 
     public function installPermission($permissionConfig)
