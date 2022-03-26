@@ -3,7 +3,6 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Permissions\Rbac\Rbac;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,7 +10,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
-use User\Service\CacheService;
 use User\Service\PermissionService;
 use User\Service\RoleService;
 
@@ -86,7 +84,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         );
 
         // Get and check access
-        $access = $this->permissionService->checkPermission($pageName, $userRoles);
+        $access = $this->permissionService->checkPermissionBefor($pageName, $userRoles);
         if (!$access) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',

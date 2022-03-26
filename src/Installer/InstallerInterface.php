@@ -4,7 +4,9 @@ namespace User\Installer;
 
 interface InstallerInterface
 {
-    public function database($version = ''): string;
+    public function database($sqlFile): void;
 
-    public function config($file = ''): string;
+    public function config($configFile): void;
+
+    public function permission($permissionFile): void;
 }

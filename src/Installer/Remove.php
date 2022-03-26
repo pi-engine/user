@@ -2,28 +2,24 @@
 
 namespace User\Installer;
 
-use Laminas\Db\Adapter\AdapterInterface;
+use User\Service\InstallerService;
 
 class Remove implements InstallerInterface
 {
-    /**
-     * @var AdapterInterface
-     */
-    private AdapterInterface $db;
+    /* @var InstallerService */
+    protected InstallerService $installerService;
 
-    public function __construct(
-        AdapterInterface $db
-    ) {
-        $this->db = $db;
-    }
-
-    public function database($version = ''): string
+    public function __construct(InstallerService $installerService)
     {
-        return true;
+        $this->installerService = $installerService;
     }
 
-    public function config($file = ''): string
-    {
-        return true;
-    }
+    public function database($sqlFile): void
+    {}
+
+    public function config($configFile): void
+    {}
+
+    public function permission($permissionFile): void
+    {}
 }

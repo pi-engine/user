@@ -10,7 +10,6 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
 use User\Middleware\AuthorizationMiddleware;
-use User\Service\CacheService;
 use User\Service\PermissionService;
 use User\Service\RoleService;
 

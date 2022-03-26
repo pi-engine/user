@@ -27,7 +27,7 @@ class PermissionService implements ServiceInterface
         $this->cacheService         = $cacheService;
     }
 
-    public function checkPermission($pageName, $userRoles): bool
+    public function checkPermissionBefore($pageName, $userRoles): bool
     {
         $permission = $this->getPermission($pageName);
 
@@ -42,6 +42,9 @@ class PermissionService implements ServiceInterface
 
         return false;
     }
+
+    public function checkPermissionAfter()
+    {}
 
     public function getPermission($pageName): array
     {

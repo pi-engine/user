@@ -27,6 +27,7 @@ return [
             Service\ProfileService::class                 => Factory\Service\ProfileServiceFactory::class,
             Service\RoleService::class                    => Factory\Service\RoleServiceFactory::class,
             Service\PermissionService::class              => Factory\Service\PermissionServiceFactory::class,
+            Service\InstallerService::class               => Factory\Service\InstallerServiceFactory::class,
             Middleware\AuthenticationMiddleware::class    => Factory\Middleware\AuthenticationMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class     => Factory\Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\SecurityMiddleware::class          => Factory\Middleware\SecurityMiddlewareFactory::class,
@@ -76,7 +77,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'login',
-                                'permissions' => 'user_login',
+                                'permissions' => 'user-login',
                                 'validation'  => 'login',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
@@ -96,7 +97,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'logout',
-                                'permissions' => 'user_logout',
+                                'permissions' => 'user-logout',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
@@ -116,7 +117,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'register',
-                                'permissions' => 'user_register',
+                                'permissions' => 'user-register',
                                 'validation'  => 'add',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
@@ -136,7 +137,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'profile',
-                                'permissions' => 'user_profile',
+                                'permissions' => 'user-profile',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
@@ -156,7 +157,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'update',
-                                'permissions' => 'user_update',
+                                'permissions' => 'user-update',
                                 'validation'  => 'edit',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
@@ -178,7 +179,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'password',
-                                'permissions' => 'user_password',
+                                'permissions' => 'user-password',
                                 'validation'  => 'password',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
@@ -200,7 +201,7 @@ return [
                                 'section'     => 'api',
                                 'package'     => 'profile',
                                 'handler'     => 'refresh',
-                                'permissions' => 'user_refresh',
+                                'permissions' => 'user-refresh',
                                 'controller'  => PipeSpec::class,
                                 'middleware'  => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
@@ -237,7 +238,7 @@ return [
                                     'section'     => 'admin',
                                     'package'     => 'profile',
                                     'handler'     => 'list',
-                                    'permissions' => 'user_profile_list',
+                                    'permissions' => 'user-profile-list',
                                     'defaults'    => [
                                         'controller' => PipeSpec::class,
                                         'middleware' => new PipeSpec(
@@ -258,7 +259,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'profile',
                                         'handler'     => 'add',
-                                        'permissions' => 'user_profile_add',
+                                        'permissions' => 'user-profile-add',
                                         'validation'  => 'add',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
@@ -280,7 +281,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'profile',
                                         'handler'     => 'edit',
-                                        'permissions' => 'user_profile_edit',
+                                        'permissions' => 'user-profile-edit',
                                         'validation'  => 'edit',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
@@ -302,7 +303,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'profile',
                                         'handler'     => 'password',
-                                        'permissions' => 'user_profile_password',
+                                        'permissions' => 'user-profile-password',
                                         'validation'  => 'password',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
@@ -324,7 +325,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'profile',
                                         'handler'     => 'view',
-                                        'permissions' => 'user_profile_view',
+                                        'permissions' => 'user-profile-view',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
@@ -354,7 +355,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'role',
                                         'handler'     => 'list',
-                                        'permissions' => 'user_role_list',
+                                        'permissions' => 'user-role-list',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
@@ -374,7 +375,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'role',
                                         'handler'     => 'add',
-                                        'permissions' => 'user_role_add',
+                                        'permissions' => 'user-role-add',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
@@ -394,7 +395,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'role',
                                         'handler'     => 'edit',
-                                        'permissions' => 'user_role_edit',
+                                        'permissions' => 'user-role-edit',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
@@ -424,7 +425,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'permission',
                                         'handler'     => 'list',
-                                        'permissions' => 'user_permission_list',
+                                        'permissions' => 'user-permission-list',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
@@ -444,7 +445,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'permission',
                                         'handler'     => 'view',
-                                        'permissions' => 'user_permission_view',
+                                        'permissions' => 'user-permission-view',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
@@ -464,7 +465,7 @@ return [
                                         'section'     => 'admin',
                                         'package'     => 'permission',
                                         'handler'     => 'access',
-                                        'permissions' => 'user_permission_access',
+                                        'permissions' => 'user-permission-access',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,

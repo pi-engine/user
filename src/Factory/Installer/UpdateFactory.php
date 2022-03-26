@@ -3,12 +3,9 @@
 namespace User\Factory\Installer;
 
 use Interop\Container\ContainerInterface;
-use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use User\Installer\Install;
 use User\Installer\Update;
+use User\Service\InstallerService;
 
 class UpdateFactory implements FactoryInterface
 {
@@ -17,14 +14,12 @@ class UpdateFactory implements FactoryInterface
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return Install
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @return Update
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): Update
     {
         return new Update(
-            $container->get(AdapterInterface::class)
+            $container->get(InstallerService::class)
         );
     }
 }

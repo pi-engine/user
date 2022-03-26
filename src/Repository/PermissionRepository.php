@@ -3,14 +3,14 @@
 namespace User\Repository;
 
 use InvalidArgumentException;
-use Laminas\Db\Sql\Insert;
-use Laminas\Db\Sql\Update;
-use RuntimeException;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
+use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Sql;
+use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
+use RuntimeException;
 use User\Model\Permission\Page;
 use User\Model\Permission\Resource;
 use User\Model\Permission\Role;
