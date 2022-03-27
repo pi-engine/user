@@ -46,8 +46,31 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Get system role list
-        $roleList = $this->roleService->getApiRoleList();
+        // Get route params
+        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
+        $routeParams = $routeMatch->getParams();
+
+        // Check and get system role list
+        switch ($routeParams['section']) {
+            case 'api':
+                $roleList = $this->roleService->getApiRoleList();
+                break;
+
+            case 'admin':
+                $roleList = $this->roleService->getAdminRoleList();
+                break;
+
+            default:
+                $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+                $request = $request->withAttribute('error',
+                    [
+                        'message' => 'Section not set !',
+                        'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                    ]
+                );
+                return $this->errorHandler->handle($request);
+                break;
+        }
 
         // Clean Up requested user roles
         $userRoles = $request->getAttribute('roles');
@@ -70,9 +93,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
-        // Get route params
-        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
-        $routeParams = $routeMatch->getParams();
+
 
         // Set page name
         $pageName = sprintf(
