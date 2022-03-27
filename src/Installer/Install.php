@@ -22,10 +22,7 @@ class Install implements InstallerInterface
             exit();
         }
 
-        /* $sql       = file_get_contents($sqlFile);
-        $statement = $this->db->createStatement($sql);
-        $statement->execute(); */
-        echo 'User module database install successfully !';
+        echo 'Module database install successfully !';
     }
 
     public function config($configFile): void
@@ -36,7 +33,7 @@ class Install implements InstallerInterface
             exit();
         }
 
-        echo '234';
+        echo 'Module config install successfully !';
     }
 
     public function permission($permissionFile): void
@@ -51,6 +48,6 @@ class Install implements InstallerInterface
 
         $this->installerService->installPermission($permissionConfig);
 
-        echo 'User module permission install successfully !';
+        echo 'Module permission install successfully !';
     }
 }

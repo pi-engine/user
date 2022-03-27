@@ -423,7 +423,7 @@ class PermissionRepository implements PermissionRepositoryInterface
             throw new InvalidArgumentException(
                 sprintf(
                     'Role with identifier "%s" not found.',
-                    $params
+                    $params['name']
                 )
             );
         }

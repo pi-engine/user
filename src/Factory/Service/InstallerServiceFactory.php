@@ -5,6 +5,7 @@ namespace User\Factory\Service;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use User\Service\InstallerService;
+use User\Service\PermissionService;
 
 class InstallerServiceFactory implements FactoryInterface
 {
@@ -17,6 +18,8 @@ class InstallerServiceFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): InstallerService
     {
-        return new InstallerService();
+        return new InstallerService(
+            $container->get(PermissionService::class)
+        );
     }
 }

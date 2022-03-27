@@ -55,6 +55,7 @@ return [
             Handler\Api\PasswordHandler::class            => Factory\Handler\Api\PasswordHandlerFactory::class,
             Handler\Api\UpdateHandler::class              => Factory\Handler\Api\UpdateHandlerFactory::class,
             Handler\ErrorHandler::class                   => Factory\Handler\ErrorHandlerFactory::class,
+            Handler\InstallerHandler::class               => Factory\Handler\InstallerHandlerFactory::class,
         ],
     ],
 
@@ -475,6 +476,25 @@ return [
                                         ),
                                     ],
                                 ],
+                            ],
+                        ],
+                    ],
+                    // Admin installer
+                    'installer'  => [
+                        'type'    => Literal::class,
+                        'options' => [
+                            'route'    => '/installer',
+                            'defaults' => [
+                                'module'     => 'user',
+                                'section'    => 'admin',
+                                'package'    => 'installer',
+                                'handler'    => 'installer',
+                                'controller' => PipeSpec::class,
+                                'middleware' => new PipeSpec(
+                                    Middleware\SecurityMiddleware::class,
+                                    Middleware\AuthenticationMiddleware::class,
+                                    Handler\InstallerHandler::class
+                                ),
                             ],
                         ],
                     ],

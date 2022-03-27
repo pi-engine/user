@@ -8,6 +8,9 @@ return [
             'package'     => 'profile',
             'handler'     => 'list',
             'permissions' => 'user-profile-list',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -16,6 +19,9 @@ return [
             'handler'     => 'add',
             'permissions' => 'user-profile-add',
             'validation'  => 'add',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -24,6 +30,9 @@ return [
             'handler'     => 'edit',
             'permissions' => 'user-profile-edit',
             'validation'  => 'edit',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -32,6 +41,9 @@ return [
             'handler'     => 'password',
             'permissions' => 'user-profile-password',
             'validation'  => 'password',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -39,6 +51,9 @@ return [
             'package'     => 'profile',
             'handler'     => 'view',
             'permissions' => 'user-profile-view',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -46,6 +61,9 @@ return [
             'package'     => 'role',
             'handler'     => 'list',
             'permissions' => 'user-role-list',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -53,6 +71,9 @@ return [
             'package'     => 'role',
             'handler'     => 'add',
             'permissions' => 'user-role-add',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -60,6 +81,9 @@ return [
             'package'     => 'role',
             'handler'     => 'edit',
             'permissions' => 'user-role-edit',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -67,6 +91,9 @@ return [
             'package'     => 'permission',
             'handler'     => 'list',
             'permissions' => 'user-permission-list',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -74,6 +101,9 @@ return [
             'package'     => 'permission',
             'handler'     => 'view',
             'permissions' => 'user-permission-view',
+            'role'        => [
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -81,6 +111,9 @@ return [
             'package'     => 'permission',
             'handler'     => 'access',
             'permissions' => 'user-permission-access',
+            'role'        => [
+                'admin',
+            ],
         ],
     ],
     'api'   => [
@@ -90,6 +123,10 @@ return [
             'package'     => 'profile',
             'handler'     => 'logout',
             'permissions' => 'user-logout',
+            'role'        => [
+                'member',
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -97,6 +134,10 @@ return [
             'package'     => 'profile',
             'handler'     => 'profile',
             'permissions' => 'user-profile',
+            'role'        => [
+                'member',
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -104,6 +145,10 @@ return [
             'package'     => 'profile',
             'handler'     => 'update',
             'permissions' => 'user-update',
+            'role'        => [
+                'member',
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -111,6 +156,10 @@ return [
             'package'     => 'profile',
             'handler'     => 'password',
             'permissions' => 'user-password',
+            'role'        => [
+                'member',
+                'admin',
+            ],
         ],
         [
             'module'      => 'user',
@@ -118,6 +167,10 @@ return [
             'package'     => 'profile',
             'handler'     => 'refresh',
             'permissions' => 'user-refresh',
+            'role'        => [
+                'member',
+                'admin',
+            ],
         ],
     ],
 ];

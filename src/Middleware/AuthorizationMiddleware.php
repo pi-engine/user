@@ -84,7 +84,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         );
 
         // Get and check access
-        $access = $this->permissionService->checkPermissionBefor($pageName, $userRoles);
+        $access = $this->permissionService->checkPermissionBefore($pageName, $userRoles);
         if (!$access) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
