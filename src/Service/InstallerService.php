@@ -23,14 +23,11 @@ class InstallerService implements ServiceInterface
         // inset
         foreach ($permissionConfig as $permissionList) {
             foreach ($permissionList as $permissionSingle) {
-                echo '<pre>';
-                print_r($permissionSingle);
-                echo '</pre>';
-
                 if (
                     !isset($installerList['page_list'][$permissionSingle['page']])
                     && !isset($installerList['resource_list'][$permissionSingle['permissions']])
                 ) {
+                    // Set resource params
                     $resourceParams = array_merge(
                         $permissionSingle,
                         [
@@ -38,9 +35,10 @@ class InstallerService implements ServiceInterface
                         ]
                     );
 
+                    // Add resource
                     $resource = $this->permissionService->addPermissionResource($resourceParams);
 
-
+                    // Set page params
                     $pageParams = array_merge(
                         $permissionSingle,
                         [
@@ -49,9 +47,12 @@ class InstallerService implements ServiceInterface
                         ]
                     );
 
+                    // Add page
                     $this->permissionService->addPermissionPage($pageParams);
 
+                    // Check roles
                     foreach ($permissionSingle['role'] as $role) {
+                        // Set role params
                         $roleParams = array_merge(
                             $permissionSingle,
                             [
@@ -61,16 +62,12 @@ class InstallerService implements ServiceInterface
                             ]
                         );
 
+                        // Add role
                         $this->permissionService->addPermissionRole($roleParams);
                     }
                 }
             }
         }
-
-
-        echo '<pre>';
-        print_r($installerList);
-        echo '</pre>';
     }
 
     public function canonizePermission(array $permissionConfig): array
