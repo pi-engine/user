@@ -43,33 +43,6 @@ class PermissionService implements ServiceInterface
         return false;
     }
 
-    public function checkPermissionAfter(array $current = [], array $validate = [], array $items = []): bool
-    {
-        foreach ($items as $item) {
-            // Check item exist or not
-            if (!isset($current[$item]) || empty($current[$item]) || !isset($validate[$item]) || empty($validate[$item])) {
-                return false;
-            }
-
-            // Check
-            if (is_array($validate[$item])) {
-                if (!in_array($current[$item], $validate[$item])) {
-                    return false;
-                }
-            } elseif (is_int($validate[$item])) {
-                if ($current[$item] !== $validate[$item]) {
-                    return false;
-                }
-            } else {
-                if ($current[$item] != $validate[$item]) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     public function getPermission($pageName): array
     {
         $page = $this->permissionRepository->getPermissionPage(['name' => $pageName]);
@@ -88,81 +61,6 @@ class PermissionService implements ServiceInterface
             'resource'    => $resource,
             'systemRoles' => $systemRoles,
         ];
-    }
-
-    public function getInstallerList($params)
-    {
-        $result = [
-            'page_list'     => [],
-            'resource_list' => [],
-            'role_list'     => [],
-        ];
-
-        // Get list
-        $rowSet = $this->permissionRepository->getPermissionPageList(['module' => $params['module']]);
-        foreach ($rowSet as $row) {
-            $result['page_list'][$row->getName()] = $this->canonizePage($row);
-        }
-
-        // Get list
-        $rowSet = $this->permissionRepository->getPermissionResourceList(['module' => $params['module']]);
-        foreach ($rowSet as $row) {
-            $result['resource_list'][$row->getName()] = $this->canonizeResource($row);
-        }
-
-        $rowSet = $this->permissionRepository->getPermissionRoleList(['module' => $params['module']]);
-        foreach ($rowSet as $row) {
-            $result['role_list'][$row->getName()] = $this->canonizeRole($row);
-        }
-
-        return $result;
-    }
-
-    public function addPermissionResource($params)
-    {
-        $values = [
-            'title'    => $params['title'] ?? $params['name'],
-            'section' => $params['section'],
-            'module'  => $params['module'],
-            'name'    => $params['name'],
-            'type'    => $params['type'] ?? 'system',
-        ];
-
-        $resource = $this->permissionRepository->addPermissionResource($values);
-
-        return $this->canonizeResource($resource);
-    }
-
-    public function addPermissionPage($params)
-    {
-        $values = [
-            'title'    => $params['title'] ?? $params['name'],
-            'section'  => $params['section'],
-            'module'   => $params['module'],
-            'package'  => $params['package'],
-            'handler'  => $params['handler'],
-            'resource' => $params['resource'],
-            'name'     => $params['name'],
-        ];
-
-        $page = $this->permissionRepository->addPermissionPage($values);
-
-        return $this->canonizePage($page);
-    }
-
-    public function addPermissionRole($params)
-    {
-        $values = [
-            'resource' => $params['resource'],
-            'section'  => $params['section'],
-            'module'   => $params['module'],
-            'role'     => $params['role'],
-            'name'     => $params['name'],
-        ];
-
-        $role = $this->permissionRepository->addPermissionRole($values);
-
-        return $this->canonizeRole($role);
     }
 
     public function canonizePage($page)
@@ -228,5 +126,107 @@ class PermissionService implements ServiceInterface
         }
 
         return $role;
+    }
+
+    public function checkPermissionAfter(array $current = [], array $validate = [], array $items = []): bool
+    {
+        foreach ($items as $item) {
+            // Check item exist or not
+            if (!isset($current[$item]) || empty($current[$item]) || !isset($validate[$item]) || empty($validate[$item])) {
+                return false;
+            }
+
+            // Check
+            if (is_array($validate[$item])) {
+                if (!in_array($current[$item], $validate[$item])) {
+                    return false;
+                }
+            } elseif (is_int($validate[$item])) {
+                if ($current[$item] !== $validate[$item]) {
+                    return false;
+                }
+            } else {
+                if ($current[$item] != $validate[$item]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function getInstallerList($params)
+    {
+        $result = [
+            'page_list'     => [],
+            'resource_list' => [],
+            'role_list'     => [],
+        ];
+
+        // Get list
+        $rowSet = $this->permissionRepository->getPermissionPageList(['module' => $params['module']]);
+        foreach ($rowSet as $row) {
+            $result['page_list'][$row->getName()] = $this->canonizePage($row);
+        }
+
+        // Get list
+        $rowSet = $this->permissionRepository->getPermissionResourceList(['module' => $params['module']]);
+        foreach ($rowSet as $row) {
+            $result['resource_list'][$row->getName()] = $this->canonizeResource($row);
+        }
+
+        $rowSet = $this->permissionRepository->getPermissionRoleList(['module' => $params['module']]);
+        foreach ($rowSet as $row) {
+            $result['role_list'][$row->getName()] = $this->canonizeRole($row);
+        }
+
+        return $result;
+    }
+
+    public function addPermissionResource($params)
+    {
+        $values = [
+            'title'   => $params['title'] ?? $params['name'],
+            'section' => $params['section'],
+            'module'  => $params['module'],
+            'name'    => $params['name'],
+            'type'    => $params['type'] ?? 'system',
+        ];
+
+        $resource = $this->permissionRepository->addPermissionResource($values);
+
+        return $this->canonizeResource($resource);
+    }
+
+    public function addPermissionPage($params)
+    {
+        $values = [
+            'title'    => $params['title'] ?? $params['name'],
+            'section'  => $params['section'],
+            'module'   => $params['module'],
+            'package'  => $params['package'],
+            'handler'  => $params['handler'],
+            'resource' => $params['resource'],
+            'name'     => $params['name'],
+        ];
+
+        $page = $this->permissionRepository->addPermissionPage($values);
+
+        return $this->canonizePage($page);
+    }
+
+    public function addPermissionRole($params)
+    {
+        $values = [
+            'resource' => $params['resource'],
+            'section'  => $params['section'],
+            'module'   => $params['module'],
+            'role'     => $params['role'],
+            'name'     => $params['name'],
+        ];
+
+        $role = $this->permissionRepository->addPermissionRole($values);
+
+        return $this->canonizeRole($role);
     }
 }

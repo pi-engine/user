@@ -88,6 +88,26 @@ class RoleRepository implements RoleRepositoryInterface
         return $resultSet;
     }
 
+    public function addRoleResource(array $params = []): Resource
+    {
+        $insert = new Insert($this->tableRoleResource);
+        $insert->values($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post insert operation'
+            );
+        }
+
+        $id = $result->getGeneratedValue();
+
+        return $this->getRoleResource(['id' => $id]);
+    }
+
     public function getRoleResource(array $params = []): Resource
     {
         // Set
@@ -126,26 +146,6 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         return $role;
-    }
-
-    public function addRoleResource(array $params = []): Resource
-    {
-        $insert = new Insert($this->tableRoleResource);
-        $insert->values($params);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getRoleResource(['id' => $id]);
     }
 
     public function updateRoleResource(string $roleName, array $params = []): void

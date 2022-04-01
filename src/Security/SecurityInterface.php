@@ -11,15 +11,15 @@ interface SecurityInterface
      *
      * @return bool
      */
-    public function check(ServerRequestInterface $request) : bool;
+    public function check(ServerRequestInterface $request): bool;
 
     /**
      * @return string
      */
-    public function getErrorMessage() : string;
+    public function getErrorMessage(): string;
 
     /**
      * @return int
      */
-    public function getStatusCode() : int;
+    public function getStatusCode(): int;
 }

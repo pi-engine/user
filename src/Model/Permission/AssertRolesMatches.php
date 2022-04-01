@@ -19,7 +19,7 @@ class AssertRolesMatches implements AssertionInterface
         $this->resource    = $resource;
     }
 
-    public function assert(Rbac $rbac, RoleInterface $role = null, string $permission = null) : bool
+    public function assert(Rbac $rbac, RoleInterface $role = null, string $permission = null): bool
     {
         if (empty($this->userRoles) || empty($this->systemRoles) || empty($this->resource)) {
             return false;

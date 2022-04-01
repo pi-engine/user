@@ -38,27 +38,6 @@ class RoleService implements ServiceInterface
         $this->cacheService   = $cacheService;
     }
 
-    public function getRoleListLight(): array
-    {
-        $roles = $this->cacheService->getItem('roles-light');
-        if (empty($roles)) {
-            $listParams = [
-                'status' => 1,
-            ];
-
-            // Get list
-            $list   = [];
-            $rowSet = $this->roleRepository->getRoleResourceList($listParams);
-            foreach ($rowSet as $row) {
-                $list[] = $row->getName();
-            }
-
-            $roles = $this->cacheService->setItem('roles-light', $list);
-        }
-
-        return $roles;
-    }
-
     public function getApiRoleList(): array
     {
         $roles = $this->cacheService->getItem('roles-api');
@@ -168,6 +147,27 @@ class RoleService implements ServiceInterface
         if (in_array($roleName, $roleList) && in_array($section, $this->sectionList)) {
             $this->roleRepository->addRoleAccount($userId, $roleName, $section);
         }
+    }
+
+    public function getRoleListLight(): array
+    {
+        $roles = $this->cacheService->getItem('roles-light');
+        if (empty($roles)) {
+            $listParams = [
+                'status' => 1,
+            ];
+
+            // Get list
+            $list   = [];
+            $rowSet = $this->roleRepository->getRoleResourceList($listParams);
+            foreach ($rowSet as $row) {
+                $list[] = $row->getName();
+            }
+
+            $roles = $this->cacheService->setItem('roles-light', $list);
+        }
+
+        return $roles;
     }
 
     public function deleteRoleAccount(int $userId, string $roleName): void

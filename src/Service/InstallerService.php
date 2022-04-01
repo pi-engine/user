@@ -58,7 +58,7 @@ class InstallerService implements ServiceInterface
                             [
                                 'name'     => sprintf('%s-%s', $role, $permissionSingle['permissions']),
                                 'resource' => $resource['name'],
-                                'role' => $role
+                                'role'     => $role,
                             ]
                         );
 

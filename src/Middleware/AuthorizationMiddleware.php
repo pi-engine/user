@@ -94,7 +94,6 @@ class AuthorizationMiddleware implements MiddlewareInterface
         }
 
 
-
         // Set page name
         $pageName = sprintf(
             '%s-%s-%s-%s',

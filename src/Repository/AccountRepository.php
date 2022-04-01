@@ -92,51 +92,6 @@ class AccountRepository implements AccountRepositoryInterface
         return (int)$row['count'];
     }
 
-    public function getAccount(array $params = []): Account
-    {
-        // Set
-        $where = [];
-        if (isset($params['id']) && (int)$params['id'] > 0) {
-            $where['id'] = (int)$params['id'];
-        } elseif (isset($params['identity']) && !empty($params['identity'])) {
-            $where['identity'] = $params['identity'];
-        } elseif (isset($params['email']) && !empty($params['email'])) {
-            $where['email'] = $params['email'];
-        }
-        if (isset($params['status']) && (int)$params['status'] > 0) {
-            $where['status'] = (int)$params['status'];
-        }
-
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->where($where);
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
-            throw new RuntimeException(
-                sprintf(
-                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
-                    $params
-                )
-            );
-        }
-
-        $resultSet = new HydratingResultSet($this->hydrator, $this->accountPrototype);
-        $resultSet->initialize($result);
-        $account = $resultSet->current();
-
-        if (!$account) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Account with identifier "%s" not found.',
-                    $params
-                )
-            );
-        }
-
-        return $account;
-    }
-
     public function getAccountCredential(int $userId): string
     {
         $sql       = new Sql($this->db);
@@ -187,6 +142,51 @@ class AccountRepository implements AccountRepositoryInterface
         $id = $result->getGeneratedValue();
 
         return $this->getAccount(['id' => $id]);
+    }
+
+    public function getAccount(array $params = []): Account
+    {
+        // Set
+        $where = [];
+        if (isset($params['id']) && (int)$params['id'] > 0) {
+            $where['id'] = (int)$params['id'];
+        } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            $where['identity'] = $params['identity'];
+        } elseif (isset($params['email']) && !empty($params['email'])) {
+            $where['email'] = $params['email'];
+        }
+        if (isset($params['status']) && (int)$params['status'] > 0) {
+            $where['status'] = (int)$params['status'];
+        }
+
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            throw new RuntimeException(
+                sprintf(
+                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
+                    $params
+                )
+            );
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, $this->accountPrototype);
+        $resultSet->initialize($result);
+        $account = $resultSet->current();
+
+        if (!$account) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Account with identifier "%s" not found.',
+                    $params
+                )
+            );
+        }
+
+        return $account;
     }
 
     public function updateAccount(int $userId, array $params = []): void

@@ -118,6 +118,31 @@ class PermissionRepository implements PermissionRepositoryInterface
      *
      * @return Resource
      */
+    public function addPermissionResource(array $params = []): Resource
+    {
+        $insert = new Insert($this->tablePermissionResource);
+        $insert->values($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post insert operation'
+            );
+        }
+
+        $id = $result->getGeneratedValue();
+
+        return $this->getPermissionResource(['id' => $id]);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return Resource
+     */
     public function getPermissionResource(array $params = []): Resource
     {
         // Set
@@ -159,33 +184,8 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param array $params
-     *
-     * @return Resource
-     */
-    public function addPermissionResource(array $params = []): Resource
-    {
-        $insert = new Insert($this->tablePermissionResource);
-        $insert->values($params);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getPermissionResource(['id' => $id]);
-    }
-
-    /**
      * @param string $resourceName
-     * @param array $params
+     * @param array  $params
      */
     public function updatePermissionResource(string $resourceName, array $params = []): void
     {
@@ -253,6 +253,31 @@ class PermissionRepository implements PermissionRepositoryInterface
      *
      * @return Role
      */
+    public function addPermissionRole(array $params = []): Role
+    {
+        $insert = new Insert($this->tablePermissionRole);
+        $insert->values($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post insert operation'
+            );
+        }
+
+        $id = $result->getGeneratedValue();
+
+        return $this->getPermissionRole(['id' => $id]);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return Role
+     */
     public function getPermissionRole(array $params = []): Role
     {
         // Set
@@ -294,33 +319,8 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param array $params
-     *
-     * @return Role
-     */
-    public function addPermissionRole(array $params = []): Role
-    {
-        $insert = new Insert($this->tablePermissionRole);
-        $insert->values($params);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getPermissionRole(['id' => $id]);
-    }
-
-    /**
      * @param string $roleName
-     * @param array $params
+     * @param array  $params
      */
     public function updatePermissionRole(string $roleName, array $params = []): void
     {
@@ -391,6 +391,31 @@ class PermissionRepository implements PermissionRepositoryInterface
      *
      * @return Page
      */
+    public function addPermissionPage(array $params = []): Page
+    {
+        $insert = new Insert($this->tablePermissionPage);
+        $insert->values($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post insert operation'
+            );
+        }
+
+        $id = $result->getGeneratedValue();
+
+        return $this->getPermissionPage(['id' => $id]);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return Page
+     */
     public function getPermissionPage(array $params = []): Page
     {
         // Set
@@ -432,33 +457,8 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param array $params
-     *
-     * @return Page
-     */
-    public function addPermissionPage(array $params = []): Page
-    {
-        $insert = new Insert($this->tablePermissionPage);
-        $insert->values($params);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getPermissionPage(['id' => $id]);
-    }
-
-    /**
      * @param string $pageName
-     * @param array $params
+     * @param array  $params
      */
     public function updatePermissionPage(string $pageName, array $params = []): void
     {

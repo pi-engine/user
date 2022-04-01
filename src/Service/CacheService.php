@@ -9,13 +9,6 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class CacheService implements ServiceInterface
 {
-    /* @var SimpleCacheDecorator */
-    protected SimpleCacheDecorator $cache;
-
-    protected string $userKeyPattern = 'user-%s';
-
-    protected string $roleKeyPattern = 'roles-list';
-
     public array $userValuePattern
         = [
             'account'      => [],
@@ -23,6 +16,10 @@ class CacheService implements ServiceInterface
             'access_keys'  => [],
             'refresh_keys' => [],
         ];
+    /* @var SimpleCacheDecorator */
+    protected SimpleCacheDecorator $cache;
+    protected string $userKeyPattern = 'user-%s';
+    protected string $roleKeyPattern = 'roles-list';
 
     public function __construct(StorageAdapterFactoryInterface $storageFactory)
     {
@@ -60,6 +57,29 @@ class CacheService implements ServiceInterface
         }
 
         return $list;
+    }
+
+    public function addItem(int $userId, string $key, string $value): void
+    {
+        $user = $this->getUser($userId);
+        if (!empty($user) && !empty($value)) {
+            switch ($key) {
+                case 'access_keys':
+                    $user['access_keys'] = array_unique(array_merge($user['access_keys'], [$value]));
+                    $this->setUser($userId, ['access_keys' => $user['access_keys']]);
+                    break;
+
+                case 'refresh_keys':
+                    $user['refresh_keys'] = array_unique(array_merge($user['refresh_keys'], [$value]));
+                    $this->setUser($userId, ['refresh_keys' => $user['refresh_keys']]);
+                    break;
+
+                case 'roles':
+                    $user['roles'] = array_unique(array_merge($user['roles'], [$value]));
+                    $this->setUser($userId, ['roles' => $user['roles']]);
+                    break;
+            }
+        }
     }
 
     public function getUser(int $userId): array
@@ -110,29 +130,6 @@ class CacheService implements ServiceInterface
         $this->cache->set($key, $user);
 
         return $user;
-    }
-
-    public function addItem(int $userId, string $key, string $value): void
-    {
-        $user = $this->getUser($userId);
-        if (!empty($user) && !empty($value)) {
-            switch ($key) {
-                case 'access_keys':
-                    $user['access_keys'] = array_unique(array_merge($user['access_keys'], [$value]));
-                    $this->setUser($userId, ['access_keys' => $user['access_keys']]);
-                    break;
-
-                case 'refresh_keys':
-                    $user['refresh_keys'] = array_unique(array_merge($user['refresh_keys'], [$value]));
-                    $this->setUser($userId, ['refresh_keys' => $user['refresh_keys']]);
-                    break;
-
-                case 'roles':
-                    $user['roles'] = array_unique(array_merge($user['roles'], [$value]));
-                    $this->setUser($userId, ['roles' => $user['roles']]);
-                    break;
-            }
-        }
     }
 
     public function removeItem(int $userId, string $key, string $value): void

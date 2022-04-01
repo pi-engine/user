@@ -26,9 +26,9 @@ class InstallerHandler implements RequestHandlerInterface
         StreamFactoryInterface $streamFactory,
         InstallerService $installerService
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->installerService   = $installerService;
+        $this->responseFactory  = $responseFactory;
+        $this->streamFactory    = $streamFactory;
+        $this->installerService = $installerService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

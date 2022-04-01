@@ -21,24 +21,20 @@ use User\Validator\PasswordValidator;
 
 class ValidationMiddleware implements MiddlewareInterface
 {
-    /** @var ResponseFactoryInterface */
-    protected ResponseFactoryInterface $responseFactory;
-
-    /** @var StreamFactoryInterface */
-    protected StreamFactoryInterface $streamFactory;
-
-    /** @var AccountService */
-    protected AccountService $accountService;
-
-    /** @var ErrorHandler */
-    protected ErrorHandler $errorHandler;
-
     public array $validationResult
         = [
             'status'  => true,
             'code'    => StatusCodeInterface::STATUS_OK,
             'message' => '',
         ];
+    /** @var ResponseFactoryInterface */
+    protected ResponseFactoryInterface $responseFactory;
+    /** @var StreamFactoryInterface */
+    protected StreamFactoryInterface $streamFactory;
+    /** @var AccountService */
+    protected AccountService $accountService;
+    /** @var ErrorHandler */
+    protected ErrorHandler $errorHandler;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
@@ -105,20 +101,6 @@ class ValidationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    protected function setErrorHandler($inputFilter): array
-    {
-        $message = [];
-        foreach ($inputFilter->getInvalidInput() as $error) {
-            $message[$error->getName()] = implode(', ', $error->getMessages());
-        }
-
-        return $this->validationResult = [
-            'status'  => false,
-            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-            'message' => $message,
-        ];
-    }
-
     protected function loginIsValid($params)
     {
         $identity = new Input('identity');
@@ -135,6 +117,20 @@ class ValidationMiddleware implements MiddlewareInterface
         if (!$inputFilter->isValid()) {
             return $this->setErrorHandler($inputFilter);
         }
+    }
+
+    protected function setErrorHandler($inputFilter): array
+    {
+        $message = [];
+        foreach ($inputFilter->getInvalidInput() as $error) {
+            $message[$error->getName()] = implode(', ', $error->getMessages());
+        }
+
+        return $this->validationResult = [
+            'status'  => false,
+            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+            'message' => $message,
+        ];
     }
 
     protected function registerIsValid($params)
