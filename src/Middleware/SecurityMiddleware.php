@@ -9,6 +9,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
+use User\Security\Method as SecurityMethod;
+use User\Security\Xss as SecurityXss;
 
 class SecurityMiddleware implements MiddlewareInterface
 {
@@ -33,7 +35,28 @@ class SecurityMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // ToDo : check request security
+        // Start security checks in request
+        foreach ($this->securityList() as $security) {
+            if (!$security->check($request)) {
+                $request = $request->withAttribute('status', $security->getStatusCode());
+                $request = $request->withAttribute('error',
+                    [
+                        'message' => $security->getErrorMessage(),
+                        'code'    => $security->getStatusCode(),
+                    ]
+                );
+                return $this->errorHandler->handle($request);
+            }
+        }
+
         return $handler->handle($request);
+    }
+
+    protected function securityList(): array
+    {
+        return [
+            'method' => new SecurityMethod(),
+            'xss'    => new SecurityXss(),
+        ];
     }
 }
