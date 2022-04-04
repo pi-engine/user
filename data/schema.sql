@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `profile`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `role`
+CREATE TABLE IF NOT EXISTS `role_resource`
 (
     `id`      INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
     `name`    VARCHAR(255)                   DEFAULT NULL,
@@ -91,6 +91,6 @@ CREATE TABLE IF NOT EXISTS `permission_page`
     UNIQUE KEY `key` (`section`, `module`, `package`, `handler`, `resource`, `name`)
 );
 
-/* INSERT INTO `role` (`id`, `name`, `title`, `status`, `section`)
+INSERT INTO `role_resource` (`id`, `name`, `title`, `status`, `section`)
 VALUES (NULL, 'member', 'Member', '1', 'api'),
-       (NULL, 'admin', 'Admin', '1', 'admin'); */
+       (NULL, 'admin', 'Admin', '1', 'admin');
