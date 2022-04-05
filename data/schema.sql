@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `account`
+CREATE TABLE IF NOT EXISTS `user_account`
 (
     `id`             INT(10) UNSIGNED    NOT NULL AUTO_INCREMENT,
     `name`           VARCHAR(255)                 DEFAULT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `account`
     KEY `status` (`status`)
 );
 
-CREATE TABLE IF NOT EXISTS `profile`
+CREATE TABLE IF NOT EXISTS `user_profile`
 (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 

@@ -13,7 +13,7 @@ class ProfileRepository implements AccountRoleRepositoryInterface
      *
      * @var string
      */
-    private string $tableProfile = 'profile';
+    private string $tableProfile = 'user_profile';
 
     /**
      * @var AdapterInterface

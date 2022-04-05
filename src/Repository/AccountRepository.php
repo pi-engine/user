@@ -25,7 +25,7 @@ class AccountRepository implements AccountRepositoryInterface
      *
      * @var string
      */
-    private string $tableAccount = 'account';
+    private string $tableAccount = 'user_account';
 
     /**
      * @var AdapterInterface
