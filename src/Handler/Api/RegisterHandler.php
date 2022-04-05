@@ -55,7 +55,7 @@ class RegisterHandler implements RequestHandlerInterface
             $result = [
                 'result' => true,
                 'data'   => $account,
-                'error'  => '',
+                'error'  => [],
             ];
         } else {
             // ToDo: use error handler for this part

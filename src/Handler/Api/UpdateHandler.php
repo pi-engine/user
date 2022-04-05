@@ -47,7 +47,7 @@ class UpdateHandler implements RequestHandlerInterface
         $result = [
             'result' => true,
             'data'   => $updatedAccount,
-            'error'  => '',
+            'error'  => [],
         ];
 
         return new JsonResponse($result);

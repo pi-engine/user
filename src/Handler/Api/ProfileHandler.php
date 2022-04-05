@@ -45,7 +45,7 @@ class ProfileHandler implements RequestHandlerInterface
         $result = [
             'result' => true,
             'data'   => $account,
-            'error'  => '',
+            'error'  => [],
         ];
 
         return new JsonResponse($result);

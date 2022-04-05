@@ -116,7 +116,7 @@ class AccountService implements ServiceInterface
             $result = [
                 'result' => true,
                 'data'   => $account,
-                'error'  => '',
+                'error'  => [],
             ];
         } else {
             $result = [
@@ -171,7 +171,7 @@ class AccountService implements ServiceInterface
             'data'   => [
                 'message' => $message,
             ],
-            'error'  => '',
+            'error'  => [],
         ];
     }
 
@@ -274,7 +274,7 @@ class AccountService implements ServiceInterface
                 'data'   => [
                     'message' => 'Password update successfully !',
                 ],
-                'error'  => '',
+                'error'  => [],
             ];
         } else {
             $result = [
@@ -310,7 +310,7 @@ class AccountService implements ServiceInterface
             'data'   => [
                 'access_token' => $accessToken['token'],
             ],
-            'error'  => '',
+            'error'  => [],
         ];
     }
 

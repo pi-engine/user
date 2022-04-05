@@ -20,6 +20,13 @@ class InstallerService implements ServiceInterface
         // Get list of exist pages and permission
         $installerList = $this->permissionService->getInstallerList(['module' => $module]);
 
+        // Set list
+        $insertList = [
+            'permission' => [],
+            'page'       => [],
+            'role'       => [],
+        ];
+
         // inset
         foreach ($permissionConfig as $permissionList) {
             foreach ($permissionList as $permissionSingle) {
@@ -27,44 +34,68 @@ class InstallerService implements ServiceInterface
                     !isset($installerList['page_list'][$permissionSingle['page']])
                     && !isset($installerList['resource_list'][$permissionSingle['permissions']])
                 ) {
-                    // Set resource params
-                    $resourceParams = array_merge(
-                        $permissionSingle,
-                        [
-                            'name' => $permissionSingle['permissions'],
-                        ]
-                    );
-
-                    // Add resource
-                    $resource = $this->permissionService->addPermissionResource($resourceParams);
-
-                    // Set page params
-                    $pageParams = array_merge(
-                        $permissionSingle,
-                        [
-                            'name'     => $permissionSingle['page'],
-                            'resource' => $resource['name'],
-                        ]
-                    );
-
-                    // Add page
-                    $this->permissionService->addPermissionPage($pageParams);
-
-                    // Check roles
-                    foreach ($permissionSingle['role'] as $role) {
-                        // Set role params
-                        $roleParams = array_merge(
+                    // Check for duplicate
+                    if (!in_array($permissionSingle['permissions'], $insertList['permission'])) {
+                        // Set resource params
+                        $resourceParams = array_merge(
                             $permissionSingle,
                             [
-                                'name'     => sprintf('%s-%s', $role, $permissionSingle['permissions']),
-                                'resource' => $resource['name'],
-                                'role'     => $role,
+                                'name' => $permissionSingle['permissions'],
                             ]
                         );
 
-                        // Add role
-                        $this->permissionService->addPermissionRole($roleParams);
+                        // Add resource
+                        $resource = $this->permissionService->addPermissionResource($resourceParams);
+                    } else {
+                        $resource = [
+                            'name' => $permissionSingle['permissions'],
+                        ];
                     }
+
+                    // Check for duplicate
+                    if (!in_array($permissionSingle['page'], $insertList['page'])) {
+                        // Set page params
+                        $pageParams = array_merge(
+                            $permissionSingle,
+                            [
+                                'name'     => $permissionSingle['page'],
+                                'resource' => $resource['name'],
+                            ]
+                        );
+
+                        // Add page
+                        $this->permissionService->addPermissionPage($pageParams);
+                    }
+
+                    // Check roles
+                    foreach ($permissionSingle['role'] as $role) {
+
+                        // Set name
+                        $name = sprintf('%s-%s', $role, $permissionSingle['permissions']);
+
+                        // Check for duplicate
+                        if (!in_array($name, $insertList['role'])) {
+                            // Set role params
+                            $roleParams = array_merge(
+                                $permissionSingle,
+                                [
+                                    'name'     => $name,
+                                    'resource' => $resource['name'],
+                                    'role'     => $role,
+                                ]
+                            );
+
+                            // Add role
+                            $this->permissionService->addPermissionRole($roleParams);
+
+                            // Add to list
+                            $insertList['role'][$name] = $name;
+                        }
+                    }
+
+                    // Add to list
+                    $insertList['permission'][$permissionSingle['permissions']] = $permissionSingle['permissions'];
+                    $insertList['page'][$permissionSingle['page']]              = $permissionSingle['page'];
                 }
             }
         }
