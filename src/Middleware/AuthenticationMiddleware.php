@@ -86,9 +86,18 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
+        // Set token type
+        $type = 'access';
+        if (
+            isset($routeParams['module'])
+            && $routeParams['module'] == 'user'
+            && isset($routeParams['handler'])
+            && $routeParams['handler'] == 'refresh'
+        ) {
+            $type = 'refresh';
+        }
 
         // Check token type
-        $type = ($routeParams['module'] == 'user' && $routeParams['handler'] == 'refresh') ? 'refresh' : 'access';
         if ($tokenParsed['type'] != $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',

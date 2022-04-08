@@ -129,33 +129,6 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
-    public function canonizeAccount($account): array
-    {
-        if (empty($account)) {
-            return [];
-        }
-
-        if (is_object($account)) {
-            $account = [
-                'id'       => $account->getId(),
-                'name'     => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email'    => $account->getEmail(),
-                'status'   => $account->getStatus(),
-            ];
-        } else {
-            $account = [
-                'id'       => $account['id'],
-                'name'     => $account['name'],
-                'email'    => $account['email'],
-                'identity' => $account['identity'],
-                'status'   => $account['status'],
-            ];
-        }
-
-        return $account;
-    }
-
     public function logout($params): array
     {
         if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
@@ -210,6 +183,12 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    public function getAccount($params): array
+    {
+        $account = $this->accountRepository->getAccount($params);
+        return $this->canonizeAccount($account);
+    }
+
     public function addAccount($params): array
     {
         $params['credential']   = $this->generateCredential($params['credential']);
@@ -225,18 +204,6 @@ class AccountService implements ServiceInterface
         return $account;
     }
 
-    public function generateCredential($credential): string
-    {
-        $bcrypt = new Bcrypt();
-        return $bcrypt->create($credential);
-    }
-
-    public function userRegisterStatus(): int
-    {
-        // ToDo: call it from config
-        return 1;
-    }
-
     public function updateAccount($params, $account): array
     {
         // Clean up
@@ -250,13 +217,27 @@ class AccountService implements ServiceInterface
             $this->accountRepository->updateAccount((int)$account['id'], $params);
         }
 
-        return $this->getAccount(['id' => (int)$account['id']]);
-    }
+        // Get account after update
+        $account = $this->getAccount(['id' => (int)$account['id']]);
 
-    public function getAccount($params): array
-    {
-        $account = $this->accountRepository->getAccount($params);
-        return $this->canonizeAccount($account);
+        // Get user from cache if exist
+        $user = $this->cacheService->getUser($account['id']);
+
+        // Set/Update user data to cache
+        $this->cacheService->setUser(
+            $account['id'],
+            [
+                'account' => [
+                    'id'         => $account['id'],
+                    'name'       => $account['name'],
+                    'email'      => $account['email'],
+                    'identity'   => $account['identity'],
+                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                ],
+            ]
+        );
+
+        return $account;
     }
 
     public function updatePassword($params, $account): array
@@ -312,6 +293,45 @@ class AccountService implements ServiceInterface
             ],
             'error'  => [],
         ];
+    }
+
+    public function canonizeAccount($account): array
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'       => $account->getId(),
+                'name'     => $account->getName(),
+                'identity' => $account->getIdentity(),
+                'email'    => $account->getEmail(),
+                'status'   => $account->getStatus(),
+            ];
+        } else {
+            $account = [
+                'id'       => $account['id'],
+                'name'     => $account['name'],
+                'email'    => $account['email'],
+                'identity' => $account['identity'],
+                'status'   => $account['status'],
+            ];
+        }
+
+        return $account;
+    }
+
+    public function generateCredential($credential): string
+    {
+        $bcrypt = new Bcrypt();
+        return $bcrypt->create($credential);
+    }
+
+    public function userRegisterStatus(): int
+    {
+        // ToDo: call it from config
+        return 1;
     }
 
     public function isDuplicated($type, $value, $id = 0): bool

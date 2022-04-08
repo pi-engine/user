@@ -235,12 +235,12 @@ return [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'       => '/list',
-                                    'module'      => 'user',
-                                    'section'     => 'admin',
-                                    'package'     => 'profile',
-                                    'handler'     => 'list',
-                                    'permissions' => 'user-profile-list',
                                     'defaults'    => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'list',
+                                        'permissions' => 'user-profile-list',
                                         'controller' => PipeSpec::class,
                                         'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
