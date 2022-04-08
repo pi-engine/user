@@ -62,7 +62,7 @@ return [
     'router' => [
         'routes' => [
             // Api section
-            'api'   => [
+            'api_user'   => [
                 'type'         => Literal::class,
                 'options'      => [
                     'route'    => '/user',
@@ -216,7 +216,7 @@ return [
                 ],
             ],
             // Admin section
-            'admin' => [
+            'admin_user' => [
                 'type'         => Literal::class,
                 'options'      => [
                     'route'    => '/admin/user',
