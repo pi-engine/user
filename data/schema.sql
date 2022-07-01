@@ -20,9 +20,29 @@ CREATE TABLE IF NOT EXISTS `user_account`
 
 CREATE TABLE IF NOT EXISTS `user_profile`
 (
-    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-
-    PRIMARY KEY (`id`)
+    `id`              INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id`         INT(10) UNSIGNED NOT NULL          DEFAULT 0,
+    `first_name`      VARCHAR(64)                        DEFAULT NULL,
+    `last_name`       VARCHAR(64)                        DEFAULT NULL,
+    `id_number`       VARCHAR(16)                        DEFAULT NULL,
+    `birthdate`       VARCHAR(16)                        DEFAULT NULL,
+    `gender`          ENUM ('male', 'female', 'unknown') DEFAULT NULL,
+    `avatar`          VARCHAR(128)                       DEFAULT NULL,
+    `ip_register`     VARCHAR(128)                       DEFAULT NULL,
+    `register_source` VARCHAR(16)                        DEFAULT NULL,
+    `homepage`        VARCHAR(128)                       DEFAULT NULL,
+    `phone`           VARCHAR(16)                        DEFAULT NULL,
+    `address_1`       VARCHAR(255)                       DEFAULT NULL,
+    `address_2`       VARCHAR(255)                       DEFAULT NULL,
+    `country`         VARCHAR(32)                        DEFAULT NULL,
+    `state`           VARCHAR(32)                        DEFAULT NULL,
+    `city`            VARCHAR(32)                        DEFAULT NULL,
+    `zip_code`        VARCHAR(16)                        DEFAULT NULL,
+    `bank_name`       VARCHAR(32)                        DEFAULT NULL,
+    `bank_card`       VARCHAR(32)                        DEFAULT NULL,
+    `bank_account`    VARCHAR(32)                        DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `user_id` (`user_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `role_resource`
@@ -40,9 +60,9 @@ CREATE TABLE IF NOT EXISTS `role_resource`
 CREATE TABLE IF NOT EXISTS `role_account`
 (
     `id`      INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
-    `user_id` INT(10) UNSIGNED      NOT NULL,
-    `role`    VARCHAR(64)           NOT NULL,
-    `section` ENUM ('api', 'admin') NOT NULL,
+    `user_id` INT(10) UNSIGNED      NOT NULL DEFAULT 0,
+    `role`    VARCHAR(64)           NOT NULL DEFAULT '',
+    `section` ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
     PRIMARY KEY (`id`),
     UNIQUE KEY `section_user` (`section`, `user_id`, `role`)
 );

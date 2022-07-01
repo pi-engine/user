@@ -18,6 +18,7 @@ use User\Validator\IdentityValidator;
 use User\Validator\MobileValidator;
 use User\Validator\NameValidator;
 use User\Validator\PasswordValidator;
+use function sprintf;
 
 class ValidationMiddleware implements MiddlewareInterface
 {
@@ -138,24 +139,47 @@ class ValidationMiddleware implements MiddlewareInterface
 
     protected function registerIsValid($params)
     {
-        $email = new Input('email');
-        $email->getValidatorChain()->attach(new EmailValidator($this->accountService));
-
-        $name = new Input('name');
-        $name->getValidatorChain()->attach(new NameValidator($this->accountService));
-
-        $identity = new Input('identity');
-        $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService));
-
-        $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator());
+        // Set name
+        if (
+            isset($params['first_name'])
+            && !empty($params['first_name'])
+            && isset($params['last_name'])
+            && !empty($params['last_name'])
+        ) {
+            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
+        }
 
         $inputFilter = new InputFilter();
-        $inputFilter->add($email);
-        $inputFilter->add($name);
-        $inputFilter->add($identity);
-        $inputFilter->add($credential);
 
+        // Check name
+        if (isset($params['name']) && !empty($params['name'])) {
+            $name = new Input('name');
+            $name->getValidatorChain()->attach(new NameValidator($this->accountService));
+            $inputFilter->add($name);
+        }
+
+        // Check email
+        if (isset($params['email']) && !empty($params['email'])) {
+            $email = new Input('email');
+            $email->getValidatorChain()->attach(new EmailValidator($this->accountService));
+            $inputFilter->add($email);
+        }
+
+        // Check credential
+        if (isset($params['credential']) && !empty($params['credential'])) {
+            $identity = new Input('identity');
+            $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService));
+            $inputFilter->add($identity);
+        }
+
+        // Check identity
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $credential = new Input('credential');
+            $credential->getValidatorChain()->attach(new PasswordValidator());
+            $inputFilter->add($credential);
+        }
+
+        // Check mobile
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $option = [];
             if (isset($params['country']) && !empty($params['country'])) {
@@ -175,6 +199,16 @@ class ValidationMiddleware implements MiddlewareInterface
 
     protected function editIsValid($params, $account)
     {
+        // Set name
+        if (
+            isset($params['first_name'])
+            && !empty($params['first_name'])
+            && isset($params['last_name'])
+            && !empty($params['last_name'])
+        ) {
+            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
+        }
+
         $inputFilter = new InputFilter();
 
         if (isset($params['email']) && !empty($params['email'])) {

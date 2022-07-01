@@ -5,6 +5,13 @@ namespace User\Service;
 use Laminas\Crypt\Password\Bcrypt;
 use Psr\SimpleCache\InvalidArgumentException;
 use User\Repository\AccountRepositoryInterface;
+use function array_merge;
+use function array_merge_recursive;
+use function in_array;
+use function is_object;
+use function is_string;
+use function sprintf;
+use function var_dump;
 
 class AccountService implements ServiceInterface
 {
@@ -19,6 +26,30 @@ class AccountService implements ServiceInterface
 
     /* @var CacheService */
     protected CacheService $cacheService;
+
+    protected array $profileFields
+        = [
+            'user_id',
+            'first_name',
+            'last_name',
+            'id_number',
+            'birthdate',
+            'gender',
+            'avatar',
+            'ip_register',
+            'register_source',
+            'homepage',
+            'phone',
+            'address_1',
+            'address_2',
+            'country',
+            'state',
+            'city',
+            'zip_code',
+            'bank_name',
+            'bank_card',
+            'bank_account',
+        ];
 
     /**
      * @param AccountRepositoryInterface $accountRepository
@@ -189,14 +220,69 @@ class AccountService implements ServiceInterface
         return $this->canonizeAccount($account);
     }
 
+    public function getProfile($params): array
+    {
+        $profile = $this->accountRepository->getProfile($params);
+        return $this->canonizeProfile($profile);
+    }
+
     public function addAccount($params): array
     {
-        $params['credential']   = $this->generateCredential($params['credential']);
-        $params['status']       = $this->userRegisterStatus();
-        $params['time_created'] = time();
+        // Set name
+        if (
+            isset($params['first_name'])
+            && !empty($params['first_name'])
+            && isset($params['last_name'])
+            && !empty($params['last_name'])
+        ) {
+            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
+        }
 
-        $account = $this->accountRepository->addAccount($params);
+        $credential = null;
+        if (isset($params['credential']) && !empty($params['credential'])) {
+            $credential = $this->generateCredential($params['credential']);
+        }
+
+        $paramsAccount = [
+            'name'         => $params['name'] ?? null,
+            'email'        => $params['email'] ?? null,
+            'identity'     => $params['identity'] ?? null,
+            'mobile'       => $params['mobile'] ?? null,
+            'credential'   => $credential,
+            'status'       => $this->userRegisterStatus(),
+            'time_created' => time(),
+        ];
+
+        $account = $this->accountRepository->addAccount($paramsAccount);
         $account = $this->canonizeAccount($account);
+
+        $profileParams = [
+            'user_id'         => (int)$account['id'],
+            'first_name'      => $params['first_name'] ?? null,
+            'last_name'       => $params['last_name'] ?? null,
+            'id_number'       => $params['id_number'] ?? null,
+            'birthdate'       => $params['birthdate'] ?? null,
+            'gender'          => $params['gender'] ?? null,
+            'avatar'          => $params['avatar'] ?? null,
+            'ip_register'     => $params['ip_register'] ?? null,
+            'register_source' => $params['register_source'] ?? null,
+            'homepage'        => $params['homepage'] ?? null,
+            'phone'           => $params['phone'] ?? null,
+            'address_1'       => $params['address_1'] ?? null,
+            'address_2'       => $params['address_2'] ?? null,
+            'country'         => $params['country'] ?? null,
+            'state'           => $params['state'] ?? null,
+            'city'            => $params['city'] ?? null,
+            'zip_code'        => $params['zip_code'] ?? null,
+            'bank_name'       => $params['bank_name'] ?? null,
+            'bank_card'       => $params['bank_card'] ?? null,
+            'bank_account'    => $params['bank_account'] ?? null,
+        ];
+
+        $profile = $this->accountRepository->addProfile($profileParams);
+        $profile = $this->canonizeProfile($profile);
+
+        $account = array_merge($account, $profile);
 
         // Set user roles
         $this->roleService->addDefaultRoles((int)$account['id']);
@@ -206,19 +292,43 @@ class AccountService implements ServiceInterface
 
     public function updateAccount($params, $account): array
     {
+        // Set name
+        if (
+            isset($params['first_name'])
+            && !empty($params['first_name'])
+            && isset($params['last_name'])
+            && !empty($params['last_name'])
+        ) {
+            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
+        }
+
         // Clean up
+        $accountParams = [];
+        $profileParams = [];
         foreach ($params as $key => $value) {
-            if (empty($value) || !isset($account[$key]) || $account[$key] == $value) {
-                unset($params[$key]);
+            if (!empty($value) && isset($account[$key]) && $account[$key] != $value) {
+                $accountParams[$key] = $value;
+            }
+            if (in_array($key, $this->profileFields)) {
+                if (empty($value)) {
+                    $profileParams[$key] = null;
+                } elseif (is_string($value)) {
+                    $profileParams[$key] = $value;
+                }
             }
         }
 
-        if (!empty($params)) {
-            $this->accountRepository->updateAccount((int)$account['id'], $params);
+        if (!empty($accountParams)) {
+            $this->accountRepository->updateAccount((int)$account['id'], $accountParams);
+        }
+
+        if (!empty($profileParams)) {
+            $this->accountRepository->updateProfile((int)$account['id'], $profileParams);
         }
 
         // Get account after update
         $account = $this->getAccount(['id' => (int)$account['id']]);
+        $profile = $this->getProfile(['user_id' => (int)$account['id']]);
 
         // Get user from cache if exist
         $user = $this->cacheService->getUser($account['id']);
@@ -237,7 +347,7 @@ class AccountService implements ServiceInterface
             ]
         );
 
-        return $account;
+        return array_merge($account, $profile);
     }
 
     public function updatePassword($params, $account): array
@@ -320,6 +430,63 @@ class AccountService implements ServiceInterface
         }
 
         return $account;
+    }
+
+    public function canonizeProfile($profile): array
+    {
+        if (empty($profile)) {
+            return [];
+        }
+
+        if (is_object($profile)) {
+            $profile = [
+                //'user_id'         => $profile->getUserId(),
+                'first_name'      => $profile->getFirstName(),
+                'last_name'       => $profile->getLastName(),
+                'id_number'       => $profile->getIdNumber(),
+                'birthdate'       => $profile->getBirthdate(),
+                'gender'          => $profile->getGender(),
+                'avatar'          => $profile->getAvatar(),
+                'ip_register'     => $profile->getIpRegister(),
+                'register_source' => $profile->getRegisterSource(),
+                'homepage'        => $profile->getHomepage(),
+                'phone'           => $profile->getPhone(),
+                'address_1'       => $profile->getAddress1(),
+                'address_2'       => $profile->getAddress2(),
+                'country'         => $profile->getCountry(),
+                'state'           => $profile->getState(),
+                'city'            => $profile->getCity(),
+                'zip_code'        => $profile->getZipCode(),
+                'bank_name'       => $profile->getBankName(),
+                'bank_card'       => $profile->getBankCard(),
+                'bank_account'    => $profile->getBankAccount(),
+            ];
+        } else {
+            $profile = [
+                //'user_id'         => $profile['user_id'],
+                'first_name'      => $profile['first_name'],
+                'last_name'       => $profile['last_name'],
+                'id_number'       => $profile['id_number'],
+                'birthdate'       => $profile['birthdate'],
+                'gender'          => $profile['gender'],
+                'avatar'          => $profile['avatar'],
+                'ip_register'     => $profile['ip_register'],
+                'register_source' => $profile['register_source'],
+                'homepage'        => $profile['homepage'],
+                'phone'           => $profile['phone'],
+                'address_1'       => $profile['address_1'],
+                'address_2'       => $profile['address_2'],
+                'country'         => $profile['country'],
+                'state'           => $profile['state'],
+                'city'            => $profile['city'],
+                'zip_code'        => $profile['zip_code'],
+                'bank_name'       => $profile['bank_name'],
+                'bank_card'       => $profile['bank_card'],
+                'bank_account'    => $profile['bank_account'],
+            ];
+        }
+
+        return $profile;
     }
 
     public function generateCredential($credential): string

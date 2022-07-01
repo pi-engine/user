@@ -10,6 +10,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Model\Account\Account;
 use User\Model\Account\Credential;
+use User\Model\Account\Profile;
 use User\Repository\AccountRepository;
 
 class AccountRepositoryFactory implements FactoryInterface
@@ -29,6 +30,7 @@ class AccountRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new Account('', '', '', ''),
+            new Profile(0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''),
             new Credential('')
         );
     }

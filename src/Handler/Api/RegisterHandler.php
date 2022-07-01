@@ -42,14 +42,7 @@ class RegisterHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
 
-        $params = [
-            'name'       => $requestBody['name'],
-            'email'      => $requestBody['email'],
-            'identity'   => $requestBody['identity'],
-            'credential' => $requestBody['credential'],
-        ];
-
-        $account = $this->accountService->addAccount($params);
+        $account = $this->accountService->addAccount($requestBody);
 
         if (!empty($account)) {
             $result = [

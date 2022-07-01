@@ -4,12 +4,12 @@ namespace User\Model\Account;
 
 class Account
 {
-    private         $id;
-    private string  $name;
+    private mixed  $id;
+    private string $name;
     private ?string $identity;
     private ?string $email;
     private ?string $mobile;
-    private         $status;
+    private mixed   $status;
 
     public function __construct(
         $name,

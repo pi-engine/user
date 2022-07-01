@@ -10,6 +10,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
+use function array_merge;
 
 class ProfileHandler implements RequestHandlerInterface
 {
@@ -41,10 +42,17 @@ class ProfileHandler implements RequestHandlerInterface
     {
         $account = $request->getAttribute('account');
 
+        // Set profile params
+        $params = [
+            'user_id' => (int) $account['id']
+        ];
+
+        $profile = $this->accountService->getProfile($params);
+
         // Set result array
         $result = [
             'result' => true,
-            'data'   => $account,
+            'data'   => array_merge($account, $profile),
             'error'  => [],
         ];
 
