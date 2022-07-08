@@ -36,7 +36,7 @@ class TokenService implements ServiceInterface
             'id'   => $key,
             'uid'  => $params['user_id'],
             'iat'  => time(),
-            'exp'  => time() + $ttl,
+            'exp'  => $params['exp'] ?? time() + $ttl,
             'type' => $params['type'],
         ];
 

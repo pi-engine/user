@@ -125,6 +125,9 @@ class CacheService implements ServiceInterface
         if (isset($params['roles']) && !empty($params['roles'])) {
             $user['roles'] = $params['roles'];
         }
+        if (isset($params['otp']) && !empty($params['otp'])) {
+            $user['otp'] = $params['otp'];
+        }
 
         // Set/Reset cache
         $this->cache->set($key, $user);

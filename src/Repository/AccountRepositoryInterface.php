@@ -13,7 +13,7 @@ interface AccountRepositoryInterface
 
     public function getAccountCount($params = []): int;
 
-    public function getAccount(array $params = []): Account;
+    public function getAccount(array $params = []): array|Account;
 
     public function getAccountCredential(int $userId): string;
 
@@ -29,5 +29,5 @@ interface AccountRepositoryInterface
 
     public function updateProfile(int $userId, array $params = []): void;
 
-    public function authentication(): AuthenticationService;
+    public function authentication($identityColumn = 'identity'): AuthenticationService;
 }

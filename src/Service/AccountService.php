@@ -3,15 +3,16 @@
 namespace User\Service;
 
 use Laminas\Crypt\Password\Bcrypt;
+use Laminas\Math\Rand;
+use Laminas\Soap\Client as LaminasSoapClient;
 use Psr\SimpleCache\InvalidArgumentException;
 use User\Repository\AccountRepositoryInterface;
 use function array_merge;
-use function array_merge_recursive;
 use function in_array;
 use function is_object;
 use function is_string;
 use function sprintf;
-use function var_dump;
+use function time;
 
 class AccountService implements ServiceInterface
 {
@@ -76,8 +77,11 @@ class AccountService implements ServiceInterface
      */
     public function login($params): array
     {
+        // Set login column
+        $identityColumn = $params['column'] ?? 'identity';
+
         // Do log in
-        $authentication = $this->accountRepository->authentication();
+        $authentication = $this->accountRepository->authentication($identityColumn);
         $adapter        = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
 
@@ -133,6 +137,7 @@ class AccountService implements ServiceInterface
                     'name'       => $account['name'],
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
+                    'mobile'     => $account['mobile'],
                     'last_login' => $account['last_login'],
                 ],
                 'roles'        => $account['roles'],
@@ -174,6 +179,76 @@ class AccountService implements ServiceInterface
             'result' => true,
             'data'   => [
                 'message' => $message,
+            ],
+            'error'  => [],
+        ];
+    }
+
+    public function prepareMobileLogin($params): array
+    {
+        // Set new password as OTP
+        $otpCode   = Rand::getInteger(100000, 999999);
+        $otpExpire = (time() + 120);
+        $isNew     = 0;
+
+        // Check account exist
+        $account = $this->getAccount(['mobile' => $params['mobile']]);
+
+        // Create account if not exist
+        // Update OTP password if account exist
+        if (empty($account)) {
+            $account = $this->addAccount(
+                [
+                    'mobile'     => $params['mobile'],
+                    'credential' => $otpCode,
+                ]
+            );
+
+            // Set is new
+            $isNew = 1;
+        } else {
+            $bcrypt     = new Bcrypt();
+            $credential = $bcrypt->create($otpCode);
+            $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
+        }
+
+        // Set user cache
+        $this->cacheService->setUser(
+            $account['id'],
+            [
+                'account' => [
+                    'id'         => $account['id'],
+                    'name'       => $account['name'],
+                    'email'      => $account['email'],
+                    'identity'   => $account['identity'],
+                    'mobile'     => $account['mobile'],
+                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                ],
+                'otp'     => [
+                    'code'        => $otpCode,
+                    'time_expire' => $otpExpire,
+                ],
+            ]
+        );
+
+        // Send OTP as SMS
+        $this->sendSMS(
+            [
+                'message' => sprintf('Your code %s', $otpCode),
+                'mobile'  => $account['mobile'],
+            ]
+        );
+
+        // Set result
+        return [
+            'result' => true,
+            'data'   => [
+                'message'    => 'Verify code send to your mobile number !',
+                'name'       => $account['name'],
+                'mobile'     => $account['mobile'],
+                'is_new'     => $isNew,
+                'otp_expire' => $otpExpire,
+                'otp_code'   => $otpCode,
             ],
             'error'  => [],
         ];
@@ -342,6 +417,7 @@ class AccountService implements ServiceInterface
                     'name'       => $account['name'],
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
+                    'mobile'     => $account['mobile'],
                     'last_login' => isset($user['account']['last_login']) ?? time(),
                 ],
             ]
@@ -417,14 +493,16 @@ class AccountService implements ServiceInterface
                 'name'     => $account->getName(),
                 'identity' => $account->getIdentity(),
                 'email'    => $account->getEmail(),
+                'mobile'   => $account->getMobile(),
                 'status'   => $account->getStatus(),
             ];
         } else {
             $account = [
                 'id'       => $account['id'],
-                'name'     => $account['name'],
-                'email'    => $account['email'],
-                'identity' => $account['identity'],
+                'name'     => $account['name'] ?? '',
+                'email'    => $account['email'] ?? '',
+                'identity' => $account['identity'] ?? '',
+                'mobile'   => $account['mobile'] ?? '',
                 'status'   => $account['status'],
             ];
         }
@@ -510,5 +588,11 @@ class AccountService implements ServiceInterface
                 'id'    => $id,
             ]
         );
+    }
+
+    // ToDo: Move it to notification module
+    public function sendSMS($params)
+    {
+
     }
 }

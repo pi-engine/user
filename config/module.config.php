@@ -36,6 +36,7 @@ return [
             Validator\IdentityValidator::class            => Factory\Validator\IdentityValidatorFactory::class,
             Validator\NameValidator::class                => Factory\Validator\NameValidatorFactory::class,
             Validator\MobileValidator::class              => Factory\Validator\MobileValidatorFactory::class,
+            Validator\OtpValidator::class                 => Factory\Validator\OtpValidatorFactory::class,
             Handler\Admin\Profile\AddHandler::class       => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
             Handler\Admin\Profile\EditHandler::class      => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
             Handler\Admin\Profile\ListHandler::class      => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
@@ -54,6 +55,8 @@ return [
             Handler\Api\RefreshHandler::class             => Factory\Handler\Api\RefreshHandlerFactory::class,
             Handler\Api\PasswordHandler::class            => Factory\Handler\Api\PasswordHandlerFactory::class,
             Handler\Api\UpdateHandler::class              => Factory\Handler\Api\UpdateHandlerFactory::class,
+            Handler\Api\MobileHandler::class              => Factory\Handler\Api\MobileHandlerFactory::class,
+            Handler\Api\VerifyHandler::class              => Factory\Handler\Api\VerifyHandlerFactory::class,
             Handler\ErrorHandler::class                   => Factory\Handler\ErrorHandlerFactory::class,
             Handler\InstallerHandler::class               => Factory\Handler\InstallerHandlerFactory::class,
         ],
@@ -125,6 +128,46 @@ return [
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\ValidationMiddleware::class,
                                     Handler\Api\RegisterHandler::class
+                                ),
+                            ],
+                        ],
+                    ],
+                    'mobile'   => [
+                        'type'    => Literal::class,
+                        'options' => [
+                            'route'    => '/mobile',
+                            'defaults' => [
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'mobile',
+                                'permissions' => 'user-mobile',
+                                'validator'   => 'mobile',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
+                                    Middleware\SecurityMiddleware::class,
+                                    Middleware\ValidationMiddleware::class,
+                                    Handler\Api\MobileHandler::class
+                                ),
+                            ],
+                        ],
+                    ],
+                    'verify'   => [
+                        'type'    => Literal::class,
+                        'options' => [
+                            'route'    => '/verify',
+                            'defaults' => [
+                                'module'      => 'user',
+                                'section'     => 'api',
+                                'package'     => 'profile',
+                                'handler'     => 'verify',
+                                'permissions' => 'user-verify',
+                                'validator'   => 'verify',
+                                'controller'  => PipeSpec::class,
+                                'middleware'  => new PipeSpec(
+                                    Middleware\SecurityMiddleware::class,
+                                    Middleware\ValidationMiddleware::class,
+                                    Handler\Api\VerifyHandler::class
                                 ),
                             ],
                         ],
@@ -234,15 +277,15 @@ return [
                             'list'     => [
                                 'type'    => Literal::class,
                                 'options' => [
-                                    'route'       => '/list',
-                                    'defaults'    => [
+                                    'route'    => '/list',
+                                    'defaults' => [
                                         'module'      => 'user',
                                         'section'     => 'admin',
                                         'package'     => 'profile',
                                         'handler'     => 'list',
                                         'permissions' => 'user-profile-list',
-                                        'controller' => PipeSpec::class,
-                                        'middleware' => new PipeSpec(
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,

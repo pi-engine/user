@@ -5,7 +5,7 @@ namespace User\Model\Account;
 class Account
 {
     private mixed  $id;
-    private string $name;
+    private ?string $name;
     private ?string $identity;
     private ?string $email;
     private ?string $mobile;
@@ -30,47 +30,47 @@ class Account
     /**
      * @return int|null
      */
-    public function getId(): ?int
+    public function getId(): int|null
     {
         return $this->id;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getName(): string|null
     {
         return $this->name;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getIdentity(): string
+    public function getIdentity(): string|null
     {
         return $this->identity;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getEmail(): string
+    public function getEmail(): string|null
     {
         return $this->email;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getMobile(): ?string
+    public function getMobile(): string|null
     {
         return $this->mobile;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getStatus(): ?int
+    public function getStatus(): int|null
     {
         return $this->status;
     }

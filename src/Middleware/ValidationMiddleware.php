@@ -13,10 +13,12 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
 use User\Service\AccountService;
+use User\Service\CacheService;
 use User\Validator\EmailValidator;
 use User\Validator\IdentityValidator;
 use User\Validator\MobileValidator;
 use User\Validator\NameValidator;
+use User\Validator\OtpValidator;
 use User\Validator\PasswordValidator;
 use function sprintf;
 
@@ -37,6 +39,9 @@ class ValidationMiddleware implements MiddlewareInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
+    /* @var CacheService */
+    protected CacheService $cacheService;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -44,11 +49,13 @@ class ValidationMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
+        CacheService $cacheService,
         ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
+        $this->cacheService = $cacheService;
         $this->errorHandler    = $errorHandler;
     }
 
@@ -66,6 +73,10 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->loginIsValid($parsedBody);
                 break;
 
+            case 'verify':
+                $this->loginOTPIsValid($parsedBody);
+                break;
+
             case 'add':
                 $this->registerIsValid($parsedBody);
                 break;
@@ -76,6 +87,10 @@ class ValidationMiddleware implements MiddlewareInterface
 
             case 'password':
                 $this->passwordIsValid($parsedBody, $account);
+                break;
+
+            case 'mobile':
+                $this->mobileIsValid($parsedBody);
                 break;
 
             default:
@@ -121,15 +136,76 @@ class ValidationMiddleware implements MiddlewareInterface
 
     protected function loginIsValid($params)
     {
-        $identity = new Input('identity');
-        $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService, ['check_duplication' => false]));
+        $inputFilter = new InputFilter();
 
+        // Check email
+        // Check identity
+        // Check mobile
+        if (isset($params['email']) && !empty($params['email'])) {
+            $email = new Input('email');
+            $email->getValidatorChain()->attach(new EmailValidator($this->accountService, ['check_duplication' => false]));
+            $inputFilter->add($email);
+        } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            $identity = new Input('identity');
+            $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService, ['check_duplication' => false]));
+            $inputFilter->add($identity);
+        } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
+            $option = [
+                'check_duplication' => false,
+                'country' => 'IR'
+            ];
+            if (isset($params['country']) && !empty($params['country'])) {
+                $option['country'] = $params['country'];
+            }
+
+            $mobile = new Input('mobile');
+            $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
+            $inputFilter->add($mobile);
+        } else {
+            return $this->validationResult = [
+                'status'  => false,
+                'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                'message' => 'Login fields not set !',
+            ];
+        }
+
+        // Check credential
         $credential = new Input('credential');
         $credential->getValidatorChain()->attach(new PasswordValidator());
-
-        $inputFilter = new InputFilter();
-        $inputFilter->add($identity);
         $inputFilter->add($credential);
+
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function loginOTPIsValid($params)
+    {
+        $inputFilter = new InputFilter();
+
+        $option = [
+            'check_duplication' => false,
+            'country' => 'IR'
+        ];
+        if (isset($params['country']) && !empty($params['country'])) {
+            $option['country'] = $params['country'];
+        }
+
+        $mobile = new Input('mobile');
+        $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
+        $inputFilter->add($mobile);
+
+        $option = [
+            'mobile' => $params['mobile']
+        ];
+
+        // Check otp
+        $otp = new Input('otp');
+        $otp->getValidatorChain()->attach(new OtpValidator($this->accountService, $this->cacheService, $option));
+        $inputFilter->add($otp);
+
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
@@ -181,10 +257,14 @@ class ValidationMiddleware implements MiddlewareInterface
 
         // Check mobile
         if (isset($params['mobile']) && !empty($params['mobile'])) {
-            $option = [];
+            $option = [
+                'check_duplication' => false,
+                'country' => 'IR'
+            ];
             if (isset($params['country']) && !empty($params['country'])) {
                 $option['country'] = $params['country'];
             }
+
             $mobile = new Input('mobile');
             $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
             $inputFilter->add($mobile);
@@ -259,4 +339,27 @@ class ValidationMiddleware implements MiddlewareInterface
             return $this->setErrorHandler($inputFilter);
         }
     }
+
+    protected function mobileIsValid($params)
+    {
+        $option = [
+            'check_duplication' => false,
+            'country' => 'IR'
+        ];
+        if (isset($params['country']) && !empty($params['country'])) {
+            $option['country'] = $params['country'];
+        }
+
+        $mobile = new Input('mobile');
+        $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($mobile);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
 }

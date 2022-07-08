@@ -161,7 +161,7 @@ class AccountRepository implements AccountRepositoryInterface
         return $this->getAccount(['id' => $id]);
     }
 
-    public function getAccount(array $params = []): Account
+    public function getAccount(array $params = []): array|Account
     {
         // Set
         $where = [];
@@ -171,7 +171,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where['identity'] = $params['identity'];
         } elseif (isset($params['email']) && !empty($params['email'])) {
             $where['email'] = $params['email'];
+        } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
+            $where['mobile'] = $params['mobile'];
         }
+
         if (isset($params['status']) && (int)$params['status'] > 0) {
             $where['status'] = (int)$params['status'];
         }
@@ -195,12 +198,7 @@ class AccountRepository implements AccountRepositoryInterface
         $account = $resultSet->current();
 
         if (!$account) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Account with identifier "%s" not found.',
-                    $params
-                )
-            );
+            return [];
         }
 
         return $account;
@@ -240,13 +238,13 @@ class AccountRepository implements AccountRepositoryInterface
         return (int)$row['count'];
     }
 
-    public function authentication(): AuthenticationService
+    public function authentication($identityColumn = 'identity'): AuthenticationService
     {
         // Call authAdapter
         $authAdapter = new CallbackCheckAdapter(
             $this->db,
             $this->tableAccount,
-            'identity',
+            $identityColumn,
             'credential',
             function ($hash, $password) {
                 $bcrypt = new Bcrypt();

@@ -3,6 +3,7 @@
 namespace User\Validator;
 
 use Laminas\Validator\AbstractValidator;
+use function sprintf;
 
 class PasswordValidator extends AbstractValidator
 {
@@ -28,8 +29,8 @@ class PasswordValidator extends AbstractValidator
     public function __construct()
     {
         $this->messageTemplates = [
-            self::TOO_SHORT => 'Password is less than %min% characters long',
-            self::TOO_LONG  => 'Password is more than %max% characters long',
+            self::TOO_SHORT => sprintf('Password is less than %s characters long', (int)$this->options['min']),
+            self::TOO_LONG  => sprintf('Password is more than %s characters long', (int)$this->options['max']),
         ];
 
         parent::__construct();
@@ -40,13 +41,11 @@ class PasswordValidator extends AbstractValidator
         $this->setValue($value);
 
         if (!empty($this->options['max']) && $this->options['max'] < strlen($value)) {
-            $this->max = (int)$this->options['max'];
             $this->error(static::TOO_LONG);
             return false;
         }
 
         if (!empty($this->options['min']) && $this->options['min'] > strlen($value)) {
-            $this->min = (int)$this->options['min'];
             $this->error(static::TOO_SHORT);
             return false;
         }
