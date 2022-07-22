@@ -18,10 +18,10 @@ class RoleService implements ServiceInterface
                 'name'    => 'member',
                 'section' => 'api',
             ],
-            [
+            /* [
                 'name'    => 'admin',
                 'section' => 'admin',
-            ],
+            ], */
         ];
 
     protected array $sectionList = ['api', 'admin'];

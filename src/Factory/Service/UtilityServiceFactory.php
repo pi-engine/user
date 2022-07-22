@@ -6,26 +6,22 @@ use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Repository\ProfileRepositoryInterface;
-use User\Service\CacheService;
-use User\Service\ProfileService;
+use User\Service\RoleService;
+use User\Service\UtilityService;
 
-class ProfileServiceFactory implements FactoryInterface
+class UtilityServiceFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return ProfileService
+     * @return RoleService
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ProfileService
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): UtilityService
     {
-        return new ProfileService(
-            $container->get(ProfileRepositoryInterface::class),
-            $container->get(CacheService::class)
-        );
+        return new UtilityService();
     }
 }

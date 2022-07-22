@@ -12,6 +12,7 @@ use function in_array;
 use function is_object;
 use function is_string;
 use function sprintf;
+use function str_replace;
 use function time;
 
 class AccountService implements ServiceInterface
@@ -231,10 +232,14 @@ class AccountService implements ServiceInterface
             ]
         );
 
+        // Set sms message
+        $message = 'کد تایید: %s
+        لوکس ایرانا';
+
         // Send OTP as SMS
         $this->sendSMS(
             [
-                'message' => sprintf('Your code %s', $otpCode),
+                'message' => sprintf($message, $otpCode),
                 'mobile'  => $account['mobile'],
             ]
         );
@@ -248,7 +253,6 @@ class AccountService implements ServiceInterface
                 'mobile'     => $account['mobile'],
                 'is_new'     => $isNew,
                 'otp_expire' => $otpExpire,
-                'otp_code'   => $otpCode,
             ],
             'error'  => [],
         ];

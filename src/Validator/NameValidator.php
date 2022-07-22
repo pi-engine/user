@@ -4,6 +4,7 @@ namespace User\Validator;
 
 use Laminas\Validator\AbstractValidator;
 use User\Service\AccountService;
+use function print_r;
 
 class NameValidator extends AbstractValidator
 {
@@ -41,9 +42,9 @@ class NameValidator extends AbstractValidator
      */
     protected $options
         = [
-            'format'            => 'medium-space',
+            'format'            => 'loose-space',
             'blacklist'         => [],
-            'check_duplication' => true,
+            'check_duplication' => false,
         ];
 
     /** @var AccountService */

@@ -66,6 +66,7 @@ class MobileValidator extends AbstractValidator
 
         // Set mobile validator
         $validator = new PhoneNumber();
+        $validator->allowedTypes(['mobile']);
         if (isset($this->options['country'])) {
             $validator->setCountry($this->options['country']);
         }
