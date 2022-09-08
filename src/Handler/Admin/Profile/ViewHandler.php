@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
+use function array_merge;
 
 class ViewHandler implements RequestHandlerInterface
 {
@@ -35,7 +36,15 @@ class ViewHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
 
-        $result = ['message' => 'Profile view section is under development'];
+        $account = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
+        $profile = $this->accountService->getProfile(['user_id' => (int)$requestBody['user_id']]);
+
+        // Set result array
+        $result = [
+            'result' => true,
+            'data'   => array_merge($account, $profile),
+            'error'  => [],
+        ];
 
         return new JsonResponse($result);
     }

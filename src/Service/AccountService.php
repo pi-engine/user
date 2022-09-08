@@ -522,7 +522,6 @@ class AccountService implements ServiceInterface
 
         if (is_object($profile)) {
             $profile = [
-                //'user_id'         => $profile->getUserId(),
                 'first_name'      => $profile->getFirstName(),
                 'last_name'       => $profile->getLastName(),
                 'id_number'       => $profile->getIdNumber(),
@@ -545,7 +544,6 @@ class AccountService implements ServiceInterface
             ];
         } else {
             $profile = [
-                //'user_id'         => $profile['user_id'],
                 'first_name'      => $profile['first_name'],
                 'last_name'       => $profile['last_name'],
                 'id_number'       => $profile['id_number'],
@@ -597,6 +595,22 @@ class AccountService implements ServiceInterface
     // ToDo: Move it to notification module
     public function sendSMS($params)
     {
+        $url = 'https://smspanel.payamakyab.com/Post/Send.asmx?wsdl';
+        $to  = str_replace('+98', '', $params['mobile']);
 
+        $smsParams = [
+            'username' => 'luxirana',
+            'password' => '88141488',
+            'from'     => '1000185',
+            'to'       => [$to],
+            'text'     => $params['message'],
+            'isflash'  => false,
+            'udh'      => '',
+            'recId'    => [0],
+            'status'   => [0],
+        ];
+
+        $client = new LaminasSoapClient($url);
+        $client->SendSms($smsParams)->SendSmsResult;
     }
 }

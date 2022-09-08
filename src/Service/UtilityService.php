@@ -4,6 +4,7 @@ namespace User\Service;
 
 use IntlDateFormatter;
 use Laminas\Escaper\Escaper;
+use NumberFormatter;
 use Pi;
 use function _escape;
 use function class_exists;
@@ -145,5 +146,54 @@ class UtilityService implements ServiceInterface
     public function getConfig()
     {
 
+    }
+
+    /**
+     * Locale-dependent formatting/parsing of number
+     * using pattern strings and/or canned patterns
+     *
+     * @param int|float   $value
+     * @param string|null $currency
+     * @param string|null $locale
+     *
+     * @return string
+     */
+    public function setCurrency($value, $currency = null, $locale = null)
+    {
+        $result   = $value;
+        $currency = (null === $currency) ? 'IRR' : $currency;
+        if ($currency) {
+            $style     = 'CURRENCY';
+            $formatter = $this->getNumberFormatter($style, $locale);
+            $result    = $formatter->formatCurrency((int)$value, $currency);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Load number formatter
+     *
+     * @param string|null $style
+     * @param string|null $pattern
+     * @param string|null $locale
+     *
+     * @return NumberFormatter|null
+     * @see NumberFormatter
+     *
+     */
+    public function getNumberFormatter($style = null, $pattern = null, $locale = null) {
+        if (!class_exists('NumberFormatter')) {
+            return null;
+        }
+
+        $locale    = $locale ?: 'fa_IR';
+        $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+
+        if ($pattern) {
+            $formatter->setPattern($pattern);
+        }
+
+        return $formatter;
     }
 }
