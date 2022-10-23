@@ -258,6 +258,11 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    public function getAccountCount($params = []): int
+    {
+        return $this->accountRepository->getAccountCount($params);
+    }
+
     public function getAccountList($params): array
     {
         $limit  = (int)$params['limit'] ?? 10;
