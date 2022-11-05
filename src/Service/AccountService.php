@@ -201,6 +201,7 @@ class AccountService implements ServiceInterface
             $account = $this->addAccount(
                 [
                     'mobile'     => $params['mobile'],
+                    'source'     => $params['source'],
                     'credential' => $otpCode,
                 ]
             );
@@ -233,14 +234,31 @@ class AccountService implements ServiceInterface
         );
 
         // Set sms message
-        $message = 'کد تایید: %s
+        if (isset($params['source']) && !empty($params['source'])) {
+            switch ($params['source']) {
+                case 'dafi':
+                    $message = 'کد تایید: %s
+        دافی';
+                    break;
+
+                case 'luxirana':
+                default:
+                    $message = 'کد تایید: %s
         لوکس ایرانا';
+                    break;
+
+            }
+        } else {
+            $message = 'کد تایید: %s
+        لوکس ایرانا';
+        }
 
         // Send OTP as SMS
         $this->sendSMS(
             [
                 'message' => sprintf($message, $otpCode),
                 'mobile'  => $account['mobile'],
+                'source' => $params['source'] ?? ''
             ]
         );
 
@@ -370,6 +388,11 @@ class AccountService implements ServiceInterface
 
         // Set user roles
         $this->roleService->addDefaultRoles((int)$account['id']);
+
+        // Set source roles params
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source'])) {
+            $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+        }
 
         return $account;
     }

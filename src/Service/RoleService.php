@@ -3,6 +3,7 @@
 namespace User\Service;
 
 use User\Repository\RoleRepositoryInterface;
+use function in_array;
 
 class RoleService implements ServiceInterface
 {
@@ -143,8 +144,15 @@ class RoleService implements ServiceInterface
 
     public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void
     {
-        $roleList = $this->getRoleListLight();
-        if (in_array($roleName, $roleList) && in_array($section, $this->sectionList)) {
+        $systemRoleList = $this->getRoleListLight();
+        $userRoleList   = $this->getRoleAccount($userId);
+
+        // Check role and add
+        if (
+            in_array($roleName, $systemRoleList)
+            && !in_array($section, $userRoleList)
+            && in_array($section, $this->sectionList)
+        ) {
             $this->roleRepository->addRoleAccount($userId, $roleName, $section);
         }
     }
