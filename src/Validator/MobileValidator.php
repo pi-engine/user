@@ -5,6 +5,7 @@ namespace User\Validator;
 use Laminas\I18n\Validator\PhoneNumber;
 use Laminas\Validator\AbstractValidator;
 use User\Service\AccountService;
+use function preg_match;
 
 class MobileValidator extends AbstractValidator
 {
@@ -65,16 +66,24 @@ class MobileValidator extends AbstractValidator
         $this->setValue($value);
 
         // Set mobile validator
-        $validator = new PhoneNumber();
-        $validator->allowedTypes(['mobile']);
-        if (isset($this->options['country'])) {
-            $validator->setCountry($this->options['country']);
-        }
+        if (isset($this->options['country']) && $this->options['country'] == 'IR') {
+            $pattern = '/(\+?98|098|0|0098)?(9\d{9})/';
+            if (!preg_match($pattern, $value)) {
+                $this->error(static::INVALID);
+                return false;
+            }
+        } else {
+            $validator = new PhoneNumber();
+            $validator->allowedTypes(['mobile']);
+            if (isset($this->options['country'])) {
+                $validator->setCountry($this->options['country']);
+            }
 
-        // Check
-        if (!$validator->isValid($value)) {
-            $this->error(static::INVALID);
-            return false;
+            // Check
+            if (!$validator->isValid($value)) {
+                $this->error(static::INVALID);
+                return false;
+            }
         }
 
         if (!empty($this->options['blacklist'])) {

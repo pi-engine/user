@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `user_account`
     `email`          VARCHAR(128)                 DEFAULT NULL,
     `mobile`         VARCHAR(128)                 DEFAULT NULL,
     `credential`     VARCHAR(255)        NOT NULL DEFAULT '',
+    `otp`            VARCHAR(255)        NOT NULL DEFAULT '',
     `status`         TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
     `time_created`   INT(10) UNSIGNED    NOT NULL DEFAULT '0',
     `time_activated` INT(10) UNSIGNED    NOT NULL DEFAULT '0',

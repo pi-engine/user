@@ -9,7 +9,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
-use User\Service\TokenService;
 
 class VerifyHandler implements RequestHandlerInterface
 {
@@ -38,9 +37,10 @@ class VerifyHandler implements RequestHandlerInterface
 
         // Set login params
         $params = [
-            'column'     => 'mobile',
-            'identity'   => $requestBody['mobile'],
-            'credential' => $requestBody['otp'],
+            'identityColumn'   => 'mobile',
+            'credentialColumn' => 'otp',
+            'identity'         => $requestBody['mobile'],
+            'credential'       => $requestBody['otp'],
         ];
 
         // Do log in

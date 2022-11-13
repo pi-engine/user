@@ -42,6 +42,9 @@ class ProfileHandler implements RequestHandlerInterface
     {
         $account = $request->getAttribute('account');
 
+        // Set ID as int
+        $account['id'] = (int) $account['id'];
+
         // Set profile params
         $params = [
             'user_id' => (int) $account['id']

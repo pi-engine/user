@@ -79,10 +79,11 @@ class AccountService implements ServiceInterface
     public function login($params): array
     {
         // Set login column
-        $identityColumn = $params['column'] ?? 'identity';
+        $identityColumn = $params['identityColumn'] ?? 'identity';
+        $credentialColumn = $params['credentialColumn'] ?? 'credential';
 
         // Do log in
-        $authentication = $this->accountRepository->authentication($identityColumn);
+        $authentication = $this->accountRepository->authentication($identityColumn, $credentialColumn);
         $adapter        = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
 
@@ -202,7 +203,7 @@ class AccountService implements ServiceInterface
                 [
                     'mobile'     => $params['mobile'],
                     'source'     => $params['source'],
-                    'credential' => $otpCode,
+                    'otp'        => $otpCode,
                 ]
             );
 
@@ -210,8 +211,8 @@ class AccountService implements ServiceInterface
             $isNew = 1;
         } else {
             $bcrypt     = new Bcrypt();
-            $credential = $bcrypt->create($otpCode);
-            $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
+            $otp = $bcrypt->create($otpCode);
+            $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
         // Set user cache
@@ -219,7 +220,7 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id'         => $account['id'],
+                    'id'         => (int) $account['id'],
                     'name'       => $account['name'],
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
@@ -340,9 +341,13 @@ class AccountService implements ServiceInterface
             $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
         }
 
+        $otp = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
             $credential = $this->generateCredential($params['credential']);
+        }
+        if (isset($params['otp']) && !empty($params['otp'])) {
+            $otp = $this->generateCredential($params['otp']);
         }
 
         $paramsAccount = [
@@ -351,6 +356,7 @@ class AccountService implements ServiceInterface
             'identity'     => $params['identity'] ?? null,
             'mobile'       => $params['mobile'] ?? null,
             'credential'   => $credential,
+            'otp'          => $otp,
             'status'       => $this->userRegisterStatus(),
             'time_created' => time(),
         ];

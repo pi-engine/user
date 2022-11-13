@@ -88,6 +88,9 @@ class CacheService implements ServiceInterface
         $user = [];
         if ($this->cache->has($key)) {
             $user = $this->cache->get($key);
+
+            // Set ID as int
+            $user['account']['id'] = (int) $user['account']['id'];
         }
 
         return $user;
@@ -114,6 +117,9 @@ class CacheService implements ServiceInterface
 
         // Set params
         if (isset($params['account']) && !empty($params['account'])) {
+            // Set ID as int
+            $params['account']['id'] = (int)$params['account']['id'];
+
             $user['account'] = $params['account'];
         }
         if (isset($params['access_keys']) && !empty($params['access_keys'])) {

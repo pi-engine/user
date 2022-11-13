@@ -238,14 +238,14 @@ class AccountRepository implements AccountRepositoryInterface
         return (int)$row['count'];
     }
 
-    public function authentication($identityColumn = 'identity'): AuthenticationService
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential'): AuthenticationService
     {
         // Call authAdapter
         $authAdapter = new CallbackCheckAdapter(
             $this->db,
             $this->tableAccount,
             $identityColumn,
-            'credential',
+            $credentialColumn,
             function ($hash, $password) {
                 $bcrypt = new Bcrypt();
                 return $bcrypt->verify($password, $hash);
