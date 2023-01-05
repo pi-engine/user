@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api;
+namespace User\Factory\Handler\Api\Authentication\Mobile;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -8,28 +8,26 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\UpdateHandler;
+use User\Handler\Api\Authentication\Mobile\VerifyHandler;
 use User\Service\AccountService;
-use User\Service\TokenService;
 
-class UpdateHandlerFactory implements FactoryInterface
+class VerifyHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return UpdateHandler
+     * @return VerifyHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): UpdateHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): VerifyHandler
     {
-        return new UpdateHandler(
+        return new VerifyHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(AccountService::class),
-            $container->get(TokenService::class)
+            $container->get(AccountService::class)
         );
     }
 }

@@ -80,6 +80,12 @@ class OtpValidator extends AbstractValidator
                 $this->error(static::NOT_FOUND);
                 return false;
             }
+        } elseif (isset($this->options['email']) && !empty($this->options['email'])) {
+            $account = $this->accountService->getAccount(['email' => $this->options['email']]);
+            if (empty($account) || (int)$account['id'] === 0) {
+                $this->error(static::NOT_FOUND);
+                return false;
+            }
         } else {
             $this->error(static::NOT_FOUND);
             return false;

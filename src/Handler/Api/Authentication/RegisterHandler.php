@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Authentication;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;

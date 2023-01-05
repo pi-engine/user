@@ -4,6 +4,7 @@ namespace User\Factory\Service;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Notification\Service\NotificationService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\AccountRepositoryInterface;
@@ -29,7 +30,8 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(AccountRepositoryInterface::class),
             $container->get(RoleService::class),
             $container->get(TokenService::class),
-            $container->get(CacheService::class)
+            $container->get(CacheService::class),
+            $container->get(NotificationService::class)
         );
     }
 }

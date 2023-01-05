@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api;
+namespace User\Factory\Handler\Api\Authentication;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -8,24 +8,24 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\ProfileHandler;
+use User\Handler\Api\Authentication\LogoutHandler;
 use User\Service\AccountService;
 use User\Service\TokenService;
 
-class ProfileHandlerFactory implements FactoryInterface
+class LogoutHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return ProfileHandler
+     * @return LogoutHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ProfileHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): LogoutHandler
     {
-        return new ProfileHandler(
+        return new LogoutHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),

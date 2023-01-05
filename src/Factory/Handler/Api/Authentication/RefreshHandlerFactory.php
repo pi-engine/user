@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api;
+namespace User\Factory\Handler\Api\Authentication;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -8,7 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\RefreshHandler;
+use User\Handler\Api\Authentication\RefreshHandler;
 use User\Service\AccountService;
 use User\Service\TokenService;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Authentication\Mobile;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
 
-class PasswordHandler implements RequestHandlerInterface
+class RequestHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -22,26 +22,22 @@ class PasswordHandler implements RequestHandlerInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
-    /** @var TokenService */
-    protected TokenService $tokenService;
-
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        TokenService $tokenService
+        AccountService $accountService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->tokenService    = $tokenService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $account     = $request->getAttribute('account');
-        $result      = $this->accountService->updatePassword($requestBody, $account);
+
+        // Do log in
+        $result = $this->accountService->prepareMobileLogin($requestBody);
 
         return new JsonResponse($result);
     }

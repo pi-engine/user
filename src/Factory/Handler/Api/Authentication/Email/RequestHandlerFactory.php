@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api;
+namespace User\Factory\Handler\Api\Authentication\Email;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -8,28 +8,26 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\PasswordHandler;
+use User\Handler\Api\Authentication\Email\RequestHandler;
 use User\Service\AccountService;
-use User\Service\TokenService;
 
-class PasswordHandlerFactory implements FactoryInterface
+class RequestHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return PasswordHandler
+     * @return RequestHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): PasswordHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): RequestHandler
     {
-        return new PasswordHandler(
+        return new RequestHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(AccountService::class),
-            $container->get(TokenService::class)
+            $container->get(AccountService::class)
         );
     }
 }

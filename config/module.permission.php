@@ -121,6 +121,17 @@ return [
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'profile',
+            'handler'     => 'refresh',
+            'permissions' => 'user-refresh',
+            'role'        => [
+                'member',
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'api',
+            'package'     => 'profile',
             'handler'     => 'logout',
             'permissions' => 'user-logout',
             'role'        => [
@@ -132,8 +143,8 @@ return [
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'profile',
-            'handler'     => 'profile',
-            'permissions' => 'user-profile',
+            'handler'     => 'view',
+            'permissions' => 'user-view',
             'role'        => [
                 'member',
                 'admin',
@@ -156,17 +167,6 @@ return [
             'package'     => 'profile',
             'handler'     => 'password',
             'permissions' => 'user-password',
-            'role'        => [
-                'member',
-                'admin',
-            ],
-        ],
-        [
-            'module'      => 'user',
-            'section'     => 'api',
-            'package'     => 'profile',
-            'handler'     => 'refresh',
-            'permissions' => 'user-refresh',
             'role'        => [
                 'member',
                 'admin',

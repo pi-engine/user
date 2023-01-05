@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Authentication;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
 
-class RefreshHandler implements RequestHandlerInterface
+class LoginHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -39,15 +39,17 @@ class RefreshHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account = $request->getAttribute('account');
+        $requestBody = $request->getParsedBody();
 
+        // Set login params
         $params = [
-            'user_id' => $account['id'],
+            'identity'   => $requestBody['identity'],
+            'credential' => $requestBody['credential'],
         ];
 
-        $result = $this->accountService->refreshToken($params);
+        // Do log in
+        $result = $this->accountService->login($params);
 
-        // Set result
         return new JsonResponse($result);
     }
 }

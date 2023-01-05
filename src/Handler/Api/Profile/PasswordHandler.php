@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Profile;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -10,9 +10,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
-use function array_merge;
 
-class ProfileHandler implements RequestHandlerInterface
+class PasswordHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -40,24 +39,9 @@ class ProfileHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account = $request->getAttribute('account');
-
-        // Set ID as int
-        $account['id'] = (int) $account['id'];
-
-        // Set profile params
-        $params = [
-            'user_id' => (int) $account['id']
-        ];
-
-        $profile = $this->accountService->getProfile($params);
-
-        // Set result array
-        $result = [
-            'result' => true,
-            'data'   => array_merge($account, $profile),
-            'error'  => [],
-        ];
+        $requestBody = $request->getParsedBody();
+        $account     = $request->getAttribute('account');
+        $result      = $this->accountService->updatePassword($requestBody, $account);
 
         return new JsonResponse($result);
     }

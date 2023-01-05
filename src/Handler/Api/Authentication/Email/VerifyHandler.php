@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Authentication\Email;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -9,9 +9,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
-use User\Service\TokenService;
 
-class LoginHandler implements RequestHandlerInterface
+class VerifyHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -22,19 +21,14 @@ class LoginHandler implements RequestHandlerInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
-    /** @var TokenService */
-    protected TokenService $tokenService;
-
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        TokenService $tokenService
+        AccountService $accountService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->tokenService    = $tokenService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -43,8 +37,10 @@ class LoginHandler implements RequestHandlerInterface
 
         // Set login params
         $params = [
-            'identity'   => $requestBody['identity'],
-            'credential' => $requestBody['credential'],
+            'identityColumn'   => 'email',
+            'credentialColumn' => 'otp',
+            'identity'         => $requestBody['email'],
+            'credential'       => $requestBody['otp'],
         ];
 
         // Do log in

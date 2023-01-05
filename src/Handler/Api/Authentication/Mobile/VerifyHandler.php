@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Authentication\Mobile;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -9,9 +9,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
-use User\Service\TokenService;
 
-class UpdateHandler implements RequestHandlerInterface
+class VerifyHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -22,33 +21,33 @@ class UpdateHandler implements RequestHandlerInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
-    /** @var TokenService */
-    protected TokenService $tokenService;
-
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        TokenService $tokenService
+        AccountService $accountService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->tokenService    = $tokenService;
     }
 
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody    = $request->getParsedBody();
-        $account        = $request->getAttribute('account');
-        $updatedAccount = $this->accountService->updateAccount($requestBody, $account);
+        $requestBody = $request->getParsedBody();
 
-        // Set result array
-        $result = [
-            'result' => true,
-            'data'   => $updatedAccount,
-            'error'  => [],
+        // Set login params
+        $params = [
+            'identityColumn'   => 'mobile',
+            'credentialColumn' => 'otp',
+            'identity'         => $requestBody['mobile'],
+            'credential'       => $requestBody['otp'],
         ];
+
+        // Do log in
+        $result = $this->accountService->login($params);
 
         return new JsonResponse($result);
     }

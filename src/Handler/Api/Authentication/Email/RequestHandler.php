@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Authentication\Email;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -9,8 +9,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
+use User\Service\TokenService;
 
-class VerifyHandler implements RequestHandlerInterface
+class RequestHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -35,16 +36,8 @@ class VerifyHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
 
-        // Set login params
-        $params = [
-            'identityColumn'   => 'mobile',
-            'credentialColumn' => 'otp',
-            'identity'         => $requestBody['mobile'],
-            'credential'       => $requestBody['otp'],
-        ];
-
         // Do log in
-        $result = $this->accountService->login($params);
+        $result = $this->accountService->prepareMailLogin($requestBody);
 
         return new JsonResponse($result);
     }

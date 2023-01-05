@@ -4,15 +4,13 @@ namespace User\Service;
 
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
-use Laminas\Soap\Client as LaminasSoapClient;
-use Psr\SimpleCache\InvalidArgumentException;
+use Notification\Service\NotificationService;
 use User\Repository\AccountRepositoryInterface;
 use function array_merge;
 use function in_array;
 use function is_object;
 use function is_string;
 use function sprintf;
-use function str_replace;
 use function time;
 
 class AccountService implements ServiceInterface
@@ -28,6 +26,9 @@ class AccountService implements ServiceInterface
 
     /* @var CacheService */
     protected CacheService $cacheService;
+
+    /** @var NotificationService */
+    protected NotificationService $notificationService;
 
     protected array $profileFields
         = [
@@ -62,24 +63,20 @@ class AccountService implements ServiceInterface
         AccountRepositoryInterface $accountRepository,
         RoleService $roleService,
         TokenService $tokenService,
-        CacheService $cacheService
+        CacheService $cacheService,
+        NotificationService $notificationService,
     ) {
-        $this->accountRepository = $accountRepository;
-        $this->roleService       = $roleService;
-        $this->tokenService      = $tokenService;
-        $this->cacheService      = $cacheService;
+        $this->accountRepository   = $accountRepository;
+        $this->roleService         = $roleService;
+        $this->tokenService        = $tokenService;
+        $this->cacheService        = $cacheService;
+        $this->notificationService = $notificationService;
     }
 
-    /**
-     * @param $params
-     *
-     * @return array
-     * @throws InvalidArgumentException
-     */
     public function login($params): array
     {
         // Set login column
-        $identityColumn = $params['identityColumn'] ?? 'identity';
+        $identityColumn   = $params['identityColumn'] ?? 'identity';
         $credentialColumn = $params['credentialColumn'] ?? 'credential';
 
         // Do log in
@@ -201,17 +198,17 @@ class AccountService implements ServiceInterface
         if (empty($account)) {
             $account = $this->addAccount(
                 [
-                    'mobile'     => $params['mobile'],
-                    'source'     => $params['source'],
-                    'otp'        => $otpCode,
+                    'mobile' => $params['mobile'],
+                    'source' => $params['source'],
+                    'otp'    => $otpCode,
                 ]
             );
 
             // Set is new
             $isNew = 1;
         } else {
-            $bcrypt     = new Bcrypt();
-            $otp = $bcrypt->create($otpCode);
+            $bcrypt = new Bcrypt();
+            $otp    = $bcrypt->create($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -220,7 +217,7 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id'         => (int) $account['id'],
+                    'id'         => (int)$account['id'],
                     'name'       => $account['name'],
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
@@ -254,14 +251,91 @@ class AccountService implements ServiceInterface
         لوکس ایرانا';
         }
 
-        // Send OTP as SMS
-        $this->sendSMS(
-            [
+        // Set notification params
+        $notificationParams = [
+            'sms' =>             [
                 'message' => sprintf($message, $otpCode),
                 'mobile'  => $account['mobile'],
-                'source' => $params['source'] ?? ''
+                'source'  => $params['source'] ?? '',
+            ]
+        ];
+
+        // Send notification
+        $this->notificationService->send($notificationParams);
+
+        // Set result
+        return [
+            'result' => true,
+            'data'   => [
+                'message'    => 'Verify code send to your mobile number !',
+                'name'       => $account['name'],
+                'mobile'     => $account['mobile'],
+                'is_new'     => $isNew,
+                'otp_expire' => $otpExpire,
+            ],
+            'error'  => [],
+        ];
+    }
+
+    public function prepareMailLogin($params): array
+    {
+        // Set new password as OTP
+        $otpCode   = Rand::getInteger(100000, 999999);
+        $otpExpire = (time() + 180);
+        $isNew     = 0;
+
+        // Check account exist
+        $account = $this->getAccount(['email' => $params['email']]);
+
+        // Create account if not exist
+        // Update OTP password if account exist
+        if (empty($account)) {
+            $account = $this->addAccount(
+                [
+                    'email'  => $params['email'],
+                    'source' => $params['source'],
+                    'otp'    => $otpCode,
+                ]
+            );
+
+            // Set is new
+            $isNew = 1;
+        } else {
+            $bcrypt = new Bcrypt();
+            $otp    = $bcrypt->create($otpCode);
+            $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
+        }
+
+        // Set user cache
+        $this->cacheService->setUser(
+            $account['id'],
+            [
+                'account' => [
+                    'id'         => (int)$account['id'],
+                    'name'       => $account['name'],
+                    'email'      => $account['email'],
+                    'identity'   => $account['identity'],
+                    'mobile'     => $account['mobile'],
+                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                ],
+                'otp'     => [
+                    'code'        => $otpCode,
+                    'time_expire' => $otpExpire,
+                ],
             ]
         );
+
+        // Set notification params
+        $notificationParams = [
+            'email' => [
+                'to' => $account['email'],
+                'subject' => 'Login Verification Code',
+                'body' => sprintf('Your code is : <strong>%s</strong> and is valid for 3 min', $otpCode)
+            ]
+        ];
+
+        // Send notification
+        $this->notificationService->send($notificationParams);
 
         // Set result
         return [
@@ -341,7 +415,7 @@ class AccountService implements ServiceInterface
             $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
         }
 
-        $otp = null;
+        $otp        = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
             $credential = $this->generateCredential($params['credential']);
@@ -624,11 +698,5 @@ class AccountService implements ServiceInterface
                 'id'    => $id,
             ]
         );
-    }
-
-    // ToDo: Move it to notification module
-    public function sendSMS($params)
-    {
-
     }
 }

@@ -73,10 +73,6 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->loginIsValid($parsedBody);
                 break;
 
-            case 'verify':
-                $this->loginOTPIsValid($parsedBody);
-                break;
-
             case 'add':
                 $this->registerIsValid($parsedBody);
                 break;
@@ -91,6 +87,18 @@ class ValidationMiddleware implements MiddlewareInterface
 
             case 'mobile':
                 $this->mobileIsValid($parsedBody);
+                break;
+
+            case 'email':
+                $this->emailIsValid($parsedBody);
+                break;
+
+            case 'verify-mobile':
+                $this->loginMobileIsValid($parsedBody);
+                break;
+
+            case 'verify-email':
+                $this->loginEmailIsValid($parsedBody);
                 break;
 
             default:
@@ -173,38 +181,6 @@ class ValidationMiddleware implements MiddlewareInterface
         $credential = new Input('credential');
         $credential->getValidatorChain()->attach(new PasswordValidator());
         $inputFilter->add($credential);
-
-        $inputFilter->setData($params);
-
-        if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
-        }
-    }
-
-    protected function loginOTPIsValid($params)
-    {
-        $inputFilter = new InputFilter();
-
-        $option = [
-            'check_duplication' => false,
-            'country' => 'IR'
-        ];
-        if (isset($params['country']) && !empty($params['country'])) {
-            $option['country'] = $params['country'];
-        }
-
-        $mobile = new Input('mobile');
-        $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
-        $inputFilter->add($mobile);
-
-        $option = [
-            'mobile' => $params['mobile']
-        ];
-
-        // Check otp
-        $otp = new Input('otp');
-        $otp->getValidatorChain()->attach(new OtpValidator($this->accountService, $this->cacheService, $option));
-        $inputFilter->add($otp);
 
         $inputFilter->setData($params);
 
@@ -355,6 +331,84 @@ class ValidationMiddleware implements MiddlewareInterface
 
         $inputFilter = new InputFilter();
         $inputFilter->add($mobile);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function emailIsValid($params)
+    {
+        $option = [
+            'check_duplication' => false,
+        ];
+
+        $email = new Input('email');
+        $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($email);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function loginMobileIsValid($params)
+    {
+        $inputFilter = new InputFilter();
+
+        $option = [
+            'check_duplication' => false,
+            'country' => 'IR'
+        ];
+        if (isset($params['country']) && !empty($params['country'])) {
+            $option['country'] = $params['country'];
+        }
+
+        $mobile = new Input('mobile');
+        $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
+        $inputFilter->add($mobile);
+
+        $option = [
+            'mobile' => $params['mobile']
+        ];
+
+        // Check otp
+        $otp = new Input('otp');
+        $otp->getValidatorChain()->attach(new OtpValidator($this->accountService, $this->cacheService, $option));
+        $inputFilter->add($otp);
+
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function loginEmailIsValid($params)
+    {
+        $option = [
+            'check_duplication' => false,
+        ];
+
+        // Check email
+        $email = new Input('email');
+        $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
+
+        $option = [
+            'email' => $params['email']
+        ];
+
+        // Check otp
+        $otp = new Input('otp');
+        $otp->getValidatorChain()->attach(new OtpValidator($this->accountService, $this->cacheService, $option));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($email);
+        $inputFilter->add($otp);
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {

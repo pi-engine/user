@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api;
+namespace User\Handler\Api\Profile;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -10,8 +10,9 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
+use function array_merge;
 
-class LogoutHandler implements RequestHandlerInterface
+class ViewHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -39,17 +40,24 @@ class LogoutHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $tokenId     = $request->getAttribute('token_id');
-        $account     = $request->getAttribute('account');
-        $requestBody = $request->getParsedBody();
+        $account = $request->getAttribute('account');
 
+        // Set ID as int
+        $account['id'] = (int) $account['id'];
+
+        // Set profile params
         $params = [
-            'user_id'     => $account['id'],
-            'token_id'    => $tokenId,
-            'all_session' => $requestBody['all_session'] ?? 0,
+            'user_id' => (int) $account['id']
         ];
 
-        $result = $this->accountService->logout($params);
+        $profile = $this->accountService->getProfile($params);
+
+        // Set result array
+        $result = [
+            'result' => true,
+            'data'   => array_merge($account, $profile),
+            'error'  => [],
+        ];
 
         return new JsonResponse($result);
     }
