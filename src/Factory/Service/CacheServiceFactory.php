@@ -18,8 +18,12 @@ class CacheServiceFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): CacheService
     {
+        // Get config
+        $config = $container->get('config');
+
         return new CacheService(
-            $container->get(StorageAdapterFactoryInterface::class)
+            $container->get(StorageAdapterFactoryInterface::class),
+            $config['cache']
         );
     }
 }

@@ -16,28 +16,21 @@ class CacheService implements ServiceInterface
             'access_keys'  => [],
             'refresh_keys' => [],
         ];
+
     /* @var SimpleCacheDecorator */
     protected SimpleCacheDecorator $cache;
+
     protected string $userKeyPattern = 'user-%s';
+
     protected string $roleKeyPattern = 'roles-list';
 
-    public function __construct(StorageAdapterFactoryInterface $storageFactory)
+    /* @var array */
+    protected array $config;
+
+    public function __construct(StorageAdapterFactoryInterface $storageFactory, $config)
     {
         // Set cache
-        $cache = $storageFactory->create(
-            'redis',
-            [
-                'server' => [
-                    '127.0.0.1',
-                    6379,
-                ],
-            ],
-            [
-                [
-                    'name' => 'serializer',
-                ],
-            ]
-        );
+        $cache = $storageFactory->create($config['storage'], $config['options'], $config['plugins']);
         $cache->addPlugin(new Serializer());
         $this->cache = new SimpleCacheDecorator($cache);
     }

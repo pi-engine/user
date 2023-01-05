@@ -10,17 +10,18 @@ use Laminas\Math\Rand;
 
 class TokenService implements ServiceInterface
 {
-    /* @var Config */
-    protected Config $config;
-
     /* @var CacheService */
     protected CacheService $cacheService;
 
+    /* @var array */
+    protected array $config;
+
     public function __construct(
-        CacheService $cacheService
+        CacheService $cacheService,
+        $config
     ) {
-        $this->config       = new Config(include __DIR__ . '/../../config/custom.config.php');
         $this->cacheService = $cacheService;
+        $this->config       = $config;
     }
 
     public function generate($params): array
@@ -41,7 +42,7 @@ class TokenService implements ServiceInterface
         ];
 
         return [
-            'token'   => JWT::encode($payload, $this->config->jwt->secret, 'HS256'),
+            'token'   => JWT::encode($payload, $this->config['secret'], 'HS256'),
             'key'     => $key,
             'payload' => $payload,
         ];
@@ -72,17 +73,17 @@ class TokenService implements ServiceInterface
         switch ($params['type']) {
             default:
             case 'access':
-                return $this->config->jwt->exp_access;
+                return $this->config['exp_access'];
 
             case 'refresh':
-                return $this->config->jwt->exp_refresh;
+                return $this->config['exp_refresh'];
         }
     }
 
     public function parse($token): array
     {
         try {
-            $decoded = JWT::decode($token, new Key($this->config->jwt->secret, 'HS256'));
+            $decoded = JWT::decode($token, new Key($this->config['secret'], 'HS256'));
 
             // Get data from cache
             $cacheUser = $this->cacheService->getUser((int)$decoded->uid);

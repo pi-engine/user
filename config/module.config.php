@@ -303,7 +303,7 @@ return [
                                                 'package'     => 'profile',
                                                 'handler'     => 'request',
                                                 'permissions' => 'user-mobile-request',
-                                                'validator'   => 'request',
+                                                'validator'   => 'mobile',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,

@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS `user_account`
     `identity`       VARCHAR(128)                 DEFAULT NULL,
     `email`          VARCHAR(128)                 DEFAULT NULL,
     `mobile`         VARCHAR(128)                 DEFAULT NULL,
-    `credential`     VARCHAR(255)        NOT NULL DEFAULT '',
-    `otp`            VARCHAR(255)        NOT NULL DEFAULT '',
+    `credential`     VARCHAR(255)                 DEFAULT NULL,
+    `otp`            VARCHAR(255)                 DEFAULT NULL,
     `status`         TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
     `time_created`   INT(10) UNSIGNED    NOT NULL DEFAULT '0',
     `time_activated` INT(10) UNSIGNED    NOT NULL DEFAULT '0',
@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `user_account`
     PRIMARY KEY (`id`),
     UNIQUE KEY `identity` (`identity`),
     UNIQUE KEY `email` (`email`),
+    UNIQUE KEY `mobile` (`mobile`),
     KEY `name` (`name`),
     KEY `status` (`status`)
 );
