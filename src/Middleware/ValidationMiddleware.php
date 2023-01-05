@@ -21,6 +21,7 @@ use User\Validator\NameValidator;
 use User\Validator\OtpValidator;
 use User\Validator\PasswordValidator;
 use function sprintf;
+use function var_dump;
 
 class ValidationMiddleware implements MiddlewareInterface
 {

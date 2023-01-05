@@ -199,7 +199,7 @@ class AccountService implements ServiceInterface
             $account = $this->addAccount(
                 [
                     'mobile' => $params['mobile'],
-                    'source' => $params['source'],
+                    'source' => $params['source'] ?? null,
                     'otp'    => $otpCode,
                 ]
             );
@@ -293,7 +293,7 @@ class AccountService implements ServiceInterface
             $account = $this->addAccount(
                 [
                     'email'  => $params['email'],
-                    'source' => $params['source'],
+                    'source' => $params['source'] ?? null,
                     'otp'    => $otpCode,
                 ]
             );
@@ -328,9 +328,12 @@ class AccountService implements ServiceInterface
         // Set notification params
         $notificationParams = [
             'email' => [
-                'to' => $account['email'],
+                'to' => [
+                    'email' => $account['email'],
+                    'name' => $account['name']
+                ],
                 'subject' => 'Login Verification Code',
-                'body' => sprintf('Your code is : <strong>%s</strong> and is valid for 3 min', $otpCode)
+                'body' => sprintf('Your verification code is : <strong>%s</strong> and is valid for 3 min', $otpCode)
             ]
         ];
 
@@ -341,7 +344,7 @@ class AccountService implements ServiceInterface
         return [
             'result' => true,
             'data'   => [
-                'message'    => 'Verify code send to your mobile number !',
+                'message'    => 'Verify code send to your email !',
                 'name'       => $account['name'],
                 'mobile'     => $account['mobile'],
                 'is_new'     => $isNew,

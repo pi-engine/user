@@ -272,9 +272,9 @@ return [
                                                 'module'      => 'user',
                                                 'section'     => 'api',
                                                 'package'     => 'profile',
-                                                'handler'     => 'verify-email',
+                                                'handler'     => 'verify',
                                                 'permissions' => 'user-email-verify',
-                                                'validator'   => 'verify',
+                                                'validator'   => 'verify-email',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
@@ -321,9 +321,9 @@ return [
                                                 'module'      => 'user',
                                                 'section'     => 'api',
                                                 'package'     => 'profile',
-                                                'handler'     => 'verify-mobile',
+                                                'handler'     => 'verify',
                                                 'permissions' => 'user-mobile-verify',
-                                                'validator'   => 'mobile',
+                                                'validator'   => 'verify-mobile',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
