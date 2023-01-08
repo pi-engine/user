@@ -37,6 +37,7 @@ return [
             Validator\NameValidator::class                          => Factory\Validator\NameValidatorFactory::class,
             Validator\MobileValidator::class                        => Factory\Validator\MobileValidatorFactory::class,
             Validator\OtpValidator::class                           => Factory\Validator\OtpValidatorFactory::class,
+            Validator\PasswordValidator::class                      => Factory\Validator\PasswordValidatorFactory::class,
             Handler\Admin\Profile\AddHandler::class                 => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
             Handler\Admin\Profile\EditHandler::class                => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
             Handler\Admin\Profile\ListHandler::class                => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
@@ -49,8 +50,9 @@ return [
             Handler\Admin\Permission\AccessHandler::class           => Factory\Handler\Admin\Permission\AccessHandlerFactory::class,
             Handler\Admin\Permission\ViewHandler::class             => Factory\Handler\Admin\Permission\ViewHandlerFactory::class,
             Handler\Api\Profile\ViewHandler::class                  => Factory\Handler\Api\Profile\ViewHandlerFactory::class,
-            Handler\Api\Profile\PasswordHandler::class              => Factory\Handler\Api\Profile\PasswordHandlerFactory::class,
             Handler\Api\Profile\UpdateHandler::class                => Factory\Handler\Api\Profile\UpdateHandlerFactory::class,
+            Handler\Api\Password\AddHandler::class                  => Factory\Handler\Api\Password\AddHandlerFactory::class,
+            Handler\Api\Password\UpdateHandler::class               => Factory\Handler\Api\Password\UpdateHandlerFactory::class,
             Handler\Api\Authentication\LoginHandler::class          => Factory\Handler\Api\Authentication\LoginHandlerFactory::class,
             Handler\Api\Authentication\LogoutHandler::class         => Factory\Handler\Api\Authentication\LogoutHandlerFactory::class,
             Handler\Api\Authentication\RegisterHandler::class       => Factory\Handler\Api\Authentication\RegisterHandlerFactory::class,
@@ -76,14 +78,14 @@ return [
                 'child_routes' => [
 
                     // Api profile section
-                    'profile'    => [
+                    'profile'        => [
                         'type'         => Literal::class,
                         'options'      => [
                             'route'    => '/profile',
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'view'  => [
+                            'view' => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/view',
@@ -103,7 +105,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'edit'     => [
+                            'edit' => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/update',
@@ -125,32 +127,66 @@ return [
                                     ],
                                 ],
                             ],
-                            'password' => [
+                        ],
+                    ],
+
+                    // Api profile section
+                    'password'       => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/password',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'add'    => [
                                 'type'    => Literal::class,
                                 'options' => [
-                                    'route'    => '/password',
+                                    'route'    => '/add',
                                     'defaults' => [
                                         'module'      => 'user',
                                         'section'     => 'api',
-                                        'package'     => 'profile',
-                                        'handler'     => 'password',
+                                        'package'     => 'password',
+                                        'handler'     => 'add',
                                         'permissions' => 'user-password',
-                                        'validator'   => 'password',
+                                        'validator'   => 'password-add',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
-                                            Handler\Api\Profile\PasswordHandler::class
+                                            Handler\Api\Password\AddHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'update' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/update',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'api',
+                                        'package'     => 'password',
+                                        'handler'     => 'update',
+                                        'permissions' => 'user-password',
+                                        'validator'   => 'password-update',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
+                                            Handler\Api\Password\UpdateHandler::class
                                         ),
                                     ],
                                 ],
                             ],
                         ],
                     ],
+
                     // Api Authentication section
-                    'authentication'    => [
+                    'authentication' => [
                         'type'         => Literal::class,
                         'options'      => [
                             'route'    => '/authentication',
@@ -264,7 +300,7 @@ return [
                                             ],
                                         ],
                                     ],
-                                    'verify' => [
+                                    'verify'  => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/verify',
@@ -286,7 +322,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'mobile'    => [
+                            'mobile'   => [
                                 'type'         => Literal::class,
                                 'options'      => [
                                     'route'    => '/mobile',
@@ -313,7 +349,7 @@ return [
                                             ],
                                         ],
                                     ],
-                                    'verify' => [
+                                    'verify'  => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/verify',

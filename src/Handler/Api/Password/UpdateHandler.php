@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api\Authentication;
+namespace User\Handler\Api\Password;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
 
-class LoginHandler implements RequestHandlerInterface
+class UpdateHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -40,28 +40,8 @@ class LoginHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-
-        // Set identity
-        if (isset($requestBody['email']) && !empty($requestBody['email'])) {
-            $identity       = $requestBody['email'];
-            $identityColumn = 'email';
-        } elseif (isset($requestBody['mobile']) && !empty($requestBody['mobile'])) {
-            $identity       = $requestBody['mobile'];
-            $identityColumn = 'mobile';
-        } else {
-            $identity       = $requestBody['identity'];
-            $identityColumn = 'identity';
-        }
-
-        // Set login params
-        $params = [
-            'identity'       => $identity,
-            'identityColumn' => $identityColumn,
-            'credential'     => $requestBody['credential'],
-        ];
-
-        // Do log in
-        $result = $this->accountService->login($params);
+        $account     = $request->getAttribute('account');
+        $result      = $this->accountService->updatePassword($requestBody, $account);
 
         return new JsonResponse($result);
     }

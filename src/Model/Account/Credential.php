@@ -4,8 +4,8 @@ namespace User\Model\Account;
 
 class Credential
 {
-    private        $id;
-    private string $credential;
+    private mixed   $id;
+    private ?string $credential;
 
     public function __construct(
         $credential,
@@ -26,7 +26,7 @@ class Credential
     /**
      * @return string
      */
-    public function getCredential(): string
+    public function getCredential(): string|null
     {
         return $this->credential;
     }

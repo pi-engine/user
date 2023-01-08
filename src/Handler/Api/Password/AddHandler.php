@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api\Profile;
+namespace User\Handler\Api\Password;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
 
-class PasswordHandler implements RequestHandlerInterface
+class AddHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -41,7 +41,7 @@ class PasswordHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
         $account     = $request->getAttribute('account');
-        $result      = $this->accountService->updatePassword($requestBody, $account);
+        $result      = $this->accountService->addPassword($requestBody, $account);
 
         return new JsonResponse($result);
     }

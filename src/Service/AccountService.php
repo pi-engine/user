@@ -541,6 +541,32 @@ class AccountService implements ServiceInterface
         return array_merge($account, $profile);
     }
 
+    public function hasPassword($userId): bool
+    {
+        $hash = $this->accountRepository->getAccountCredential((int)$userId);
+
+        if (empty($hash)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function addPassword($params, $account): array
+    {
+        $credential = $this->generateCredential($params['credential']);
+
+        $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
+
+        return [
+            'result' => true,
+            'data'   => [
+                'message' => 'Password set successfully !',
+            ],
+            'error'  => [],
+        ];
+    }
+
     public function updatePassword($params, $account): array
     {
         $hash = $this->accountRepository->getAccountCredential((int)$account['id']);

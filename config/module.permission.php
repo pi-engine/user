@@ -164,9 +164,20 @@ return [
         [
             'module'      => 'user',
             'section'     => 'api',
-            'package'     => 'profile',
-            'handler'     => 'password',
-            'permissions' => 'user-password',
+            'package'     => 'password',
+            'handler'     => 'add',
+            'permissions' => 'user-password-add',
+            'role'        => [
+                'member',
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'api',
+            'package'     => 'password',
+            'handler'     => 'update',
+            'permissions' => 'user-password-update',
             'role'        => [
                 'member',
                 'admin',

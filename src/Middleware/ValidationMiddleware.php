@@ -82,8 +82,12 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->editIsValid($parsedBody, $account);
                 break;
 
-            case 'password':
-                $this->passwordIsValid($parsedBody, $account);
+            case 'password-add':
+                $this->passwordAddIsValid($parsedBody, $account);
+                break;
+
+            case 'password-update':
+                $this->passwordEditIsValid($parsedBody, $account);
                 break;
 
             case 'mobile':
@@ -180,7 +184,7 @@ class ValidationMiddleware implements MiddlewareInterface
 
         // Check credential
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator());
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
         $inputFilter->add($credential);
 
         $inputFilter->setData($params);
@@ -219,16 +223,16 @@ class ValidationMiddleware implements MiddlewareInterface
         }
 
         // Check credential
-        if (isset($params['credential']) && !empty($params['credential'])) {
+        if (isset($params['identity']) && !empty($params['identity'])) {
             $identity = new Input('identity');
             $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService));
             $inputFilter->add($identity);
         }
 
         // Check identity
-        if (isset($params['identity']) && !empty($params['identity'])) {
+        if (isset($params['credential']) && !empty($params['credential'])) {
             $credential = new Input('credential');
-            $credential->getValidatorChain()->attach(new PasswordValidator());
+            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
             $inputFilter->add($credential);
         }
 
@@ -299,13 +303,33 @@ class ValidationMiddleware implements MiddlewareInterface
         }
     }
 
-    protected function passwordIsValid($params, $account)
+    protected function passwordAddIsValid($params, $account)
+    {
+        // Set option
+        $option = [
+            'user_id' => $account['id'],
+            'check_has_password' => 1,
+        ];
+
+        $credential = new Input('credential');
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $option));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($credential);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function passwordEditIsValid($params, $account)
     {
         $currentCredential = new Input('current_credential');
-        $currentCredential->getValidatorChain()->attach(new PasswordValidator());
+        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
 
         $newCredential = new Input('new_credential');
-        $newCredential->getValidatorChain()->attach(new PasswordValidator());
+        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($currentCredential);
