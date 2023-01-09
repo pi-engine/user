@@ -182,7 +182,8 @@ class UtilityService implements ServiceInterface
      * @see NumberFormatter
      *
      */
-    public function getNumberFormatter($style = null, $pattern = null, $locale = null) {
+    public function getNumberFormatter($style = null, $pattern = null, $locale = null)
+    {
         if (!class_exists('NumberFormatter')) {
             return null;
         }

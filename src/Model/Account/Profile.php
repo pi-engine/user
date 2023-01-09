@@ -4,8 +4,8 @@ namespace User\Model\Account;
 
 class Profile
 {
-    private mixed  $id;
-    private int    $user_id;
+    private mixed $id;
+    private int   $user_id;
     private mixed $first_name;
     private mixed $last_name;
     private mixed $id_number;

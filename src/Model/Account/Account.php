@@ -4,7 +4,7 @@ namespace User\Model\Account;
 
 class Account
 {
-    private mixed  $id;
+    private mixed   $id;
     private ?string $name;
     private ?string $identity;
     private ?string $email;

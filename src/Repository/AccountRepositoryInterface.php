@@ -5,7 +5,6 @@ namespace User\Repository;
 use Laminas\Authentication\AuthenticationService;
 use Laminas\Db\ResultSet\HydratingResultSet;
 use User\Model\Account\Account;
-use User\Model\Account\Profile;
 
 interface AccountRepositoryInterface
 {

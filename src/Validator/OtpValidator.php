@@ -6,7 +6,6 @@ use Laminas\Validator\AbstractValidator;
 use User\Service\AccountService;
 use User\Service\CacheService;
 use function array_merge;
-use function var_dump;
 
 class OtpValidator extends AbstractValidator
 {
@@ -48,10 +47,10 @@ class OtpValidator extends AbstractValidator
         $this->options        = array_merge($this->options, $options);
 
         $this->messageTemplates = [
-            self::TOO_SHORT         => 'Password is less than %min% characters long',
-            self::TOO_LONG          => 'Password is more than %max% characters long',
+            self::TOO_SHORT => 'Password is less than %min% characters long',
+            self::TOO_LONG  => 'Password is more than %max% characters long',
             self::NOT_FOUND => 'Account by this information was not found !',
-            self::NOT_VALID => 'OTP Is not valid !'
+            self::NOT_VALID => 'OTP Is not valid !',
         ];
 
         parent::__construct();

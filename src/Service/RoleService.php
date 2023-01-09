@@ -131,17 +131,6 @@ class RoleService implements ServiceInterface
         }
     }
 
-    public function getRoleAccount($userId): array
-    {
-        $list   = [];
-        $rowSet = $this->roleRepository->getRoleAccount($userId);
-        foreach ($rowSet as $row) {
-            $list[] = $row->getRoleResource();
-        }
-
-        return $list;
-    }
-
     public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void
     {
         $systemRoleList = $this->getRoleListLight();
@@ -176,6 +165,17 @@ class RoleService implements ServiceInterface
         }
 
         return $roles;
+    }
+
+    public function getRoleAccount($userId): array
+    {
+        $list   = [];
+        $rowSet = $this->roleRepository->getRoleAccount($userId);
+        foreach ($rowSet as $row) {
+            $list[] = $row->getRoleResource();
+        }
+
+        return $list;
     }
 
     public function deleteRoleAccount(int $userId, string $roleName): void

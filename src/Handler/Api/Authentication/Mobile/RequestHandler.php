@@ -9,7 +9,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
-use User\Service\TokenService;
 
 class RequestHandler implements RequestHandlerInterface
 {

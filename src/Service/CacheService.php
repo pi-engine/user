@@ -83,7 +83,7 @@ class CacheService implements ServiceInterface
             $user = $this->cache->get($key);
 
             // Set ID as int
-            $user['account']['id'] = (int) $user['account']['id'];
+            $user['account']['id'] = (int)$user['account']['id'];
         }
 
         return $user;

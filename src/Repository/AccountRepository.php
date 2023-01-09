@@ -19,7 +19,6 @@ use User\Model\Account\Account;
 use User\Model\Account\Credential;
 use User\Model\Account\Profile;
 use function sprintf;
-use function var_dump;
 
 class AccountRepository implements AccountRepositoryInterface
 {
@@ -262,6 +261,31 @@ class AccountRepository implements AccountRepositoryInterface
     /**
      * @param array $params
      *
+     * @return Profile
+     */
+    public function addProfile(array $params = []): array|object
+    {
+        $insert = new Insert($this->tableProfile);
+        $insert->values($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during blog post insert operation'
+            );
+        }
+
+        $id = $result->getGeneratedValue();
+
+        return $this->getProfile(['id' => $id]);
+    }
+
+    /**
+     * @param array $params
+     *
      * @return array
      */
     public function getProfile(array $params = []): array|object
@@ -297,31 +321,6 @@ class AccountRepository implements AccountRepositoryInterface
     /**
      * @param array $params
      *
-     * @return Profile
-     */
-    public function addProfile(array $params = []): array|object
-    {
-        $insert = new Insert($this->tableProfile);
-        $insert->values($params);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during blog post insert operation'
-            );
-        }
-
-        $id = $result->getGeneratedValue();
-
-        return $this->getProfile(['id' => $id]);
-    }
-
-    /**
-     * @param array $params
-     *
      * @return void
      */
     public function updateProfile(int $userId, array $params = []): void
@@ -339,5 +338,5 @@ class AccountRepository implements AccountRepositoryInterface
                 'Database error occurred during update operation'
             );
         }
-}
+    }
 }

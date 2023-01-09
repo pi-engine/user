@@ -164,6 +164,35 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
+    public function canonizeAccount($account): array
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'       => $account->getId(),
+                'name'     => $account->getName(),
+                'identity' => $account->getIdentity(),
+                'email'    => $account->getEmail(),
+                'mobile'   => $account->getMobile(),
+                'status'   => $account->getStatus(),
+            ];
+        } else {
+            $account = [
+                'id'       => $account['id'],
+                'name'     => $account['name'] ?? '',
+                'email'    => $account['email'] ?? '',
+                'identity' => $account['identity'] ?? '',
+                'mobile'   => $account['mobile'] ?? '',
+                'status'   => $account['status'],
+            ];
+        }
+
+        return $account;
+    }
+
     public function logout($params): array
     {
         if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
@@ -253,11 +282,11 @@ class AccountService implements ServiceInterface
 
         // Set notification params
         $notificationParams = [
-            'sms' =>             [
+            'sms' => [
                 'message' => sprintf($message, $otpCode),
                 'mobile'  => $account['mobile'],
                 'source'  => $params['source'] ?? '',
-            ]
+            ],
         ];
 
         // Send notification
@@ -277,133 +306,10 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function prepareMailLogin($params): array
-    {
-        // Set new password as OTP
-        $otpCode   = Rand::getInteger(100000, 999999);
-        $otpExpire = (time() + 180);
-        $isNew     = 0;
-
-        // Check account exist
-        $account = $this->getAccount(['email' => $params['email']]);
-
-        // Create account if not exist
-        // Update OTP password if account exist
-        if (empty($account)) {
-            $account = $this->addAccount(
-                [
-                    'email'  => $params['email'],
-                    'source' => $params['source'] ?? null,
-                    'otp'    => $otpCode,
-                ]
-            );
-
-            // Set is new
-            $isNew = 1;
-        } else {
-            $bcrypt = new Bcrypt();
-            $otp    = $bcrypt->create($otpCode);
-            $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
-        }
-
-        // Set user cache
-        $this->cacheService->setUser(
-            $account['id'],
-            [
-                'account' => [
-                    'id'         => (int)$account['id'],
-                    'name'       => $account['name'],
-                    'email'      => $account['email'],
-                    'identity'   => $account['identity'],
-                    'mobile'     => $account['mobile'],
-                    'last_login' => isset($user['account']['last_login']) ?? time(),
-                ],
-                'otp'     => [
-                    'code'        => $otpCode,
-                    'time_expire' => $otpExpire,
-                ],
-            ]
-        );
-
-        // Set notification params
-        $notificationParams = [
-            'email' => [
-                'to' => [
-                    'email' => $account['email'],
-                    'name' => $account['name']
-                ],
-                'subject' => 'Login Verification Code',
-                'body' => sprintf('Your verification code is : <strong>%s</strong> and is valid for 3 min', $otpCode)
-            ]
-        ];
-
-        // Send notification
-        $this->notificationService->send($notificationParams);
-
-        // Set result
-        return [
-            'result' => true,
-            'data'   => [
-                'message'    => 'Verify code send to your email !',
-                'name'       => $account['name'],
-                'mobile'     => $account['mobile'],
-                'is_new'     => $isNew,
-                'otp_expire' => $otpExpire,
-            ],
-            'error'  => [],
-        ];
-    }
-
-    public function getAccountCount($params = []): int
-    {
-        return $this->accountRepository->getAccountCount($params);
-    }
-
-    public function getAccountList($params): array
-    {
-        $limit  = (int)$params['limit'] ?? 10;
-        $page   = (int)$params['page'] ?? 1;
-        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
-        $offset = ($page - 1) * $limit;
-
-        // Set params
-        $listParams = [
-            'page'   => $page,
-            'limit'  => $limit,
-            'order'  => $order,
-            'offset' => $offset,
-        ];
-
-        // Get list
-        $list   = [];
-        $rowSet = $this->accountRepository->getAccountList($listParams);
-        foreach ($rowSet as $row) {
-            $list[] = $this->canonizeAccount($row);
-        }
-
-        // Get count
-        $count = $this->accountRepository->getAccountCount($listParams);
-
-        return [
-            'list'      => $list,
-            'paginator' => [
-                'count' => $count,
-                'limit' => $limit,
-                'page'  => $page,
-            ],
-        ];
-    }
-
     public function getAccount($params): array
     {
         $account = $this->accountRepository->getAccount($params);
         return $this->canonizeAccount($account);
-    }
-
-    public function getProfile($params): array
-    {
-        $profile = $this->accountRepository->getProfile($params);
-        return $this->canonizeProfile($profile);
     }
 
     public function addAccount($params): array
@@ -480,6 +386,190 @@ class AccountService implements ServiceInterface
         return $account;
     }
 
+    public function generateCredential($credential): string
+    {
+        $bcrypt = new Bcrypt();
+        return $bcrypt->create($credential);
+    }
+
+    public function userRegisterStatus(): int
+    {
+        // ToDo: call it from config
+        return 1;
+    }
+
+    public function canonizeProfile($profile): array
+    {
+        if (empty($profile)) {
+            return [];
+        }
+
+        if (is_object($profile)) {
+            $profile = [
+                'first_name'      => $profile->getFirstName(),
+                'last_name'       => $profile->getLastName(),
+                'id_number'       => $profile->getIdNumber(),
+                'birthdate'       => $profile->getBirthdate(),
+                'gender'          => $profile->getGender(),
+                'avatar'          => $profile->getAvatar(),
+                'ip_register'     => $profile->getIpRegister(),
+                'register_source' => $profile->getRegisterSource(),
+                'homepage'        => $profile->getHomepage(),
+                'phone'           => $profile->getPhone(),
+                'address_1'       => $profile->getAddress1(),
+                'address_2'       => $profile->getAddress2(),
+                'country'         => $profile->getCountry(),
+                'state'           => $profile->getState(),
+                'city'            => $profile->getCity(),
+                'zip_code'        => $profile->getZipCode(),
+                'bank_name'       => $profile->getBankName(),
+                'bank_card'       => $profile->getBankCard(),
+                'bank_account'    => $profile->getBankAccount(),
+            ];
+        } else {
+            $profile = [
+                'first_name'      => $profile['first_name'],
+                'last_name'       => $profile['last_name'],
+                'id_number'       => $profile['id_number'],
+                'birthdate'       => $profile['birthdate'],
+                'gender'          => $profile['gender'],
+                'avatar'          => $profile['avatar'],
+                'ip_register'     => $profile['ip_register'],
+                'register_source' => $profile['register_source'],
+                'homepage'        => $profile['homepage'],
+                'phone'           => $profile['phone'],
+                'address_1'       => $profile['address_1'],
+                'address_2'       => $profile['address_2'],
+                'country'         => $profile['country'],
+                'state'           => $profile['state'],
+                'city'            => $profile['city'],
+                'zip_code'        => $profile['zip_code'],
+                'bank_name'       => $profile['bank_name'],
+                'bank_card'       => $profile['bank_card'],
+                'bank_account'    => $profile['bank_account'],
+            ];
+        }
+
+        return $profile;
+    }
+
+    public function prepareMailLogin($params): array
+    {
+        // Set new password as OTP
+        $otpCode   = Rand::getInteger(100000, 999999);
+        $otpExpire = (time() + 180);
+        $isNew     = 0;
+
+        // Check account exist
+        $account = $this->getAccount(['email' => $params['email']]);
+
+        // Create account if not exist
+        // Update OTP password if account exist
+        if (empty($account)) {
+            $account = $this->addAccount(
+                [
+                    'email'  => $params['email'],
+                    'source' => $params['source'] ?? null,
+                    'otp'    => $otpCode,
+                ]
+            );
+
+            // Set is new
+            $isNew = 1;
+        } else {
+            $bcrypt = new Bcrypt();
+            $otp    = $bcrypt->create($otpCode);
+            $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
+        }
+
+        // Set user cache
+        $this->cacheService->setUser(
+            $account['id'],
+            [
+                'account' => [
+                    'id'         => (int)$account['id'],
+                    'name'       => $account['name'],
+                    'email'      => $account['email'],
+                    'identity'   => $account['identity'],
+                    'mobile'     => $account['mobile'],
+                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                ],
+                'otp'     => [
+                    'code'        => $otpCode,
+                    'time_expire' => $otpExpire,
+                ],
+            ]
+        );
+
+        // Set notification params
+        $notificationParams = [
+            'email' => [
+                'to'      => [
+                    'email' => $account['email'],
+                    'name'  => $account['name'],
+                ],
+                'subject' => 'Login Verification Code',
+                'body'    => sprintf('Your verification code is : <strong>%s</strong> and is valid for 3 min', $otpCode),
+            ],
+        ];
+
+        // Send notification
+        $this->notificationService->send($notificationParams);
+
+        // Set result
+        return [
+            'result' => true,
+            'data'   => [
+                'message'    => 'Verify code send to your email !',
+                'name'       => $account['name'],
+                'mobile'     => $account['mobile'],
+                'is_new'     => $isNew,
+                'otp_expire' => $otpExpire,
+            ],
+            'error'  => [],
+        ];
+    }
+
+    public function getAccountCount($params = []): int
+    {
+        return $this->accountRepository->getAccountCount($params);
+    }
+
+    public function getAccountList($params): array
+    {
+        $limit  = (int)$params['limit'] ?? 10;
+        $page   = (int)$params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ($page - 1) * $limit;
+
+        // Set params
+        $listParams = [
+            'page'   => $page,
+            'limit'  => $limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->accountRepository->getAccountList($listParams);
+        foreach ($rowSet as $row) {
+            $list[] = $this->canonizeAccount($row);
+        }
+
+        // Get count
+        $count = $this->accountRepository->getAccountCount($listParams);
+
+        return [
+            'list'      => $list,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
     public function updateAccount($params, $account): array
     {
         // Set name
@@ -539,6 +629,12 @@ class AccountService implements ServiceInterface
         );
 
         return array_merge($account, $profile);
+    }
+
+    public function getProfile($params): array
+    {
+        $profile = $this->accountRepository->getProfile($params);
+        return $this->canonizeProfile($profile);
     }
 
     public function hasPassword($userId): bool
@@ -620,102 +716,6 @@ class AccountService implements ServiceInterface
             ],
             'error'  => [],
         ];
-    }
-
-    public function canonizeAccount($account): array
-    {
-        if (empty($account)) {
-            return [];
-        }
-
-        if (is_object($account)) {
-            $account = [
-                'id'       => $account->getId(),
-                'name'     => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email'    => $account->getEmail(),
-                'mobile'   => $account->getMobile(),
-                'status'   => $account->getStatus(),
-            ];
-        } else {
-            $account = [
-                'id'       => $account['id'],
-                'name'     => $account['name'] ?? '',
-                'email'    => $account['email'] ?? '',
-                'identity' => $account['identity'] ?? '',
-                'mobile'   => $account['mobile'] ?? '',
-                'status'   => $account['status'],
-            ];
-        }
-
-        return $account;
-    }
-
-    public function canonizeProfile($profile): array
-    {
-        if (empty($profile)) {
-            return [];
-        }
-
-        if (is_object($profile)) {
-            $profile = [
-                'first_name'      => $profile->getFirstName(),
-                'last_name'       => $profile->getLastName(),
-                'id_number'       => $profile->getIdNumber(),
-                'birthdate'       => $profile->getBirthdate(),
-                'gender'          => $profile->getGender(),
-                'avatar'          => $profile->getAvatar(),
-                'ip_register'     => $profile->getIpRegister(),
-                'register_source' => $profile->getRegisterSource(),
-                'homepage'        => $profile->getHomepage(),
-                'phone'           => $profile->getPhone(),
-                'address_1'       => $profile->getAddress1(),
-                'address_2'       => $profile->getAddress2(),
-                'country'         => $profile->getCountry(),
-                'state'           => $profile->getState(),
-                'city'            => $profile->getCity(),
-                'zip_code'        => $profile->getZipCode(),
-                'bank_name'       => $profile->getBankName(),
-                'bank_card'       => $profile->getBankCard(),
-                'bank_account'    => $profile->getBankAccount(),
-            ];
-        } else {
-            $profile = [
-                'first_name'      => $profile['first_name'],
-                'last_name'       => $profile['last_name'],
-                'id_number'       => $profile['id_number'],
-                'birthdate'       => $profile['birthdate'],
-                'gender'          => $profile['gender'],
-                'avatar'          => $profile['avatar'],
-                'ip_register'     => $profile['ip_register'],
-                'register_source' => $profile['register_source'],
-                'homepage'        => $profile['homepage'],
-                'phone'           => $profile['phone'],
-                'address_1'       => $profile['address_1'],
-                'address_2'       => $profile['address_2'],
-                'country'         => $profile['country'],
-                'state'           => $profile['state'],
-                'city'            => $profile['city'],
-                'zip_code'        => $profile['zip_code'],
-                'bank_name'       => $profile['bank_name'],
-                'bank_card'       => $profile['bank_card'],
-                'bank_account'    => $profile['bank_account'],
-            ];
-        }
-
-        return $profile;
-    }
-
-    public function generateCredential($credential): string
-    {
-        $bcrypt = new Bcrypt();
-        return $bcrypt->create($credential);
-    }
-
-    public function userRegisterStatus(): int
-    {
-        // ToDo: call it from config
-        return 1;
     }
 
     public function isDuplicated($type, $value, $id = 0): bool

@@ -43,11 +43,11 @@ class ViewHandler implements RequestHandlerInterface
         $account = $request->getAttribute('account');
 
         // Set ID as int
-        $account['id'] = (int) $account['id'];
+        $account['id'] = (int)$account['id'];
 
         // Set profile params
         $params = [
-            'user_id' => (int) $account['id']
+            'user_id' => (int)$account['id'],
         ];
 
         $profile = $this->accountService->getProfile($params);

@@ -21,7 +21,6 @@ use User\Validator\NameValidator;
 use User\Validator\OtpValidator;
 use User\Validator\PasswordValidator;
 use function sprintf;
-use function var_dump;
 
 class ValidationMiddleware implements MiddlewareInterface
 {
@@ -56,7 +55,7 @@ class ValidationMiddleware implements MiddlewareInterface
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->cacheService = $cacheService;
+        $this->cacheService    = $cacheService;
         $this->errorHandler    = $errorHandler;
     }
 
@@ -133,27 +132,11 @@ class ValidationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    protected function setErrorHandler($inputFilter): array
-    {
-        $message = [];
-        foreach ($inputFilter->getInvalidInput() as $error) {
-            $message[$error->getName()] = implode(', ', $error->getMessages());
-        }
-
-        return $this->validationResult = [
-            'status'  => false,
-            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-            'message' => $message,
-        ];
-    }
-
     protected function loginIsValid($params)
     {
         $inputFilter = new InputFilter();
 
-        // Check email
-        // Check identity
-        // Check mobile
+        // Check email or identity or mobile
         if (isset($params['email']) && !empty($params['email'])) {
             $email = new Input('email');
             $email->getValidatorChain()->attach(new EmailValidator($this->accountService, ['check_duplication' => false]));
@@ -165,7 +148,7 @@ class ValidationMiddleware implements MiddlewareInterface
         } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
             $option = [
                 'check_duplication' => false,
-                'country' => 'IR'
+                'country'           => 'IR',
             ];
             if (isset($params['country']) && !empty($params['country'])) {
                 $option['country'] = $params['country'];
@@ -192,6 +175,20 @@ class ValidationMiddleware implements MiddlewareInterface
         if (!$inputFilter->isValid()) {
             return $this->setErrorHandler($inputFilter);
         }
+    }
+
+    protected function setErrorHandler($inputFilter): array
+    {
+        $message = [];
+        foreach ($inputFilter->getInvalidInput() as $error) {
+            $message[$error->getName()] = implode(', ', $error->getMessages());
+        }
+
+        return $this->validationResult = [
+            'status'  => false,
+            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+            'message' => $message,
+        ];
     }
 
     protected function registerIsValid($params)
@@ -240,7 +237,7 @@ class ValidationMiddleware implements MiddlewareInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $option = [
                 'check_duplication' => false,
-                'country' => 'IR'
+                'country'           => 'IR',
             ];
             if (isset($params['country']) && !empty($params['country'])) {
                 $option['country'] = $params['country'];
@@ -307,7 +304,7 @@ class ValidationMiddleware implements MiddlewareInterface
     {
         // Set option
         $option = [
-            'user_id' => $account['id'],
+            'user_id'            => $account['id'],
             'check_has_password' => 1,
         ];
 
@@ -345,7 +342,7 @@ class ValidationMiddleware implements MiddlewareInterface
     {
         $option = [
             'check_duplication' => false,
-            'country' => 'IR'
+            'country'           => 'IR',
         ];
         if (isset($params['country']) && !empty($params['country'])) {
             $option['country'] = $params['country'];
@@ -387,7 +384,7 @@ class ValidationMiddleware implements MiddlewareInterface
 
         $option = [
             'check_duplication' => false,
-            'country' => 'IR'
+            'country'           => 'IR',
         ];
         if (isset($params['country']) && !empty($params['country'])) {
             $option['country'] = $params['country'];
@@ -398,7 +395,7 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->add($mobile);
 
         $option = [
-            'mobile' => $params['mobile']
+            'mobile' => $params['mobile'],
         ];
 
         // Check otp
@@ -424,7 +421,7 @@ class ValidationMiddleware implements MiddlewareInterface
         $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
 
         $option = [
-            'email' => $params['email']
+            'email' => $params['email'],
         ];
 
         // Check otp

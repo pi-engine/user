@@ -4,7 +4,6 @@ namespace User\Validator;
 
 use Laminas\Validator\AbstractValidator;
 use User\Service\AccountService;
-use function print_r;
 
 class NameValidator extends AbstractValidator
 {

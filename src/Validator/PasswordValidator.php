@@ -34,15 +34,14 @@ class PasswordValidator extends AbstractValidator
     public function __construct(
         AccountService $accountService,
         $options = []
-    )
-    {
+    ) {
         $this->accountService = $accountService;
         $this->options        = array_merge($this->options, $options);
 
         $this->messageTemplates = [
-            self::TOO_SHORT => sprintf('Password is less than %s characters long', (int)$this->options['min']),
-            self::TOO_LONG  => sprintf('Password is more than %s characters long', (int)$this->options['max']),
-            self::HAS_PASSWORD => 'User set password before !'
+            self::TOO_SHORT    => sprintf('Password is less than %s characters long', (int)$this->options['min']),
+            self::TOO_LONG     => sprintf('Password is more than %s characters long', (int)$this->options['max']),
+            self::HAS_PASSWORD => 'User set password before !',
         ];
 
         parent::__construct();
