@@ -100,24 +100,28 @@ class AccountService implements ServiceInterface
             // Canonize account
             $account = $this->canonizeAccount($account);
 
+            // Get profile
+            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+
+            // Sync profile and account
+            $account = array_merge($account, $profile);
+
             // Get roles
             $account['roles'] = $this->roleService->getRoleAccount($account['id']);
 
             // Generate access token
             $accessToken = $this->tokenService->generate(
                 [
-                    'user_id' => $account['id'],
+                    'account' => $account,
                     'type'    => 'access',
-                    'roles'   => $account['roles'],
                 ]
             );
 
             // Generate refresh token
             $refreshToken = $this->tokenService->generate(
                 [
-                    'user_id' => $account['id'],
+                    'account' => $account,
                     'type'    => 'refresh',
-                    'roles'   => $account['roles'],
                 ]
             );
 
@@ -162,35 +166,6 @@ class AccountService implements ServiceInterface
         }
 
         return $result;
-    }
-
-    public function canonizeAccount($account): array
-    {
-        if (empty($account)) {
-            return [];
-        }
-
-        if (is_object($account)) {
-            $account = [
-                'id'       => $account->getId(),
-                'name'     => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email'    => $account->getEmail(),
-                'mobile'   => $account->getMobile(),
-                'status'   => $account->getStatus(),
-            ];
-        } else {
-            $account = [
-                'id'       => $account['id'],
-                'name'     => $account['name'] ?? '',
-                'email'    => $account['email'] ?? '',
-                'identity' => $account['identity'] ?? '',
-                'mobile'   => $account['mobile'] ?? '',
-                'status'   => $account['status'],
-            ];
-        }
-
-        return $account;
     }
 
     public function logout($params): array
@@ -306,153 +281,6 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function getAccount($params): array
-    {
-        $account = $this->accountRepository->getAccount($params);
-        return $this->canonizeAccount($account);
-    }
-
-    public function addAccount($params): array
-    {
-        // Set name
-        if (
-            isset($params['first_name'])
-            && !empty($params['first_name'])
-            && isset($params['last_name'])
-            && !empty($params['last_name'])
-        ) {
-            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
-        }
-
-        $otp        = null;
-        $credential = null;
-        if (isset($params['credential']) && !empty($params['credential'])) {
-            $credential = $this->generateCredential($params['credential']);
-        }
-        if (isset($params['otp']) && !empty($params['otp'])) {
-            $otp = $this->generateCredential($params['otp']);
-        }
-
-        $paramsAccount = [
-            'name'         => $params['name'] ?? null,
-            'email'        => $params['email'] ?? null,
-            'identity'     => $params['identity'] ?? null,
-            'mobile'       => $params['mobile'] ?? null,
-            'credential'   => $credential,
-            'otp'          => $otp,
-            'status'       => $this->userRegisterStatus(),
-            'time_created' => time(),
-        ];
-
-        $account = $this->accountRepository->addAccount($paramsAccount);
-        $account = $this->canonizeAccount($account);
-
-        $profileParams = [
-            'user_id'         => (int)$account['id'],
-            'first_name'      => $params['first_name'] ?? null,
-            'last_name'       => $params['last_name'] ?? null,
-            'id_number'       => $params['id_number'] ?? null,
-            'birthdate'       => $params['birthdate'] ?? null,
-            'gender'          => $params['gender'] ?? null,
-            'avatar'          => $params['avatar'] ?? null,
-            'ip_register'     => $params['ip_register'] ?? null,
-            'register_source' => $params['register_source'] ?? null,
-            'homepage'        => $params['homepage'] ?? null,
-            'phone'           => $params['phone'] ?? null,
-            'address_1'       => $params['address_1'] ?? null,
-            'address_2'       => $params['address_2'] ?? null,
-            'country'         => $params['country'] ?? null,
-            'state'           => $params['state'] ?? null,
-            'city'            => $params['city'] ?? null,
-            'zip_code'        => $params['zip_code'] ?? null,
-            'bank_name'       => $params['bank_name'] ?? null,
-            'bank_card'       => $params['bank_card'] ?? null,
-            'bank_account'    => $params['bank_account'] ?? null,
-        ];
-
-        $profile = $this->accountRepository->addProfile($profileParams);
-        $profile = $this->canonizeProfile($profile);
-
-        $account = array_merge($account, $profile);
-
-        // Set user roles
-        $this->roleService->addDefaultRoles((int)$account['id']);
-
-        // Set source roles params
-        if (isset($params['source']) && !empty($params['source']) && is_string($params['source'])) {
-            $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
-        }
-
-        return $account;
-    }
-
-    public function generateCredential($credential): string
-    {
-        $bcrypt = new Bcrypt();
-        return $bcrypt->create($credential);
-    }
-
-    public function userRegisterStatus(): int
-    {
-        // ToDo: call it from config
-        return 1;
-    }
-
-    public function canonizeProfile($profile): array
-    {
-        if (empty($profile)) {
-            return [];
-        }
-
-        if (is_object($profile)) {
-            $profile = [
-                'first_name'      => $profile->getFirstName(),
-                'last_name'       => $profile->getLastName(),
-                'id_number'       => $profile->getIdNumber(),
-                'birthdate'       => $profile->getBirthdate(),
-                'gender'          => $profile->getGender(),
-                'avatar'          => $profile->getAvatar(),
-                'ip_register'     => $profile->getIpRegister(),
-                'register_source' => $profile->getRegisterSource(),
-                'homepage'        => $profile->getHomepage(),
-                'phone'           => $profile->getPhone(),
-                'address_1'       => $profile->getAddress1(),
-                'address_2'       => $profile->getAddress2(),
-                'country'         => $profile->getCountry(),
-                'state'           => $profile->getState(),
-                'city'            => $profile->getCity(),
-                'zip_code'        => $profile->getZipCode(),
-                'bank_name'       => $profile->getBankName(),
-                'bank_card'       => $profile->getBankCard(),
-                'bank_account'    => $profile->getBankAccount(),
-            ];
-        } else {
-            $profile = [
-                'first_name'      => $profile['first_name'],
-                'last_name'       => $profile['last_name'],
-                'id_number'       => $profile['id_number'],
-                'birthdate'       => $profile['birthdate'],
-                'gender'          => $profile['gender'],
-                'avatar'          => $profile['avatar'],
-                'ip_register'     => $profile['ip_register'],
-                'register_source' => $profile['register_source'],
-                'homepage'        => $profile['homepage'],
-                'phone'           => $profile['phone'],
-                'address_1'       => $profile['address_1'],
-                'address_2'       => $profile['address_2'],
-                'country'         => $profile['country'],
-                'state'           => $profile['state'],
-                'city'            => $profile['city'],
-                'zip_code'        => $profile['zip_code'],
-                'bank_name'       => $profile['bank_name'],
-                'bank_card'       => $profile['bank_card'],
-                'bank_account'    => $profile['bank_account'],
-            ];
-        }
-
-        return $profile;
-    }
-
     public function prepareMailLogin($params): array
     {
         // Set new password as OTP
@@ -522,12 +350,92 @@ class AccountService implements ServiceInterface
             'data'   => [
                 'message'    => 'Verify code send to your email !',
                 'name'       => $account['name'],
-                'mobile'     => $account['mobile'],
+                'email'      => $account['email'],
                 'is_new'     => $isNew,
                 'otp_expire' => $otpExpire,
             ],
             'error'  => [],
         ];
+    }
+
+    public function addAccount($params): array
+    {
+        // Set name
+        if (
+            isset($params['first_name'])
+            && !empty($params['first_name'])
+            && isset($params['last_name'])
+            && !empty($params['last_name'])
+        ) {
+            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
+        }
+
+        $otp        = null;
+        $credential = null;
+        if (isset($params['credential']) && !empty($params['credential'])) {
+            $credential = $this->generatePassword($params['credential']);
+        }
+        if (isset($params['otp']) && !empty($params['otp'])) {
+            $otp = $this->generatePassword($params['otp']);
+        }
+
+        $paramsAccount = [
+            'name'         => $params['name'] ?? null,
+            'email'        => $params['email'] ?? null,
+            'identity'     => $params['identity'] ?? null,
+            'mobile'       => $params['mobile'] ?? null,
+            'credential'   => $credential,
+            'otp'          => $otp,
+            'status'       => $this->userRegisterStatus(),
+            'time_created' => time(),
+        ];
+
+        $account = $this->accountRepository->addAccount($paramsAccount);
+        $account = $this->canonizeAccount($account);
+
+        $profileParams = [
+            'user_id'         => (int)$account['id'],
+            'first_name'      => $params['first_name'] ?? null,
+            'last_name'       => $params['last_name'] ?? null,
+            'id_number'       => $params['id_number'] ?? null,
+            'birthdate'       => $params['birthdate'] ?? null,
+            'gender'          => $params['gender'] ?? null,
+            'avatar'          => $params['avatar'] ?? null,
+            'ip_register'     => $params['ip_register'] ?? null,
+            'register_source' => $params['register_source'] ?? null,
+            'homepage'        => $params['homepage'] ?? null,
+            'phone'           => $params['phone'] ?? null,
+            'address_1'       => $params['address_1'] ?? null,
+            'address_2'       => $params['address_2'] ?? null,
+            'country'         => $params['country'] ?? null,
+            'state'           => $params['state'] ?? null,
+            'city'            => $params['city'] ?? null,
+            'zip_code'        => $params['zip_code'] ?? null,
+            'bank_name'       => $params['bank_name'] ?? null,
+            'bank_card'       => $params['bank_card'] ?? null,
+            'bank_account'    => $params['bank_account'] ?? null,
+        ];
+
+        $profile = $this->accountRepository->addProfile($profileParams);
+        $profile = $this->canonizeProfile($profile);
+
+        $account = array_merge($account, $profile);
+
+        // Set user roles
+        $this->roleService->addDefaultRoles((int)$account['id']);
+
+        // Set source roles params
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source'])) {
+            $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+        }
+
+        return $account;
+    }
+
+    public function getAccount($params): array
+    {
+        $account = $this->accountRepository->getAccount($params);
+        return $this->canonizeAccount($account);
     }
 
     public function getAccountCount($params = []): int
@@ -637,20 +545,15 @@ class AccountService implements ServiceInterface
         return $this->canonizeProfile($profile);
     }
 
-    public function hasPassword($userId): bool
+    public function generatePassword($credential): string
     {
-        $hash = $this->accountRepository->getAccountCredential((int)$userId);
-
-        if (empty($hash)) {
-            return false;
-        }
-
-        return true;
+        $bcrypt = new Bcrypt();
+        return $bcrypt->create($credential);
     }
 
     public function addPassword($params, $account): array
     {
-        $credential = $this->generateCredential($params['credential']);
+        $credential = $this->generatePassword($params['credential']);
 
         $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
@@ -665,7 +568,7 @@ class AccountService implements ServiceInterface
 
     public function updatePassword($params, $account): array
     {
-        $hash = $this->accountRepository->getAccountCredential((int)$account['id']);
+        $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
 
         $bcrypt = new Bcrypt();
         if ($bcrypt->verify($params['current_credential'], $hash)) {
@@ -693,6 +596,17 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
+    public function hasPassword($userId): bool
+    {
+        $hash = $this->accountRepository->getAccountPassword((int)$userId);
+
+        if (empty($hash)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function refreshToken($params): array
     {
         $accessToken = $this->tokenService->generate(
@@ -718,6 +632,90 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    public function canonizeAccount($account): array
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'       => $account->getId(),
+                'name'     => $account->getName(),
+                'identity' => $account->getIdentity(),
+                'email'    => $account->getEmail(),
+                'mobile'   => $account->getMobile(),
+                'status'   => $account->getStatus(),
+            ];
+        } else {
+            $account = [
+                'id'       => $account['id'],
+                'name'     => $account['name'] ?? '',
+                'email'    => $account['email'] ?? '',
+                'identity' => $account['identity'] ?? '',
+                'mobile'   => $account['mobile'] ?? '',
+                'status'   => $account['status'],
+            ];
+        }
+
+        return $account;
+    }
+
+    public function canonizeProfile($profile): array
+    {
+        if (empty($profile)) {
+            return [];
+        }
+
+        if (is_object($profile)) {
+            $profile = [
+                'first_name'      => $profile->getFirstName(),
+                'last_name'       => $profile->getLastName(),
+                'id_number'       => $profile->getIdNumber(),
+                'birthdate'       => $profile->getBirthdate(),
+                'gender'          => $profile->getGender(),
+                'avatar'          => $profile->getAvatar(),
+                'ip_register'     => $profile->getIpRegister(),
+                'register_source' => $profile->getRegisterSource(),
+                'homepage'        => $profile->getHomepage(),
+                'phone'           => $profile->getPhone(),
+                'address_1'       => $profile->getAddress1(),
+                'address_2'       => $profile->getAddress2(),
+                'country'         => $profile->getCountry(),
+                'state'           => $profile->getState(),
+                'city'            => $profile->getCity(),
+                'zip_code'        => $profile->getZipCode(),
+                'bank_name'       => $profile->getBankName(),
+                'bank_card'       => $profile->getBankCard(),
+                'bank_account'    => $profile->getBankAccount(),
+            ];
+        } else {
+            $profile = [
+                'first_name'      => $profile['first_name'],
+                'last_name'       => $profile['last_name'],
+                'id_number'       => $profile['id_number'],
+                'birthdate'       => $profile['birthdate'],
+                'gender'          => $profile['gender'],
+                'avatar'          => $profile['avatar'],
+                'ip_register'     => $profile['ip_register'],
+                'register_source' => $profile['register_source'],
+                'homepage'        => $profile['homepage'],
+                'phone'           => $profile['phone'],
+                'address_1'       => $profile['address_1'],
+                'address_2'       => $profile['address_2'],
+                'country'         => $profile['country'],
+                'state'           => $profile['state'],
+                'city'            => $profile['city'],
+                'zip_code'        => $profile['zip_code'],
+                'bank_name'       => $profile['bank_name'],
+                'bank_card'       => $profile['bank_card'],
+                'bank_account'    => $profile['bank_account'],
+            ];
+        }
+
+        return $profile;
+    }
+
     public function isDuplicated($type, $value, $id = 0): bool
     {
         return (bool)$this->accountRepository->count(
@@ -727,5 +725,11 @@ class AccountService implements ServiceInterface
                 'id'    => $id,
             ]
         );
+    }
+
+    public function userRegisterStatus(): int
+    {
+        // ToDo: call it from config
+        return 1;
     }
 }

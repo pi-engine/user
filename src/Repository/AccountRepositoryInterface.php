@@ -14,7 +14,7 @@ interface AccountRepositoryInterface
 
     public function getAccount(array $params = []): array|Account;
 
-    public function getAccountCredential(int $userId): string|null;
+    public function getAccountPassword(int $userId): string|null;
 
     public function addAccount(array $params = []): Account;
 

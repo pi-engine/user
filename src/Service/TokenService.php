@@ -7,6 +7,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Laminas\Config\Config;
 use Laminas\Math\Rand;
+use function array_merge;
+use function var_dump;
 
 class TokenService implements ServiceInterface
 {
@@ -35,11 +37,21 @@ class TokenService implements ServiceInterface
         // Set payload
         $payload = [
             'id'   => $key,
-            'uid'  => $params['user_id'],
+            'uid'  => $params['account']['id'],
             'iat'  => time(),
             'exp'  => $params['exp'] ?? time() + $ttl,
             'type' => $params['type'],
         ];
+
+        // Set additional information in payload
+        if (isset($this->config['additional']) && !empty($this->config['additional'])) {
+            foreach ($this->config['additional'] as $additional) {
+                $payload[$additional] = '';
+                if (isset($params['account'][$additional])) {
+                    $payload[$additional] = $params['account'][$additional];
+                }
+            }
+        }
 
         return [
             'token'   => JWT::encode($payload, $this->config['secret'], 'HS256'),
@@ -55,14 +67,14 @@ class TokenService implements ServiceInterface
             case 'access':
                 return sprintf(
                     'user-access-%s-%s',
-                    $params['user_id'],
+                    $params['account']['id'],
                     Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789')
                 );
 
             case 'refresh':
                 return sprintf(
                     'user-refresh-%s-%s',
-                    $params['user_id'],
+                    $params['account']['id'],
                     Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789')
                 );
         }

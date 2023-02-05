@@ -108,7 +108,7 @@ class AccountRepository implements AccountRepositoryInterface
         return (int)$row['count'];
     }
 
-    public function getAccountCredential(int $userId): string|null
+    public function getAccountPassword(int $userId): string|null
     {
         $sql       = new Sql($this->db);
         $select    = $sql->select($this->tableAccount)->where(['id' => $userId]);
