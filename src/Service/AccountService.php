@@ -551,11 +551,12 @@ class AccountService implements ServiceInterface
         return $bcrypt->create($credential);
     }
 
-    public function addPassword($params, $account): array
+    public function addPassword($params, $account = []): array
     {
+        $userId     = $account['id'] ?? $params['user_id'];
         $credential = $this->generatePassword($params['credential']);
 
-        $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
+        $this->accountRepository->updateAccount((int)$userId, ['credential' => $credential]);
 
         return [
             'result' => true,

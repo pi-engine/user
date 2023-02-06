@@ -34,8 +34,7 @@ class PasswordHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-
-        $result = ['message' => 'Profile change password section is under development'];
+        $result      = $this->accountService->addPassword($requestBody);
 
         return new JsonResponse($result);
     }

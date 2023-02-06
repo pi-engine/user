@@ -86,7 +86,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
                 [
-                    'message' => 'You dont have access to this area !',
+                    'message' => 'You dont have access to this area ! 1',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ]
             );
@@ -109,7 +109,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute('error',
                 [
-                    'message' => 'You dont have access to this area !',
+                    'message' => 'You dont have access to this area ! 2',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ]
             );

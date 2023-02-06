@@ -465,7 +465,7 @@ return [
                                         'package'     => 'profile',
                                         'handler'     => 'password',
                                         'permissions' => 'user-profile-password',
-                                        'validator'   => 'password',
+                                        'validator'   => 'password-add',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
