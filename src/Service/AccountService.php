@@ -5,6 +5,7 @@ namespace User\Service;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
+use Psr\SimpleCache\InvalidArgumentException;
 use User\Repository\AccountRepositoryInterface;
 use function array_merge;
 use function in_array;
@@ -35,12 +36,12 @@ class AccountService implements ServiceInterface
             'user_id',
             'first_name',
             'last_name',
-            'id_number',
             'birthdate',
             'gender',
             'avatar',
             'ip_register',
             'register_source',
+            'id_number',
             'homepage',
             'phone',
             'address_1',
@@ -73,6 +74,9 @@ class AccountService implements ServiceInterface
         $this->notificationService = $notificationService;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function login($params): array
     {
         // Set login column
@@ -127,6 +131,7 @@ class AccountService implements ServiceInterface
 
             // Set extra info
             $account['last_login']    = time();
+            $account['has_password']  = $this->hasPassword($account['id']);
             $account['access_token']  = $accessToken['token'];
             $account['refresh_token'] = $refreshToken['token'];
 
@@ -226,7 +231,7 @@ class AccountService implements ServiceInterface
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
                     'mobile'     => $account['mobile'],
-                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                    'last_login' => $user['account']['last_login'] ?? time(),
                 ],
                 'otp'     => [
                     'code'        => $otpCode,
@@ -320,7 +325,7 @@ class AccountService implements ServiceInterface
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
                     'mobile'     => $account['mobile'],
-                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                    'last_login' => $user['account']['last_login'] ?? time(),
                 ],
                 'otp'     => [
                     'code'        => $otpCode,
@@ -336,8 +341,8 @@ class AccountService implements ServiceInterface
                     'email' => $account['email'],
                     'name'  => $account['name'],
                 ],
-                'subject' => 'Login Verification Code',
-                'body'    => sprintf('Your verification code is : <strong>%s</strong> and is valid for 3 min', $otpCode),
+                'subject' => 'ورود با کد یک بار مصرف',
+                'body' => sprintf('کد یک بار مصرف شما برای ورود <strong>%s</strong> است و این کد به مدت ۳ دقیقه معتبر خواهد بود.', $otpCode)
             ],
         ];
 
@@ -531,7 +536,7 @@ class AccountService implements ServiceInterface
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
                     'mobile'     => $account['mobile'],
-                    'last_login' => isset($user['account']['last_login']) ?? time(),
+                    'last_login' => $user['account']['last_login'] ?? time(),
                 ],
             ]
         );

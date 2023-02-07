@@ -47,7 +47,7 @@ class ViewHandler implements RequestHandlerInterface
 
         // Set profile params
         $params = [
-            'user_id' => (int)$account['id'],
+            'user_id' => $account['id'],
         ];
 
         $profile = $this->accountService->getProfile($params);
