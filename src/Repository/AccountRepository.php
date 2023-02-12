@@ -11,6 +11,7 @@ use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Predicate\Expression;
+use Laminas\Db\Sql\Predicate\IsNotNull;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
@@ -108,6 +109,49 @@ class AccountRepository implements AccountRepositoryInterface
         return (int)$row['count'];
     }
 
+    public function getAccount(array $params = []): array|Account
+    {
+        // Set
+        $where = [];
+        if (isset($params['id']) && (int)$params['id'] > 0) {
+            $where['id'] = (int)$params['id'];
+        } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            $where['identity'] = $params['identity'];
+        } elseif (isset($params['email']) && !empty($params['email'])) {
+            $where['email'] = $params['email'];
+        } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
+            $where['mobile'] = $params['mobile'];
+        }
+
+        if (isset($params['status']) && (int)$params['status'] > 0) {
+            $where['status'] = (int)$params['status'];
+        }
+
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            throw new RuntimeException(
+                sprintf(
+                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
+                    $params
+                )
+            );
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, $this->accountPrototype);
+        $resultSet->initialize($result);
+        $account = $resultSet->current();
+
+        if (!$account) {
+            return [];
+        }
+
+        return $account;
+    }
+
     public function getAccountPassword(int $userId): string|null
     {
         $sql       = new Sql($this->db);
@@ -160,49 +204,6 @@ class AccountRepository implements AccountRepositoryInterface
         return $this->getAccount(['id' => $id]);
     }
 
-    public function getAccount(array $params = []): array|Account
-    {
-        // Set
-        $where = [];
-        if (isset($params['id']) && (int)$params['id'] > 0) {
-            $where['id'] = (int)$params['id'];
-        } elseif (isset($params['identity']) && !empty($params['identity'])) {
-            $where['identity'] = $params['identity'];
-        } elseif (isset($params['email']) && !empty($params['email'])) {
-            $where['email'] = $params['email'];
-        } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
-            $where['mobile'] = $params['mobile'];
-        }
-
-        if (isset($params['status']) && (int)$params['status'] > 0) {
-            $where['status'] = (int)$params['status'];
-        }
-
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->where($where);
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
-            throw new RuntimeException(
-                sprintf(
-                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
-                    $params
-                )
-            );
-        }
-
-        $resultSet = new HydratingResultSet($this->hydrator, $this->accountPrototype);
-        $resultSet->initialize($result);
-        $account = $resultSet->current();
-
-        if (!$account) {
-            return [];
-        }
-
-        return $account;
-    }
-
     public function updateAccount(int $userId, array $params = []): void
     {
         $update = new Update($this->tableAccount);
@@ -237,32 +238,6 @@ class AccountRepository implements AccountRepositoryInterface
         return (int)$row['count'];
     }
 
-    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential'): AuthenticationService
-    {
-        // Call authAdapter
-        $authAdapter = new CallbackCheckAdapter(
-            $this->db,
-            $this->tableAccount,
-            $identityColumn,
-            $credentialColumn,
-            function ($hash, $password) {
-                $bcrypt = new Bcrypt();
-                return $bcrypt->verify($password, $hash);
-            }
-        );
-
-        // Set condition
-        $select = $authAdapter->getDbSelect();
-        $select->where(['status' => 1]);
-
-        return new AuthenticationService(null, $authAdapter);
-    }
-
-    /**
-     * @param array $params
-     *
-     * @return Profile
-     */
     public function addProfile(array $params = []): array|object
     {
         $insert = new Insert($this->tableProfile);
@@ -283,11 +258,6 @@ class AccountRepository implements AccountRepositoryInterface
         return $this->getProfile(['id' => $id]);
     }
 
-    /**
-     * @param array $params
-     *
-     * @return array
-     */
     public function getProfile(array $params = []): array|object
     {
         // Set
@@ -318,11 +288,6 @@ class AccountRepository implements AccountRepositoryInterface
         return $profile;
     }
 
-    /**
-     * @param array $params
-     *
-     * @return void
-     */
     public function updateProfile(int $userId, array $params = []): void
     {
         $update = new Update($this->tableProfile);
@@ -338,5 +303,26 @@ class AccountRepository implements AccountRepositoryInterface
                 'Database error occurred during update operation'
             );
         }
+    }
+
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential'): AuthenticationService
+    {
+        // Call authAdapter
+        $authAdapter = new CallbackCheckAdapter(
+            $this->db,
+            $this->tableAccount,
+            $identityColumn,
+            $credentialColumn,
+            function ($hash, $password) {
+                $bcrypt = new Bcrypt();
+                return $bcrypt->verify($password, $hash);
+            }
+        );
+
+        // Set condition
+        $select = $authAdapter->getDbSelect();
+        $select->where(['status' => 1, new IsNotNull($credentialColumn)]);
+
+        return new AuthenticationService(null, $authAdapter);
     }
 }

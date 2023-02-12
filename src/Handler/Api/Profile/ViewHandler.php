@@ -45,6 +45,9 @@ class ViewHandler implements RequestHandlerInterface
         // Set ID as int
         $account['id'] = (int)$account['id'];
 
+        // Check user has password or not
+        $account['has_password']  = $this->accountService->hasPassword($account['id']);
+
         // Set profile params
         $params = [
             'user_id' => $account['id'],

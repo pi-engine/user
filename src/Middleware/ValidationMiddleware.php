@@ -89,20 +89,20 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->passwordEditIsValid($parsedBody, $account);
                 break;
 
-            case 'mobile':
-                $this->mobileIsValid($parsedBody);
+            case 'email-request':
+                $this->emailRequestIsValid($parsedBody);
                 break;
 
-            case 'email':
-                $this->emailIsValid($parsedBody);
+            case 'email-verify':
+                $this->emailVerifyIsValid($parsedBody);
                 break;
 
-            case 'verify-mobile':
-                $this->loginMobileIsValid($parsedBody);
+            case 'mobile-request':
+                $this->mobileRequestIsValid($parsedBody);
                 break;
 
-            case 'verify-email':
-                $this->loginEmailIsValid($parsedBody);
+            case 'mobile-verify':
+                $this->mobileVerifyIsValid($parsedBody);
                 break;
 
             default:
@@ -132,31 +132,53 @@ class ValidationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
+    protected function setErrorHandler($inputFilter): array
+    {
+        $message = [];
+        foreach ($inputFilter->getInvalidInput() as $error) {
+            $message[$error->getName()] = implode(', ', $error->getMessages());
+        }
+
+        return $this->validationResult = [
+            'status'  => false,
+            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+            'message' => $message,
+        ];
+    }
+
     protected function loginIsValid($params)
     {
         $inputFilter = new InputFilter();
 
         // Check email or identity or mobile
         if (isset($params['email']) && !empty($params['email'])) {
+            // Set input filter
             $email = new Input('email');
             $email->getValidatorChain()->attach(new EmailValidator($this->accountService, ['check_duplication' => false]));
             $inputFilter->add($email);
+
+            // Set check params
+            $checkParams = ['email' => $params['email']];
         } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            // Set input filter
             $identity = new Input('identity');
             $identity->getValidatorChain()->attach(new IdentityValidator($this->accountService, ['check_duplication' => false]));
             $inputFilter->add($identity);
+
+            // Set check params
+            $checkParams = ['identity' => $params['identity']];
         } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
+            // Set input filter
             $option = [
                 'check_duplication' => false,
-                'country'           => 'IR',
+                'country'           => $option['country'] ?? 'IR',
             ];
-            if (isset($params['country']) && !empty($params['country'])) {
-                $option['country'] = $params['country'];
-            }
-
             $mobile = new Input('mobile');
             $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
             $inputFilter->add($mobile);
+
+            // Set check params
+            $checkParams = ['mobile' => $params['mobile']];
         } else {
             return $this->validationResult = [
                 'status'  => false,
@@ -170,25 +192,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
         $inputFilter->add($credential);
 
+        // Set data and check
         $inputFilter->setData($params);
-
         if (!$inputFilter->isValid()) {
             return $this->setErrorHandler($inputFilter);
         }
-    }
-
-    protected function setErrorHandler($inputFilter): array
-    {
-        $message = [];
-        foreach ($inputFilter->getInvalidInput() as $error) {
-            $message[$error->getName()] = implode(', ', $error->getMessages());
-        }
-
-        return $this->validationResult = [
-            'status'  => false,
-            'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-            'message' => $message,
-        ];
     }
 
     protected function registerIsValid($params)
@@ -338,7 +346,53 @@ class ValidationMiddleware implements MiddlewareInterface
         }
     }
 
-    protected function mobileIsValid($params)
+    protected function emailRequestIsValid($params)
+    {
+        $option = [
+            'check_duplication' => false,
+        ];
+
+        $email = new Input('email');
+        $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($email);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function emailVerifyIsValid($params)
+    {
+        $option = [
+            'check_duplication' => false,
+        ];
+
+        // Check email
+        $email = new Input('email');
+        $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
+
+        $option = [
+            'email' => $params['email'],
+        ];
+
+        // Check otp
+        $otp = new Input('otp');
+        $otp->getValidatorChain()->attach(new OtpValidator($this->accountService, $this->cacheService, $option));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($email);
+        $inputFilter->add($otp);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function mobileRequestIsValid($params)
     {
         $option = [
             'check_duplication' => false,
@@ -360,25 +414,7 @@ class ValidationMiddleware implements MiddlewareInterface
         }
     }
 
-    protected function emailIsValid($params)
-    {
-        $option = [
-            'check_duplication' => false,
-        ];
-
-        $email = new Input('email');
-        $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
-
-        $inputFilter = new InputFilter();
-        $inputFilter->add($email);
-        $inputFilter->setData($params);
-
-        if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
-        }
-    }
-
-    protected function loginMobileIsValid($params)
+    protected function mobileVerifyIsValid($params)
     {
         $inputFilter = new InputFilter();
 
@@ -409,33 +445,4 @@ class ValidationMiddleware implements MiddlewareInterface
             return $this->setErrorHandler($inputFilter);
         }
     }
-
-    protected function loginEmailIsValid($params)
-    {
-        $option = [
-            'check_duplication' => false,
-        ];
-
-        // Check email
-        $email = new Input('email');
-        $email->getValidatorChain()->attach(new EmailValidator($this->accountService, $option));
-
-        $option = [
-            'email' => $params['email'],
-        ];
-
-        // Check otp
-        $otp = new Input('otp');
-        $otp->getValidatorChain()->attach(new OtpValidator($this->accountService, $this->cacheService, $option));
-
-        $inputFilter = new InputFilter();
-        $inputFilter->add($email);
-        $inputFilter->add($otp);
-        $inputFilter->setData($params);
-
-        if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
-        }
-    }
-
 }

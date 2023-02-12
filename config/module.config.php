@@ -290,7 +290,7 @@ return [
                                                 'package'     => 'profile',
                                                 'handler'     => 'request',
                                                 'permissions' => 'user-email-request',
-                                                'validator'   => 'email',
+                                                'validator'   => 'email-request',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
@@ -310,7 +310,7 @@ return [
                                                 'package'     => 'profile',
                                                 'handler'     => 'verify',
                                                 'permissions' => 'user-email-verify',
-                                                'validator'   => 'verify-email',
+                                                'validator'   => 'email-verify',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
@@ -339,7 +339,7 @@ return [
                                                 'package'     => 'profile',
                                                 'handler'     => 'request',
                                                 'permissions' => 'user-mobile-request',
-                                                'validator'   => 'mobile',
+                                                'validator'   => 'mobile-request',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
@@ -359,7 +359,7 @@ return [
                                                 'package'     => 'profile',
                                                 'handler'     => 'verify',
                                                 'permissions' => 'user-mobile-verify',
-                                                'validator'   => 'verify-mobile',
+                                                'validator'   => 'mobile-verify',
                                                 'controller'  => PipeSpec::class,
                                                 'middleware'  => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
