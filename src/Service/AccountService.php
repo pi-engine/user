@@ -2,6 +2,7 @@
 
 namespace User\Service;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
@@ -167,6 +168,7 @@ class AccountService implements ServiceInterface
                 'result' => false,
                 'data'   => [],
                 'error'  => 'error in login',
+                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED
             ];
         }
 
@@ -600,6 +602,21 @@ class AccountService implements ServiceInterface
         }
 
         return $result;
+    }
+
+    public function updatePasswordByAdmin($params): array
+    {
+        $credential = $this->generatePassword($params['credential']);
+
+        $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
+
+        return [
+            'result' => true,
+            'data'   => [
+                'message' => 'Password set successfully !',
+            ],
+            'error'  => [],
+        ];
     }
 
     public function hasPassword($userId): bool

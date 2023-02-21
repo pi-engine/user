@@ -33,10 +33,16 @@ class EditHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody = $request->getParsedBody();
+        $requestBody    = $request->getParsedBody();
+        $account        = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
+        $updatedAccount = $this->accountService->updateAccount($requestBody, $account);
 
-        $result = ['message' => 'Profile edit section is under development'];
-
-        return new JsonResponse($result);
+        return new JsonResponse(
+            [
+                'result' => true,
+                'data'   => $updatedAccount,
+                'error'  => [],
+            ]
+        );
     }
 }

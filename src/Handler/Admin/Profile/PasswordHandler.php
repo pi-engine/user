@@ -34,7 +34,7 @@ class PasswordHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->accountService->addPassword($requestBody);
+        $result      = $this->accountService->updatePasswordByAdmin($requestBody);
 
         return new JsonResponse($result);
     }

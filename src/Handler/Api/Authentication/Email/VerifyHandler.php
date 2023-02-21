@@ -46,6 +46,6 @@ class VerifyHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->login($params);
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, $result['status'] ?? 200);
     }
 }
