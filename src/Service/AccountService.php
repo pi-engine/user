@@ -29,6 +29,9 @@ class AccountService implements ServiceInterface
     /* @var CacheService */
     protected CacheService $cacheService;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /** @var NotificationService */
     protected NotificationService $notificationService;
 
@@ -66,12 +69,14 @@ class AccountService implements ServiceInterface
         RoleService $roleService,
         TokenService $tokenService,
         CacheService $cacheService,
-        NotificationService $notificationService,
+        UtilityService $utilityService,
+        NotificationService $notificationService
     ) {
         $this->accountRepository   = $accountRepository;
         $this->roleService         = $roleService;
         $this->tokenService        = $tokenService;
         $this->cacheService        = $cacheService;
+        $this->utilityService      = $utilityService;
         $this->notificationService = $notificationService;
     }
 
@@ -168,7 +173,7 @@ class AccountService implements ServiceInterface
                 'result' => false,
                 'data'   => [],
                 'error'  => 'error in login',
-                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED
+                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ];
         }
 
@@ -344,7 +349,7 @@ class AccountService implements ServiceInterface
                     'name'  => $account['name'],
                 ],
                 'subject' => 'ورود با کد یک بار مصرف',
-                'body' => sprintf('کد یک بار مصرف شما برای ورود <strong>%s</strong> است و این کد به مدت ۳ دقیقه معتبر خواهد بود.', $otpCode)
+                'body'    => sprintf('کد یک بار مصرف شما برای ورود <strong>%s</strong> است و این کد به مدت ۳ دقیقه معتبر خواهد بود.', $otpCode),
             ],
         ];
 
@@ -669,6 +674,7 @@ class AccountService implements ServiceInterface
                 'email'    => $account->getEmail(),
                 'mobile'   => $account->getMobile(),
                 'status'   => $account->getStatus(),
+                'time_created_view' => $this->utilityService->date($account->getTimeCreated()),
             ];
         } else {
             $account = [
@@ -678,6 +684,7 @@ class AccountService implements ServiceInterface
                 'identity' => $account['identity'] ?? '',
                 'mobile'   => $account['mobile'] ?? '',
                 'status'   => $account['status'],
+                'time_created_view' => $this->utilityService->date($account['time_created']),
             ];
         }
 

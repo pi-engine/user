@@ -12,6 +12,7 @@ use User\Service\AccountService;
 use User\Service\CacheService;
 use User\Service\RoleService;
 use User\Service\TokenService;
+use User\Service\UtilityService;
 
 class AccountServiceFactory implements FactoryInterface
 {
@@ -31,6 +32,7 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(RoleService::class),
             $container->get(TokenService::class),
             $container->get(CacheService::class),
+            $container->get(UtilityService::class),
             $container->get(NotificationService::class)
         );
     }

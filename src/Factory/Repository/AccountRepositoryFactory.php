@@ -29,7 +29,7 @@ class AccountRepositoryFactory implements FactoryInterface
         return new AccountRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new Account('', '', '', '', 0, 0),
+            new Account('', '', '', '', 0, 0, 0),
             new Profile(0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''),
             new Credential('')
         );
