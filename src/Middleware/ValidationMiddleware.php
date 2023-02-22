@@ -86,7 +86,11 @@ class ValidationMiddleware implements MiddlewareInterface
                 break;
 
             case 'password-update':
-                $this->passwordEditIsValid($parsedBody, $account);
+                $this->passwordEditIsValid($parsedBody);
+                break;
+
+            case 'password-admin':
+                $this->passwordAdminIsValid($parsedBody);
                 break;
 
             case 'email-request':
@@ -328,7 +332,7 @@ class ValidationMiddleware implements MiddlewareInterface
         }
     }
 
-    protected function passwordEditIsValid($params, $account)
+    protected function passwordEditIsValid($params)
     {
         $currentCredential = new Input('current_credential');
         $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
@@ -339,6 +343,20 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter = new InputFilter();
         $inputFilter->add($currentCredential);
         $inputFilter->add($newCredential);
+        $inputFilter->setData($params);
+
+        if (!$inputFilter->isValid()) {
+            return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function passwordAdminIsValid($params)
+    {
+        $credential = new Input('credential');
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($credential);
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
