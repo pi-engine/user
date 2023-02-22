@@ -674,7 +674,7 @@ class AccountService implements ServiceInterface
                 'email'    => $account->getEmail(),
                 'mobile'   => $account->getMobile(),
                 'status'   => $account->getStatus(),
-                'time_created_view' => $this->utilityService->date($account->getTimeCreated()),
+                'time_created' => $account->getTimeCreated(),
             ];
         } else {
             $account = [
@@ -684,8 +684,13 @@ class AccountService implements ServiceInterface
                 'identity' => $account['identity'] ?? '',
                 'mobile'   => $account['mobile'] ?? '',
                 'status'   => $account['status'],
-                'time_created_view' => $this->utilityService->date($account['time_created']),
+                'time_created' => $account['time_created'] ?? '',
             ];
+        }
+
+        $account['time_created_view'] = ' - ';
+        if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
+            $account['time_created_view'] = $this->utilityService->date($account['time_created']);
         }
 
         return $account;
