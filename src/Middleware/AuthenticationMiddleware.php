@@ -61,11 +61,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // Check token set
         if (empty($token)) {
-            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute('error',
                 [
                     'message' => 'Token is not set !',
-                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                    'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );
             return $this->errorHandler->handle($request);
@@ -76,11 +76,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // Check parsed token
         if (!$tokenParsed['status']) {
-            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute('error',
                 [
                     'message' => $tokenParsed['message'],
-                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                    'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );
             return $this->errorHandler->handle($request);
@@ -99,11 +99,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // Check token type
         if ($tokenParsed['type'] != $type) {
-            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute('error',
                 [
                     'message' => 'This token not allowed for authentication',
-                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                    'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );
             return $this->errorHandler->handle($request);
