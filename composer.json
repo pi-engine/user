@@ -57,7 +57,9 @@
     "laminas/laminas-i18n": "*",
     "laminas/laminas-file":"*",
     "laminas/laminas-config": "*",
-    "firebase/php-jwt": "*"
+    "lm-commons/lmc-cors": "*",
+    "firebase/php-jwt": "*",
+    "phpmailer/phpmailer": "*"
   },
   "autoload": {
     "psr-4": {
