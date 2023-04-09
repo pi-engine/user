@@ -32,6 +32,7 @@
     "ext-pdo": "*",
     "ext-spl": "*",
     "lib-curl": "*",
+    "ext-intl": "*",
     "laminas/laminas-component-installer":  "*",
     "laminas/laminas-development-mode": "*",
     "laminas/laminas-skeleton-installer":  "*",
@@ -57,6 +58,7 @@
     "laminas/laminas-i18n": "*",
     "laminas/laminas-file":"*",
     "laminas/laminas-config": "*",
+    "laminas/laminas-diactoros": "*",
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*"

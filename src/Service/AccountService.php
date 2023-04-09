@@ -551,6 +551,12 @@ class AccountService implements ServiceInterface
         return array_merge($account, $profile);
     }
 
+    public function updatedDeviceToken($requestBody, $account)
+    {
+        // Update cache
+        $this->cacheService->addItem($account['id'], 'device_token', $requestBody['device_token']);
+    }
+
     public function getProfile($params): array
     {
         $profile = $this->accountRepository->getProfile($params);

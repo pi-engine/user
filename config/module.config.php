@@ -51,6 +51,7 @@ return [
             Handler\Admin\Permission\ViewHandler::class             => Factory\Handler\Admin\Permission\ViewHandlerFactory::class,
             Handler\Api\Profile\ViewHandler::class                  => Factory\Handler\Api\Profile\ViewHandlerFactory::class,
             Handler\Api\Profile\UpdateHandler::class                => Factory\Handler\Api\Profile\UpdateHandlerFactory::class,
+            Handler\Api\Profile\DeviceTokenHandler::class           => Factory\Handler\Api\Profile\DeviceTokenHandlerFactory::class,
             Handler\Api\Password\AddHandler::class                  => Factory\Handler\Api\Password\AddHandlerFactory::class,
             Handler\Api\Password\UpdateHandler::class               => Factory\Handler\Api\Password\UpdateHandlerFactory::class,
             Handler\Api\Authentication\LoginHandler::class          => Factory\Handler\Api\Authentication\LoginHandlerFactory::class,
@@ -123,6 +124,28 @@ return [
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
                                             Handler\Api\Profile\UpdateHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'device-token' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/device-token',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'api',
+                                        'package'     => 'profile',
+                                        'handler'     => 'device-token',
+                                        'permissions' => 'user-update',
+                                        'validator'   => 'device-token',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
+                                            Handler\Api\Profile\DeviceTokenHandler::class
                                         ),
                                     ],
                                 ],

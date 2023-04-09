@@ -164,6 +164,17 @@ return [
         [
             'module'      => 'user',
             'section'     => 'api',
+            'package'     => 'profile',
+            'handler'     => 'device-token',
+            'permissions' => 'user-update',
+            'role'        => [
+                'member',
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'api',
             'package'     => 'password',
             'handler'     => 'add',
             'permissions' => 'user-password-add',

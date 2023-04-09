@@ -81,6 +81,10 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->editIsValid($parsedBody, $account);
                 break;
 
+            case 'device-token':
+                $this->deviceTokenIsValid($parsedBody, $account);
+                break;
+
             case 'password-add':
                 $this->passwordAddIsValid($parsedBody, $account);
                 break;
@@ -309,6 +313,17 @@ class ValidationMiddleware implements MiddlewareInterface
 
         if (!$inputFilter->isValid()) {
             return $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    protected function deviceTokenIsValid($params, $account)
+    {
+        if(!isset($params['device_token']) || empty($params['device_token']) || !is_string($params['device_token'])) {
+            return $this->validationResult = [
+                'status'  => false,
+                'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                'message' => 'Device token was not set or its wrong !',
+            ];
         }
     }
 
