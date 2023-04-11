@@ -35,6 +35,9 @@ class AccountService implements ServiceInterface
     /** @var NotificationService */
     protected NotificationService $notificationService;
 
+    /* @var array */
+    protected array $config;
+
     protected array $profileFields
         = [
             'user_id',
@@ -66,6 +69,7 @@ class AccountService implements ServiceInterface
      * @param CacheService               $cacheService
      * @param UtilityService             $utilityService
      * @param NotificationService        $notificationService
+     * @param                            $config
      */
     public function __construct(
         AccountRepositoryInterface $accountRepository,
@@ -73,7 +77,8 @@ class AccountService implements ServiceInterface
         TokenService $tokenService,
         CacheService $cacheService,
         UtilityService $utilityService,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        $config
     ) {
         $this->accountRepository   = $accountRepository;
         $this->roleService         = $roleService;
@@ -81,6 +86,7 @@ class AccountService implements ServiceInterface
         $this->cacheService        = $cacheService;
         $this->utilityService      = $utilityService;
         $this->notificationService = $notificationService;
+        $this->config       = $config;
     }
 
     /**
@@ -256,23 +262,14 @@ class AccountService implements ServiceInterface
         );
 
         // Set sms message
-        if (isset($params['source']) && !empty($params['source'])) {
-            switch ($params['source']) {
-                case 'dafi':
-                    $message = 'کد تایید: %s
-        دافی';
-                    break;
-
-                case 'luxirana':
-                default:
-                    $message = 'کد تایید: %s
-        لوکس ایرانا';
-                    break;
-
-            }
-        } else {
-            $message = 'کد تایید: %s
-        لوکس ایرانا';
+        $message = 'Code: %s';
+        if (
+            isset($params['source'])
+            && !empty($params['source'])
+            && isset($this->config['otp_sms'])
+            && in_array('source', array_keys($this->config['otp_sms']))
+        ) {
+            $message = $this->config['otp_sms'][$params['source']];
         }
 
         // Set notification params
@@ -356,8 +353,8 @@ class AccountService implements ServiceInterface
                     'email' => $account['email'],
                     'name'  => $account['name'],
                 ],
-                'subject' => 'ورود با کد یک بار مصرف',
-                'body'    => sprintf('کد یک بار مصرف شما برای ورود <strong>%s</strong> است و این کد به مدت ۳ دقیقه معتبر خواهد بود.', $otpCode),
+                'subject' => $this->config['otp_email']['subject'],
+                'body'    => sprintf($this->config['otp_email']['body'], $otpCode),
             ],
         ];
 

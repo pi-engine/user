@@ -27,13 +27,17 @@ class AccountServiceFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountService
     {
+        // Get config
+        $config = $container->get('config');
+
         return new AccountService(
             $container->get(AccountRepositoryInterface::class),
             $container->get(RoleService::class),
             $container->get(TokenService::class),
             $container->get(CacheService::class),
             $container->get(UtilityService::class),
-            $container->get(NotificationService::class)
+            $container->get(NotificationService::class),
+            $config['account']
         );
     }
 }
