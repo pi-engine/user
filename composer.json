@@ -62,9 +62,8 @@
     "laminas/laminas-soap": "*",
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
-    "phpmailer/phpmailer": "*"
-
-
+    "phpmailer/phpmailer": "*",
+    "automattic/woocommerce": "*"
   },
   "autoload": {
     "psr-4": {
