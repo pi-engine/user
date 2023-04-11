@@ -59,9 +59,12 @@
     "laminas/laminas-file":"*",
     "laminas/laminas-config": "*",
     "laminas/laminas-diactoros": "*",
+    "laminas/laminas-soap": "*",
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*"
+
+
   },
   "autoload": {
     "psr-4": {

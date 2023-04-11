@@ -22,6 +22,9 @@ class UtilityServiceFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): UtilityService
     {
-        return new UtilityService();
+        // Get config
+        $config = $container->get('config');
+
+        return new UtilityService($config['utility']);
     }
 }

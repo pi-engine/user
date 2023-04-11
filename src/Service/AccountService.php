@@ -61,8 +61,11 @@ class AccountService implements ServiceInterface
 
     /**
      * @param AccountRepositoryInterface $accountRepository
+     * @param RoleService                $roleService
      * @param TokenService               $tokenService
      * @param CacheService               $cacheService
+     * @param UtilityService             $utilityService
+     * @param NotificationService        $notificationService
      */
     public function __construct(
         AccountRepositoryInterface $accountRepository,
@@ -162,6 +165,11 @@ class AccountService implements ServiceInterface
                     ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
                     : [$refreshToken['key']],
             ]);
+
+            // Set source roles params
+            if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
+                $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+            }
 
             $result = [
                 'result' => true,

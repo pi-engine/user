@@ -6,6 +6,7 @@ use IntlDateFormatter;
 use Laminas\Escaper\Escaper;
 use NumberFormatter;
 use Pi;
+
 use function _escape;
 use function class_exists;
 use function method_exists;
@@ -16,9 +17,12 @@ use function ucfirst;
 
 class UtilityService implements ServiceInterface
 {
-    public function __construct()
-    {
+    /* @var array */
+    protected array $config;
 
+    public function __construct($config)
+    {
+        $this->config = $config;
     }
 
     /**
@@ -40,42 +44,13 @@ class UtilityService implements ServiceInterface
             return date('Y-m-d H:i:s', $date);
         }
 
-        /* if (!$locale) {
-            $locale = $this->getLocale();
-        } elseif (strpos($locale, '@')) {
-            $calendar = IntlDateFormatter::TRADITIONAL;
-        }
-
-        if (null === $calendar) {
-            $calendar = Pi::config('date_calendar');
-            if (!$calendar) {
-                $calendar = IntlDateFormatter::GREGORIAN;
-            }
-        }
-        if ($calendar && !is_numeric($calendar)) {
-            $locale   .= '@calendar=' . $calendar;
-            $calendar = IntlDateFormatter::TRADITIONAL;
-        }
-        if (null === $calendar) {
-            $calendar = IntlDateFormatter::GREGORIAN;
-        }
-
-        $datetype = constant(
-            'IntlDateFormatter::'
-            . strtoupper($datetype ?: Pi::config('date_datetype'))
-        );
-        $timetype =  constant(
-            'IntlDateFormatter::'
-            . strtoupper($timetype ?: Pi::config('date_timetype'))
-        );
-        $timezone = $timezone ?: Pi::config('timezone'); */
-
-        $local    = $params['local'] ?? 'fa_IR@calendar=persian';
-        $datetype = IntlDateFormatter::SHORT;
-        $timetype = IntlDateFormatter::NONE;
-        $timezone = $params['timezone'] ?? 'Asia/Tehran';
-        $calendar = IntlDateFormatter::TRADITIONAL;
-        $pattern  = $params['pattern'] ?? 'yyyy/MM/dd HH:mm:ss';
+        // Set params
+        $local    = $params['local'] ?? $this->config['date_local'];
+        $datetype = $params['datetype'] ?? $this->config['date_type'];
+        $timetype = $params['timetype'] ?? $this->config['time_type'];
+        $timezone = $params['timezone'] ?? $this->config['timezone'];
+        $calendar = $params['calendar'] ?? $this->config['date_calendar'];
+        $pattern  = $params['pattern'] ?? $this->config['date_pattern'];
 
         $formatter = new IntlDateFormatter($local, $datetype, $timetype, $timezone, $calendar, $pattern);
         return $formatter->format($date);
@@ -116,10 +91,40 @@ class UtilityService implements ServiceInterface
     {
         if (empty($pattern)) {
             $pattern = [
-                "\t", "\r\n", "\r", "\n", "'", "\\",
-                '&nbsp;', ',', '.', ';', ':', ')', '(',
-                '"', '?', '!', '{', '}', '[', ']', '<', '>', '/', '+', '-', '_',
-                '*', '=', '@', '#', '$', '%', '^', '&',
+                "\t",
+                "\r\n",
+                "\r",
+                "\n",
+                "'",
+                "\\",
+                '&nbsp;',
+                ',',
+                '.',
+                ';',
+                ':',
+                ')',
+                '(',
+                '"',
+                '?',
+                '!',
+                '{',
+                '}',
+                '[',
+                ']',
+                '<',
+                '>',
+                '/',
+                '+',
+                '-',
+                '_',
+                '*',
+                '=',
+                '@',
+                '#',
+                '$',
+                '%',
+                '^',
+                '&',
             ];
         }
         $replacement = (null === $replacement) ? ' ' : $replacement;
@@ -143,11 +148,6 @@ class UtilityService implements ServiceInterface
         return $text ? str_replace($pattern, $replacement, $text) : '';
     }
 
-    public function getConfig()
-    {
-
-    }
-
     /**
      * Locale-dependent formatting/parsing of number
      * using pattern strings and/or canned patterns
@@ -161,7 +161,7 @@ class UtilityService implements ServiceInterface
     public function setCurrency($value, $currency = null, $locale = null)
     {
         $result   = $value;
-        $currency = (null === $currency) ? 'IRR' : $currency;
+        $currency = (null === $currency) ? $this->config['currency'] : $currency;
         if ($currency) {
             $style     = 'CURRENCY';
             $formatter = $this->getNumberFormatter($style, $locale);
@@ -188,7 +188,7 @@ class UtilityService implements ServiceInterface
             return null;
         }
 
-        $locale    = $locale ?: 'fa_IR';
+        $locale    = $locale ?: $this->config['local'];
         $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
 
         if ($pattern) {
