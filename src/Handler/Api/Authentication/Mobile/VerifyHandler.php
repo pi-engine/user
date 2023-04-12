@@ -44,6 +44,7 @@ class VerifyHandler implements RequestHandlerInterface
             'credentialColumn' => 'otp',
             'identity'         => $requestBody['mobile'],
             'credential'       => $requestBody['otp'],
+            'source'           => $requestBody['source'] ?? '',
         ];
 
         // Do log in

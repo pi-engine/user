@@ -58,6 +58,7 @@ class LoginHandler implements RequestHandlerInterface
             'identity'       => $identity,
             'identityColumn' => $identityColumn,
             'credential'     => $requestBody['credential'],
+            'source'         => $requestBody['source'] ?? '',
         ];
 
         // Do log in
