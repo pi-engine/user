@@ -8,6 +8,7 @@ use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
 use Psr\SimpleCache\InvalidArgumentException;
 use User\Repository\AccountRepositoryInterface;
+
 use function array_merge;
 use function in_array;
 use function is_object;
@@ -86,7 +87,7 @@ class AccountService implements ServiceInterface
         $this->cacheService        = $cacheService;
         $this->utilityService      = $utilityService;
         $this->notificationService = $notificationService;
-        $this->config       = $config;
+        $this->config              = $config;
     }
 
     /**
@@ -150,6 +151,15 @@ class AccountService implements ServiceInterface
             $account['access_token']  = $accessToken['token'];
             $account['refresh_token'] = $refreshToken['token'];
 
+            // Set source roles params
+            if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
+                $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+
+                // Set new role
+                $account['roles'][] = $params['source'];
+                $account['roles']   = array_values($account['roles']);
+            }
+
             // Get from cache if exist
             $user = $this->cacheService->getUser($account['id']);
 
@@ -171,11 +181,6 @@ class AccountService implements ServiceInterface
                     ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
                     : [$refreshToken['key']],
             ]);
-
-            // Set source roles params
-            if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
-                $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
-            }
 
             $result = [
                 'result' => true,
@@ -442,8 +447,12 @@ class AccountService implements ServiceInterface
         $this->roleService->addDefaultRoles((int)$account['id']);
 
         // Set source roles params
-        if (isset($params['source']) && !empty($params['source']) && is_string($params['source'])) {
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
             $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+
+            // Set new role
+            $account['roles'][] = $params['source'];
+            $account['roles']   = array_values($account['roles']);
         }
 
         return $account;
@@ -679,22 +688,22 @@ class AccountService implements ServiceInterface
 
         if (is_object($account)) {
             $account = [
-                'id'       => $account->getId(),
-                'name'     => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email'    => $account->getEmail(),
-                'mobile'   => $account->getMobile(),
-                'status'   => $account->getStatus(),
+                'id'           => $account->getId(),
+                'name'         => $account->getName(),
+                'identity'     => $account->getIdentity(),
+                'email'        => $account->getEmail(),
+                'mobile'       => $account->getMobile(),
+                'status'       => $account->getStatus(),
                 'time_created' => $account->getTimeCreated(),
             ];
         } else {
             $account = [
-                'id'       => $account['id'],
-                'name'     => $account['name'] ?? '',
-                'email'    => $account['email'] ?? '',
-                'identity' => $account['identity'] ?? '',
-                'mobile'   => $account['mobile'] ?? '',
-                'status'   => $account['status'],
+                'id'           => $account['id'],
+                'name'         => $account['name'] ?? '',
+                'email'        => $account['email'] ?? '',
+                'identity'     => $account['identity'] ?? '',
+                'mobile'       => $account['mobile'] ?? '',
+                'status'       => $account['status'],
                 'time_created' => $account['time_created'] ?? '',
             ];
         }
