@@ -267,7 +267,7 @@ class AccountService implements ServiceInterface
             isset($params['source'])
             && !empty($params['source'])
             && isset($this->config['otp_sms'])
-            && in_array('source', array_keys($this->config['otp_sms']))
+            && in_array($params['source'], array_keys($this->config['otp_sms']))
         ) {
             $message = $this->config['otp_sms'][$params['source']];
         }
