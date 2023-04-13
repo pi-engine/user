@@ -464,6 +464,16 @@ class AccountService implements ServiceInterface
         return $this->canonizeAccount($account);
     }
 
+    public function getUserFromCache($id): array
+    {
+        $user = $this->cacheService->getUser($id);
+
+        return [
+            'account' => $user['account'],
+            'roles'   => $user['roles'],
+        ];
+    }
+
     public function getAccountCount($params = []): int
     {
         return $this->accountRepository->getAccountCount($params);
