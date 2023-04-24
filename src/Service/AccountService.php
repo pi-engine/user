@@ -483,21 +483,26 @@ class AccountService implements ServiceInterface
     {
         $limit  = (int)$params['limit'] ?? 10;
         $page   = (int)$params['page'] ?? 1;
+        /// changed by kerloper
+        $key    =  $params['key'] ?? '';
         $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ($page - 1) * $limit;
 
         // Set params
+        /// changed by kerloper
         $listParams = [
             'page'   => $page,
             'limit'  => $limit,
             'order'  => $order,
             'offset' => $offset,
+            'key'    => $key,
         ];
 
         // Get list
         $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
+            /// changed by kerloper
             $list[$row->getId()] = $this->canonizeAccount($row);
         }
 
