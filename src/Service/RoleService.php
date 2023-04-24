@@ -178,6 +178,19 @@ class RoleService implements ServiceInterface
         return $list;
     }
 
+    public function getRoleAccountList($userIdList): array
+    {
+        $list   = [];
+        $rowSet = $this->roleRepository->getRoleAccount($userIdList);
+        foreach ($rowSet as $row) {
+            $role = $this->canonizeUserRole($row);
+
+            $list[$role['user_id']][$role['section']][] = $role;
+        }
+
+        return $list;
+    }
+
     public function deleteRoleAccount(int $userId, string $roleName): void
     {
         $roleList = $this->getRoleListLight();

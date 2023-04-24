@@ -498,14 +498,18 @@ class AccountService implements ServiceInterface
         $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
-            $list[] = $this->canonizeAccount($row);
+            $list[$row->id] = $this->canonizeAccount($row);
         }
+
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
 
         // Get count
         $count = $this->accountRepository->getAccountCount($listParams);
 
         return [
-            'list'      => $list,
+            'list'      => array_values($list),
+            'roles'     => $roleList,
             'paginator' => [
                 'count' => $count,
                 'limit' => $limit,
