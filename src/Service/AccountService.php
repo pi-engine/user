@@ -498,7 +498,7 @@ class AccountService implements ServiceInterface
         $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
-            $list[$row->id] = $this->canonizeAccount($row);
+            $list[$row->getId()] = $this->canonizeAccount($row);
         }
 
         // Get roles
