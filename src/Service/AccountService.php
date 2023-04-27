@@ -127,7 +127,7 @@ class AccountService implements ServiceInterface
             $account = array_merge($account, $profile);
 
             // Get roles
-            $account['roles'] = $this->roleService->getRoleAccount($account['id']);
+            $account['roles'] = $this->roleService->getRoleAccount((int)$account['id']);
 
             // Generate access token
             $accessToken = $this->tokenService->generate(
@@ -166,7 +166,7 @@ class AccountService implements ServiceInterface
             // Set/Update user data to cache
             $this->cacheService->setUser($account['id'], [
                 'account'      => [
-                    'id'         => $account['id'],
+                    'id'         => (int)$account['id'],
                     'name'       => $account['name'],
                     'email'      => $account['email'],
                     'identity'   => $account['identity'],
@@ -446,13 +446,12 @@ class AccountService implements ServiceInterface
         // Set user roles
         $this->roleService->addDefaultRoles((int)$account['id']);
 
-        // Set source roles params
-        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
-            $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+        // Get roles
+        $roles = $this->roleService->getRoleAccount((int)$account['id']);
 
-            // Set new role
-            $account['roles'][] = $params['source'];
-            $account['roles']   = array_values($account['roles']);
+        // Set source roles params
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
+            $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
         }
 
         return $account;
@@ -707,22 +706,22 @@ class AccountService implements ServiceInterface
 
         if (is_object($account)) {
             $account = [
-                'id'           => $account->getId(),
+                'id'           => (int)$account->getId(),
                 'name'         => $account->getName(),
                 'identity'     => $account->getIdentity(),
                 'email'        => $account->getEmail(),
                 'mobile'       => $account->getMobile(),
-                'status'       => $account->getStatus(),
+                'status'       => (int)$account->getStatus(),
                 'time_created' => $account->getTimeCreated(),
             ];
         } else {
             $account = [
-                'id'           => $account['id'],
+                'id'           => (int)$account['id'],
                 'name'         => $account['name'] ?? '',
                 'email'        => $account['email'] ?? '',
                 'identity'     => $account['identity'] ?? '',
                 'mobile'       => $account['mobile'] ?? '',
-                'status'       => $account['status'],
+                'status'       => (int)$account['status'],
                 'time_created' => $account['time_created'] ?? '',
             ];
         }
