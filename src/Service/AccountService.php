@@ -473,6 +473,11 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    public function getUserFromCacheFull($id): array
+    {
+        return $this->cacheService->getUser($id);
+    }
+
     public function getAccountCount($params = []): int
     {
         return $this->accountRepository->getAccountCount($params);
