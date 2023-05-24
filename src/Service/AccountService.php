@@ -747,6 +747,7 @@ class AccountService implements ServiceInterface
 
         if (is_object($profile)) {
             $profile = [
+                'user_id'         => $profile->getUserId(),
                 'first_name'      => $profile->getFirstName(),
                 'last_name'       => $profile->getLastName(),
                 'id_number'       => $profile->getIdNumber(),
@@ -769,6 +770,7 @@ class AccountService implements ServiceInterface
             ];
         } else {
             $profile = [
+                'user_id'         => $profile['user_id'],
                 'first_name'      => $profile['first_name'],
                 'last_name'       => $profile['last_name'],
                 'id_number'       => $profile['id_number'],
