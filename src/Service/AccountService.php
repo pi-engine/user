@@ -591,7 +591,7 @@ class AccountService implements ServiceInterface
     public function updatedDeviceToken($requestBody, $account)
     {
         // Update cache
-        $this->cacheService->addItem($account['id'], 'device_token', $requestBody['device_token']);
+        $this->cacheService->addItem($account['id'], 'device_tokens', $requestBody['device_token']);
     }
 
     public function getProfile($params): array
