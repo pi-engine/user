@@ -300,6 +300,8 @@ class AccountRepository implements AccountRepositoryInterface
             $where['id'] = (int)$params['id'];
         } elseif (isset($params['user_id']) && (int)$params['user_id'] > 0) {
             $where['user_id'] = $params['user_id'];
+        }elseif (isset($params['item_id']) && (int)$params['item_id'] > 0) {
+            $where['item_id'] = $params['item_id'];
         }
 
         $sql       = new Sql($this->db);
