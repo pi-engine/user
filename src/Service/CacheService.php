@@ -73,9 +73,9 @@ class CacheService implements ServiceInterface
                     $user['roles'] = array_unique(array_merge($user['roles'], [$value]));
                     $this->setUser($userId, ['roles' => $user['roles']]);
                     break;
-
+                //TODO:review this solution
                 case 'device_tokens':
-                    $user['device_tokens'] = array_unique(array_merge($user['device_tokens'], [$value]));
+                    $user['device_tokens'] =$value;// array_unique(array_merge($user['device_tokens'], [$value]));
                     $this->setUser($userId, ['device_tokens' => $user['device_tokens']]);
                     break;
             }
