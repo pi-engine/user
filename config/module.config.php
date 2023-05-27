@@ -143,7 +143,7 @@ return [
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationMiddleware::class,
+//                                            Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
                                             Handler\Api\Profile\DeviceTokenHandler::class
                                         ),
