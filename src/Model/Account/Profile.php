@@ -18,6 +18,7 @@ class Profile
     private mixed $phone;
     private mixed $address_1;
     private mixed $address_2;
+    private mixed $item_id;
     private mixed $country;
     private mixed $state;
     private mixed $city;
@@ -40,6 +41,7 @@ class Profile
         $phone,
         $address_1,
         $address_2,
+        $item_id,
         $country,
         $state,
         $city,
@@ -61,7 +63,8 @@ class Profile
         $this->homepage        = $homepage;
         $this->phone           = $phone;
         $this->address_1       = $address_1;
-        $this->address_2       = $address_2;
+        $this->address_1       = $address_2;
+        $this->item_id         = $item_id;
         $this->country         = $country;
         $this->state           = $state;
         $this->city            = $city;
@@ -176,6 +179,14 @@ class Profile
     public function getAddress2(): ?string
     {
         return $this->address_2;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getItemId(): ?string
+    {
+        return $this->item_id;
     }
 
     /**
