@@ -268,7 +268,8 @@ class AccountService implements ServiceInterface
         );
 
         // Set sms message
-        $message = 'Code: %s';
+        $message = 'Code: %s
+        لغو11';
         if (
             isset($params['source'])
             && !empty($params['source'])
