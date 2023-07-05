@@ -63,7 +63,7 @@ class Profile
         $this->homepage        = $homepage;
         $this->phone           = $phone;
         $this->address_1       = $address_1;
-        $this->address_1       = $address_2;
+        $this->address_2       = $address_2;
         $this->item_id         = $item_id;
         $this->country         = $country;
         $this->state           = $state;
