@@ -194,4 +194,27 @@ class CacheService implements ServiceInterface
         $key = sprintf($this->userKeyPattern, $userId);
         $this->cache->delete($key);
     }
+
+    public function updateUserRoles(int $userId, array $roles, string $section = 'api'): array
+    {
+        // Get and check user
+        $key = sprintf($this->userKeyPattern, $userId);
+        $user = $this->getUser($userId);
+
+        // Update roles
+        switch ($section) {
+            case 'api':
+                $user['roles'] = array_unique(array_merge($user['roles'], $roles));
+                break;
+
+            case 'admin':
+                // Todo
+                break;
+        }
+
+        // Set/Reset cache
+        $this->cache->set($key, $user);
+
+        return $user;
+    }
 }

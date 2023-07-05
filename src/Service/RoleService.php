@@ -144,6 +144,9 @@ class RoleService implements ServiceInterface
         ) {
             $this->roleRepository->addRoleAccount($userId, $roleName, $section);
         }
+
+        // Update cache
+        $this->cacheService->updateUserRoles($userId, [$roleName], $section);
     }
 
     public function getRoleListLight(): array
