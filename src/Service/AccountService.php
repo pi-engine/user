@@ -466,6 +466,53 @@ class AccountService implements ServiceInterface
         return $this->canonizeAccount($account);
     }
 
+    public function addOrGetAccount($params): array
+    {
+        $account = [];
+        if (isset($params['email']) && !empty($params['email'])) {
+            $account = $this->getAccount(['email' => $params['email']]);
+        } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
+            $account = $this->getAccount(['mobile' => $params['mobile']]);
+        } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            $account = $this->getAccount(['identity' => $params['identity']]);
+        }
+
+        if (empty($account)) {
+            $addParams = [
+                'email'           => $params['email'] ?? null,
+                'mobile'          => $params['mobile'] ?? null,
+                'identity'        => $params['identity'] ?? null,
+                'source'          => $params['source'] ?? null,
+                'first_name'      => $params['first_name'] ?? null,
+                'last_name'       => $params['last_name'] ?? null,
+                'id_number'       => $params['id_number'] ?? null,
+                'birthdate'       => $params['birthdate'] ?? null,
+                'gender'          => $params['gender'] ?? null,
+                'avatar'          => $params['avatar'] ?? null,
+                'ip_register'     => $params['ip_register'] ?? null,
+                'register_source' => $params['register_source'] ?? null,
+                'homepage'        => $params['homepage'] ?? null,
+                'phone'           => $params['phone'] ?? null,
+                'address_1'       => $params['address_1'] ?? null,
+                'address_2'       => $params['address_2'] ?? null,
+                'item_id'         => $params['item_id'] ?? null,
+                'country'         => $params['country'] ?? null,
+                'state'           => $params['state'] ?? null,
+                'city'            => $params['city'] ?? null,
+                'zip_code'        => $params['zip_code'] ?? null,
+                'bank_name'       => $params['bank_name'] ?? null,
+                'bank_card'       => $params['bank_card'] ?? null,
+                'bank_account'    => $params['bank_account'] ?? null,
+            ];
+            $account = $this->addAccount($addParams);
+        } else {
+            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+            $account = array_merge($account, $profile);
+        }
+
+        return $account;
+    }
+
     public function getUserFromCache($id): array
     {
         $user = $this->cacheService->getUser($id);
@@ -488,10 +535,10 @@ class AccountService implements ServiceInterface
 
     public function getAccountList($params): array
     {
-        $limit  = (int)$params['limit'] ?? 10;
-        $page   = (int)$params['page'] ?? 1;
+        $limit = (int)$params['limit'] ?? 10;
+        $page  = (int)$params['page'] ?? 1;
         /// changed by kerloper
-        $key    =  $params['key'] ?? '';
+        $key    = $params['key'] ?? '';
         $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ($page - 1) * $limit;
 
