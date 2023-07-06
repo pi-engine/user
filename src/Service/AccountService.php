@@ -482,6 +482,7 @@ class AccountService implements ServiceInterface
                 'email'           => $params['email'] ?? null,
                 'mobile'          => $params['mobile'] ?? null,
                 'identity'        => $params['identity'] ?? null,
+                'credential'      => $params['credential'] ?? null,
                 'source'          => $params['source'] ?? null,
                 'first_name'      => $params['first_name'] ?? null,
                 'last_name'       => $params['last_name'] ?? null,
@@ -500,9 +501,6 @@ class AccountService implements ServiceInterface
                 'state'           => $params['state'] ?? null,
                 'city'            => $params['city'] ?? null,
                 'zip_code'        => $params['zip_code'] ?? null,
-                'bank_name'       => $params['bank_name'] ?? null,
-                'bank_card'       => $params['bank_card'] ?? null,
-                'bank_account'    => $params['bank_account'] ?? null,
             ];
             $account = $this->addAccount($addParams);
         } else {
