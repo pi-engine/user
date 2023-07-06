@@ -32,6 +32,7 @@ return [
             Middleware\AuthorizationMiddleware::class               => Factory\Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\SecurityMiddleware::class                    => Factory\Middleware\SecurityMiddlewareFactory::class,
             Middleware\ValidationMiddleware::class                  => Factory\Middleware\ValidationMiddlewareFactory::class,
+            Middleware\InstallerMiddleware::class                  => Factory\Middleware\InstallerMiddlewareFactory::class,
             Validator\EmailValidator::class                         => Factory\Validator\EmailValidatorFactory::class,
             Validator\IdentityValidator::class                      => Factory\Validator\IdentityValidatorFactory::class,
             Validator\NameValidator::class                          => Factory\Validator\NameValidatorFactory::class,
@@ -676,6 +677,7 @@ return [
                                 'middleware' => new PipeSpec(
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,
+                                    Middleware\InstallerMiddleware::class,
                                     Handler\InstallerHandler::class
                                 ),
                             ],
