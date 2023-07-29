@@ -39,6 +39,6 @@ class Method implements SecurityInterface
      */
     public function getStatusCode(): int
     {
-        return StatusCodeInterface::STATUS_UNAUTHORIZED;
+        return StatusCodeInterface::STATUS_BAD_REQUEST;
     }
 }

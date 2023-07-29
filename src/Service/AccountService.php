@@ -192,7 +192,7 @@ class AccountService implements ServiceInterface
             $result = [
                 'result' => false,
                 'data'   => [],
-                'error'  => 'error in login',
+                'error'  => 'Invalid Username or Password',
                 'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ];
         }
