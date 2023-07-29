@@ -33,6 +33,7 @@
     "ext-spl": "*",
     "ext-intl": "*",
     "ext-soap": "*",
+    "ext-zip": "*",
     "lib-curl": "*",
     "laminas/laminas-component-installer":  "*",
     "laminas/laminas-development-mode": "*",
