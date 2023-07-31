@@ -18,8 +18,16 @@ class Xss implements SecurityInterface
         $params = $request->getParsedBody();
 
         foreach ($params as $param) {
-            if ($param != htmlspecialchars($param, ENT_QUOTES, 'UTF-8')) {
-                return false;
+            if (is_array($param)) {
+                foreach ($param as $subParam) {
+                    if ($subParam != htmlspecialchars($subParam, ENT_QUOTES, 'UTF-8')) {
+                        return false;
+                    }
+                }
+            } else {
+                if ($param != htmlspecialchars($param, ENT_QUOTES, 'UTF-8')) {
+                    return false;
+                }
             }
         }
 
