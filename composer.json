@@ -70,7 +70,8 @@
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*",
-    "automattic/woocommerce": "*"
+    "automattic/woocommerce": "*",
+    "voku/anti-xss": "^4.1"
   },
   "autoload": {
     "psr-4": {
