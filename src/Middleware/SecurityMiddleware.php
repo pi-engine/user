@@ -9,7 +9,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
-use User\Security\Method as SecurityMethod;
+//use User\Security\Method as SecurityMethod;
 use User\Security\Xss as SecurityXss;
 
 class SecurityMiddleware implements MiddlewareInterface
@@ -55,8 +55,11 @@ class SecurityMiddleware implements MiddlewareInterface
     protected function securityList(): array
     {
         return [
-            'method' => new SecurityMethod(),
-            'xss'    => new SecurityXss(),
+            //'method' => new SecurityMethod(),
+            'xss'    => new SecurityXss(
+                $this->responseFactory,
+                $this->streamFactory
+            ),
         ];
     }
 }

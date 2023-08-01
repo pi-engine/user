@@ -3,10 +3,27 @@
 namespace User\Security;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use voku\helper\AntiXSS;
 
 class Xss implements SecurityInterface
 {
+    /** @var ResponseFactoryInterface */
+    protected ResponseFactoryInterface $responseFactory;
+
+    /** @var StreamFactoryInterface */
+    protected StreamFactoryInterface $streamFactory;
+
+    public function __construct(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory
+    ) {
+        $this->responseFactory = $responseFactory;
+        $this->streamFactory   = $streamFactory;
+    }
+
     /**
      * @param ServerRequestInterface $request
      *
@@ -14,10 +31,34 @@ class Xss implements SecurityInterface
      */
     public function check(ServerRequestInterface $request): bool
     {
-        // Get request body
-        $params = $request->getParsedBody();
+        // Retrieve the raw JSON data from the request body
+        $stream       = $this->streamFactory->createStreamFromFile('php://input');
+        $streamParams = $stream->getContents();
 
-        foreach ($params as $param) {
+        // Get request body
+        $requestParams = $request->getParsedBody();
+
+        // Call XSS checker
+        $antiXss = new AntiXSS();
+
+        // Check request
+        if (!empty($requestParams)) {
+            $antiXss->xss_clean($requestParams);
+            if ($antiXss->isXssFound()) {
+                return false;
+            }
+        }
+
+        // Check stream
+        if (!empty($streamParams)) {
+            $antiXss->xss_clean($streamParams);
+            if ($antiXss->isXssFound()) {
+                return false;
+            }
+        }
+
+        // old method
+        /* foreach ($params as $param) {
             if (is_array($param)) {
                 foreach ($param as $subParam) {
                     if ($subParam != htmlspecialchars($subParam, ENT_QUOTES, 'UTF-8')) {
@@ -29,7 +70,7 @@ class Xss implements SecurityInterface
                     return false;
                 }
             }
-        }
+        } */
 
         return true;
     }
