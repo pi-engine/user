@@ -34,6 +34,7 @@
     "ext-intl": "*",
     "ext-soap": "*",
     "ext-zip": "*",
+    "ext-curl": "*",
     "lib-curl": "*",
     "laminas/laminas-component-installer":  "*",
     "laminas/laminas-development-mode": "*",
@@ -71,7 +72,8 @@
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*",
     "automattic/woocommerce": "*",
-    "voku/anti-xss": "^4.1"
+    "voku/anti-xss": "*",
+    "phpoffice/phpspreadsheet": "*"
   },
   "autoload": {
     "psr-4": {
