@@ -181,14 +181,30 @@ class RoleService implements ServiceInterface
         return $list;
     }
 
-    public function getRoleAccountList($userIdList): array
+    public function getRoleAccountList($userIdList, $section = 'full'): array
     {
         $list   = [];
         $rowSet = $this->roleRepository->getRoleAccount($userIdList);
         foreach ($rowSet as $row) {
             $role = $this->canonizeUserRole($row);
 
-            $list[$role['user_id']][$role['section']][] = $role;
+            switch ($section) {
+                case 'admin':
+                    if ($role['section'] == 'admin') {
+                        $list[$role['user_id']][] = $role;
+                    }
+                    break;
+
+                case 'api':
+                    if ($role['section'] == 'api') {
+                        $list[$role['user_id']][] = $role;
+                    }
+                    break;
+
+                case 'full':
+                    $list[$role['user_id']][$role['section']][] = $role;
+                    break;
+            }
         }
 
         return $list;
