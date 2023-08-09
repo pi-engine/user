@@ -533,18 +533,18 @@ class AccountService implements ServiceInterface
 
     public function getAccountList($params): array
     {
-        $limit = (int)$params['limit'] ?? 10;
-        $page  = (int)$params['page'] ?? 1;
+        $limit = $params['limit'] ?? 10;
+        $page  = $params['page'] ?? 1;
         /// changed by kerloper
         $key    = $params['key'] ?? '';
         $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
-        $offset = ($page - 1) * $limit;
+        $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
         /// changed by kerloper
         $listParams = [
-            'page'   => $page,
-            'limit'  => $limit,
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
             'order'  => $order,
             'offset' => $offset,
             'key'    => $key,
