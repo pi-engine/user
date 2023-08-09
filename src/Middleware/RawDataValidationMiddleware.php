@@ -259,6 +259,21 @@ class RawDataValidationMiddleware implements MiddlewareInterface
             $inputFilter->add($email);
         }
 
+        // Check mobile
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $option = [
+                'check_duplication' => true,
+                'country'           => 'IR',
+            ];
+            if (isset($params['country']) && !empty($params['country'])) {
+                $option['country'] = $params['country'];
+            }
+
+            $mobile = new Input('mobile');
+            $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
+            $inputFilter->add($mobile);
+        }
+
         // Check credential
         if (isset($params['identity']) && !empty($params['identity'])) {
             $identity = new Input('identity');
