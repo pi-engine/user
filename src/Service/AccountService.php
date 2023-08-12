@@ -784,7 +784,6 @@ class AccountService implements ServiceInterface
             $account['time_created_view'] = $this->utilityService->date($account['time_created']);
         }
 
-        $account['roles'] = [];
         return $account;
     }
 
