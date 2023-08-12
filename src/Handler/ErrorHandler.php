@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use stdClass;
 
 class ErrorHandler implements RequestHandlerInterface
 {
@@ -34,7 +35,7 @@ class ErrorHandler implements RequestHandlerInterface
         return new JsonResponse(
             [
                 'result' => false,
-                'data'   => new \stdClass(),
+                'data'   => new stdClass,
                 'error'  => $error,
             ],
             $status
