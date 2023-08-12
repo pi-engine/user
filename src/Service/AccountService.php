@@ -636,7 +636,7 @@ class AccountService implements ServiceInterface
         return array_merge($account, $profile);
     }
 
-    public function updatedDeviceToken($requestBody, $account)
+    public function updatedDeviceToken($requestBody, $account): void
     {
         // Update cache
         $this->cacheService->addItem($account['id'], 'device_tokens', $requestBody['device_token']);
@@ -784,7 +784,7 @@ class AccountService implements ServiceInterface
             $account['time_created_view'] = $this->utilityService->date($account['time_created']);
         }
 
-        $account['roles'] = array_values($this->roleService->getRoleAccountList((int)$account['id']))[0];
+        $account['roles'] = [];
         return $account;
     }
 
