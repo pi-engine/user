@@ -39,6 +39,15 @@ class AccountService implements ServiceInterface
     /* @var array */
     protected array $config;
 
+    protected array $accountFields
+        = [
+            'name',
+            //'email',
+            //'identity',
+            //'mobile',
+            //'status',
+        ];
+
     protected array $profileFields
         = [
             'user_id',
@@ -591,9 +600,12 @@ class AccountService implements ServiceInterface
         $accountParams = [];
         $profileParams = [];
         foreach ($params as $key => $value) {
-            if (!empty($value) && isset($account[$key]) && $account[$key] != $value) {
-                $accountParams[$key] = $value;
+            if (in_array($key, $this->accountFields)) {
+                if (!empty($value) && is_string($value)) {
+                    $accountParams[$key] = $value;
+                }
             }
+
             if (in_array($key, $this->profileFields)) {
                 if (empty($value)) {
                     $profileParams[$key] = null;

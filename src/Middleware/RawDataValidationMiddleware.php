@@ -174,7 +174,7 @@ class RawDataValidationMiddleware implements MiddlewareInterface
         return $this->validationResult = [
             'status'  => false,
             'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-            'message' => $message,
+            'message' => implode(', ', $message),
         ];
     }
 
