@@ -2,6 +2,7 @@
 
 namespace User\Handler;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -37,6 +38,7 @@ class ErrorHandler implements RequestHandlerInterface
                 'result' => false,
                 'data'   => new stdClass,
                 'error'  => $error,
+                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ],
             $status
         );

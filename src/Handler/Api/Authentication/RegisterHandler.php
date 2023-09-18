@@ -57,11 +57,11 @@ class RegisterHandler implements RequestHandlerInterface
                 'data'   => [],
                 'error'  => [
                     'message' => 'Error to register user account',
-                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ],
+                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ];
         }
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

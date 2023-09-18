@@ -2,6 +2,7 @@
 
 namespace User\Handler\Admin\Role;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -31,6 +32,6 @@ class EditHandler implements RequestHandlerInterface
 
         $result = ['message' => 'Role edit section is under development'];
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

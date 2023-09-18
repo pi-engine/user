@@ -2,6 +2,7 @@
 
 namespace User\Handler\Api\Password;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -43,6 +44,6 @@ class UpdateHandler implements RequestHandlerInterface
         $account     = $request->getAttribute('account');
         $result      = $this->accountService->updatePassword($requestBody, $account);
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

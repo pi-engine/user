@@ -65,6 +65,8 @@ return [
             Handler\Api\Authentication\Email\VerifyHandler::class   => Factory\Handler\Api\Authentication\Email\VerifyHandlerFactory::class,
             Handler\ErrorHandler::class                             => Factory\Handler\ErrorHandlerFactory::class,
             Handler\InstallerHandler::class                         => Factory\Handler\InstallerHandlerFactory::class,
+
+            'translator' => Factory\Service\TranslatorFactory::class,
         ],
     ],
 

@@ -2,6 +2,7 @@
 
 namespace User\Handler\Admin\Profile;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -36,6 +37,6 @@ class PasswordHandler implements RequestHandlerInterface
         $requestBody = $request->getParsedBody();
         $result      = $this->accountService->updatePasswordByAdmin($requestBody);
 
-        return new JsonResponse($result);
+        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

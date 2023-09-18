@@ -2,6 +2,7 @@
 
 namespace User\Handler\Api\Authentication\Mobile;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -50,6 +51,6 @@ class VerifyHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->login($params);
 
-        return new JsonResponse($result, $result['status'] ?? 200);
+        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }
