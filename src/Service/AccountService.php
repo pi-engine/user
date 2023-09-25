@@ -245,9 +245,11 @@ class AccountService implements ServiceInterface
         if (empty($account)) {
             $account = $this->addAccount(
                 [
-                    'mobile' => $params['mobile'],
-                    'source' => $params['source'] ?? null,
-                    'otp'    => $otpCode,
+                    'mobile'     => $params['mobile'],
+                    'first_name' => $params['first_name'] ?? null,
+                    'last_name'  => $params['last_name'] ?? null,
+                    'source'     => $params['source'] ?? null,
+                    'otp'        => $otpCode,
                 ]
             );
 
@@ -331,9 +333,11 @@ class AccountService implements ServiceInterface
         if (empty($account)) {
             $account = $this->addAccount(
                 [
-                    'email'  => $params['email'],
-                    'source' => $params['source'] ?? null,
-                    'otp'    => $otpCode,
+                    'email'      => $params['email'],
+                    'source'     => $params['source'] ?? null,
+                    'first_name' => $params['first_name'] ?? null,
+                    'last_name'  => $params['last_name'] ?? null,
+                    'otp'        => $otpCode,
                 ]
             );
 
@@ -513,7 +517,7 @@ class AccountService implements ServiceInterface
                 'city'            => $params['city'] ?? null,
                 'zip_code'        => $params['zip_code'] ?? null,
             ];
-            $account = $this->addAccount($addParams);
+            $account   = $this->addAccount($addParams);
         } else {
             $profile = $this->getProfile(['user_id' => (int)$account['id']]);
             $account = array_merge($account, $profile);
