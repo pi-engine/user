@@ -125,7 +125,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Set attribute
-        $request = $request->withAttribute('account', $user['account']);
+//        $request = $request->withAttribute('account', $user['account']);
+        $request = $request->withAttribute('account', $this->accountService->getAccount(['id'=>$user['account']['id']]));
         $request = $request->withAttribute('roles', $user['roles']);
         $request = $request->withAttribute('token_id', $tokenParsed['id']);
         $request = $request->withAttribute('current_token', $token);
