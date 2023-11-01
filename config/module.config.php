@@ -27,6 +27,7 @@ return [
             Service\RoleService::class                              => Factory\Service\RoleServiceFactory::class,
             Service\PermissionService::class                        => Factory\Service\PermissionServiceFactory::class,
             Service\UtilityService::class                           => Factory\Service\UtilityServiceFactory::class,
+            Service\HistoryService::class                           => Factory\Service\HistoryServiceFactory::class,
             Service\InstallerService::class                         => Factory\Service\InstallerServiceFactory::class,
             Middleware\AuthenticationMiddleware::class              => Factory\Middleware\AuthenticationMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class               => Factory\Middleware\AuthorizationMiddlewareFactory::class,

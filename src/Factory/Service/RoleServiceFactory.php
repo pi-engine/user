@@ -8,6 +8,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\RoleRepositoryInterface;
 use User\Service\CacheService;
+use User\Service\HistoryService;
 use User\Service\RoleService;
 
 class RoleServiceFactory implements FactoryInterface
@@ -25,7 +26,8 @@ class RoleServiceFactory implements FactoryInterface
     {
         return new RoleService(
             $container->get(RoleRepositoryInterface::class),
-            $container->get(CacheService::class)
+            $container->get(CacheService::class),
+            $container->get(HistoryService::class),
         );
     }
 }

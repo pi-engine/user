@@ -36,6 +36,9 @@ class AccountService implements ServiceInterface
     /** @var NotificationService */
     protected NotificationService $notificationService;
 
+    /** @var HistoryService */
+    protected HistoryService $historyService;
+
     /* @var array */
     protected array $config;
 
@@ -80,6 +83,7 @@ class AccountService implements ServiceInterface
      * @param CacheService               $cacheService
      * @param UtilityService             $utilityService
      * @param NotificationService        $notificationService
+     * @param HistoryService             $historyService
      * @param                            $config
      */
     public function __construct(
@@ -89,6 +93,7 @@ class AccountService implements ServiceInterface
         CacheService $cacheService,
         UtilityService $utilityService,
         NotificationService $notificationService,
+        HistoryService $historyService,
         $config
     ) {
         $this->accountRepository   = $accountRepository;
@@ -97,6 +102,7 @@ class AccountService implements ServiceInterface
         $this->cacheService        = $cacheService;
         $this->utilityService      = $utilityService;
         $this->notificationService = $notificationService;
+        $this->historyService      = $historyService;
         $this->config              = $config;
     }
 
@@ -192,12 +198,19 @@ class AccountService implements ServiceInterface
                     : [$refreshToken['key']],
             ]);
 
+            // Save log
+            $this->historyService->logger('login', ['params' => $params,'account' => $account]);
+
             $result = [
                 'result' => true,
                 'data'   => $account,
                 'error'  => [],
             ];
         } else {
+            // Save log
+            $account = $this->getAccount([$identityColumn => $params['identity']]);
+            $this->historyService->logger('failedLogin', ['params' => $params,'account' => $account]);
+
             $result = [
                 'result' => false,
                 'data'   => [],
@@ -213,6 +226,10 @@ class AccountService implements ServiceInterface
 
     public function logout($params): array
     {
+        // Save log
+        $account = $this->cacheService->getUser($params['user_id']);
+        $this->historyService->logger('logout', ['params' => $params,'account' => $account]);
+
         if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
             $this->cacheService->deleteUser($params['user_id']);
             $message = 'You are logout successfully from all of your sessions !';
@@ -472,6 +489,9 @@ class AccountService implements ServiceInterface
             $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
         }
 
+        // Save log
+        $this->historyService->logger('register', ['params' => $params,'account' => $account]);
+
         return $account;
     }
 
@@ -651,13 +671,19 @@ class AccountService implements ServiceInterface
             ]
         );
 
+        // Save log
+        $this->historyService->logger('update', ['params' => $params,'account' => $account]);
+
         return array_merge($account, $profile);
     }
 
-    public function updatedDeviceToken($requestBody, $account): void
+    public function updatedDeviceToken($params, $account): void
     {
         // Update cache
-        $this->cacheService->addItem($account['id'], 'device_tokens', $requestBody['device_token']);
+        $this->cacheService->addItem($account['id'], 'device_tokens', $params['device_token']);
+
+        // Save log
+        $this->historyService->logger('updateupdatedDeviceToken', ['params' => $params,'account' => $account]);
     }
 
     public function getProfile($params): array
@@ -679,6 +705,10 @@ class AccountService implements ServiceInterface
 
         $this->accountRepository->updateAccount((int)$userId, ['credential' => $credential]);
 
+        // Save log
+        $account = empty($account) ? ['id' => $userId] : $account;
+        $this->historyService->logger('addPassword', ['params' => $params,'account' => $account]);
+
         return [
             'result' => true,
             'data'   => [
@@ -698,6 +728,9 @@ class AccountService implements ServiceInterface
 
             $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
+            // Save log
+            $this->historyService->logger('updatePassword', ['params' => $params,'account' => $account]);
+
             $result = [
                 'result' => true,
                 'data'   => [
@@ -706,6 +739,9 @@ class AccountService implements ServiceInterface
                 'error'  => [],
             ];
         } else {
+            // Save log
+            $this->historyService->logger('failedUpdatePassword', ['params' => $params,'account' => $account]);
+
             $result = [
                 'result' => false,
                 'data'   => [],
@@ -724,6 +760,9 @@ class AccountService implements ServiceInterface
         $credential = $this->generatePassword($params['credential']);
 
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
+
+        // Save log
+        $this->historyService->logger('updatePasswordByAdmin', ['params' => $params,'account' => ['id' => (int)$params['user_id']]]);
 
         return [
             'result' => true,

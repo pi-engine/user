@@ -10,6 +10,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\AccountRepositoryInterface;
 use User\Service\AccountService;
 use User\Service\CacheService;
+use User\Service\HistoryService;
 use User\Service\RoleService;
 use User\Service\TokenService;
 use User\Service\UtilityService;
@@ -37,6 +38,7 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(CacheService::class),
             $container->get(UtilityService::class),
             $container->get(NotificationService::class),
+            $container->get(HistoryService::class),
             $config['account']
         );
     }
