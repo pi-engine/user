@@ -16,10 +16,11 @@ class HistoryService implements ServiceInterface
 
     public function __construct(
         LoggerService $loggerService,
-        $config
-    ) {
+                      $config
+    )
+    {
         $this->loggerService = $loggerService;
-        $this->config        = $config;
+        $this->config = $config;
     }
 
     public function logger(string $state, array $params): void
@@ -30,6 +31,8 @@ class HistoryService implements ServiceInterface
                 unset($params[$key]);
             }
         }
+        ///TODO: improve this
+        $params['params']['ip'] = $_SERVER['REMOTE_ADDR'];
 
         // Save log
         $this->loggerService->addUserLog($state, $params);
@@ -39,8 +42,8 @@ class HistoryService implements ServiceInterface
     {
         $params = [
             'user_id' => $account['id'],
-            'limit'   => 25,
-            'page'    => 1,
+            'limit' => 25,
+            'page' => 1,
         ];
 
         return $this->loggerService->getUserLog($params);
