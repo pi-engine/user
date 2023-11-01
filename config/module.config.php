@@ -33,7 +33,7 @@ return [
             Middleware\AuthorizationMiddleware::class               => Factory\Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\SecurityMiddleware::class                    => Factory\Middleware\SecurityMiddlewareFactory::class,
             Middleware\ValidationMiddleware::class                  => Factory\Middleware\ValidationMiddlewareFactory::class,
-            Middleware\InstallerMiddleware::class                  => Factory\Middleware\InstallerMiddlewareFactory::class,
+            Middleware\InstallerMiddleware::class                   => Factory\Middleware\InstallerMiddlewareFactory::class,
             Validator\EmailValidator::class                         => Factory\Validator\EmailValidatorFactory::class,
             Validator\IdentityValidator::class                      => Factory\Validator\IdentityValidatorFactory::class,
             Validator\NameValidator::class                          => Factory\Validator\NameValidatorFactory::class,
@@ -54,6 +54,7 @@ return [
             Handler\Api\Profile\ViewHandler::class                  => Factory\Handler\Api\Profile\ViewHandlerFactory::class,
             Handler\Api\Profile\UpdateHandler::class                => Factory\Handler\Api\Profile\UpdateHandlerFactory::class,
             Handler\Api\Profile\DeviceTokenHandler::class           => Factory\Handler\Api\Profile\DeviceTokenHandlerFactory::class,
+            Handler\Api\Profile\HistoryHandler::class               => Factory\Handler\Api\Profile\HistoryHandlerFactory::class,
             Handler\Api\Password\AddHandler::class                  => Factory\Handler\Api\Password\AddHandlerFactory::class,
             Handler\Api\Password\UpdateHandler::class               => Factory\Handler\Api\Password\UpdateHandlerFactory::class,
             Handler\Api\Authentication\LoginHandler::class          => Factory\Handler\Api\Authentication\LoginHandlerFactory::class,
@@ -90,7 +91,7 @@ return [
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'view' => [
+                            'view'         => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/view',
@@ -110,7 +111,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'edit' => [
+                            'edit'         => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/update',
@@ -149,6 +150,25 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
                                             Handler\Api\Profile\DeviceTokenHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'history'      => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/history',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'api',
+                                        'package'     => 'profile',
+                                        'handler'     => 'history',
+                                        'permissions' => 'user-view',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Handler\Api\Profile\HistoryHandler::class
                                         ),
                                     ],
                                 ],
@@ -279,7 +299,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'refresh'  => [
+                            /* 'refresh'  => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/refresh',
@@ -298,7 +318,7 @@ return [
                                         ),
                                     ],
                                 ],
-                            ],
+                            ], */
                             'email'    => [
                                 'type'         => Literal::class,
                                 'options'      => [

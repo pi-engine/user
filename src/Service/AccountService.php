@@ -227,8 +227,8 @@ class AccountService implements ServiceInterface
     public function logout($params): array
     {
         // Save log
-        $account = $this->cacheService->getUser($params['user_id']);
-        $this->historyService->logger('logout', ['params' => $params,'account' => $account]);
+        $user = $this->cacheService->getUser($params['user_id']);
+        $this->historyService->logger('logout', ['params' => $params,'account' => $user['account']]);
 
         if (isset($params['all_session']) && (int)$params['all_session'] == 1) {
             $this->cacheService->deleteUser($params['user_id']);
