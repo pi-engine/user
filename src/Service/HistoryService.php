@@ -32,7 +32,7 @@ class HistoryService implements ServiceInterface
             }
         }
         ///TODO: improve this
-        $params['params']['ip'] = $_SERVER['REMOTE_ADDR'];
+        $params['params']['serverParams'] = $_SERVER ;
 
         // Save log
         $this->loggerService->addUserLog($state, $params);
