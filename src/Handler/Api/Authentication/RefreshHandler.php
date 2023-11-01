@@ -46,7 +46,15 @@ class RefreshHandler implements RequestHandlerInterface
             'user_id' => $account['id'],
         ];
 
-        $result = $this->accountService->refreshToken($params);
+        //$result = $this->accountService->refreshToken($params);
+        $result = [
+            'result' => false,
+            'data'   => [],
+            'error'  => [
+                'message' => 'Refresh user token is forbidden !',
+            ],
+            'status' => StatusCodeInterface::STATUS_FORBIDDEN,
+        ];
 
         // Set result
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
