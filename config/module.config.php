@@ -545,6 +545,27 @@ return [
                                     ],
                                 ],
                             ],
+                            'delete' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/delete',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'password',
+                                        'permissions' => 'user-profile-password',
+                                        'validator'   => 'password-admin',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Profile\DeleteHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
                             'view'     => [
                                 'type'    => Literal::class,
                                 'options' => [

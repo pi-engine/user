@@ -866,6 +866,22 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    public function deleteUserByAdmin($params): array
+    {
+        $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => 0, 'time_deleted' => time()]);
+        $this->cacheService->deleteUser((int)$params['user_id']);
+        // Save log
+        $this->historyService->logger('deleteUserByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
+
+        return [
+            'result' => true,
+            'data' => [
+                'message' => 'Delete user successfully !',
+            ],
+            'error' => [],
+        ];
+    }
+
     public function hasPassword($userId): bool
     {
         $hash = $this->accountRepository->getAccountPassword((int)$userId);
