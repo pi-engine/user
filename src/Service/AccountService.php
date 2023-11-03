@@ -611,6 +611,23 @@ class AccountService implements ServiceInterface
         if (isset($params['status']) && !empty($params['status'])) {
             $listParams['status'] = $params['status'];
         }
+        if (isset($params['status']) && !empty($params['status'])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
+            $listParams['data_from'] = strtotime(
+                ($params['data_from']) != null
+                    ? sprintf('%s 00:00:00', $params['data_from'])
+                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
+            );
+        }
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
+            $listParams['data_to'] = strtotime(
+                ($params['data_to']) != null
+                    ? sprintf('%s 00:00:00', $params['data_to'])
+                    : sprintf('%s 23:59:59', date('Y-m-d'))
+            );
+        }
 
         $filters = $this->prepareFilter($params);
         if (!empty($filters)) {

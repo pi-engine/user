@@ -119,6 +119,12 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['id']) && !empty($params['id'])) {
             $where['id'] = $params['id'];
         }
+        if (isset($params['data_from']) &&!empty($params['data_from'])) {
+            $where['time_created >= ?'] = $params['data_from'];
+        }
+        if (isset($params['data_to']) &&!empty($params['data_to'])) {
+            $where['time_created <= ?'] = $params['data_to'];
+        }
 
         $sql = new Sql($this->db);
         $select = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
@@ -173,6 +179,12 @@ class AccountRepository implements AccountRepositoryInterface
         }
         if (isset($params['id']) && !empty($params['id'])) {
             $where['id'] = $params['id'];
+        }
+        if (isset($params['data_from']) &&!empty($params['data_from'])) {
+            $where['time_created >= ?'] = $params['data_from'];
+        }
+        if (isset($params['data_to']) &&!empty($params['data_to'])) {
+            $where['time_created <= ?'] = $params['data_to'];
         }
 
         // Get count
