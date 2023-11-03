@@ -9,6 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use User\Model\Permission\Role;
+use User\Service\RoleService;
 
 class ListHandler implements RequestHandlerInterface
 {
@@ -18,20 +20,32 @@ class ListHandler implements RequestHandlerInterface
     /** @var StreamFactoryInterface */
     protected StreamFactoryInterface $streamFactory;
 
+    /** @var RoleService */
+    protected RoleService $roleService;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory
-    ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
+        StreamFactoryInterface   $streamFactory,
+        RoleService              $roleService,
+    )
+    {
+        $this->responseFactory  = $responseFactory;
+        $this->streamFactory    = $streamFactory;
+        $this->roleService      = $roleService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
 
-        $result = ['message' => 'Role list section is under development'];
+        $result =
+            [
+                'result' => true,
+                'data' => [
+                    "list" => $this->roleService->getRoleResourceList($requestBody)
+                ],
+                'error' => new \stdClass(),];
+        return new JsonResponse($result);
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
-    }
+   }
 }

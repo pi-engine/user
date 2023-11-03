@@ -9,13 +9,14 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\Admin\Role\ListHandler;
+use User\Service\RoleService;
 
 class ListHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string             $requestedName
-     * @param null|array         $options
+     * @param string $requestedName
+     * @param null|array $options
      *
      * @return ListHandler
      * @throws ContainerExceptionInterface
@@ -25,7 +26,8 @@ class ListHandlerFactory implements FactoryInterface
     {
         return new ListHandler(
             $container->get(ResponseFactoryInterface::class),
-            $container->get(StreamFactoryInterface::class)
+            $container->get(StreamFactoryInterface::class),
+            $container->get(RoleService::class)
         );
     }
 }
