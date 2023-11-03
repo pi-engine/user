@@ -850,9 +850,12 @@ class AccountService implements ServiceInterface
 
     public function updateStatusByAdmin($params): array
     {
-        $status = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
-
-        $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => $status]);
+        $params['status'] = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
+        $paramsList = [
+            'status' => $params['status'],
+            $params['status'] ? 'time_activated' : 'time_disabled' => time()
+        ];
+        $this->accountRepository->updateAccount((int)$params['user_id'], $paramsList);
 
         // Save log
         $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
