@@ -742,7 +742,7 @@ class AccountService implements ServiceInterface
                     'identity' => $account['identity'],
                     'mobile' => $account['mobile'],
                     'last_login' => $user['account']['last_login'] ?? time(),
-                ], 
+                ],
             ]
         );
 
@@ -843,6 +843,24 @@ class AccountService implements ServiceInterface
             'result' => true,
             'data' => [
                 'message' => 'Password set successfully !',
+            ],
+            'error' => [],
+        ];
+    }
+
+    public function updateStatusByAdmin($params): array
+    {
+        $status = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
+
+        $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => $status]);
+
+        // Save log
+        $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
+
+        return [
+            'result' => true,
+            'data' => [
+                'message' => 'Status change successfully !',
             ],
             'error' => [],
         ];

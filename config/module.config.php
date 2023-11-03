@@ -501,6 +501,28 @@ return [
                                     ],
                                 ],
                             ],
+                            'status'   => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/status',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'edit',
+                                        'permissions' => 'user-profile-edit',
+                                        'validator'   => 'edit',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
+                                            Handler\Admin\Profile\StatusHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
                             'password' => [
                                 'type'    => Literal::class,
                                 'options' => [
