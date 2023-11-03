@@ -857,6 +857,10 @@ class AccountService implements ServiceInterface
         ];
         $this->accountRepository->updateAccount((int)$params['user_id'], $paramsList);
 
+        if($params['status']==0){
+            $this->cacheService->deleteUser((int)$params['user_id']);
+        }
+
         // Save log
         $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
 
