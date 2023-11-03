@@ -482,6 +482,16 @@ class AccountService implements ServiceInterface
         // Set user roles
         $this->roleService->addDefaultRoles((int)$account['id']);
 
+        // Set user roles that receive from service
+        if (isset($params['roles'])) {
+            $roles = explode(',', $params['roles']);
+            foreach ($roles as $role) {
+                if ($role != 'member') {
+                    $this->roleService->addRoleAccount($account['id'], $role);
+                }
+            }
+        }
+
         // Get roles
         $roles = $this->roleService->getRoleAccount((int)$account['id']);
 
