@@ -97,7 +97,7 @@ class AccountRepository implements AccountRepositoryInterface
     public function getAccountList($params = []): HydratingResultSet
     {
         // Add filter
-        $where = [];
+        $where['time_deleted'] = 0;
         if (isset($params['key']) && !empty($params['key'])) {
             $where = ["name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
         }
@@ -152,7 +152,7 @@ class AccountRepository implements AccountRepositoryInterface
         $columns = ['count' => new Expression('count(*)')];
 
         // Add filter
-        $where = [];
+        $where['time_deleted'] = 0;
         if (isset($params['key']) && !empty($params['key'])) {
             $where = ["name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
         }
