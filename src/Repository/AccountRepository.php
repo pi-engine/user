@@ -65,16 +65,17 @@ class AccountRepository implements AccountRepositoryInterface
     private Credential $credentialPrototype;
 
     public function __construct(
-        AdapterInterface $db,
+        AdapterInterface  $db,
         HydratorInterface $hydrator,
-        Account $accountPrototype,
-        Profile $profilePrototype,
-        Credential $credentialPrototype
-    ) {
-        $this->db                  = $db;
-        $this->hydrator            = $hydrator;
-        $this->accountPrototype    = $accountPrototype;
-        $this->profilePrototype    = $profilePrototype;
+        Account           $accountPrototype,
+        Profile           $profilePrototype,
+        Credential        $credentialPrototype
+    )
+    {
+        $this->db = $db;
+        $this->hydrator = $hydrator;
+        $this->accountPrototype = $accountPrototype;
+        $this->profilePrototype = $profilePrototype;
         $this->credentialPrototype = $credentialPrototype;
     }
 
@@ -85,9 +86,24 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['key']) && !empty($params['key'])) {
             $where = ["name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
         }
+        if (isset($params['name']) && !empty($params['name'])) {
+            $where['name like ?'] = '%' . $params['name'] . '%';
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $where['identity like ?'] = '%' . $params['identity'] . '%';
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $where['email like ?'] = '%' . $params['email'] . '%';
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $where['mobile like ?'] = '%' . $params['mobile'] . '%';
+        }
+        if (isset($params['status']) && !empty($params['status'])) {
+            $where['status'] =  $params['status']  ;
+        }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
         /* if (isset($params['key']) && !empty($params['key'])) {
             $select->where->addPredicate(
                 new Like('name', '%' . $params['key'] . '%')
@@ -100,7 +116,7 @@ class AccountRepository implements AccountRepositoryInterface
             )->or;
         } */
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             return [];
@@ -122,10 +138,25 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['key']) && !empty($params['key'])) {
             $where = ["name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
         }
+        if (isset($params['name']) && !empty($params['name'])) {
+            $where['name like ?'] = '%' . $params['name'] . '%';
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $where['identity like ?'] = '%' . $params['identity'] . '%';
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $where['email like ?'] = '%' . $params['email'] . '%';
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $where['mobile like ?'] = '%' . $params['mobile'] . '%';
+        }
+        if (isset($params['status']) && !empty($params['status'])) {
+            $where['status'] =  $params['status']  ;
+        }
 
         // Get count
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->columns($columns)->where($where);
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableAccount)->columns($columns)->where($where);
         /* if (isset($params['key']) && !empty($params['key'])) {
             $select->where->addPredicate(
                 new Like('name', '%' . $params['key'] . '%')
@@ -138,7 +169,7 @@ class AccountRepository implements AccountRepositoryInterface
             )->or;
         } */
         $statement = $sql->prepareStatementForSqlObject($select);
-        $row       = $statement->execute()->current();
+        $row = $statement->execute()->current();
 
         return (int)$row['count'];
     }
@@ -161,10 +192,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where['status'] = (int)$params['status'];
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->where($where);
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableAccount)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             throw new RuntimeException(
@@ -188,10 +219,10 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function getAccountPassword(int $userId): string|null
     {
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->where(['id' => $userId]);
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableAccount)->where(['id' => $userId]);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             throw new RuntimeException(
@@ -223,9 +254,9 @@ class AccountRepository implements AccountRepositoryInterface
         $insert = new Insert($this->tableAccount);
         $insert->values($params);
 
-        $sql       = new Sql($this->db);
+        $sql = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -244,9 +275,9 @@ class AccountRepository implements AccountRepositoryInterface
         $update->set($params);
         $update->where(['id' => $userId]);
 
-        $sql       = new Sql($this->db);
+        $sql = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -259,15 +290,15 @@ class AccountRepository implements AccountRepositoryInterface
     {
         // Set where
         $columns = ['count' => new Expression('count(*)')];
-        $where   = [$params['field'] => $params['value']];
+        $where = [$params['field'] => $params['value']];
         if (isset($params['id']) && (int)$params['id'] > 0) {
             $where['id <> ?'] = $params['id'];
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->columns($columns)->where($where);
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableAccount)->columns($columns)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $row       = $statement->execute()->current();
+        $row = $statement->execute()->current();
 
         return (int)$row['count'];
     }
@@ -277,9 +308,9 @@ class AccountRepository implements AccountRepositoryInterface
         $insert = new Insert($this->tableProfile);
         $insert->values($params);
 
-        $sql       = new Sql($this->db);
+        $sql = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($insert);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -300,14 +331,14 @@ class AccountRepository implements AccountRepositoryInterface
             $where['id'] = (int)$params['id'];
         } elseif (isset($params['user_id']) && (int)$params['user_id'] > 0) {
             $where['user_id'] = $params['user_id'];
-        }elseif (isset($params['item_id']) && (int)$params['item_id'] > 0) {
+        } elseif (isset($params['item_id']) && (int)$params['item_id'] > 0) {
             $where['item_id'] = $params['item_id'];
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableProfile)->where($where);
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableProfile)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             return [];
@@ -330,9 +361,9 @@ class AccountRepository implements AccountRepositoryInterface
         $update->set($params);
         $update->where(['user_id' => $userId]);
 
-        $sql       = new Sql($this->db);
+        $sql = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
-        $result    = $statement->execute();
+        $result = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(

@@ -585,6 +585,22 @@ class AccountService implements ServiceInterface
             'key'    => $key,
         ];
 
+        if(isset($params['name'])&&!empty($params['name'])){
+            $listParams['name'] = $params['name'];
+        }
+        if(isset($params['identity'])&&!empty($params['identity'])){
+            $listParams['identity'] = $params['identity'];
+        }
+        if(isset($params['email'])&&!empty($params['email'])){
+            $listParams['email'] = $params['email'];
+        }
+        if(isset($params['mobile'])&&!empty($params['mobile'])){
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if(isset($params['status'])&&!empty($params['status'])){
+            $listParams['status'] = $params['status'];
+        }
+
         // Get list
         $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
