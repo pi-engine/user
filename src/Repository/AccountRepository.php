@@ -18,9 +18,11 @@ use Laminas\Db\Sql\Predicate\Like;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
 use User\Model\Account\Account;
+use User\Model\Role\Account as AccountRole;
 use User\Model\Account\Credential;
 use User\Model\Account\Profile;
 
+use User\Model\Role\Resource;
 use function sprintf;
 
 class AccountRepository implements AccountRepositoryInterface
@@ -38,6 +40,13 @@ class AccountRepository implements AccountRepositoryInterface
      * @var string
      */
     private string $tableProfile = 'user_profile';
+
+    /**
+     * Role Account Table name
+     *
+     * @var string
+     */
+    private string $tableRoleAccount = 'role_account';
 
     /**
      * @var AdapterInterface
@@ -58,6 +67,10 @@ class AccountRepository implements AccountRepositoryInterface
      * @var Profile
      */
     private Profile $profilePrototype;
+    /**
+     * @var AccountRole
+     */
+    private AccountRole $accountRolePrototype;
 
     /**
      * @var Credential
@@ -69,14 +82,16 @@ class AccountRepository implements AccountRepositoryInterface
         HydratorInterface $hydrator,
         Account           $accountPrototype,
         Profile           $profilePrototype,
+        AccountRole       $accountRolePrototype,
         Credential        $credentialPrototype
     )
     {
-        $this->db = $db;
-        $this->hydrator = $hydrator;
-        $this->accountPrototype = $accountPrototype;
-        $this->profilePrototype = $profilePrototype;
-        $this->credentialPrototype = $credentialPrototype;
+        $this->db                   = $db;
+        $this->hydrator             = $hydrator;
+        $this->accountPrototype     = $accountPrototype;
+        $this->profilePrototype     = $profilePrototype;
+        $this->accountRolePrototype = $accountRolePrototype;
+        $this->credentialPrototype  = $credentialPrototype;
     }
 
     public function getAccountList($params = []): HydratingResultSet
@@ -99,7 +114,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
         if (isset($params['status']) && !empty($params['status'])) {
-            $where['status'] =  $params['status']  ;
+            $where['status'] = $params['status'];
+        }
+        if (isset($params['id']) && !empty($params['id'])) {
+            $where['id'] = $params['id'];
         }
 
         $sql = new Sql($this->db);
@@ -151,7 +169,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
         if (isset($params['status']) && !empty($params['status'])) {
-            $where['status'] =  $params['status']  ;
+            $where['status'] = $params['status'];
+        }
+        if (isset($params['id']) && !empty($params['id'])) {
+            $where['id'] = $params['id'];
         }
 
         // Get count
@@ -392,4 +413,30 @@ class AccountRepository implements AccountRepositoryInterface
 
         return new AuthenticationService(null, $authAdapter);
     }
+
+    public function getIdFromFilter(array $filter = []): HydratingResultSet|array
+    {
+        $where = [];
+        $sql = new Sql($this->db);
+        $select = $sql->select($this->tableRoleAccount)->where($where);
+
+        switch ($filter['type']) {
+            case 'string':
+                $select->where(['role' => $filter['value']]);
+                break;
+        }
+
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            return [];
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, $this->accountRolePrototype);
+        $resultSet->initialize($result);
+
+        return $resultSet;
+    }
+
 }
