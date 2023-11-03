@@ -599,8 +599,16 @@ class AccountService implements ServiceInterface
         // Get count
         $count = $this->accountRepository->getAccountCount($listParams);
 
+
+        $list = array_values($list);
+        $i = 0;
+        foreach ($list as $user) {
+            $list[$i]['roles'] = $roleList[$user['id']];
+            $i++;
+        }
+
         return [
-            'list'      => array_values($list),
+            'list'      => $list,
             'roles'     => $roleList,
             'paginator' => [
                 'count' => $count,
