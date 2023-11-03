@@ -261,4 +261,19 @@ class RoleRepository implements RoleRepositoryInterface
             );
         }
     }
+    public function deleteAllRoleAccount(int $userId): void
+    {
+        $delete = new Delete($this->tableRoleAccount);
+        $delete->where(['user_id' => $userId]);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
+    }
 }

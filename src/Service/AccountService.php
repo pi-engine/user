@@ -720,6 +720,17 @@ class AccountService implements ServiceInterface
         // Get user from cache if exist
         $user = $this->cacheService->getUser($account['id']);
 
+        // restore roles that receive from service
+        if (isset($params['roles'])) {
+            $this->roleService->deleteAllRoleAccount($account['id']);
+            $roles = explode(',', $params['roles']);
+            foreach ($roles as $role) {
+                if ($role != 'member') {
+                    $this->roleService->addRoleAccount($account['id'], $role);
+                }
+            }
+        }
+
         // Set/Update user data to cache
         $this->cacheService->setUser(
             $account['id'],
@@ -731,7 +742,7 @@ class AccountService implements ServiceInterface
                     'identity' => $account['identity'],
                     'mobile' => $account['mobile'],
                     'last_login' => $user['account']['last_login'] ?? time(),
-                ],
+                ], 
             ]
         );
 

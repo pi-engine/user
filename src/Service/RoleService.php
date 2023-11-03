@@ -20,7 +20,7 @@ class RoleService implements ServiceInterface
     protected array $defaultRoles
         = [
             [
-                'name'    => 'member',
+                'name' => 'member',
                 'section' => 'api',
             ],
             /* [
@@ -33,16 +33,17 @@ class RoleService implements ServiceInterface
 
     /**
      * @param RoleRepositoryInterface $roleRepository
-     * @param CacheService            $cacheService
-     * @param HistoryService          $historyService
+     * @param CacheService $cacheService
+     * @param HistoryService $historyService
      */
     public function __construct(
         RoleRepositoryInterface $roleRepository,
-        CacheService $cacheService,
-        HistoryService $historyService
-    ) {
+        CacheService            $cacheService,
+        HistoryService          $historyService
+    )
+    {
         $this->roleRepository = $roleRepository;
-        $this->cacheService   = $cacheService;
+        $this->cacheService = $cacheService;
         $this->historyService = $historyService;
     }
 
@@ -52,11 +53,11 @@ class RoleService implements ServiceInterface
         if (empty($roles)) {
             $listParams = [
                 'section' => 'api',
-                'status'  => 1,
+                'status' => 1,
             ];
 
             // Get list
-            $list   = [];
+            $list = [];
             $rowSet = $this->roleRepository->getRoleResourceList($listParams);
             foreach ($rowSet as $row) {
                 $list[] = $row->getName();
@@ -74,11 +75,11 @@ class RoleService implements ServiceInterface
         if (empty($roles)) {
             $listParams = [
                 'section' => 'admin',
-                'status'  => 1,
+                'status' => 1,
             ];
 
             // Get list
-            $list   = [];
+            $list = [];
             $rowSet = $this->roleRepository->getRoleResourceList($listParams);
             foreach ($rowSet as $row) {
                 $list[] = $row->getName();
@@ -96,11 +97,11 @@ class RoleService implements ServiceInterface
         if (empty($roles)) {
             $listParams = [
                 'section' => $section,
-                'status'  => 1,
+                'status' => 1,
             ];
 
             // Get list
-            $list   = [];
+            $list = [];
             $rowSet = $this->roleRepository->getRoleResourceList($listParams);
             foreach ($rowSet as $row) {
                 $list[] = $this->canonizeRole($row);
@@ -120,11 +121,11 @@ class RoleService implements ServiceInterface
 
         if (is_object($role)) {
             $role = [
-                'id'      => $role->getId(),
-                'name'    => $role->getName(),
-                'title'   => $role->getTitle(),
+                'id' => $role->getId(),
+                'name' => $role->getName(),
+                'title' => $role->getTitle(),
                 'section' => $role->getSection(),
-                'status'  => $role->getStatus(),
+                'status' => $role->getStatus(),
             ];
         }
 
@@ -138,13 +139,13 @@ class RoleService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles,'account' => ['id' => $userId]]);
+        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles, 'account' => ['id' => $userId]]);
     }
 
     public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void
     {
         $systemRoleList = $this->getRoleListLight();
-        $userRoleList   = $this->getRoleAccount($userId);
+        $userRoleList = $this->getRoleAccount($userId);
 
         // Check role and add
         if (
@@ -171,7 +172,7 @@ class RoleService implements ServiceInterface
             ];
 
             // Get list
-            $list   = [];
+            $list = [];
             $rowSet = $this->roleRepository->getRoleResourceList($listParams);
             foreach ($rowSet as $row) {
                 $list[] = $row->getName();
@@ -185,7 +186,7 @@ class RoleService implements ServiceInterface
 
     public function getRoleAccount($userId): array
     {
-        $list   = [];
+        $list = [];
         $rowSet = $this->roleRepository->getRoleAccount($userId);
         foreach ($rowSet as $row) {
             $list[] = $row->getRoleResource();
@@ -196,7 +197,7 @@ class RoleService implements ServiceInterface
 
     public function getRoleAccountList($userIdList, $section = 'full'): array
     {
-        $list   = [];
+        $list = [];
         $rowSet = $this->roleRepository->getRoleAccount($userIdList);
         foreach ($rowSet as $row) {
             $role = $this->canonizeUserRole($row);
@@ -234,6 +235,13 @@ class RoleService implements ServiceInterface
         $this->historyService->logger('deleteRoleAccount', ['params' => ['role' => $roleName], 'account' => ['id' => $userId]]);
     }
 
+    public function deleteAllRoleAccount(int $userId): void
+    {
+        $this->roleRepository->deleteAllRoleAccount($userId);
+        // Save log
+        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => ['id' => $userId]]);
+    }
+
     public function canonizeUserRole($userRole)
     {
         if (empty($userRole)) {
@@ -242,9 +250,9 @@ class RoleService implements ServiceInterface
 
         if (is_object($userRole)) {
             $userRole = [
-                'id'      => $userRole->getId(),
+                'id' => $userRole->getId(),
                 'user_id' => $userRole->getUserId(),
-                'role'    => $userRole->getRoleResource(),
+                'role' => $userRole->getRoleResource(),
                 'section' => $userRole->getSection(),
             ];
         }
