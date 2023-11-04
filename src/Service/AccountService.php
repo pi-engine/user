@@ -415,7 +415,7 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function addAccount($params): array
+    public function addAccount($params, $operator = []): array
     {
         // Set name
         if (
@@ -501,7 +501,7 @@ class AccountService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('register', ['params' => $params, 'account' => $account]);
+        $this->historyService->logger('register', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
         return $account;
     }
@@ -874,7 +874,7 @@ class AccountService implements ServiceInterface
         ];
         $this->accountRepository->updateAccount((int)$params['user_id'], $paramsList);
 
-        if($params['status']==0){
+        if ($params['status'] == 0) {
             $this->cacheService->deleteUser((int)$params['user_id']);
         }
 
