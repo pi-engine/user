@@ -691,7 +691,7 @@ class AccountService implements ServiceInterface
     }
 
 
-    public function updateAccount($params, $account): array
+    public function updateAccount($params, $account, $operator = []): array
     {
         // Set name
         if (
@@ -739,12 +739,10 @@ class AccountService implements ServiceInterface
 
         // restore roles that receive from service
         if (isset($params['roles'])) {
-            $this->roleService->deleteAllRoleAccount($account['id']);
+            $this->roleService->deleteAllRoleAccount($account['id'], $operator);
             $roles = explode(',', $params['roles']);
             foreach ($roles as $role) {
-                if ($role != 'member') {
-                    $this->roleService->addRoleAccount($account['id'], $role);
-                }
+                $this->roleService->addRoleAccount($account['id'], $role, $role == 'admin' ? 'admin' : 'api', $operator);
             }
         }
 
@@ -764,7 +762,7 @@ class AccountService implements ServiceInterface
         );
 
         // Save log
-        $this->historyService->logger('update', ['params' => $params, 'account' => $account]);
+        $this->historyService->logger('update', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
         return array_merge($account, $profile);
     }
@@ -847,14 +845,14 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
-    public function updatePasswordByAdmin($params): array
+    public function updatePasswordByAdmin($params, $operator = []): array
     {
         $credential = $this->generatePassword($params['credential']);
 
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
 
         // Save log
-        $this->historyService->logger('updatePasswordByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
+        $this->historyService->logger('updatePasswordByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -865,7 +863,7 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function updateStatusByAdmin($params): array
+    public function updateStatusByAdmin($params, $operator = []): array
     {
         $params['status'] = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
         $paramsList = [
@@ -879,7 +877,7 @@ class AccountService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
+        $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -890,12 +888,12 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function deleteUserByAdmin($params): array
+    public function deleteUserByAdmin($params, $operator = []): array
     {
         $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => 0, 'time_deleted' => time()]);
         $this->cacheService->deleteUser((int)$params['user_id']);
         // Save log
-        $this->historyService->logger('deleteUserByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']]]);
+        $this->historyService->logger('deleteUserByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
 
         return [
             'result' => true,

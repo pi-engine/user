@@ -35,7 +35,8 @@ class EditHandler implements RequestHandlerInterface
     {
         $requestBody    = $request->getParsedBody();
         $account        = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
-        $updatedAccount = $this->accountService->updateAccount($requestBody, $account);
+        $operator        = $request->getAttribute('account');
+        $updatedAccount = $this->accountService->updateAccount($requestBody, $account,$operator);
 
         return new JsonResponse(
             [

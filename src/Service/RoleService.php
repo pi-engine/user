@@ -235,11 +235,11 @@ class RoleService implements ServiceInterface
         $this->historyService->logger('deleteRoleAccount', ['params' => ['role' => $roleName], 'account' => ['id' => $userId]]);
     }
 
-    public function deleteAllRoleAccount(int $userId): void
+    public function deleteAllRoleAccount(int $userId,$operator=[]): void
     {
         $this->roleRepository->deleteAllRoleAccount($userId);
         // Save log
-        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => ['id' => $userId]]);
+        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => ['id' => $userId],'operator'=>$operator]);
     }
 
     public function canonizeUserRole($userRole)

@@ -34,8 +34,8 @@ class AddHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $account = $request->getAttribute('account');
-        $result      = $this->accountService->addAccount($requestBody,$account);
+        $operator = $request->getAttribute('account');
+        $result      = $this->accountService->addAccount($requestBody,$operator);
 
         return new JsonResponse(
             [

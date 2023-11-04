@@ -35,7 +35,8 @@ class StatusHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->accountService->updateStatusByAdmin($requestBody);
+        $operator    = $request->getAttribute('account');
+        $result      = $this->accountService->updateStatusByAdmin($requestBody,$operator);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

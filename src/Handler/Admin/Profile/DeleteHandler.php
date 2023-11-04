@@ -35,7 +35,8 @@ class DeleteHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->accountService->deleteUserByAdmin($requestBody);
+        $operator = $request->getAttribute('account');
+        $result      = $this->accountService->deleteUserByAdmin($requestBody,$operator);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
