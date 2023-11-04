@@ -37,7 +37,7 @@ class EditHandler implements RequestHandlerInterface
         $account        = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
         $operator        = $request->getAttribute('account');
         $updatedAccount = $this->accountService->updateAccount($requestBody, $account,$operator);
-
+        $this->accountService->addRoleAccountByAdmin($requestBody,$updatedAccount,$operator);
         return new JsonResponse(
             [
                 'result' => true,

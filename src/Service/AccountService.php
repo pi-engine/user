@@ -485,16 +485,6 @@ class AccountService implements ServiceInterface
         // Set user roles
         $this->roleService->addDefaultRoles((int)$account['id'], $operator);
 
-        // Set user roles that receive from service
-        if (isset($params['roles'])) {
-            $roles = explode(',', $params['roles']);
-            foreach ($roles as $role) {
-                if ($role != 'member') {
-                    $this->roleService->addRoleAccount($account['id'], $role, $role == 'admin' ? 'admin' : 'api', $operator);
-                }
-            }
-        }
-
         // Get roles
         $roles = $this->roleService->getRoleAccount((int)$account['id']);
 
@@ -504,6 +494,19 @@ class AccountService implements ServiceInterface
         }
 
         return $account;
+    }
+
+    public function addRoleAccountByAdmin($params,$account,$operator): void
+    {
+        // Set user roles that receive from service
+        if (isset($params['roles'])) {
+            $roles = explode(',', $params['roles']);
+            foreach ($roles as $role) {
+                if ($role != 'member') {
+                    $this->roleService->addRoleAccount($account['id'], $role, $role == 'admin' ? 'admin' : 'api', $operator);
+                }
+            }
+        }
     }
 
     public function getAccount($params): array
@@ -740,10 +743,6 @@ class AccountService implements ServiceInterface
         // restore roles that receive from service
         if (isset($params['roles'])) {
             $this->roleService->deleteAllRoleAccount($account['id'], $operator);
-            $roles = explode(',', $params['roles']);
-            foreach ($roles as $role) {
-                $this->roleService->addRoleAccount($account['id'], $role, $role == 'admin' ? 'admin' : 'api', $operator);
-            }
         }
 
         // Set/Update user data to cache

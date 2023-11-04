@@ -33,10 +33,10 @@ class AddHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody = $request->getParsedBody();
-        $operator = $request->getAttribute('account');
-        $result      = $this->accountService->addAccount($requestBody,$operator);
-
+        $requestBody    = $request->getParsedBody();
+        $operator       = $request->getAttribute('account');
+        $result         = $this->accountService->addAccount($requestBody,$operator);
+        $this->accountService->addRoleAccountByAdmin($requestBody,$result,$operator);
         return new JsonResponse(
             [
                 'result' => true,
