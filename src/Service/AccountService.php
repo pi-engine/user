@@ -450,6 +450,9 @@ class AccountService implements ServiceInterface
         $account = $this->accountRepository->addAccount($paramsAccount);
         $account = $this->canonizeAccount($account);
 
+        // Save log
+        $this->historyService->logger('register', ['params' => $params, 'account' => $account, 'operator' => $operator]);
+
         $profileParams = [
             'user_id' => (int)$account['id'],
             'first_name' => $params['first_name'] ?? null,
@@ -499,9 +502,6 @@ class AccountService implements ServiceInterface
         if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
             $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
         }
-
-        // Save log
-        $this->historyService->logger('register', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
         return $account;
     }
