@@ -132,17 +132,17 @@ class RoleService implements ServiceInterface
         return $role;
     }
 
-    public function addDefaultRoles(int $userId): void
+    public function addDefaultRoles(int $userId, $operator = []): void
     {
         foreach ($this->defaultRoles as $role) {
             $this->roleRepository->addRoleAccount($userId, $role['name'], $role['section']);
         }
 
         // Save log
-        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles, 'account' => ['id' => $userId]]);
+        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles, 'account' => ['id' => $userId], 'operator' => $operator]);
     }
 
-    public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void
+    public function addRoleAccount(int $userId, string $roleName, string $section = 'api', $operator = []): void
     {
         $systemRoleList = $this->getRoleListLight();
         $userRoleList = $this->getRoleAccount($userId);
@@ -160,7 +160,7 @@ class RoleService implements ServiceInterface
         $this->cacheService->updateUserRoles($userId, [$roleName], $section);
 
         // Save log
-        $this->historyService->logger('addRoleAccount', ['params' => ['role' => $roleName, 'section' => $section], 'account' => ['id' => $userId]]);
+        $this->historyService->logger('addRoleAccount', ['params' => ['role' => $roleName, 'section' => $section], 'account' => ['id' => $userId], 'operator' => $operator]);
     }
 
     public function getRoleListLight(): array

@@ -483,14 +483,14 @@ class AccountService implements ServiceInterface
         $account = array_merge($account, $profile);
 
         // Set user roles
-        $this->roleService->addDefaultRoles((int)$account['id']);
+        $this->roleService->addDefaultRoles((int)$account['id'], $operator);
 
         // Set user roles that receive from service
         if (isset($params['roles'])) {
             $roles = explode(',', $params['roles']);
             foreach ($roles as $role) {
                 if ($role != 'member') {
-                    $this->roleService->addRoleAccount($account['id'], $role);
+                    $this->roleService->addRoleAccount($account['id'], $role, $role == 'admin' ? 'admin' : 'api', $operator);
                 }
             }
         }
