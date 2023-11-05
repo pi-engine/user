@@ -219,4 +219,11 @@ class CacheService implements ServiceInterface
         
         return $user;
     }
+
+    public function deleteItem(array $array): void
+    {
+        foreach ($array as $key){
+            $this->cache->delete($key);
+        }
+    }
 }

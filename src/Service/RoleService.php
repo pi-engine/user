@@ -235,11 +235,11 @@ class RoleService implements ServiceInterface
         $this->historyService->logger('deleteRoleAccount', ['params' => ['role' => $roleName], 'account' => ['id' => $userId]]);
     }
 
-    public function deleteAllRoleAccount(int $userId,$operator=[]): void
+    public function deleteAllRoleAccount(int $userId, $operator = []): void
     {
         $this->roleRepository->deleteAllRoleAccount($userId);
         // Save log
-        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => ['id' => $userId],'operator'=>$operator]);
+        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => ['id' => $userId], 'operator' => $operator]);
     }
 
     public function canonizeUserRole($userRole)
@@ -258,5 +258,18 @@ class RoleService implements ServiceInterface
         }
 
         return $userRole;
+    }
+
+    public function addRoleResource(object|array|null $params, mixed $operator)
+    {
+        $result = $this->roleRepository->addRoleResource($params);
+        $result = $this->canonizeRole($result);
+        $this->cacheService->deleteItem([
+            'roles-admin',
+            'roles-api',
+            'roles-light',
+            'roleList'
+        ]);
+        return $result;
     }
 }
