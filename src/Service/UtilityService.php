@@ -197,4 +197,18 @@ class UtilityService implements ServiceInterface
 
         return $formatter;
     }
+
+    public function canonizeJsonDecode(string $data): array
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        return json_decode($this->canonizeJsonEncode(json_decode($data, true)), true);
+    }
+
+    public function canonizeJsonEncode(array $data): string
+    {
+        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
+    }
 }
