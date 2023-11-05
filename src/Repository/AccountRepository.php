@@ -116,7 +116,7 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['status']) && !empty($params['status'])) {
             $where['status'] = $params['status'];
         }
-        if (isset($params['id']) && !empty($params['id'])) {
+        if (isset($params['id'])  ) {
             $where['id'] = $params['id'];
         }
         if (isset($params['data_from']) &&!empty($params['data_from'])) {
@@ -177,7 +177,7 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['status']) && !empty($params['status'])) {
             $where['status'] = $params['status'];
         }
-        if (isset($params['id']) && !empty($params['id'])) {
+        if (isset($params['id']) ) {
             $where['id'] = $params['id'];
         }
         if (isset($params['data_from']) &&!empty($params['data_from'])) {
