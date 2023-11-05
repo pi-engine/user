@@ -12,6 +12,7 @@ use Laminas\Db\ResultSet\HydratingResultSet;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Predicate\Expression;
 use Laminas\Db\Sql\Predicate\IsNotNull;
+use Laminas\Db\Sql\Predicate\NotIn;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Db\Sql\Predicate\Like;
@@ -125,6 +126,9 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['data_to']) &&!empty($params['data_to'])) {
             $where['time_created <= ?'] = $params['data_to'];
         }
+        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+            $where[] = new NotIn('id', $params['not_allowed_id']);
+        }
 
         $sql = new Sql($this->db);
         $select = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
@@ -185,6 +189,9 @@ class AccountRepository implements AccountRepositoryInterface
         }
         if (isset($params['data_to']) &&!empty($params['data_to'])) {
             $where['time_created <= ?'] = $params['data_to'];
+        }
+        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+            $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
         // Get count
