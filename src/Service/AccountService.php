@@ -434,7 +434,7 @@ class AccountService implements ServiceInterface
             $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
             if(!$isPasswordStrong){
                 // Save log
-                $this->historyService->logger('setPasswordFailedInRegister', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+                $this->historyService->logger('setPasswordFailedInRegister', ['params' => $params, 'account' => [], 'operator' => $operator]);
                 return [
                     'result' => false,
                     'data' => new stdClass(),
