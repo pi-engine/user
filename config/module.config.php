@@ -48,6 +48,7 @@ return [
             Handler\Admin\Role\AddHandler::class                    => Factory\Handler\Admin\Role\AddHandlerFactory::class,
             Handler\Admin\Role\EditHandler::class                   => Factory\Handler\Admin\Role\EditHandlerFactory::class,
             Handler\Admin\Role\ListHandler::class                   => Factory\Handler\Admin\Role\ListHandlerFactory::class,
+            Handler\Admin\Role\DeleteHandler::class                   => Factory\Handler\Admin\Role\DeleteHandlerFactory::class,
             Handler\Admin\Permission\ListHandler::class             => Factory\Handler\Admin\Permission\ListHandlerFactory::class,
             Handler\Admin\Permission\AccessHandler::class           => Factory\Handler\Admin\Permission\AccessHandlerFactory::class,
             Handler\Admin\Permission\ViewHandler::class             => Factory\Handler\Admin\Permission\ViewHandlerFactory::class,
@@ -652,6 +653,26 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Role\EditHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'delete' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/delete',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'role',
+                                        'handler'     => 'edit',
+                                        'permissions' => 'user-role-edit',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Role\DeleteHandler::class
                                         ),
                                     ],
                                 ],
