@@ -227,9 +227,11 @@ class AccountRepository implements AccountRepositoryInterface
         } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile'] = $params['mobile'];
         }
-
         if (isset($params['status']) && (int)$params['status'] > 0) {
             $where['status'] = (int)$params['status'];
+        }
+        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+            $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
         $sql = new Sql($this->db);
@@ -373,6 +375,9 @@ class AccountRepository implements AccountRepositoryInterface
             $where['user_id'] = $params['user_id'];
         } elseif (isset($params['item_id']) && (int)$params['item_id'] > 0) {
             $where['item_id'] = $params['item_id'];
+        }
+        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+            $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
         $sql = new Sql($this->db);

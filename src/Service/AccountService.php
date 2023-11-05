@@ -677,116 +677,6 @@ class AccountService implements ServiceInterface
             ],
         ];
     }
-    public function getApiAccountList($params): array
-    {
-        $limit = $params['limit'] ?? 10;
-        $page = $params['page'] ?? 1;
-        /// changed by kerloper
-        $key = $params['key'] ?? '';
-        $order = $params['order'] ?? ['time_created DESC', 'id DESC'];
-        $offset = ((int)$page - 1) * (int)$limit;
-
-        // Set params
-        /// changed by kerloper
-        $listParams = [
-            'page' => (int)$page,
-            'limit' => (int)$limit,
-            'order' => $order,
-            'offset' => $offset,
-            'key' => $key,
-        ];
-
-        if (isset($params['name']) && !empty($params['name'])) {
-            $listParams['name'] = $params['name'];
-        }
-        if (isset($params['identity']) && !empty($params['identity'])) {
-            $listParams['identity'] = $params['identity'];
-        }
-        if (isset($params['email']) && !empty($params['email'])) {
-            echo "d";
-            $listParams['email'] = $params['email'];
-        }
-        if (isset($params['mobile']) && !empty($params['mobile'])) {
-            $listParams['mobile'] = $params['mobile'];
-        }
-        if (isset($params['status']) && !empty($params['status'])) {
-            $listParams['status'] = $params['status'];
-        }
-        if (isset($params['status']) && !empty($params['status'])) {
-            $listParams['status'] = $params['status'];
-        }
-        if (isset($params['data_from']) && !empty($params['data_from'])) {
-            $listParams['data_from'] = strtotime(
-                ($params['data_from']) != null
-                    ? sprintf('%s 00:00:00', $params['data_from'])
-                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
-            );
-        }
-        if (isset($params['data_to']) && !empty($params['data_to'])) {
-            $listParams['data_to'] = strtotime(
-                ($params['data_to']) != null
-                    ? sprintf('%s 00:00:00', $params['data_to'])
-                    : sprintf('%s 23:59:59', date('Y-m-d'))
-            );
-        }
-
-        $filters = $this->prepareFilter($params);
-        if (!empty($filters)) {
-            foreach ($filters as $filter) {
-                $itemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
-                foreach ($rowSet as $row) {
-                    $itemIdList[] = $this->canonizeAccountId($row);
-                }
-                $listParams['id'] = $itemIdList;
-            }
-
-        }
-
-        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
-        if (!empty($notAllow)) {
-            foreach ($notAllow as $filter) {
-                $notAllowItemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
-                foreach ($rowSet as $row) {
-                    $notAllowItemIdList[] = $this->canonizeAccountId($row);
-                }
-                $listParams['not_allowed_id'] = $notAllowItemIdList;
-            }
-        }
-
-        // Get list
-        $list = [];
-        $rowSet = $this->accountRepository->getAccountList($listParams);
-        foreach ($rowSet as $row) {
-            /// changed by kerloper
-            $list[$row->getId()] = $this->canonizeAccount($row);
-        }
-
-        // Get roles
-        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
-
-        // Get count
-        $count = $this->accountRepository->getAccountCount($listParams);
-
-
-        $list = array_values($list);
-        $i = 0;
-        foreach ($list as $user) {
-            $list[$i]['roles'] = $roleList[$user['id']];
-            $i++;
-        }
-
-        return [
-            'list' => $list,
-            'roles' => $roleList,
-            'paginator' => [
-                'count' => $count,
-                'limit' => $limit,
-                'page' => $page,
-            ],
-        ];
-    }
 
     public function canonizeAccountId(object|array $roleAccountList): int|null
     {
@@ -1177,5 +1067,150 @@ class AccountService implements ServiceInterface
             }
         }
         return $filters;
+    }
+
+    public function getApiAccountList($params): array
+    {
+        $limit = $params['limit'] ?? 10;
+        $page = $params['page'] ?? 1;
+        /// changed by kerloper
+        $key = $params['key'] ?? '';
+        $order = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        /// changed by kerloper
+        $listParams = [
+            'page' => (int)$page,
+            'limit' => (int)$limit,
+            'order' => $order,
+            'offset' => $offset,
+            'key' => $key,
+        ];
+
+        if (isset($params['name']) && !empty($params['name'])) {
+            $listParams['name'] = $params['name'];
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $listParams['identity'] = $params['identity'];
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            echo "d";
+            $listParams['email'] = $params['email'];
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if (isset($params['status']) && !empty($params['status'])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['status']) && !empty($params['status'])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
+            $listParams['data_from'] = strtotime(
+                ($params['data_from']) != null
+                    ? sprintf('%s 00:00:00', $params['data_from'])
+                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
+            );
+        }
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
+            $listParams['data_to'] = strtotime(
+                ($params['data_to']) != null
+                    ? sprintf('%s 00:00:00', $params['data_to'])
+                    : sprintf('%s 23:59:59', date('Y-m-d'))
+            );
+        }
+
+        $filters = $this->prepareFilter($params);
+        if (!empty($filters)) {
+            foreach ($filters as $filter) {
+                $itemIdList = [];
+                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $itemIdList[] = $this->canonizeAccountId($row);
+                }
+                $listParams['id'] = $itemIdList;
+            }
+
+        }
+
+        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
+        if (!empty($notAllow)) {
+            foreach ($notAllow as $filter) {
+                $notAllowItemIdList = [];
+                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $notAllowItemIdList[] = $this->canonizeAccountId($row);
+                }
+                $listParams['not_allowed_id'] = $notAllowItemIdList;
+            }
+        }
+
+        // Get list
+        $list = [];
+        $rowSet = $this->accountRepository->getAccountList($listParams);
+        foreach ($rowSet as $row) {
+            /// changed by kerloper
+            $list[$row->getId()] = $this->canonizeAccount($row);
+        }
+
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
+
+        // Get count
+        $count = $this->accountRepository->getAccountCount($listParams);
+
+
+        $list = array_values($list);
+        $i = 0;
+        foreach ($list as $user) {
+            $list[$i]['roles'] = $roleList[$user['id']];
+            $i++;
+        }
+
+        return [
+            'list' => $list,
+            'roles' => $roleList,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page' => $page,
+            ],
+        ];
+    }
+
+    public function getApiAccount($params): array
+    {
+        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
+        if (!empty($notAllow)) {
+            foreach ($notAllow as $filter) {
+                $notAllowItemIdList = [];
+                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $notAllowItemIdList[] = $this->canonizeAccountId($row);
+                }
+                $params['not_allowed_id'] = $notAllowItemIdList;
+            }
+        }
+        $account = $this->accountRepository->getAccount($params);
+        return $this->canonizeAccount($account);
+    }
+
+    public function getApiProfile($params): array
+    {
+        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
+        if (!empty($notAllow)) {
+            foreach ($notAllow as $filter) {
+                $notAllowItemIdList = [];
+                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $notAllowItemIdList[] = $this->canonizeAccountId($row);
+                }
+                $params['not_allowed_id'] = $notAllowItemIdList;
+            }
+        }
+        $profile = $this->accountRepository->getProfile($params);
+        return $this->canonizeProfile($profile);
     }
 }
