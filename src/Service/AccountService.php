@@ -1069,7 +1069,7 @@ class AccountService implements ServiceInterface
         return $filters;
     }
 
-    public function getApiAccountList($params): array
+    public function getAccountListByOperator($params): array
     {
         $limit = $params['limit'] ?? 10;
         $page = $params['page'] ?? 1;
@@ -1180,7 +1180,7 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function getApiAccount($params): array
+    public function getAccountByOperator($params): array
     {
         $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
         if (!empty($notAllow)) {
@@ -1197,7 +1197,7 @@ class AccountService implements ServiceInterface
         return $this->canonizeAccount($account);
     }
 
-    public function getApiProfile($params): array
+    public function getProfileByOperator($params): array
     {
         $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
         if (!empty($notAllow)) {
@@ -1213,4 +1213,46 @@ class AccountService implements ServiceInterface
         $profile = $this->accountRepository->getProfile($params);
         return $this->canonizeProfile($profile);
     }
+
+    public function updateStatusByOperator($params, $operator = []): array
+    {
+        $params['status'] = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
+        $paramsList = [
+            'status' => $params['status'],
+            $params['status'] ? 'time_activated' : 'time_disabled' => time()
+        ];
+        $this->accountRepository->updateAccount((int)$params['user_id'], $paramsList);
+
+        if ($params['status'] == 0) {
+            $this->cacheService->deleteUser((int)$params['user_id']);
+        }
+
+        // Save log
+        $this->historyService->logger('updateStatusByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+
+        return [
+            'result' => true,
+            'data' => [
+                'message' => 'Status change successfully !',
+            ],
+            'error' => [],
+        ];
+    }
+
+    public function deleteUserByOperator($params, $operator = []): array
+    {
+        $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => 0, 'time_deleted' => time()]);
+        $this->cacheService->deleteUser((int)$params['user_id']);
+        // Save log
+        $this->historyService->logger('deleteUserByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+
+        return [
+            'result' => true,
+            'data' => [
+                'message' => 'Delete user successfully !',
+            ],
+            'error' => [],
+        ];
+    }
+
 }
