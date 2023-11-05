@@ -59,11 +59,11 @@ class AddHandler implements RequestHandlerInterface
             );
         }
 
-//        $result         = $this->roleService->addRoleResource($requestBody,$operator);
+        $result         = $this->roleService->addRoleResource($requestBody,$operator);
         return new JsonResponse(
             [
                 'result' => true,
-                'data'   => $list,
+                'data'   => $result,
                 'error'  => [],
             ]
         );
