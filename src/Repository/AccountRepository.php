@@ -87,12 +87,12 @@ class AccountRepository implements AccountRepositoryInterface
         Credential        $credentialPrototype
     )
     {
-        $this->db                   = $db;
-        $this->hydrator             = $hydrator;
-        $this->accountPrototype     = $accountPrototype;
-        $this->profilePrototype     = $profilePrototype;
+        $this->db = $db;
+        $this->hydrator = $hydrator;
+        $this->accountPrototype = $accountPrototype;
+        $this->profilePrototype = $profilePrototype;
         $this->accountRolePrototype = $accountRolePrototype;
-        $this->credentialPrototype  = $credentialPrototype;
+        $this->credentialPrototype = $credentialPrototype;
     }
 
     public function getAccountList($params = []): HydratingResultSet
@@ -114,19 +114,19 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
-        if (isset($params['status'])  ) {
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['status'] = $params['status'];
         }
-        if (isset($params['id'])  ) {
+        if (isset($params['id'])) {
             $where['id'] = $params['id'];
         }
-        if (isset($params['data_from']) &&!empty($params['data_from'])) {
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
             $where['time_created >= ?'] = $params['data_from'];
         }
-        if (isset($params['data_to']) &&!empty($params['data_to'])) {
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
             $where['time_created <= ?'] = $params['data_to'];
         }
-        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+        if (isset($params['not_allowed_id']) && !empty($params['not_allowed_id'])) {
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
@@ -178,19 +178,19 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
-        if (isset($params['status']) ) {
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['status'] = $params['status'];
         }
-        if (isset($params['id']) ) {
+        if (isset($params['id'])) {
             $where['id'] = $params['id'];
         }
-        if (isset($params['data_from']) &&!empty($params['data_from'])) {
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
             $where['time_created >= ?'] = $params['data_from'];
         }
-        if (isset($params['data_to']) &&!empty($params['data_to'])) {
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
             $where['time_created <= ?'] = $params['data_to'];
         }
-        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+        if (isset($params['not_allowed_id']) && !empty($params['not_allowed_id'])) {
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
@@ -230,7 +230,7 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['status']) && (int)$params['status'] > 0) {
             $where['status'] = (int)$params['status'];
         }
-        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+        if (isset($params['not_allowed_id']) && !empty($params['not_allowed_id'])) {
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
@@ -376,7 +376,7 @@ class AccountRepository implements AccountRepositoryInterface
         } elseif (isset($params['item_id']) && (int)$params['item_id'] > 0) {
             $where['item_id'] = $params['item_id'];
         }
-        if (isset($params['not_allowed_id']) &&!empty($params['not_allowed_id'])) {
+        if (isset($params['not_allowed_id']) && !empty($params['not_allowed_id'])) {
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 

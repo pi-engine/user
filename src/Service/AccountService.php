@@ -624,7 +624,7 @@ class AccountService implements ServiceInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $listParams['mobile'] = $params['mobile'];
         }
-        if (isset($params['status'])  ) {
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $listParams['status'] = $params['status'];
         }
         if (isset($params['status'])  ) {
@@ -1095,6 +1095,7 @@ class AccountService implements ServiceInterface
         foreach ($params as $key => $value) {
             switch ($key) {
                 case 'roles':
+                    if (($value != '') && !empty($value) && ($value != null))
                     $filters[$key] = [
                         'role' => $key,
                         'value' => explode(',', $value),
@@ -1138,7 +1139,7 @@ class AccountService implements ServiceInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $listParams['mobile'] = $params['mobile'];
         }
-        if (isset($params['status'])  ) {
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $listParams['status'] = $params['status'];
         }
         if (isset($params['status'])  ) {
