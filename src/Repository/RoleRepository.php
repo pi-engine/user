@@ -69,7 +69,7 @@ class RoleRepository implements RoleRepositoryInterface
         if (isset($params['section']) && !empty($params['section'])) {
             $where['section'] = $params['section'];
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status'])  ) {
             $where['status'] = (int)$params['status'];
         }
 

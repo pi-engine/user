@@ -114,7 +114,7 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status'])  ) {
             $where['status'] = $params['status'];
         }
         if (isset($params['id'])  ) {
@@ -178,7 +178,7 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status']) ) {
             $where['status'] = $params['status'];
         }
         if (isset($params['id']) ) {

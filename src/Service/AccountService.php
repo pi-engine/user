@@ -624,10 +624,10 @@ class AccountService implements ServiceInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $listParams['mobile'] = $params['mobile'];
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status'])  ) {
             $listParams['status'] = $params['status'];
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status'])  ) {
             $listParams['status'] = $params['status'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
@@ -1138,10 +1138,10 @@ class AccountService implements ServiceInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $listParams['mobile'] = $params['mobile'];
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status'])  ) {
             $listParams['status'] = $params['status'];
         }
-        if (isset($params['status']) && !empty($params['status'])) {
+        if (isset($params['status'])  ) {
             $listParams['status'] = $params['status'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
