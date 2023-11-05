@@ -7,6 +7,7 @@ use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
 use Psr\SimpleCache\InvalidArgumentException;
+use stdClass;
 use User\Repository\AccountRepositoryInterface;
 
 use function array_merge;
@@ -430,6 +431,18 @@ class AccountService implements ServiceInterface
         $otp = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
+            $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
+            if(!$isPasswordStrong){
+                // Save log
+                $this->historyService->logger('setPasswordFailedInRegister', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+                return [
+                    'result' => false,
+                    'data' => new stdClass(),
+                    'error' => [
+                        'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
+                    ],
+                ];
+            }
             $credential = $this->generatePassword($params['credential']);
         }
         if (isset($params['otp']) && !empty($params['otp'])) {
@@ -809,8 +822,20 @@ class AccountService implements ServiceInterface
 
     public function updatePassword($params, $account,$operator=[]): array
     {
-        $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
+        $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['new_credential']??'');
+        if(!$isPasswordStrong){
+            // Save log
+            $this->historyService->logger('updatePasswordFailed', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+            return [
+                'result' => false,
+                'data' => new stdClass(),
+                'error' => [
+                    'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
+                ],
+            ];
+        }
 
+        $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
         $bcrypt = new Bcrypt();
         if ($bcrypt->verify($params['current_credential'], $hash)) {
             $credential = $bcrypt->create($params['new_credential']);
@@ -846,8 +871,20 @@ class AccountService implements ServiceInterface
 
     public function updatePasswordByAdmin($params, $operator = []): array
     {
-        $credential = $this->generatePassword($params['credential']);
+        $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
+        if(!$isPasswordStrong){
+            // Save log
+            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+            return [
+                'result' => false,
+                'data' => new stdClass(),
+                'error' => [
+                    'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
+                ],
+            ];
+        }
 
+        $credential = $this->generatePassword($params['credential']);
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
 
         // Save log
@@ -1260,6 +1297,19 @@ class AccountService implements ServiceInterface
     ///TODO: set control for check role of target user in function (must check target user has not admin role)
     public function updatePasswordByOperator($params, $operator = []): array
     {
+        $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
+        if(!$isPasswordStrong){
+            // Save log
+            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+            return [
+                'result' => false,
+                'data' => new stdClass(),
+                'error' => [
+                    'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
+                ],
+            ];
+        }
+
         $credential = $this->generatePassword($params['credential']);
 
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);

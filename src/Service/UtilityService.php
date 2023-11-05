@@ -211,4 +211,42 @@ class UtilityService implements ServiceInterface
     {
         return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
     }
+
+    function isPasswordStrong($password)
+    {
+        // Define your password strength rules
+        $minLength = 8;
+        $requiresUppercase = true;
+        $requiresLowercase = true;
+        $requiresNumber = true;
+        $requiresSpecialCharacter = true;
+
+        // Check length
+        if (strlen($password) < $minLength) {
+            return false;
+        }
+
+        // Check for uppercase letters
+        if ($requiresUppercase && !preg_match('/[A-Z]/', $password)) {
+            return false;
+        }
+
+        // Check for lowercase letters
+        if ($requiresLowercase && !preg_match('/[a-z]/', $password)) {
+            return false;
+        }
+
+        // Check for numbers
+        if ($requiresNumber && !preg_match('/[0-9]/', $password)) {
+            return false;
+        }
+
+        // Check for special characters
+        if ($requiresSpecialCharacter && !preg_match('/[^a-zA-Z0-9]/', $password)) {
+            return false;
+        }
+
+        // Password meets all rules
+        return true;
+    }
 }

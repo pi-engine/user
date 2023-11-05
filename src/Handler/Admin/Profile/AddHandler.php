@@ -23,25 +23,31 @@ class AddHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService
-    ) {
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService
+    )
+    {
         $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->accountService  = $accountService;
+        $this->streamFactory = $streamFactory;
+        $this->accountService = $accountService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody    = $request->getParsedBody();
-        $operator       = $request->getAttribute('account');
-        $result         = $this->accountService->addAccount($requestBody,$operator);
-        $this->accountService->addRoleAccountByAdmin($requestBody,$result,$operator);
+        $requestBody = $request->getParsedBody();
+        $operator = $request->getAttribute('account');
+        $result = $this->accountService->addAccount($requestBody, $operator);
+        if (isset($result['id']) && !empty($result)) {
+            $this->accountService->addRoleAccountByAdmin($requestBody, $result, $operator);
+        } else {
+            return new JsonResponse($result);
+        }
+
         return new JsonResponse(
             [
                 'result' => true,
-                'data'   => $result,
-                'error'  => [],
+                'data' => $result,
+                'error' => [],
             ]
         );
     }
