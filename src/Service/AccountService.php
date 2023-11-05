@@ -807,7 +807,7 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function updatePassword($params, $account): array
+    public function updatePassword($params, $account,$operator=[]): array
     {
         $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
 
@@ -818,7 +818,7 @@ class AccountService implements ServiceInterface
             $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
             // Save log
-            $this->historyService->logger('updatePassword', ['params' => $params, 'account' => $account]);
+            $this->historyService->logger('updatePassword', ['params' => $params, 'account' => $account,'operator'=>$operator]);
 
             $result = [
                 'result' => true,
@@ -829,7 +829,7 @@ class AccountService implements ServiceInterface
             ];
         } else {
             // Save log
-            $this->historyService->logger('failedUpdatePassword', ['params' => $params, 'account' => $account]);
+            $this->historyService->logger('failedUpdatePassword', ['params' => $params, 'account' => $account,'operator'=>$operator]);
 
             $result = [
                 'result' => false,
@@ -1256,5 +1256,25 @@ class AccountService implements ServiceInterface
             'error' => [],
         ];
     }
+
+    ///TODO: set control for check role of target user in function (must check target user has not admin role)
+    public function updatePasswordByOperator($params, $operator = []): array
+    {
+        $credential = $this->generatePassword($params['credential']);
+
+        $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
+
+        // Save log
+        $this->historyService->logger('updatePasswordByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+
+        return [
+            'result' => true,
+            'data' => [
+                'message' => 'Password set successfully !',
+            ],
+            'error' => [],
+        ];
+    }
+
 
 }
