@@ -1214,6 +1214,7 @@ class AccountService implements ServiceInterface
         return $this->canonizeProfile($profile);
     }
 
+    ///TODO: set control for check role of target user in function (must check target user has not admin role)
     public function updateStatusByOperator($params, $operator = []): array
     {
         $params['status'] = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
@@ -1239,6 +1240,7 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    ///TODO: set control for check role of target user in function (must check target user has not admin role)
     public function deleteUserByOperator($params, $operator = []): array
     {
         $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => 0, 'time_deleted' => time()]);
