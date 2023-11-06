@@ -38,6 +38,7 @@ class AddHandler implements RequestHandlerInterface
         $requestBody    = $request->getParsedBody();
         $operator       = $request->getAttribute('account');
 
+        $this->roleService->resetRoleListInCache();
         $list           = $this->roleService->getRoleResourceList();
         $isDuplicate    = false;
         foreach ($list as $item) {

@@ -264,25 +264,25 @@ class RoleService implements ServiceInterface
     {
         $result = $this->roleRepository->addRoleResource($params);
         $result = $this->canonizeRole($result);
+        $this->resetRoleListInCache();
+        return $result;
+    }
+
+    public function resetRoleListInCache(): void
+    {
         $this->cacheService->deleteItem([
             'roles-admin',
             'roles-api',
             'roles-light',
             'roleList'
         ]);
-        return $result;
     }
 
     public function deleteRoleResource(object|array|null $params, mixed $operator): void
     {
         $name = (isset($params['name']) && !empty($params['name'])) ? $params['name'] : '';
         $this->roleRepository->updateRoleResource($name, ['status' => 0]);
-        $this->cacheService->deleteItem([
-            'roles-admin',
-            'roles-api',
-            'roles-light',
-            'roleList'
-        ]);
+        $this->resetRoleListInCache();
     }
 
 }
