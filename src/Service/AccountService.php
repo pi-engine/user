@@ -440,9 +440,9 @@ class AccountService implements ServiceInterface
                     'data' => new stdClass(),
                     'error' => [
                         'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                        'code'=> 401
+                        'code'=> 400
                     ],
-                    'status'=>401
+                    'status'=>400
                 ];
             }
             $credential = $this->generatePassword($params['credential']);
@@ -833,9 +833,9 @@ class AccountService implements ServiceInterface
                 'data' => new stdClass(),
                 'error' => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'=> 401
+                    'code'=> 400
                 ],
-                'status'=>401
+                'status'=>400
             ];
         }
 
@@ -884,9 +884,9 @@ class AccountService implements ServiceInterface
                 'data' => new stdClass(),
                 'error' => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'=> 401
+                    'code'=> 400
                 ],
-                'status'=>401
+                'status'=>400
             ];
         }
 
@@ -1313,9 +1313,9 @@ class AccountService implements ServiceInterface
                 'data' => new stdClass(),
                 'error' => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'=> 401
+                    'code'=> 400
                 ],
-                'status'=>401
+                'status'=>400
             ];
         }
 
