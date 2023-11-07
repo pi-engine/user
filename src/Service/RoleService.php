@@ -91,6 +91,18 @@ class RoleService implements ServiceInterface
         return $roles;
     }
 
+    ///TODO:check
+    //for check role name in add role
+    public function getRoleResourceListByAdmin(): array
+    {
+        $list = [];
+        $rowSet = $this->roleRepository->getRoleResourceList();
+        foreach ($rowSet as $row) {
+            $list[] = $this->canonizeRole($row);
+        }
+        return $list;
+    }
+
     public function getRoleResourceList($section = ''): array
     {
         $roles = $this->cacheService->getItem('roleList');

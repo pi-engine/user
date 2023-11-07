@@ -39,7 +39,7 @@ class AddHandler implements RequestHandlerInterface
         $operator       = $request->getAttribute('account');
 
         $this->roleService->resetRoleListInCache();
-        $list           = $this->roleService->getRoleResourceList();
+        $list           = $this->roleService->getRoleResourceListByAdmin();
         $isDuplicate    = false;
         foreach ($list as $item) {
             if ($item["name"] === $requestBody['name']??'') {
