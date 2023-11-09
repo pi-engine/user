@@ -252,7 +252,7 @@ class ValidationMiddleware implements MiddlewareInterface
         // Check mobile
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $option = [
-                'check_duplication' => false,
+                'check_duplication' => true,
                 'country'           => 'IR',
             ];
             if (isset($params['country']) && !empty($params['country'])) {
