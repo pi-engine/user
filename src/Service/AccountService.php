@@ -827,7 +827,7 @@ class AccountService implements ServiceInterface
         $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['new_credential']??'');
         if(!$isPasswordStrong){
             // Save log
-            $this->historyService->logger('updatePasswordFailed', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+            $this->historyService->logger('updatePasswordFailed', ['params' => $params, 'account' => $account, 'operator' => $operator]);
             return [
                 'result' => false,
                 'data' => new stdClass(),
@@ -878,7 +878,7 @@ class AccountService implements ServiceInterface
         $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
         if(!$isPasswordStrong){
             // Save log
-            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
             return [
                 'result' => false,
                 'data' => new stdClass(),
@@ -894,7 +894,7 @@ class AccountService implements ServiceInterface
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
 
         // Save log
-        $this->historyService->logger('updatePasswordByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+        $this->historyService->logger('updatePasswordByAdmin', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -919,7 +919,7 @@ class AccountService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+        $this->historyService->logger('updateStatusByAdmin', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -935,7 +935,7 @@ class AccountService implements ServiceInterface
         $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => 0, 'time_deleted' => time()]);
         $this->cacheService->deleteUser((int)$params['user_id']);
         // Save log
-        $this->historyService->logger('deleteUserByAdmin', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+        $this->historyService->logger('deleteUserByAdmin', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -1273,7 +1273,7 @@ class AccountService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('updateStatusByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+        $this->historyService->logger('updateStatusByOperator', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -1290,7 +1290,7 @@ class AccountService implements ServiceInterface
         $this->accountRepository->updateAccount((int)$params['user_id'], ['status' => 0, 'time_deleted' => time()]);
         $this->cacheService->deleteUser((int)$params['user_id']);
         // Save log
-        $this->historyService->logger('deleteUserByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+        $this->historyService->logger('deleteUserByOperator', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
 
         return [
             'result' => true,
@@ -1307,7 +1307,7 @@ class AccountService implements ServiceInterface
         $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
         if(!$isPasswordStrong){
             // Save log
-            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' =>$this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
             return [
                 'result' => false,
                 'data' => new stdClass(),
@@ -1324,7 +1324,7 @@ class AccountService implements ServiceInterface
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
 
         // Save log
-        $this->historyService->logger('updatePasswordByOperator', ['params' => $params, 'account' => ['id' => (int)$params['user_id']], 'operator' => $operator]);
+        $this->historyService->logger('updatePasswordByOperator', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
 
         return [
             'result' => true,
