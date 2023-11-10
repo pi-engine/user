@@ -151,7 +151,14 @@ class RoleService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles, 'account' => ['id' => $userId], 'operator' => $operator]);
+        $account = [];
+        $accountCache = $account;
+        if (!empty($accountCache)) {
+            if (isset($accountCache['account'])) {
+                $account = $accountCache['account'];
+            }
+        }
+        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles, 'account' => $account, 'operator' => $operator]);
     }
 
     public function addRoleAccount(int $userId, string $roleName, string $section = 'api', $operator = []): void
@@ -172,7 +179,14 @@ class RoleService implements ServiceInterface
         $this->cacheService->updateUserRoles($userId, [$roleName], $section);
 
         // Save log
-        $this->historyService->logger('addRoleAccount', ['params' => ['role' => $roleName, 'section' => $section], 'account' => ['id' => $userId], 'operator' => $operator]);
+        $account = [];
+        $accountCache = $account;
+        if (!empty($accountCache)) {
+            if (isset($accountCache['account'])) {
+                $account = $accountCache['account'];
+            }
+        }
+        $this->historyService->logger('addRoleAccount', ['params' => ['role' => $roleName, 'section' => $section], 'account' => $account, 'operator' => $operator]);
     }
 
     public function getRoleListLight(): array
@@ -244,14 +258,28 @@ class RoleService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('deleteRoleAccount', ['params' => ['role' => $roleName], 'account' => ['id' => $userId]]);
+        $account = [];
+        $accountCache = $account;
+        if (!empty($accountCache)) {
+            if (isset($accountCache['account'])) {
+                $account = $accountCache['account'];
+            }
+        }
+        $this->historyService->logger('deleteRoleAccount', ['params' => ['role' => $roleName], 'account' => $account]);
     }
 
     public function deleteAllRoleAccount(int $userId, $operator = []): void
     {
         $this->roleRepository->deleteAllRoleAccount($userId);
         // Save log
-        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => ['id' => $userId], 'operator' => $operator]);
+        $account = [];
+        $accountCache = $account;
+        if (!empty($accountCache)) {
+            if (isset($accountCache['account'])) {
+                $account = $accountCache['account'];
+            }
+        }
+        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => $account, 'operator' => $operator]);
     }
 
     public function canonizeUserRole($userRole)
