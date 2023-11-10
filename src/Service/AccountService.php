@@ -275,8 +275,10 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-            $bcrypt = new Bcrypt();
-            $otp = $bcrypt->create($otpCode);
+//            $bcrypt = new Bcrypt();
+//            $otp = $bcrypt->create($otpCode);
+            ///TODO:check
+            $otp = hash('sha512', $otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -363,8 +365,10 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-            $bcrypt = new Bcrypt();
-            $otp = $bcrypt->create($otpCode);
+//            $bcrypt = new Bcrypt();
+//            $otp = $bcrypt->create($otpCode);
+            ///TODO:check
+            $otp = hash('sha512', $otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -431,8 +435,8 @@ class AccountService implements ServiceInterface
         $otp = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
-            $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
-            if(!$isPasswordStrong){
+            $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+            if (!$isPasswordStrong) {
                 // Save log
                 $this->historyService->logger('setPasswordFailedInRegister', ['params' => $params, 'account' => [], 'operator' => $operator]);
                 return [
@@ -440,9 +444,9 @@ class AccountService implements ServiceInterface
                     'data' => new stdClass(),
                     'error' => [
                         'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                        'code'=> 400
+                        'code' => 400
                     ],
-                    'status'=>400
+                    'status' => 400
                 ];
             }
             $credential = $this->generatePassword($params['credential']);
@@ -511,7 +515,7 @@ class AccountService implements ServiceInterface
         return $account;
     }
 
-    public function addRoleAccountByAdmin($params,$account,$operator): void
+    public function addRoleAccountByAdmin($params, $account, $operator): void
     {
         // Set user roles that receive from service
         if (isset($params['roles'])) {
@@ -629,7 +633,7 @@ class AccountService implements ServiceInterface
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $listParams['status'] = $params['status'];
         }
-        if (isset($params['status'])  ) {
+        if (isset($params['status'])) {
             $listParams['status'] = $params['status'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
@@ -798,8 +802,10 @@ class AccountService implements ServiceInterface
 
     public function generatePassword($credential): string
     {
-        $bcrypt = new Bcrypt();
-        return $bcrypt->create($credential);
+//        $bcrypt = new Bcrypt();
+//        return $bcrypt->create($credential);
+        ///TODO:check
+        return hash('sha512', $credential);
     }
 
     public function addPassword($params, $account = []): array
@@ -822,10 +828,10 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function updatePassword($params, $account,$operator=[]): array
+    public function updatePassword($params, $account, $operator = []): array
     {
-        $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['new_credential']??'');
-        if(!$isPasswordStrong){
+        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['new_credential'] ?? '');
+        if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger('updatePasswordFailed', ['params' => $params, 'account' => $account, 'operator' => $operator]);
             return [
@@ -833,21 +839,22 @@ class AccountService implements ServiceInterface
                 'data' => new stdClass(),
                 'error' => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'=> 400
+                    'code' => 400
                 ],
-                'status'=>400
+                'status' => 400
             ];
         }
 
         $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
-        $bcrypt = new Bcrypt();
-        if ($bcrypt->verify($params['current_credential'], $hash)) {
-            $credential = $bcrypt->create($params['new_credential']);
-
+//        $bcrypt = new Bcrypt();
+//        if ($bcrypt->verify($params['current_credential'], $hash)) {
+//            $credential = $bcrypt->create($params['new_credential']);
+        if (hash_equals($hash, hash('sha512', $params['current_credential']))) {
+            $credential = hash('sha512', $params['new_credential']);
             $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
             // Save log
-            $this->historyService->logger('updatePassword', ['params' => $params, 'account' => $account,'operator'=>$operator]);
+            $this->historyService->logger('updatePassword', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
             $result = [
                 'result' => true,
@@ -858,7 +865,7 @@ class AccountService implements ServiceInterface
             ];
         } else {
             // Save log
-            $this->historyService->logger('failedUpdatePassword', ['params' => $params, 'account' => $account,'operator'=>$operator]);
+            $this->historyService->logger('failedUpdatePassword', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
             $result = [
                 'result' => false,
@@ -875,8 +882,8 @@ class AccountService implements ServiceInterface
 
     public function updatePasswordByAdmin($params, $operator = []): array
     {
-        $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
-        if(!$isPasswordStrong){
+        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+        if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
             return [
@@ -884,9 +891,9 @@ class AccountService implements ServiceInterface
                 'data' => new stdClass(),
                 'error' => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'=> 400
+                    'code' => 400
                 ],
-                'status'=>400
+                'status' => 400
             ];
         }
 
@@ -1102,11 +1109,11 @@ class AccountService implements ServiceInterface
             switch ($key) {
                 case 'roles':
                     if (($value != '') && !empty($value) && ($value != null))
-                    $filters[$key] = [
-                        'role' => $key,
-                        'value' => explode(',', $value),
-                        'type' => 'string',
-                    ];
+                        $filters[$key] = [
+                            'role' => $key,
+                            'value' => explode(',', $value),
+                            'type' => 'string',
+                        ];
                     break;
             }
         }
@@ -1148,7 +1155,7 @@ class AccountService implements ServiceInterface
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $listParams['status'] = $params['status'];
         }
-        if (isset($params['status'])  ) {
+        if (isset($params['status'])) {
             $listParams['status'] = $params['status'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
@@ -1179,7 +1186,7 @@ class AccountService implements ServiceInterface
 
         }
 
-        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
+        $notAllow = $this->prepareFilter(['roles' => implode(',', $this->roleService->getAdminRoleList())]);
         if (!empty($notAllow)) {
             foreach ($notAllow as $filter) {
                 $notAllowItemIdList = [];
@@ -1226,7 +1233,7 @@ class AccountService implements ServiceInterface
 
     public function getAccountByOperator($params): array
     {
-        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
+        $notAllow = $this->prepareFilter(['roles' => implode(',', $this->roleService->getAdminRoleList())]);
         if (!empty($notAllow)) {
             foreach ($notAllow as $filter) {
                 $notAllowItemIdList = [];
@@ -1243,7 +1250,7 @@ class AccountService implements ServiceInterface
 
     public function getProfileByOperator($params): array
     {
-        $notAllow = $this->prepareFilter(['roles'=>implode(',',$this->roleService->getAdminRoleList())]);
+        $notAllow = $this->prepareFilter(['roles' => implode(',', $this->roleService->getAdminRoleList())]);
         if (!empty($notAllow)) {
             foreach ($notAllow as $filter) {
                 $notAllowItemIdList = [];
@@ -1304,18 +1311,18 @@ class AccountService implements ServiceInterface
     ///TODO: set control for check role of target user in function (must check target user has not admin role)
     public function updatePasswordByOperator($params, $operator = []): array
     {
-        $isPasswordStrong =  $this->utilityService->isPasswordStrong($params['credential']??'');
-        if(!$isPasswordStrong){
+        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+        if (!$isPasswordStrong) {
             // Save log
-            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' =>$this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
+            $this->historyService->logger('updatePasswordFailedByOperator', ['params' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]);
             return [
                 'result' => false,
                 'data' => new stdClass(),
                 'error' => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'=> 400
+                    'code' => 400
                 ],
-                'status'=>400
+                'status' => 400
             ];
         }
 

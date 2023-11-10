@@ -426,8 +426,10 @@ class AccountRepository implements AccountRepositoryInterface
             $identityColumn,
             $credentialColumn,
             function ($hash, $password) {
-                $bcrypt = new Bcrypt();
-                return $bcrypt->verify($password, $hash);
+//                $bcrypt = new Bcrypt();
+//                return $bcrypt->verify($password, $hash);
+                ///TODO:check
+                return hash_equals($hash, hash('sha512',$password));
             }
         );
 
