@@ -762,6 +762,7 @@ class AccountService implements ServiceInterface
         // restore roles that receive from service
         if (isset($params['roles'])) {
             $this->roleService->deleteAllRoleAccount($account['id'], $operator);
+            $this->roleService->addDefaultRoles($account['id'], $operator);
         }
 
         // Set/Update user data to cache
