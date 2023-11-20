@@ -77,6 +77,8 @@ class AccountService implements ServiceInterface
             'bank_account',
         ];
 
+    protected string $hashPattern;
+
     /**
      * @param AccountRepositoryInterface $accountRepository
      * @param RoleService $roleService
@@ -106,6 +108,10 @@ class AccountService implements ServiceInterface
         $this->notificationService = $notificationService;
         $this->historyService = $historyService;
         $this->config = $config;
+        $this->hashPattern = 'bcrypt';
+        if (isset($config['hash_pattern']) && !empty($config['hash_pattern'])) {
+            $this->hashPattern = $config['hash_pattern'];
+        }
     }
 
     /**
@@ -118,7 +124,7 @@ class AccountService implements ServiceInterface
         $credentialColumn = $params['credentialColumn'] ?? 'credential';
 
         // Do log in
-        $authentication = $this->accountRepository->authentication($identityColumn, $credentialColumn);
+        $authentication = $this->accountRepository->authentication($identityColumn, $credentialColumn,$this->hashPattern);
         $adapter = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
 
@@ -275,10 +281,7 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-//            $bcrypt = new Bcrypt();
-//            $otp = $bcrypt->create($otpCode);
-            ///TODO:check
-            $otp = hash('sha512', $otpCode);
+            $otp = $this->generateHashPassword($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -365,10 +368,7 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-//            $bcrypt = new Bcrypt();
-//            $otp = $bcrypt->create($otpCode);
-            ///TODO:check
-            $otp = hash('sha512', $otpCode);
+            $otp = $this->generateHashPassword($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -802,12 +802,13 @@ class AccountService implements ServiceInterface
         return $this->canonizeProfile($profile);
     }
 
+    ///TODO: check && should remove this method and only use generateHashPassword method
     public function generatePassword($credential): string
     {
-//        $bcrypt = new Bcrypt();
-//        return $bcrypt->create($credential);
+        //$bcrypt = new Bcrypt();
+        //return $bcrypt->create($credential);
         ///TODO:check
-        return hash('sha512', $credential);
+        return $this->generateHashPassword($credential);
     }
 
     public function addPassword($params, $account = []): array
@@ -848,11 +849,8 @@ class AccountService implements ServiceInterface
         }
 
         $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
-//        $bcrypt = new Bcrypt();
-//        if ($bcrypt->verify($params['current_credential'], $hash)) {
-//            $credential = $bcrypt->create($params['new_credential']);
-        if (hash_equals($hash, hash('sha512', $params['current_credential']))) {
-            $credential = hash('sha512', $params['new_credential']);
+        if ($this->passwordEqualityCheck($params['current_credential'], $hash)) {
+            $credential = $this->generateHashPassword($params['new_credential']);
             $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
             // Save log
@@ -1343,6 +1341,46 @@ class AccountService implements ServiceInterface
             ],
             'error' => [],
         ];
+    }
+
+    /**
+     * @param mixed $password
+     * @return string
+     */
+    protected function generateHashPassword(mixed $password): string
+    {
+        $hash = uniqid();
+        switch ($this->hashPattern) {
+            case'bcrypt':
+                $bcrypt = new Bcrypt();
+                $hash = $bcrypt->create($password);
+                break;
+            case'sha512':
+                $hash = hash('sha512', $password);
+                break;
+
+        }
+        return $hash;
+    }
+
+    /**
+     * @param mixed $credential
+     * @param mixed $hash
+     * @return boolean
+     */
+    protected function passwordEqualityCheck(mixed $credential, mixed $hash): bool
+    {
+        $result = false;
+        switch ($this->hashPattern) {
+            case'bcrypt':
+                $bcrypt = new Bcrypt();
+                $result = $bcrypt->verify($credential, $hash);
+                break;
+            case'sha512':
+                $result = hash_equals($hash, hash('sha512', $credential));
+                break;
+        }
+        return $result;
     }
 
 

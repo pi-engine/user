@@ -417,7 +417,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
     }
 
-    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential'): AuthenticationService
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential',$hashPattern='bcrypt'): AuthenticationService
     {
         // Call authAdapter
         $authAdapter = new CallbackCheckAdapter(
@@ -425,11 +425,18 @@ class AccountRepository implements AccountRepositoryInterface
             $this->tableAccount,
             $identityColumn,
             $credentialColumn,
-            function ($hash, $password) {
-//                $bcrypt = new Bcrypt();
-//                return $bcrypt->verify($password, $hash);
-                ///TODO:check
-                return hash_equals($hash, hash('sha512',$password));
+            function ($hash, $password) use ($hashPattern) {
+                $result = false;
+                switch ($hashPattern) {
+                    case'bcrypt':
+                        $bcrypt = new Bcrypt();
+                        $result =  $bcrypt->verify($password, $hash);
+                        break;
+                    case'sha512':
+                        $result = hash_equals($hash, hash('sha512',$password));
+                        break;
+                }
+                return $result;
             }
         );
 
