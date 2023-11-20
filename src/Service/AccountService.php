@@ -681,8 +681,9 @@ class AccountService implements ServiceInterface
 
         $list = array_values($list);
         $i = 0;
+        ///TODO:check
         foreach ($list as $user) {
-            $list[$i]['roles'] = $roleList[$user['id']];
+            $list[$i]['roles'] = isset($roleList[$user['id']])?$roleList[$user['id']]:['api'=>[],'admin'=>[]];
             $i++;
         }
 
@@ -1216,8 +1217,9 @@ class AccountService implements ServiceInterface
 
         $list = array_values($list);
         $i = 0;
+        ///TODO:check
         foreach ($list as $user) {
-            $list[$i]['roles'] = $roleList[$user['id']];
+            $list[$i]['roles'] = isset($roleList[$user['id']])?$roleList[$user['id']]:['api'=>[],'admin'=>[]];
             $i++;
         }
 
