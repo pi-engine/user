@@ -1440,6 +1440,9 @@ class AccountService implements ServiceInterface
 
     public function prepareMfa($account): array
     {
+        // Set multi factor
+        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
+
         // Get mfa information
         $mfa = $this->accountRepository->getMultiFactor((int)$account['id']);
 
@@ -1458,6 +1461,8 @@ class AccountService implements ServiceInterface
             'multi_factor_status' => $mfa['multi_factor_status'],
             'multi_factor_secret' => $secret,
             'multi_factor_image'  => $image,
+            'multi_factor_global' => $multiFactorGlobal,
+            'multi_factor_verify' => 0,
         ];
     }
 
