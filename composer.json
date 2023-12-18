@@ -35,6 +35,7 @@
     "ext-soap": "*",
     "ext-zip": "*",
     "ext-curl": "*",
+    "ext-mongodb": "*",
     "lib-curl": "*",
     "laminas/laminas-component-installer":  "*",
     "laminas/laminas-development-mode": "*",
@@ -72,7 +73,11 @@
     "phpmailer/phpmailer": "*",
     "automattic/woocommerce": "*",
     "voku/anti-xss": "*",
-    "phpoffice/phpspreadsheet": "*"
+    "phpoffice/phpspreadsheet": "*",
+    "hybridauth/hybridauth": "*",
+    "robthree/twofactorauth": "*",
+    "endroid/qr-code": "*",
+    "orhanerday/open-ai": "*"
   },
   "autoload": {
     "psr-4": {
