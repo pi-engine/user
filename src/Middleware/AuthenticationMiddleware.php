@@ -34,13 +34,17 @@ class AuthenticationMiddleware implements MiddlewareInterface
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
+    /* @var array */
+    protected array $config;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
         TokenService $tokenService,
         CacheService $cacheService,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
+        $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -48,6 +52,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $this->tokenService    = $tokenService;
         $this->cacheService    = $cacheService;
         $this->errorHandler    = $errorHandler;
+        $this->config          = $config;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -56,13 +61,14 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $token = $request->getHeaderLine('token');
 
         // get route match
-        $routeMatch = $request->getAttribute('Laminas\Router\RouteMatch');
+        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
         $routeParams = $routeMatch->getParams();
 
         // Check token set
         if (empty($token)) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => 'Token is not set !',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
@@ -77,7 +83,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         // Check parsed token
         if (!$tokenParsed['status']) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => $tokenParsed['message'],
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
@@ -100,7 +107,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
         // Check token type
         if ($tokenParsed['type'] != $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => 'This token not allowed for authentication',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
@@ -112,10 +120,12 @@ class AuthenticationMiddleware implements MiddlewareInterface
         // Get account data from cache
         $user = $this->cacheService->getUser($tokenParsed['user_id']);
 
+
         // Check user is found
         if (empty($user['account'])) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => 'No user information found by this token !',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
@@ -124,9 +134,30 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
+        // Check multi factor
+        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
+        if ($multiFactorGlobal && $routeParams['package'] != 'authentication') {
+            if (
+                !isset($user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'])
+                || (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'] == 0
+            ) {
+                $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+                $request = $request->withAttribute(
+                    'error',
+                    [
+                        'message'           => 'To complete your login, please enter the 6-digit code from your multi factor app.',
+                        'code'              => StatusCodeInterface::STATUS_FORBIDDEN,
+                        'multi_factor_global' => $multiFactorGlobal,
+                        'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],
+                        'multi_factor_verify' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'],
+                    ]
+                );
+                return $this->errorHandler->handle($request);
+            }
+        }
+
         // Set attribute
         $request = $request->withAttribute('account', $user['account']);
-        //$request = $request->withAttribute('account', $this->accountService->getAccount(['id'=>$user['account']['id']]));
         $request = $request->withAttribute('roles', $user['roles']);
         $request = $request->withAttribute('token_id', $tokenParsed['id']);
         $request = $request->withAttribute('current_token', $token);

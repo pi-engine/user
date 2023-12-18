@@ -29,7 +29,10 @@ class AccountServiceFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountService
     {
         // Get config
-        $config = $container->get('config');
+        $config  = $container->get('config');
+        $global  = $config['global'] ?? [];
+        $account = $config['account'] ?? [];
+        $config  = array_merge($global, $account);
 
         return new AccountService(
             $container->get(AccountRepositoryInterface::class),
@@ -39,7 +42,7 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(UtilityService::class),
             $container->get(NotificationService::class),
             $container->get(HistoryService::class),
-            $config['account']
+            $config
         );
     }
 }

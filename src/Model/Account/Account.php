@@ -10,7 +10,7 @@ class Account
     private ?string $email;
     private ?string $mobile;
     private mixed   $status;
-    private mixed $time_created;
+    private mixed   $time_created;
 
     public function __construct(
         $name,
@@ -21,13 +21,13 @@ class Account
         $time_created = null,
         $id = null
     ) {
-        $this->name     = $name;
-        $this->identity = $identity;
-        $this->email    = $email;
-        $this->mobile   = $mobile;
-        $this->status   = $status;
-        $this->time_created   = $time_created;
-        $this->id       = $id;
+        $this->name         = $name;
+        $this->identity     = $identity;
+        $this->email        = $email;
+        $this->mobile       = $mobile;
+        $this->status       = $status;
+        $this->time_created = $time_created;
+        $this->id           = $id;
     }
 
     /**

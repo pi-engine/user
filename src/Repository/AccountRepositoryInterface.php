@@ -22,11 +22,15 @@ interface AccountRepositoryInterface
 
     public function count(array $params = []): int;
 
-    public function getProfile(array $params = []): array|object;
-
     public function addProfile(array $params = []): array|object;
+
+    public function getProfile(array $params = []): array|object;
 
     public function updateProfile(int $userId, array $params = []): void;
 
-    public function authentication($identityColumn = 'identity'): AuthenticationService;
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService;
+
+    public function getIdFromFilter(array $filter = []): HydratingResultSet|array;
+
+    public function getMultiFactor(int $userId): array|null;
 }

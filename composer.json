@@ -67,7 +67,6 @@
     "laminas/laminas-server": "*",
     "laminas/laminas-diagnostics": "*",
     "laminas/laminas-uri": "*",
-    "laminas/laminas-zendframework-bridge": "*",
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*",

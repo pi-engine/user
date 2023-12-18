@@ -48,7 +48,7 @@ return [
             Handler\Admin\Role\AddHandler::class                    => Factory\Handler\Admin\Role\AddHandlerFactory::class,
             Handler\Admin\Role\EditHandler::class                   => Factory\Handler\Admin\Role\EditHandlerFactory::class,
             Handler\Admin\Role\ListHandler::class                   => Factory\Handler\Admin\Role\ListHandlerFactory::class,
-            Handler\Admin\Role\DeleteHandler::class                   => Factory\Handler\Admin\Role\DeleteHandlerFactory::class,
+            Handler\Admin\Role\DeleteHandler::class                 => Factory\Handler\Admin\Role\DeleteHandlerFactory::class,
             Handler\Admin\Permission\ListHandler::class             => Factory\Handler\Admin\Permission\ListHandlerFactory::class,
             Handler\Admin\Permission\AccessHandler::class           => Factory\Handler\Admin\Permission\AccessHandlerFactory::class,
             Handler\Admin\Permission\ViewHandler::class             => Factory\Handler\Admin\Permission\ViewHandlerFactory::class,
@@ -66,10 +66,10 @@ return [
             Handler\Api\Authentication\Mobile\VerifyHandler::class  => Factory\Handler\Api\Authentication\Mobile\VerifyHandlerFactory::class,
             Handler\Api\Authentication\Email\RequestHandler::class  => Factory\Handler\Api\Authentication\Email\RequestHandlerFactory::class,
             Handler\Api\Authentication\Email\VerifyHandler::class   => Factory\Handler\Api\Authentication\Email\VerifyHandlerFactory::class,
+            Handler\Api\Authentication\Mfa\RequestHandler::class    => Factory\Handler\Api\Authentication\Mfa\RequestHandlerFactory::class,
+            Handler\Api\Authentication\Mfa\VerifyHandler::class     => Factory\Handler\Api\Authentication\Mfa\VerifyHandlerFactory::class,
             Handler\ErrorHandler::class                             => Factory\Handler\ErrorHandlerFactory::class,
             Handler\InstallerHandler::class                         => Factory\Handler\InstallerHandlerFactory::class,
-
-            'translator' => Factory\Service\TranslatorFactory::class,
         ],
     ],
 
@@ -247,7 +247,7 @@ return [
                                     'defaults' => [
                                         'module'      => 'user',
                                         'section'     => 'api',
-                                        'package'     => 'profile',
+                                        'package'     => 'authentication',
                                         'handler'     => 'login',
                                         'permissions' => 'user-login',
                                         'validator'   => 'login',
@@ -267,14 +267,14 @@ return [
                                     'defaults' => [
                                         'module'      => 'user',
                                         'section'     => 'api',
-                                        'package'     => 'profile',
+                                        'package'     => 'authentication',
                                         'handler'     => 'logout',
                                         'permissions' => 'user-logout',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationMiddleware::class,
+                                            //Middleware\AuthorizationMiddleware::class,
                                             Handler\Api\Authentication\LogoutHandler::class
                                         ),
                                     ],
@@ -287,7 +287,7 @@ return [
                                     'defaults' => [
                                         'module'      => 'user',
                                         'section'     => 'api',
-                                        'package'     => 'profile',
+                                        'package'     => 'authentication',
                                         'handler'     => 'register',
                                         'permissions' => 'user-register',
                                         'validator'   => 'add',
@@ -307,7 +307,7 @@ return [
                                     'defaults' => [
                                         'module'      => 'user',
                                         'section'     => 'api',
-                                        'package'     => 'profile',
+                                        'package'     => 'authentication',
                                         'handler'     => 'refresh',
                                         'permissions' => 'user-refresh',
                                         'controller'  => PipeSpec::class,
@@ -334,7 +334,7 @@ return [
                                             'defaults' => [
                                                 'module'      => 'user',
                                                 'section'     => 'api',
-                                                'package'     => 'profile',
+                                                'package'     => 'authentication',
                                                 'handler'     => 'request',
                                                 'permissions' => 'user-email-request',
                                                 'validator'   => 'email-request',
@@ -354,7 +354,7 @@ return [
                                             'defaults' => [
                                                 'module'      => 'user',
                                                 'section'     => 'api',
-                                                'package'     => 'profile',
+                                                'package'     => 'authentication',
                                                 'handler'     => 'verify',
                                                 'permissions' => 'user-email-verify',
                                                 'validator'   => 'email-verify',
@@ -383,7 +383,7 @@ return [
                                             'defaults' => [
                                                 'module'      => 'user',
                                                 'section'     => 'api',
-                                                'package'     => 'profile',
+                                                'package'     => 'authentication',
                                                 'handler'     => 'request',
                                                 'permissions' => 'user-mobile-request',
                                                 'validator'   => 'mobile-request',
@@ -403,7 +403,7 @@ return [
                                             'defaults' => [
                                                 'module'      => 'user',
                                                 'section'     => 'api',
-                                                'package'     => 'profile',
+                                                'package'     => 'authentication',
                                                 'handler'     => 'verify',
                                                 'permissions' => 'user-mobile-verify',
                                                 'validator'   => 'mobile-verify',
@@ -412,6 +412,51 @@ return [
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
                                                     Handler\Api\Authentication\Mobile\VerifyHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            'mfa'    => [
+                                'type'         => Literal::class,
+                                'options'      => [
+                                    'route'    => '/mfa',
+                                    'defaults' => [],
+                                ],
+                                'child_routes' => [
+                                    'request' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/request',
+                                            'defaults' => [
+                                                'module'      => 'user',
+                                                'section'     => 'api',
+                                                'package'     => 'authentication',
+                                                'handler'     => 'request',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Handler\Api\Authentication\Mfa\RequestHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'verify'  => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/verify',
+                                            'defaults' => [
+                                                'module'      => 'user',
+                                                'section'     => 'api',
+                                                'package'     => 'authentication',
+                                                'handler'     => 'verify',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Handler\Api\Authentication\Mfa\VerifyHandler::class
                                                 ),
                                             ],
                                         ],
@@ -546,7 +591,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'delete' => [
+                            'delete'   => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/delete',
@@ -597,7 +642,7 @@ return [
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'list' => [
+                            'list'   => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/list',
@@ -617,7 +662,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'add'  => [
+                            'add'    => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/add',
@@ -637,7 +682,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'edit' => [
+                            'edit'   => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/edit',

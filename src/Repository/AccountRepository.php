@@ -15,15 +15,14 @@ use Laminas\Db\Sql\Predicate\IsNotNull;
 use Laminas\Db\Sql\Predicate\NotIn;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
-use Laminas\Db\Sql\Predicate\Like;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
 use User\Model\Account\Account;
-use User\Model\Role\Account as AccountRole;
 use User\Model\Account\Credential;
 use User\Model\Account\Profile;
+use User\Model\Account\MultiFactor;
+use User\Model\Role\Account as AccountRole;
 
-use User\Model\Role\Resource;
 use function sprintf;
 
 class AccountRepository implements AccountRepositoryInterface
@@ -78,21 +77,27 @@ class AccountRepository implements AccountRepositoryInterface
      */
     private Credential $credentialPrototype;
 
+    /**
+     * @var MultiFactor
+     */
+    private MultiFactor $multiFactorPrototype;
+
     public function __construct(
-        AdapterInterface  $db,
+        AdapterInterface $db,
         HydratorInterface $hydrator,
-        Account           $accountPrototype,
-        Profile           $profilePrototype,
-        AccountRole       $accountRolePrototype,
-        Credential        $credentialPrototype
-    )
-    {
-        $this->db = $db;
-        $this->hydrator = $hydrator;
-        $this->accountPrototype = $accountPrototype;
-        $this->profilePrototype = $profilePrototype;
+        Account $accountPrototype,
+        Profile $profilePrototype,
+        AccountRole $accountRolePrototype,
+        Credential $credentialPrototype,
+        MultiFactor $multiFactorPrototype
+    ) {
+        $this->db                   = $db;
+        $this->hydrator             = $hydrator;
+        $this->accountPrototype     = $accountPrototype;
+        $this->profilePrototype     = $profilePrototype;
         $this->accountRolePrototype = $accountRolePrototype;
-        $this->credentialPrototype = $credentialPrototype;
+        $this->credentialPrototype  = $credentialPrototype;
+        $this->multiFactorPrototype   = $multiFactorPrototype;
     }
 
     public function getAccountList($params = []): HydratingResultSet
@@ -115,7 +120,7 @@ class AccountRepository implements AccountRepositoryInterface
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
         if (isset($params['mobiles']) && !empty($params['mobiles'])) {
-            $where['mobile'] = $params['mobiles'] ;
+            $where['mobile'] = $params['mobiles'];
         }
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['status'] = $params['status'];
@@ -133,7 +138,7 @@ class AccountRepository implements AccountRepositoryInterface
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
-        $sql = new Sql($this->db);
+        $sql    = new Sql($this->db);
         $select = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
         /* if (isset($params['key']) && !empty($params['key'])) {
             $select->where->addPredicate(
@@ -147,7 +152,7 @@ class AccountRepository implements AccountRepositoryInterface
             )->or;
         } */
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             return [];
@@ -198,7 +203,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         // Get count
-        $sql = new Sql($this->db);
+        $sql    = new Sql($this->db);
         $select = $sql->select($this->tableAccount)->columns($columns)->where($where);
         /* if (isset($params['key']) && !empty($params['key'])) {
             $select->where->addPredicate(
@@ -212,7 +217,7 @@ class AccountRepository implements AccountRepositoryInterface
             )->or;
         } */
         $statement = $sql->prepareStatementForSqlObject($select);
-        $row = $statement->execute()->current();
+        $row       = $statement->execute()->current();
 
         return (int)$row['count'];
     }
@@ -237,10 +242,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
-        $sql = new Sql($this->db);
-        $select = $sql->select($this->tableAccount)->where($where);
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             throw new RuntimeException(
@@ -264,10 +269,10 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function getAccountPassword(int $userId): string|null
     {
-        $sql = new Sql($this->db);
-        $select = $sql->select($this->tableAccount)->where(['id' => $userId]);
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->where(['id' => $userId]);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             throw new RuntimeException(
@@ -299,9 +304,9 @@ class AccountRepository implements AccountRepositoryInterface
         $insert = new Insert($this->tableAccount);
         $insert->values($params);
 
-        $sql = new Sql($this->db);
+        $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($insert);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -320,9 +325,9 @@ class AccountRepository implements AccountRepositoryInterface
         $update->set($params);
         $update->where(['id' => $userId]);
 
-        $sql = new Sql($this->db);
+        $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -335,15 +340,15 @@ class AccountRepository implements AccountRepositoryInterface
     {
         // Set where
         $columns = ['count' => new Expression('count(*)')];
-        $where = [$params['field'] => $params['value']];
+        $where   = [$params['field'] => $params['value']];
         if (isset($params['id']) && (int)$params['id'] > 0) {
             $where['id <> ?'] = $params['id'];
         }
 
-        $sql = new Sql($this->db);
-        $select = $sql->select($this->tableAccount)->columns($columns)->where($where);
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->columns($columns)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $row = $statement->execute()->current();
+        $row       = $statement->execute()->current();
 
         return (int)$row['count'];
     }
@@ -353,9 +358,9 @@ class AccountRepository implements AccountRepositoryInterface
         $insert = new Insert($this->tableProfile);
         $insert->values($params);
 
-        $sql = new Sql($this->db);
+        $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($insert);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -383,10 +388,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
-        $sql = new Sql($this->db);
-        $select = $sql->select($this->tableProfile)->where($where);
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableProfile)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             return [];
@@ -409,9 +414,9 @@ class AccountRepository implements AccountRepositoryInterface
         $update->set($params);
         $update->where(['user_id' => $userId]);
 
-        $sql = new Sql($this->db);
+        $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface) {
             throw new RuntimeException(
@@ -420,7 +425,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
     }
 
-    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential',$hashPattern='bcrypt'): AuthenticationService
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService
     {
         // Call authAdapter
         $authAdapter = new CallbackCheckAdapter(
@@ -433,10 +438,10 @@ class AccountRepository implements AccountRepositoryInterface
                 switch ($hashPattern) {
                     case'bcrypt':
                         $bcrypt = new Bcrypt();
-                        $result =  $bcrypt->verify($password, $hash);
+                        $result = $bcrypt->verify($password, $hash);
                         break;
                     case'sha512':
-                        $result = hash_equals($hash, hash('sha512',$password));
+                        $result = hash_equals($hash, hash('sha512', $password));
                         break;
                 }
                 return $result;
@@ -452,8 +457,8 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function getIdFromFilter(array $filter = []): HydratingResultSet|array
     {
-        $where = [];
-        $sql = new Sql($this->db);
+        $where  = [];
+        $sql    = new Sql($this->db);
         $select = $sql->select($this->tableRoleAccount)->where($where);
 
         switch ($filter['type']) {
@@ -463,7 +468,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             return [];
@@ -475,4 +480,39 @@ class AccountRepository implements AccountRepositoryInterface
         return $resultSet;
     }
 
+    public function getMultiFactor(int $userId): array|null
+    {
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->where(['id' => $userId]);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            throw new RuntimeException(
+                sprintf(
+                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
+                    $userId
+                )
+            );
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, $this->multiFactorPrototype);
+        $resultSet->initialize($result);
+        $account = $resultSet->current();
+
+        if (!$account) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Account with identifier "%s" not found.',
+                    $userId
+                )
+            );
+        }
+
+        return [
+            'id' => $account->getId(),
+            'multi_factor_status' => $account->getMultiFactorStatus(),
+            'multi_factor_secret' => $account->getMultiFactorSecret(),
+        ];
+    }
 }

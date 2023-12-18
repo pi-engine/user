@@ -17,6 +17,7 @@ class CacheService implements ServiceInterface
             'refresh_keys'  => [],
             'otp'           => [],
             'device_tokens' => [],
+            'multi_factor'    => [],
         ];
 
     /* @var SimpleCacheDecorator */
@@ -73,9 +74,13 @@ class CacheService implements ServiceInterface
                     $user['roles'] = array_unique(array_merge($user['roles'], [$value]));
                     $this->setUser($userId, ['roles' => $user['roles']]);
                     break;
+                case 'multi_factor':
+                    $user['multi_factor'] = array_unique(array_merge($user['multi_factor'], [$value]));
+                    $this->setUser($userId, ['multi_factor' => $user['multi_factor']]);
+                    break;
                 //TODO:review this solution
                 case 'device_tokens':
-                    $user['device_tokens'] =$value;// array_unique(array_merge($user['device_tokens'], [$value]));
+                    $user['device_tokens'] = $value;// array_unique(array_merge($user['device_tokens'], [$value]));
                     $this->setUser($userId, ['device_tokens' => $user['device_tokens']]);
                     break;
             }
@@ -111,9 +116,17 @@ class CacheService implements ServiceInterface
                     $this->setUser($userId, ['roles' => array_values($user['roles'])]);
                     break;
 
+                case 'multi_factor':
+                    $user['multi_factor'] = array_combine($user['multi_factor'], $user['multi_factor']);
+                    if (isset($user['multi_factor'][$value])) {
+                        unset($user['multi_factor'][$value]);
+                    }
+                    $this->setUser($userId, ['multi_factor' => array_values($user['multi_factor'])]);
+                    break;
+
                 //TODO:review this solution
                 case 'device_tokens':
-                    $user['device_tokens'] =$value;// array_unique(array_merge($user['device_tokens'], [$value]));
+                    $user['device_tokens'] = $value;// array_unique(array_merge($user['device_tokens'], [$value]));
                     $this->setUser($userId, ['device_tokens' => $user['device_tokens']]);
                     break;
 //                case 'device_tokens':
@@ -182,6 +195,9 @@ class CacheService implements ServiceInterface
         if (isset($params['device_tokens']) && !empty($params['device_tokens'])) {
             $user['device_tokens'] = $params['device_tokens'];
         }
+        if (isset($params['multi_factor']) && !empty($params['multi_factor'])) {
+            $user['multi_factor'] = $params['multi_factor'];
+        }
 
         // Set/Reset cache
         $this->cache->set($key, $user);
@@ -198,7 +214,7 @@ class CacheService implements ServiceInterface
     public function updateUserRoles(int $userId, array $roles, string $section = 'api'): array
     {
         // Get and check user
-        $key = sprintf($this->userKeyPattern, $userId);
+        $key  = sprintf($this->userKeyPattern, $userId);
         $user = $this->getUser($userId);
 
         if (!empty($user)) {
@@ -216,13 +232,13 @@ class CacheService implements ServiceInterface
             // Set/Reset cache
             $this->cache->set($key, $user);
         }
-        
+
         return $user;
     }
 
     public function deleteItem(array $array): void
     {
-        foreach ($array as $key){
+        foreach ($array as $key) {
             $this->cache->delete($key);
         }
     }

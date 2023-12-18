@@ -27,13 +27,18 @@ class AuthenticationMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AuthenticationMiddleware
     {
+        // Get config
+        $config = $container->get('config');
+        $config = $config['account'] ?? [];
+
         return new AuthenticationMiddleware(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
             $container->get(TokenService::class),
             $container->get(CacheService::class),
-            $container->get(ErrorHandler::class)
+            $container->get(ErrorHandler::class),
+            $config
         );
     }
 }
