@@ -6,26 +6,25 @@ use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Service\RoleService;
-use User\Service\UtilityService;
+use User\Service\ExportService;
 
-class UtilityServiceFactory implements FactoryInterface
+class ExportServiceFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return UtilityService
+     * @return ExportService
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): UtilityService
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ExportService
     {
         // Get config
         $config = $container->get('config');
-        $config = $config['utility'] ?? [];
+        $config = $config['export'] ?? [];
 
-        return new UtilityService($config);
+        return new ExportService($config);
     }
 }

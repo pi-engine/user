@@ -3,6 +3,8 @@
 namespace User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Hybridauth\Exception\UnexpectedValueException;
+use Hybridauth\Hybridauth;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
@@ -12,6 +14,11 @@ use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 use stdClass;
 use User\Repository\AccountRepositoryInterface;
+use Hybridauth\Provider\Facebook as HybridauthFacebook;
+use Hybridauth\Provider\GitHub as HybridauthGitHub;
+use Hybridauth\Provider\Google as HybridauthGoogle;
+use Hybridauth\Provider\Twitter as HybridauthTwitter;
+use Hybridauth\Provider\MicrosoftGraph as HybridauthMicrosoftGraph;
 
 use function array_merge;
 use function in_array;
@@ -201,7 +208,7 @@ class AccountService implements ServiceInterface
 
             // Set source roles params
             if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
-                $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+                $this->roleService->addRoleAccount($account, $params['source']);
 
                 // Set new role
                 $account['roles'][] = $params['source'];
@@ -529,14 +536,14 @@ class AccountService implements ServiceInterface
         $account = array_merge($account, $profile);
 
         // Set user roles
-        $this->roleService->addDefaultRoles((int)$account['id'], $operator);
+        $this->roleService->addDefaultRoles($account, $operator);
 
         // Get roles
         $roles = $this->roleService->getRoleAccount((int)$account['id']);
 
         // Set source roles params
         if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
-            $this->roleService->addRoleAccount((int)$account['id'], $params['source']);
+            $this->roleService->addRoleAccount($account, $params['source']);
         }
 
         return $account;
@@ -549,7 +556,7 @@ class AccountService implements ServiceInterface
             $roles = explode(',', $params['roles']);
             foreach ($roles as $role) {
                 if ($role != 'member') {
-                    $this->roleService->addRoleAccount($account['id'], $role, $role == 'admin' ? 'admin' : 'api', $operator);
+                    $this->roleService->addRoleAccount($account, $role, $role == 'admin' ? 'admin' : 'api', $operator);
                 }
             }
         }
@@ -742,7 +749,6 @@ class AccountService implements ServiceInterface
         return $accountId;
     }
 
-
     public function updateAccount($params, $account, $operator = []): array
     {
         // Set name
@@ -789,12 +795,6 @@ class AccountService implements ServiceInterface
         // Get user from cache if exist
         $user = $this->cacheService->getUser($account['id']);
 
-        // restore roles that receive from service
-        if (isset($params['roles'])) {
-            $this->roleService->deleteAllRoleAccount($account['id'], $operator);
-            $this->roleService->addDefaultRoles($account['id'], $operator);
-        }
-
         // Set/Update user data to cache
         $this->cacheService->setUser(
             $account['id'],
@@ -816,13 +816,18 @@ class AccountService implements ServiceInterface
         return array_merge($account, $profile);
     }
 
+    public function updateAccountRoles($roles, $account, $operator = []): void
+    {
+        $this->roleService->updateAccountRoles($roles, $account, $operator);
+    }
+
     public function updatedDeviceToken($params, $account): void
     {
         // Update cache
         $this->cacheService->addItem($account['id'], 'device_tokens', $params['device_token']);
 
         // Save log
-        $this->historyService->logger('updateupdatedDeviceToken', ['params' => $params, 'account' => $account]);
+        $this->historyService->logger('updatedDeviceToken', ['params' => $params, 'account' => $account]);
     }
 
     public function getProfile($params): array
@@ -1403,8 +1408,8 @@ class AccountService implements ServiceInterface
      */
     protected function generateHashPassword(mixed $password): string
     {
-        $hash = uniqid();
         switch ($this->hashPattern) {
+            default:
             case'bcrypt':
                 $bcrypt = new Bcrypt();
                 $hash   = $bcrypt->create($password);
@@ -1413,6 +1418,7 @@ class AccountService implements ServiceInterface
                 $hash = hash('sha512', $password);
                 break;
         }
+
         return $hash;
     }
 
@@ -1424,8 +1430,8 @@ class AccountService implements ServiceInterface
      */
     protected function passwordEqualityCheck(mixed $credential, mixed $hash): bool
     {
-        $result = false;
         switch ($this->hashPattern) {
+            default:
             case'bcrypt':
                 $bcrypt = new Bcrypt();
                 $result = $bcrypt->verify($credential, $hash);
@@ -1436,7 +1442,6 @@ class AccountService implements ServiceInterface
         }
         return $result;
     }
-
 
     public function prepareMfa($account): array
     {

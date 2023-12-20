@@ -58,6 +58,16 @@ return [
         [
             'module'      => 'user',
             'section'     => 'admin',
+            'package'     => 'profile',
+            'handler'     => 'view',
+            'permissions' => 'user-profile-export',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'admin',
             'package'     => 'role',
             'handler'     => 'list',
             'permissions' => 'user-role-list',

@@ -28,6 +28,7 @@ return [
             Service\PermissionService::class                        => Factory\Service\PermissionServiceFactory::class,
             Service\UtilityService::class                           => Factory\Service\UtilityServiceFactory::class,
             Service\HistoryService::class                           => Factory\Service\HistoryServiceFactory::class,
+            Service\ExportService::class                            => Factory\Service\ExportServiceFactory::class,
             Service\InstallerService::class                         => Factory\Service\InstallerServiceFactory::class,
             Middleware\AuthenticationMiddleware::class              => Factory\Middleware\AuthenticationMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class               => Factory\Middleware\AuthorizationMiddlewareFactory::class,
@@ -45,6 +46,7 @@ return [
             Handler\Admin\Profile\ListHandler::class                => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
             Handler\Admin\Profile\PasswordHandler::class            => Factory\Handler\Admin\Profile\PasswordHandlerFactory::class,
             Handler\Admin\Profile\ViewHandler::class                => Factory\Handler\Admin\Profile\ViewHandlerFactory::class,
+            Handler\Admin\Profile\ExportHandler::class              => Factory\Handler\Admin\Profile\ExportHandlerFactory::class,
             Handler\Admin\Role\AddHandler::class                    => Factory\Handler\Admin\Role\AddHandlerFactory::class,
             Handler\Admin\Role\EditHandler::class                   => Factory\Handler\Admin\Role\EditHandlerFactory::class,
             Handler\Admin\Role\ListHandler::class                   => Factory\Handler\Admin\Role\ListHandlerFactory::class,
@@ -59,17 +61,19 @@ return [
             Handler\Api\Password\AddHandler::class                  => Factory\Handler\Api\Password\AddHandlerFactory::class,
             Handler\Api\Password\UpdateHandler::class               => Factory\Handler\Api\Password\UpdateHandlerFactory::class,
             Handler\Api\Authentication\LoginHandler::class          => Factory\Handler\Api\Authentication\LoginHandlerFactory::class,
-            Handler\Api\Authentication\LogoutHandler::class         => Factory\Handler\Api\Authentication\LogoutHandlerFactory::class,
-            Handler\Api\Authentication\RegisterHandler::class       => Factory\Handler\Api\Authentication\RegisterHandlerFactory::class,
-            Handler\Api\Authentication\RefreshHandler::class        => Factory\Handler\Api\Authentication\RefreshHandlerFactory::class,
-            Handler\Api\Authentication\Mobile\RequestHandler::class => Factory\Handler\Api\Authentication\Mobile\RequestHandlerFactory::class,
-            Handler\Api\Authentication\Mobile\VerifyHandler::class  => Factory\Handler\Api\Authentication\Mobile\VerifyHandlerFactory::class,
-            Handler\Api\Authentication\Email\RequestHandler::class  => Factory\Handler\Api\Authentication\Email\RequestHandlerFactory::class,
-            Handler\Api\Authentication\Email\VerifyHandler::class   => Factory\Handler\Api\Authentication\Email\VerifyHandlerFactory::class,
-            Handler\Api\Authentication\Mfa\RequestHandler::class    => Factory\Handler\Api\Authentication\Mfa\RequestHandlerFactory::class,
-            Handler\Api\Authentication\Mfa\VerifyHandler::class     => Factory\Handler\Api\Authentication\Mfa\VerifyHandlerFactory::class,
-            Handler\ErrorHandler::class                             => Factory\Handler\ErrorHandlerFactory::class,
-            Handler\InstallerHandler::class                         => Factory\Handler\InstallerHandlerFactory::class,
+            Handler\Api\Authentication\LogoutHandler::class          => Factory\Handler\Api\Authentication\LogoutHandlerFactory::class,
+            Handler\Api\Authentication\RegisterHandler::class        => Factory\Handler\Api\Authentication\RegisterHandlerFactory::class,
+            Handler\Api\Authentication\RefreshHandler::class         => Factory\Handler\Api\Authentication\RefreshHandlerFactory::class,
+            Handler\Api\Authentication\Mobile\RequestHandler::class  => Factory\Handler\Api\Authentication\Mobile\RequestHandlerFactory::class,
+            Handler\Api\Authentication\Mobile\VerifyHandler::class   => Factory\Handler\Api\Authentication\Mobile\VerifyHandlerFactory::class,
+            Handler\Api\Authentication\Email\RequestHandler::class   => Factory\Handler\Api\Authentication\Email\RequestHandlerFactory::class,
+            Handler\Api\Authentication\Email\VerifyHandler::class    => Factory\Handler\Api\Authentication\Email\VerifyHandlerFactory::class,
+            Handler\Api\Authentication\Mfa\RequestHandler::class     => Factory\Handler\Api\Authentication\Mfa\RequestHandlerFactory::class,
+            Handler\Api\Authentication\Mfa\VerifyHandler::class      => Factory\Handler\Api\Authentication\Mfa\VerifyHandlerFactory::class,
+            Handler\Api\Authentication\Oauth\GoogleHandler::class    => Factory\Handler\Api\Authentication\Oauth\GoogleHandlerFactory::class,
+            Handler\Api\Authentication\Oauth\MicrosoftHandler::class => Factory\Handler\Api\Authentication\Oauth\MicrosoftHandlerFactory::class,
+            Handler\ErrorHandler::class                              => Factory\Handler\ErrorHandlerFactory::class,
+            Handler\InstallerHandler::class                          => Factory\Handler\InstallerHandlerFactory::class,
         ],
     ],
 
@@ -300,26 +304,6 @@ return [
                                     ],
                                 ],
                             ],
-                            /* 'refresh'  => [
-                                'type'    => Literal::class,
-                                'options' => [
-                                    'route'    => '/refresh',
-                                    'defaults' => [
-                                        'module'      => 'user',
-                                        'section'     => 'api',
-                                        'package'     => 'authentication',
-                                        'handler'     => 'refresh',
-                                        'permissions' => 'user-refresh',
-                                        'controller'  => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
-                                            Middleware\SecurityMiddleware::class,
-                                            Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationMiddleware::class,
-                                            Handler\Api\Authentication\RefreshHandler::class
-                                        ),
-                                    ],
-                                ],
-                            ], */
                             'email'    => [
                                 'type'         => Literal::class,
                                 'options'      => [
@@ -418,7 +402,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'mfa'    => [
+                            'mfa'      => [
                                 'type'         => Literal::class,
                                 'options'      => [
                                     'route'    => '/mfa',
@@ -430,12 +414,12 @@ return [
                                         'options' => [
                                             'route'    => '/request',
                                             'defaults' => [
-                                                'module'      => 'user',
-                                                'section'     => 'api',
-                                                'package'     => 'authentication',
-                                                'handler'     => 'request',
-                                                'controller'  => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'request',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
                                                     Handler\Api\Authentication\Mfa\RequestHandler::class
@@ -448,12 +432,12 @@ return [
                                         'options' => [
                                             'route'    => '/verify',
                                             'defaults' => [
-                                                'module'      => 'user',
-                                                'section'     => 'api',
-                                                'package'     => 'authentication',
-                                                'handler'     => 'verify',
-                                                'controller'  => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'verify',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
                                                     Handler\Api\Authentication\Mfa\VerifyHandler::class
@@ -463,6 +447,69 @@ return [
                                     ],
                                 ],
                             ],
+                            'oauth'    => [
+                                'type'         => Literal::class,
+                                'options'      => [
+                                    'route'    => '/oauth',
+                                    'defaults' => [],
+                                ],
+                                'child_routes' => [
+                                    'google' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/google',
+                                            'defaults' => [
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'google',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Handler\Api\Authentication\Oauth\GoogleHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'microsoft'  => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/microsoft',
+                                            'defaults' => [
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'microsoft',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Handler\Api\Authentication\Oauth\MicrosoftHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            /* 'refresh'  => [
+    'type'    => Literal::class,
+    'options' => [
+        'route'    => '/refresh',
+        'defaults' => [
+            'module'      => 'user',
+            'section'     => 'api',
+            'package'     => 'authentication',
+            'handler'     => 'refresh',
+            'permissions' => 'user-refresh',
+            'controller'  => PipeSpec::class,
+            'middleware'  => new PipeSpec(
+                Middleware\SecurityMiddleware::class,
+                Middleware\AuthenticationMiddleware::class,
+                Middleware\AuthorizationMiddleware::class,
+                Handler\Api\Authentication\RefreshHandler::class
+            ),
+        ],
+    ],
+], */
                         ],
                     ],
                 ],
@@ -628,6 +675,26 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Handler\Admin\Profile\ViewHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'export'   => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/export',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'export',
+                                        'permissions' => 'user-profile-export',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Profile\ExportHandler::class
                                         ),
                                     ],
                                 ],
