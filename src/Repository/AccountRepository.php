@@ -478,6 +478,43 @@ class AccountRepository implements AccountRepositoryInterface
 
         return $resultSet;
     }
+    public function getAccountProfile( $params = []): object|array
+    {
+        // Set
+        $where = [];
+
+        if (isset($params['id']) && !empty($params['id'])) {
+            $where['id'] = $params['id'];
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $where['identity'] = $params['identity'];
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $where['email'] = $params['email'];
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $where['mobile'] = $params['mobile'];
+        }
+
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableProfile)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            return [];
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, $this->accountProfilePrototype);
+        $resultSet->initialize($result);
+        $profile = $resultSet->current();
+
+        if (!$profile) {
+            return [];
+        }
+
+        return $profile;
+    }
 
     public function updateProfile(int $userId, array $params = []): void
     {
