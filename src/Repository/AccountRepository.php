@@ -442,6 +442,9 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobiles']) && !empty($params['mobiles'])) {
             $where['account.mobile'] = $params['mobiles'];
         }
+        if (isset($params['id']) && !empty($params['id'])) {
+            $where['account.id'] = $params['id'];
+        }
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['account.status'] = $params['status'];
         }

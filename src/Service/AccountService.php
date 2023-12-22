@@ -868,8 +868,11 @@ class AccountService implements ServiceInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $listParams['mobile'] = $params['mobile'];
         }
-        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
-            $listParams['mobiles'] = $params['mobiles'];
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if (isset($params['id']) && !empty($params['id'])) {
+            $listParams['id'] = $params['id'];
         }
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $listParams['status'] = $params['status'];
