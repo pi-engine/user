@@ -6,6 +6,16 @@ return [
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
+            'handler'     => 'export',
+            'permissions' => 'admin-user-profile-export',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'profile',
             'handler'     => 'list',
             'permissions' => 'user-profile-list',
             'role'        => [
