@@ -147,6 +147,7 @@ class AccountService implements ServiceInterface
                     'id',
                     'name',
                     'email',
+                    'mobile',
                     'identity',
                     'status',
                     'multi_factor_status',
