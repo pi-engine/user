@@ -18,6 +18,7 @@ use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
 use User\Model\Account\Account;
+use User\Model\Account\AccountProfile;
 use User\Model\Account\Credential;
 use User\Model\Account\Profile;
 use User\Model\Account\MultiFactor;
@@ -64,6 +65,11 @@ class AccountRepository implements AccountRepositoryInterface
     private Account $accountPrototype;
 
     /**
+     * @var AccountProfile
+     */
+    private AccountProfile $accountProfilePrototype;
+
+    /**
      * @var Profile
      */
     private Profile $profilePrototype;
@@ -86,18 +92,20 @@ class AccountRepository implements AccountRepositoryInterface
         AdapterInterface $db,
         HydratorInterface $hydrator,
         Account $accountPrototype,
+        AccountProfile $accountProfilePrototype,
         Profile $profilePrototype,
         AccountRole $accountRolePrototype,
         Credential $credentialPrototype,
         MultiFactor $multiFactorPrototype
     ) {
-        $this->db                   = $db;
-        $this->hydrator             = $hydrator;
-        $this->accountPrototype     = $accountPrototype;
-        $this->profilePrototype     = $profilePrototype;
-        $this->accountRolePrototype = $accountRolePrototype;
-        $this->credentialPrototype  = $credentialPrototype;
-        $this->multiFactorPrototype   = $multiFactorPrototype;
+        $this->db                           = $db;
+        $this->hydrator                     = $hydrator;
+        $this->accountPrototype             = $accountPrototype;
+        $this->accountProfilePrototype      = $accountProfilePrototype;
+        $this->profilePrototype             = $profilePrototype;
+        $this->accountRolePrototype         = $accountRolePrototype;
+        $this->credentialPrototype          = $credentialPrototype;
+        $this->multiFactorPrototype         = $multiFactorPrototype;
     }
 
     public function getAccountList($params = []): HydratingResultSet
@@ -185,6 +193,9 @@ class AccountRepository implements AccountRepositoryInterface
         }
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
+        }
+        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
+            $where['mobile'] = $params['mobiles'];
         }
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['status'] = $params['status'];
@@ -406,6 +417,63 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         return $profile;
+    }
+
+
+    public function getAccountProfileList($params = []): HydratingResultSet
+    {
+
+        $where['time_deleted'] = 0;
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where = ["account.name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
+        }
+        if (isset($params['name']) && !empty($params['name'])) {
+            $where['account.name like ?'] = '%' . $params['name'] . '%';
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $where['account.identity like ?'] = '%' . $params['identity'] . '%';
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $where['account.email like ?'] = '%' . $params['email'] . '%';
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $where['account.mobile like ?'] = '%' . $params['mobile'] . '%';
+        }
+        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
+            $where['account.mobile'] = $params['mobiles'];
+        }
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
+            $where['account.status'] = $params['status'];
+        }
+        if (isset($params['id'])) {
+            $where['account.id'] = $params['id'];
+        }
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
+            $where['time_created >= ?'] = $params['data_from'];
+        }
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
+            $where['account.time_created <= ?'] = $params['data_to'];
+        }
+        if (isset($params['not_allowed_id']) && !empty($params['not_allowed_id'])) {
+            $where[] = new NotIn('account.id', $params['not_allowed_id']);
+        }
+
+        $sql    = new Sql($this->db);
+        $select = $sql->select();
+        $select->from(['account' => $this->tableAccount])
+            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name','avatar','birthdate','gender',])
+            ->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);;
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+
+        if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
+            return [];
+        }
+
+        $resultSet = new HydratingResultSet($this->hydrator, $this->accountProfilePrototype);
+        $resultSet->initialize($result);
+
+        return $resultSet;
     }
 
     public function updateProfile(int $userId, array $params = []): void

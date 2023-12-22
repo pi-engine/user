@@ -33,4 +33,5 @@ interface AccountRepositoryInterface
     public function getIdFromFilter(array $filter = []): HydratingResultSet|array;
 
     public function getMultiFactor(int $userId): array|null;
+    public function getAccountProfileList($params = []): HydratingResultSet;
 }

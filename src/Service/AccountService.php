@@ -734,7 +734,6 @@ class AccountService implements ServiceInterface
             ],
         ];
     }
-
     public function canonizeAccountId(object|array $roleAccountList): int|null
     {
         if (empty($roleAccountList)) {
@@ -836,6 +835,98 @@ class AccountService implements ServiceInterface
         $profile = $this->accountRepository->getProfile($params);
         return $this->canonizeProfile($profile);
     }
+
+
+    public function getAccountProfileList($params): array
+    {
+        $limit = $params['limit'] ?? 10;
+        $page  = $params['page'] ?? 1;
+        /// changed by kerloper
+        $key    = $params['key'] ?? '';
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        /// changed by kerloper
+        $listParams = [
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
+            'offset' => $offset,
+            'key'    => $key,
+        ];
+
+        if (isset($params['name']) && !empty($params['name'])) {
+            $listParams['name'] = $params['name'];
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $listParams['identity'] = $params['identity'];
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $listParams['email'] = $params['email'];
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
+            $listParams['mobiles'] = $params['mobiles'];
+        }
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['status'])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
+            $listParams['data_from'] = strtotime(
+                ($params['data_from']) != null
+                    ? sprintf('%s 00:00:00', $params['data_from'])
+                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
+            );
+        }
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
+            $listParams['data_to'] = strtotime(
+                ($params['data_to']) != null
+                    ? sprintf('%s 00:00:00', $params['data_to'])
+                    : sprintf('%s 23:59:59', date('Y-m-d'))
+            );
+        }
+
+        $filters = $this->prepareFilter($params);
+        if (!empty($filters)) {
+            foreach ($filters as $filter) {
+                $itemIdList = [];
+                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $itemIdList[] = $this->canonizeAccountId($row);
+                }
+                $listParams['id'] = $itemIdList;
+            }
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->accountRepository->getAccountProfileList($listParams);
+        foreach ($rowSet as $row) {
+            /// changed by kerloper
+            $list[] = $this->canonizeAccountProfile($row);
+        }
+
+        // Get count
+        $count = $this->accountRepository->getAccountCount($listParams);
+
+
+
+        return [
+            'list'      => $list,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
 
     ///TODO: check && should remove this method and only use generateHashPassword method
     public function generatePassword($credential): string
@@ -1061,6 +1152,51 @@ class AccountService implements ServiceInterface
                 'mobile'       => $account['mobile'] ?? '',
                 'status'       => (int)$account['status'],
                 'time_created' => $account['time_created'] ?? '',
+            ];
+        }
+
+        $account['time_created_view'] = ' - ';
+        if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
+            $account['time_created_view'] = $this->utilityService->date($account['time_created']);
+        }
+
+        return $account;
+    }
+    public function canonizeAccountProfile($account): array
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'           => (int)$account->getId(),
+                'name'         => $account->getName(),
+                'identity'     => $account->getIdentity(),
+                'email'        => $account->getEmail(),
+                'mobile'       => $account->getMobile(),
+                'status'       => (int)$account->getStatus(),
+                'time_created' => $account->getTimeCreated(),
+                'first_name'      => $account->getFirstName(),
+                'last_name'       => $account->getLastName(),
+                'birthdate'       => $account->getBirthdate(),
+                'gender'          => $account->getGender(),
+                'avatar'          => $account->getAvatar(),
+            ];
+        } else {
+            $account = [
+                'id'           => (int)$account['id'],
+                'name'         => $account['name'] ?? '',
+                'email'        => $account['email'] ?? '',
+                'identity'     => $account['identity'] ?? '',
+                'mobile'       => $account['mobile'] ?? '',
+                'status'       => (int)$account['status'],
+                'time_created' => $account['time_created'] ?? '',
+                'first_name'    => $account['first_name'] ?? '',
+                'last_name'     => $account['last_name'] ?? '',
+                'birthdate'     => $account['birthdate'] ?? '',
+                'gender'        => $account['gender'] ?? '',
+                'avatar'        => $account['avatar'] ?? '',
             ];
         }
 

@@ -9,6 +9,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Model\Account\Account;
+use User\Model\Account\AccountProfile;
 use User\Model\Account\MultiFactor;
 use User\Model\Role\Account as AccountRole;
 use User\Model\Account\Credential;
@@ -32,6 +33,7 @@ class AccountRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new Account('', '', '', '', 0, 0, 0),
+            new AccountProfile(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
             new Profile(0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''),
             new AccountRole(0,  0,  0,  0 ),
             new Credential('', 0),
