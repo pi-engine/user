@@ -44,10 +44,16 @@ return [
         'multi_factor' => [
             'status' => 0,
         ],
-        'oauth'        => [
+        'oauth'            => [
             'microsoft'               => 1,
+            'microsoft_callback'      => 'XXX',
             'microsoft_client_id'     => 'XXX',
             'microsoft_client_secret' => 'XXX',
+            'microsoft_tenant_id'     => 'XXX',
+            'google'                  => 1,
+            'google_callback'         => 'XXX',
+            'google_client_id'        => 'XXX',
+            'google_client_secret'    => 'XXX',
         ],
         'login_permission' => 0,
     ],
