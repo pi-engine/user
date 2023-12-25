@@ -568,9 +568,10 @@ class AccountRepository implements AccountRepositoryInterface
         return new AuthenticationService(null, $authAdapter);
     }
 
-    public function authenticationOauth($email): AuthenticationResult
+    public function authenticationOauth($params): AuthenticationResult
     {
-        $account = $this->getAccount(['email' => $email, 'status' => 1]);
+        // Get account
+        $account = $this->getAccount(['email' => $params['email']/*, 'status' => 1*/]);
         if ($account) {
             return new AuthenticationResult(AuthenticationResult::SUCCESS, $account);
         }

@@ -169,7 +169,7 @@ class AccountService implements ServiceInterface
         $this->identityColumn = 'email';
 
         // Do log in
-        $authAdapter = $this->accountRepository->authenticationOauth($params['email']);
+        $authAdapter = $this->accountRepository->authenticationOauth($params);
 
         // Check login
         if ($authAdapter->isValid()) {
@@ -182,7 +182,12 @@ class AccountService implements ServiceInterface
             // Complete login
             $result = $this->postLoginSuccess($account, $params);
         } else {
-            $result = $this->postLoginError($params);
+            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
+                $this->addAccount($params);
+                $result = $this->loginOauth($params);
+            } else {
+                $result = $this->postLoginError($params);
+            }
         }
 
         return $result;
@@ -316,7 +321,7 @@ class AccountService implements ServiceInterface
     public function postLoginError($params): array
     {
         // Save log
-        $account = $this->getAccount([$this->identityColumn => $params['identity']]);
+        $account = $this->getAccount([$this->identityColumn => $params[$this->identityColumn]]);
         $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
 
         return [

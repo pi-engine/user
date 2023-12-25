@@ -45,14 +45,16 @@ return [
             'status' => 0,
         ],
         'oauth'            => [
-            'microsoft' => [
+            'oauth_login'    => 1,
+            'oauth_register' => 1,
+            'microsoft'      => [
                 'status'                  => 1,
                 'microsoft_callback'      => 'XXX',
                 'microsoft_client_id'     => 'XXX',
                 'microsoft_client_secret' => 'XXX',
                 'microsoft_tenant_id'     => 'XXX',
             ],
-            'google'    => [
+            'google'         => [
                 'status'               => 1,
                 'google_callback'      => 'XXX',
                 'google_client_id'     => 'XXX',
@@ -60,6 +62,12 @@ return [
             ],
         ],
         'login_permission' => 0,
+    ],
+    'captcha'          => [
+        'recaptcha' => [
+            'public' => 'XXX',
+            'secret' => 'XXX',
+        ],
     ],
     'export'       => [
         'format'      => 'csv',
