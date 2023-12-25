@@ -6,7 +6,6 @@ use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
-use Psr\SimpleCache\InvalidArgumentException;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
@@ -45,6 +44,12 @@ class AccountService implements ServiceInterface
 
     /* @var array */
     protected array $config;
+
+    /* @var string */
+    protected string $identityColumn = 'identity';
+
+    /* @var string */
+    protected string $credentialColumn = 'credential';
 
     protected array $accountFields
         = [
@@ -112,23 +117,21 @@ class AccountService implements ServiceInterface
         $this->notificationService = $notificationService;
         $this->historyService      = $historyService;
         $this->config              = $config;
-        $this->hashPattern         = 'bcrypt';
-        if (isset($config['hash_pattern']) && !empty($config['hash_pattern'])) {
-            $this->hashPattern = $config['hash_pattern'];
-        }
+        $this->hashPattern         = $config['hash_pattern'] ?? 'bcrypt';
+
+        //if (isset($config['hash_pattern']) && !empty($config['hash_pattern'])) {
+        //    $this->hashPattern = $config['hash_pattern'];
+        //}
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function login($params): array
     {
         // Set login column
-        $identityColumn   = $params['identityColumn'] ?? 'identity';
-        $credentialColumn = $params['credentialColumn'] ?? 'credential';
+        $this->identityColumn   = $params['identityColumn'] ?? $this->identityColumn;
+        $this->credentialColumn = $params['credentialColumn'] ?? $this->credentialColumn;
 
         // Do log in
-        $authentication = $this->accountRepository->authentication($identityColumn, $credentialColumn, $this->hashPattern);
+        $authentication = $this->accountRepository->authentication($this->identityColumn, $this->credentialColumn, $this->hashPattern);
         $adapter        = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
 
@@ -148,113 +151,38 @@ class AccountService implements ServiceInterface
                 ]
             );
 
-            // Set multi factor
-            $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
-            $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
-            $multiFactorVerify = 0;
+            // Canonize account
+            $account = $this->canonizeAccount($account);
+
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
+        } else {
+            $result = $this->postLoginError($params);
+        }
+
+        return $result;
+    }
+
+    public function loginOauth($params): array
+    {
+        // Set login column
+        $this->identityColumn = 'email';
+
+        // Do log in
+        $authAdapter = $this->accountRepository->authenticationOauth($params['email']);
+
+        // Check login
+        if ($authAdapter->isValid()) {
+            // Get user account
+            $account = $authAdapter->getIdentity();
 
             // Canonize account
             $account = $this->canonizeAccount($account);
 
-            // Get profile
-            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
-
-            // Sync profile and account
-            $account = array_merge($account, $profile);
-
-            // Get roles
-            $account['roles'] = $this->roleService->getRoleAccount((int)$account['id']);
-
-            // Generate access token
-            $accessToken = $this->tokenService->generate(
-                [
-                    'account' => $account,
-                    'type'    => 'access',
-                ]
-            );
-
-            // Generate refresh token
-            $refreshToken = $this->tokenService->generate(
-                [
-                    'account' => $account,
-                    'type'    => 'refresh',
-                ]
-            );
-
-            // Set multi factor
-            $multiFactor = [
-                $accessToken['key'] => [
-                    'key'                 => $accessToken['key'],
-                    'multi_factor_global' => $multiFactorGlobal,
-                    'multi_factor_status' => $multiFactorStatus,
-                    'multi_factor_verify' => $multiFactorVerify,
-                ],
-            ];
-
-            // Set extra info
-            $account['last_login']          = time();
-            $account['has_password']        = $this->hasPassword($account['id']);
-            $account['access_token']        = $accessToken['token'];
-            $account['refresh_token']       = $refreshToken['token'];
-            $account['multi_factor_global'] = $multiFactorGlobal;
-            $account['multi_factor_status'] = $multiFactorStatus;
-            $account['multi_factor_verify'] = $multiFactorVerify;
-
-            // Set source roles params
-            if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
-                $this->roleService->addRoleAccount($account, $params['source']);
-
-                // Set new role
-                $account['roles'][] = $params['source'];
-                $account['roles']   = array_values($account['roles']);
-            }
-
-            // Get from cache if exist
-            $user = $this->cacheService->getUser($account['id']);
-
-            // Set/Update user data to cache
-            $this->cacheService->setUser($account['id'], [
-                'account'      => [
-                    'id'         => (int)$account['id'],
-                    'name'       => $account['name'],
-                    'email'      => $account['email'],
-                    'identity'   => $account['identity'],
-                    'mobile'     => $account['mobile'],
-                    'last_login' => $account['last_login'],
-                ],
-                'roles'        => $account['roles'],
-                'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
-                    ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
-                    : [$accessToken['key']],
-                'refresh_keys' => (isset($user['refresh_keys']) && !empty($user['refresh_keys']))
-                    ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
-                    : [$refreshToken['key']],
-                'multi_factor' => (isset($user['multi_factor']) && !empty($user['multi_factor']))
-                    ? array_merge($user['multi_factor'], $multiFactor)
-                    : $multiFactor,
-            ]);
-
-            // Save log
-            $this->historyService->logger('login', ['params' => $params, 'account' => $account]);
-
-            $result = [
-                'result' => true,
-                'data'   => $account,
-                'error'  => [],
-            ];
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
         } else {
-            // Save log
-            $account = $this->getAccount([$identityColumn => $params['identity']]);
-            $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
-
-            $result = [
-                'result' => false,
-                'data'   => [],
-                'error'  => [
-                    'message' => 'Invalid Username or Password',
-                ],
-                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
-            ];
+            $result = $this->postLoginError($params);
         }
 
         return $result;
@@ -283,7 +211,125 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function prepareMobileLogin($params): array
+    public function postLoginSuccess($account, $params): array
+    {
+        // Set multi factor
+        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
+        $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
+        $multiFactorVerify = 0;
+        unset($account['multi_factor_status']);
+
+        // Get profile
+        $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+
+        // Sync profile and account
+        $account = array_merge($account, $profile);
+
+        // Get roles
+        $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
+        $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
+
+        // Generate access token
+        $accessToken = $this->tokenService->generate(
+            [
+                'account' => $account,
+                'type'    => 'access',
+            ]
+        );
+
+        // Generate refresh token
+        $refreshToken = $this->tokenService->generate(
+            [
+                'account' => $account,
+                'type'    => 'refresh',
+            ]
+        );
+
+        // Set multi factor
+        $multiFactor = [
+            $accessToken['key'] => [
+                'key'                 => $accessToken['key'],
+                'multi_factor_global' => $multiFactorGlobal,
+                'multi_factor_status' => $multiFactorStatus,
+                'multi_factor_verify' => $multiFactorVerify,
+            ],
+        ];
+
+        // Set extra info
+        $account['last_login']          = time();
+        $account['has_password']        = $this->hasPassword($account['id']);
+        $account['multi_factor_global'] = $multiFactorGlobal;
+        $account['multi_factor_status'] = $multiFactorStatus;
+        $account['multi_factor_verify'] = $multiFactorVerify;
+        $account['access_token']        = $accessToken['token'];
+        $account['refresh_token']       = $refreshToken['token'];
+
+        // Set permission
+        if (isset($this->config['login_permission'])) {
+            $account['permission'] = [];
+        }
+
+        // Set source roles params
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
+            $this->roleService->addRoleAccount($account, $params['source']);
+
+            // Set new role
+            $account['roles'][] = $params['source'];
+            $account['roles']   = array_values($account['roles']);
+        }
+
+        // Get from cache if exist
+        $user = $this->cacheService->getUser($account['id']);
+
+        // Set/Update user data to cache
+        $this->cacheService->setUser($account['id'], [
+            'account'      => [
+                'id'         => (int)$account['id'],
+                'name'       => $account['name'],
+                'email'      => $account['email'],
+                'identity'   => $account['identity'],
+                'mobile'     => $account['mobile'],
+                'last_login' => $account['last_login'],
+            ],
+            'roles'        => $account['roles'],
+            'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
+                ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
+                : [$accessToken['key']],
+            'refresh_keys' => (isset($user['refresh_keys']) && !empty($user['refresh_keys']))
+                ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
+                : [$refreshToken['key']],
+            'multi_factor' => (isset($user['multi_factor']) && !empty($user['multi_factor']))
+                ? array_merge($user['multi_factor'], $multiFactor)
+                : $multiFactor,
+        ]);
+
+        // Save log
+        $this->historyService->logger('login', ['params' => $params, 'account' => $account]);
+
+        return [
+            'result' => true,
+            'data'   => $account,
+            'error'  => [],
+        ];
+    }
+
+    public function postLoginError($params): array
+    {
+        // Save log
+        $account = $this->getAccount([$this->identityColumn => $params['identity']]);
+        $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
+
+        return [
+            'result' => false,
+            'data'   => [],
+            'error'  => [
+                'message' => 'Invalid Username or Password',
+            ],
+            'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
+        ];
+    }
+
+    public function perMobileLogin($params): array
     {
         // Set new password as OTP
         $otpCode   = Rand::getInteger(100000, 999999);
@@ -309,7 +355,7 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-            $otp = $this->generateHashPassword($otpCode);
+            $otp = $this->generatePassword($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -370,7 +416,7 @@ class AccountService implements ServiceInterface
         ];
     }
 
-    public function prepareMailLogin($params): array
+    public function preMailLogin($params): array
     {
         // Set new password as OTP
         $otpCode   = Rand::getInteger(100000, 999999);
@@ -396,7 +442,7 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-            $otp = $this->generateHashPassword($otpCode);
+            $otp = $this->generatePassword($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -463,6 +509,7 @@ class AccountService implements ServiceInterface
         $otp        = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
+            // Todo: Check password validator and remove it
             $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
             if (!$isPasswordStrong) {
                 // Save log
@@ -729,6 +776,29 @@ class AccountService implements ServiceInterface
         ];
     }
 
+    public function viewAccount($account): array
+    {
+        // Check user has password or not
+        $account['has_password'] = $this->hasPassword((int)$account['id']);
+
+        // Set profile params
+        $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+
+        // Sync profile and account
+        $account = array_merge($account, $profile);
+
+        // Get roles
+        $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
+        $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
+
+        // Set permission
+        if (isset($this->config['login_permission'])) {
+            $account['permission'] = [];
+        }
+
+        return $account;
+    }
+
     public function canonizeAccountId(object|array $roleAccountList): int|null
     {
         if (empty($roleAccountList)) {
@@ -831,7 +901,6 @@ class AccountService implements ServiceInterface
         return $this->canonizeProfile($profile);
     }
 
-
     public function getAccountProfileList($params): array
     {
         $limit = $params['limit'] ?? 10;
@@ -929,16 +998,6 @@ class AccountService implements ServiceInterface
         return $this->canonizeAccountProfile($this->accountRepository->getAccountProfile($params));
     }
 
-
-    ///TODO: check && should remove this method and only use generateHashPassword method
-    public function generatePassword($credential): string
-    {
-        //$bcrypt = new Bcrypt();
-        //return $bcrypt->create($credential);
-        ///TODO:check
-        return $this->generateHashPassword($credential);
-    }
-
     public function addPassword($params, $account = []): array
     {
         $userId     = $account['id'] ?? $params['user_id'];
@@ -961,6 +1020,7 @@ class AccountService implements ServiceInterface
 
     public function updatePassword($params, $account, $operator = []): array
     {
+        // Todo: Check password validator and remove it
         $isPasswordStrong = $this->utilityService->isPasswordStrong($params['new_credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
@@ -978,7 +1038,7 @@ class AccountService implements ServiceInterface
 
         $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
         if ($this->passwordEqualityCheck($params['current_credential'], $hash)) {
-            $credential = $this->generateHashPassword($params['new_credential']);
+            $credential = $this->generatePassword($params['new_credential']);
             $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
             // Save log
@@ -1010,6 +1070,7 @@ class AccountService implements ServiceInterface
 
     public function updatePasswordByAdmin($params, $operator = []): array
     {
+        // Todo: Check password validator and remove it
         $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
@@ -1137,23 +1198,25 @@ class AccountService implements ServiceInterface
 
         if (is_object($account)) {
             $account = [
-                'id'           => (int)$account->getId(),
-                'name'         => $account->getName(),
-                'identity'     => $account->getIdentity(),
-                'email'        => $account->getEmail(),
-                'mobile'       => $account->getMobile(),
-                'status'       => (int)$account->getStatus(),
-                'time_created' => $account->getTimeCreated(),
+                'id'                  => (int)$account->getId(),
+                'name'                => $account->getName(),
+                'identity'            => $account->getIdentity(),
+                'email'               => $account->getEmail(),
+                'mobile'              => $account->getMobile(),
+                'status'              => (int)$account->getStatus(),
+                'time_created'        => $account->getTimeCreated(),
+                'multi_factor_status' => (int)$account->getMultiFactorStatus(),
             ];
         } else {
             $account = [
-                'id'           => (int)$account['id'],
-                'name'         => $account['name'] ?? '',
-                'email'        => $account['email'] ?? '',
-                'identity'     => $account['identity'] ?? '',
-                'mobile'       => $account['mobile'] ?? '',
-                'status'       => (int)$account['status'],
-                'time_created' => $account['time_created'] ?? '',
+                'id'                  => (int)$account['id'],
+                'name'                => $account['name'] ?? '',
+                'email'               => $account['email'] ?? '',
+                'identity'            => $account['identity'] ?? '',
+                'mobile'              => $account['mobile'] ?? '',
+                'status'              => (int)$account['status'],
+                'time_created'        => $account['time_created'] ?? '',
+                'multi_factor_status' => (int)$account['multi_factor_status'],
             ];
         }
 
@@ -1504,6 +1567,7 @@ class AccountService implements ServiceInterface
     ///TODO: set control for check role of target user in function (must check target user has not admin role)
     public function updatePasswordByOperator($params, $operator = []): array
     {
+        // Todo: Check password validator and remove it
         $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
@@ -1516,9 +1580,9 @@ class AccountService implements ServiceInterface
                 'data'   => new stdClass(),
                 'error'  => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code'    => 400,
+                    'code'    => 403,
                 ],
-                'status' => 400,
+                'status' => 403,
             ];
         }
 
@@ -1546,7 +1610,7 @@ class AccountService implements ServiceInterface
      *
      * @return string
      */
-    protected function generateHashPassword(mixed $password): string
+    protected function generatePassword(mixed $password): string
     {
         switch ($this->hashPattern) {
             default:
@@ -1583,7 +1647,7 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
-    public function prepareMfa($account): array
+    public function requestMfa($account): array
     {
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;

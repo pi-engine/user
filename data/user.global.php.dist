@@ -1,0 +1,68 @@
+<?php
+
+return [
+    'db'           => [
+        'driver'         => 'Pdo',
+        'dsn'            => 'mysql:dbname=XXX;host=XXX;charset=utf8',
+        'username'       => 'XXX',
+        'password'       => 'XXX',
+        'driver_options' => [
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4 COLLATE utf8mb4_general_ci',
+            PDO::ATTR_PERSISTENT         => false,
+        ],
+        'options'        => [],
+    ],
+    'global'       => [
+        'sitename' => 'Lamines',
+    ],
+    'cache'        => [
+        'storage' => 'redis',
+        'options' => [
+            'namespace' => 'local_laminas',
+            'ttl'       => 1209600,
+            'server'    => [
+                '127.0.0.1',
+                6379,
+            ],
+        ],
+        'plugins' => [
+            [
+                'name' => 'serializer',
+            ],
+        ],
+    ],
+    'jwt'          => [
+        'secret'      => 'XXX',
+        'exp_access'  => 1209600, // 14 days, for development, for production set new value
+        'exp_refresh' => 7776000, // 90 days
+    ],
+    'account'      => [
+        'otp_email'    => [
+            'subject' => 'Login by one-time token',
+            'body'    => 'Your one-time token is <strong>%s</strong> and it is valid just for 2 minutes.',
+        ],
+        'multi_factor' => [
+            'status' => 0,
+        ],
+        'oauth'        => [
+            'microsoft'               => 1,
+            'microsoft_client_id'     => 'XXX',
+            'microsoft_client_secret' => 'XXX',
+        ],
+        'login_permission' => 0,
+    ],
+    'export'       => [
+        'format'      => 'csv',
+        'file_path' => 'PATH_TO/data/export',
+    ],
+    'utility'      => [
+        'local'         => 'en_US',
+        'currency'      => 'USD',
+        'timezone'      => 'Asia/Dubai',
+        'date_local'    => 'en_US',
+        'date_type'     => IntlDateFormatter::SHORT,
+        'time_type'     => IntlDateFormatter::NONE,
+        'date_calendar' => IntlDateFormatter::TRADITIONAL,
+        'date_pattern'  => 'dd/MM/yyyy',
+    ],
+];

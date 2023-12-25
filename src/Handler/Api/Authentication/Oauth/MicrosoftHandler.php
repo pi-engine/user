@@ -3,12 +3,14 @@
 namespace User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Hybridauth\Exception\UnexpectedApiResponseException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use User\Authentication\Oauth\Microsoft;
 use User\Service\AccountService;
 
 class MicrosoftHandler implements RequestHandlerInterface
@@ -22,16 +24,24 @@ class MicrosoftHandler implements RequestHandlerInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
+    /* @var array */
+    protected array $config;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        AccountService $accountService
+        AccountService $accountService,
+        $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
+        $this->config              = $config;
     }
 
+    /**
+     * @throws UnexpectedApiResponseException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // Retrieve the raw JSON data from the request body
@@ -52,12 +62,16 @@ class MicrosoftHandler implements RequestHandlerInterface
             return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
         }
 
-        // Set result
-        $result = [
-            'result' => true,
-            'data'   => $requestBody,
-            'error'  => [],
-        ];
+        // Set params
+        $params = ['token' => ['access_token' => $requestBody['accessToken']]];
+
+        // Check
+        $authService = new Microsoft($this->config);
+        $userData    = $authService->verifyToken($params);
+
+        // Do log in
+        //$result = $this->accountService->loginOauth($userData);
+        $result = $userData;
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

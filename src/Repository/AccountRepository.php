@@ -5,6 +5,7 @@ namespace User\Repository;
 use InvalidArgumentException;
 use Laminas\Authentication\Adapter\DbTable\CallbackCheckAdapter;
 use Laminas\Authentication\AuthenticationService;
+use Laminas\Authentication\Result as AuthenticationResult;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
@@ -17,11 +18,12 @@ use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
 use RuntimeException;
+use User\Authentication\Adapter\OauthAdapter;
 use User\Model\Account\Account;
 use User\Model\Account\AccountProfile;
 use User\Model\Account\Credential;
-use User\Model\Account\Profile;
 use User\Model\Account\MultiFactor;
+use User\Model\Account\Profile;
 use User\Model\Role\Account as AccountRole;
 
 use function sprintf;
@@ -98,14 +100,14 @@ class AccountRepository implements AccountRepositoryInterface
         Credential $credentialPrototype,
         MultiFactor $multiFactorPrototype
     ) {
-        $this->db                           = $db;
-        $this->hydrator                     = $hydrator;
-        $this->accountPrototype             = $accountPrototype;
-        $this->accountProfilePrototype      = $accountProfilePrototype;
-        $this->profilePrototype             = $profilePrototype;
-        $this->accountRolePrototype         = $accountRolePrototype;
-        $this->credentialPrototype          = $credentialPrototype;
-        $this->multiFactorPrototype         = $multiFactorPrototype;
+        $this->db                      = $db;
+        $this->hydrator                = $hydrator;
+        $this->accountPrototype        = $accountPrototype;
+        $this->accountProfilePrototype = $accountProfilePrototype;
+        $this->profilePrototype        = $profilePrototype;
+        $this->accountRolePrototype    = $accountRolePrototype;
+        $this->credentialPrototype     = $credentialPrototype;
+        $this->multiFactorPrototype    = $multiFactorPrototype;
     }
 
     public function getAccountList($params = []): HydratingResultSet
@@ -422,7 +424,6 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function getAccountProfileList($params = []): HydratingResultSet
     {
-
         $where['time_deleted'] = 0;
         if (isset($params['key']) && !empty($params['key'])) {
             $where = ["account.name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
@@ -464,10 +465,10 @@ class AccountRepository implements AccountRepositoryInterface
         $sql    = new Sql($this->db);
         $select = $sql->select();
         $select->from(['account' => $this->tableAccount])
-            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name','avatar','birthdate','gender',])
+            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name', 'avatar', 'birthdate', 'gender',])
             ->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);;
         $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
+        $result    = $statement->execute();
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             return [];
@@ -478,7 +479,8 @@ class AccountRepository implements AccountRepositoryInterface
 
         return $resultSet;
     }
-    public function getAccountProfile( $params = []): object|array
+
+    public function getAccountProfile($params = []): object|array
     {
         // Set
         $where = [];
@@ -496,10 +498,10 @@ class AccountRepository implements AccountRepositoryInterface
             $where['account.mobile'] = $params['mobile'];
         }
 
-        $sql       = new Sql($this->db);
+        $sql    = new Sql($this->db);
         $select = $sql->select();
         $select->from(['account' => $this->tableAccount])
-            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name','avatar','birthdate','gender',])
+            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name', 'avatar', 'birthdate', 'gender',])
             ->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
@@ -566,6 +568,16 @@ class AccountRepository implements AccountRepositoryInterface
         return new AuthenticationService(null, $authAdapter);
     }
 
+    public function authenticationOauth($email): AuthenticationResult
+    {
+        $account = $this->getAccount(['email' => $email, 'status' => 1]);
+        if ($account) {
+            return new AuthenticationResult(AuthenticationResult::SUCCESS, $account);
+        }
+
+        return new AuthenticationResult(AuthenticationResult::FAILURE, null, ['Invalid email']);
+    }
+
     public function getIdFromFilter(array $filter = []): HydratingResultSet|array
     {
         $where  = [];
@@ -621,7 +633,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         return [
-            'id' => $account->getId(),
+            'id'                  => $account->getId(),
             'multi_factor_status' => $account->getMultiFactorStatus(),
             'multi_factor_secret' => $account->getMultiFactorSecret(),
         ];

@@ -14,12 +14,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
 use User\Service\AccountService;
 use User\Service\CacheService;
+use User\Service\UtilityService;
 use User\Validator\EmailValidator;
 use User\Validator\IdentityValidator;
 use User\Validator\MobileValidator;
 use User\Validator\NameValidator;
 use User\Validator\OtpValidator;
 use User\Validator\PasswordValidator;
+
 use function sprintf;
 
 class ValidationMiddleware implements MiddlewareInterface
@@ -39,6 +41,9 @@ class ValidationMiddleware implements MiddlewareInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /* @var CacheService */
     protected CacheService $cacheService;
 
@@ -49,12 +54,14 @@ class ValidationMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
+        UtilityService $utilityService,
         CacheService $cacheService,
         ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
+        $this->utilityService  = $utilityService;
         $this->cacheService    = $cacheService;
         $this->errorHandler    = $errorHandler;
     }
@@ -115,7 +122,8 @@ class ValidationMiddleware implements MiddlewareInterface
 
             default:
                 $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-                $request = $request->withAttribute('error',
+                $request = $request->withAttribute(
+                    'error',
                     [
                         'message' => 'Validator not set !',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
@@ -128,7 +136,8 @@ class ValidationMiddleware implements MiddlewareInterface
         // Check if validator result is not true
         if (!$this->validationResult['status']) {
             $request = $request->withAttribute('status', $this->validationResult['code']);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => $this->validationResult['message'],
                     'code'    => $this->validationResult['code'],
@@ -197,7 +206,7 @@ class ValidationMiddleware implements MiddlewareInterface
 
         // Check credential
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
         $inputFilter->add($credential);
 
         // Set data and check
@@ -245,7 +254,7 @@ class ValidationMiddleware implements MiddlewareInterface
         // Check identity
         if (isset($params['credential']) && !empty($params['credential'])) {
             $credential = new Input('credential');
-            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
             $inputFilter->add($credential);
         }
 
@@ -318,7 +327,7 @@ class ValidationMiddleware implements MiddlewareInterface
 
     protected function deviceTokenIsValid($params, $account)
     {
-        if(!isset($params['device_token']) || empty($params['device_token']) || !is_string($params['device_token'])) {
+        if (!isset($params['device_token']) || empty($params['device_token']) || !is_string($params['device_token'])) {
             return $this->validationResult = [
                 'status'  => false,
                 'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
@@ -336,7 +345,7 @@ class ValidationMiddleware implements MiddlewareInterface
         ];
 
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $option));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $option));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($credential);
@@ -349,11 +358,15 @@ class ValidationMiddleware implements MiddlewareInterface
 
     protected function passwordEditIsValid($params)
     {
+        $option = [
+            'check_strong' => 0,
+        ];
+
         $currentCredential = new Input('current_credential');
-        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $option));
 
         $newCredential = new Input('new_credential');
-        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($currentCredential);
@@ -368,7 +381,7 @@ class ValidationMiddleware implements MiddlewareInterface
     protected function passwordAdminIsValid($params)
     {
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($credential);

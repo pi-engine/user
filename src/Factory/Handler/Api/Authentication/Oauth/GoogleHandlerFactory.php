@@ -24,10 +24,14 @@ class GoogleHandlerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): GoogleHandler
     {
+        // Get config
+        $config  = $container->get('config');
+
         return new GoogleHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(AccountService::class)
+            $container->get(AccountService::class),
+            $config['account']['oauth']
         );
     }
 }

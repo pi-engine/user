@@ -337,7 +337,7 @@ class RoleService implements ServiceInterface
 
         // Make list
         $roleResource = [];
-        $roles = $this->getRoleResourceList();
+        $roles        = $this->getRoleResourceList();
         foreach ($roles as $role) {
             $roleResource[$role['name']] = $role;
         }
@@ -353,5 +353,27 @@ class RoleService implements ServiceInterface
         }
 
         return $userRole;
+    }
+
+    public function canonizeAccountRole($roleList): array
+    {
+        $list = [
+            'admin' => null,
+            'api'   => null,
+        ];
+
+        // Get role resource
+        $resources = $this->getRoleResourceList();
+        foreach ($resources as $resource) {
+            if (in_array($resource['name'], $roleList)) {
+                $list[$resource['section']][] = [
+                    'role'    => $resource['name'],
+                    'title'   => $resource['title'],
+                    'section' => $resource['section'],
+                ];
+            }
+        }
+
+        return $list;
     }
 }

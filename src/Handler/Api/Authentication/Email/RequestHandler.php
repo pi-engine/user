@@ -37,7 +37,7 @@ class RequestHandler implements RequestHandlerInterface
         $requestBody = $request->getParsedBody();
 
         // Do log in
-        $result = $this->accountService->prepareMailLogin($requestBody);
+        $result = $this->accountService->preMailLogin($requestBody);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

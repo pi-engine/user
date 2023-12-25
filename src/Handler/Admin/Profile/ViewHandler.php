@@ -38,12 +38,12 @@ class ViewHandler implements RequestHandlerInterface
         $requestBody = $request->getParsedBody();
 
         $account = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
-        $profile = $this->accountService->getProfile(['user_id' => (int)$requestBody['user_id']]);
+        $account = $this->accountService->viewAccount($account);
 
         // Set result array
         $result = [
             'result' => true,
-            'data'   => array_merge($account, $profile),
+            'data'   => $account,
             'error'  => [],
         ];
 

@@ -12,6 +12,7 @@ use User\Handler\ErrorHandler;
 use User\Middleware\ValidationMiddleware;
 use User\Service\AccountService;
 use User\Service\CacheService;
+use User\Service\UtilityService;
 
 class ValidationMiddlewareFactory implements FactoryInterface
 {
@@ -30,6 +31,7 @@ class ValidationMiddlewareFactory implements FactoryInterface
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
+            $container->get(UtilityService::class),
             $container->get(CacheService::class),
             $container->get(ErrorHandler::class)
         );

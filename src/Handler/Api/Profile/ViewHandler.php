@@ -42,24 +42,12 @@ class ViewHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $account = $request->getAttribute('account');
-
-        // Set ID as int
-        $account['id'] = (int)$account['id'];
-
-        // Check user has password or not
-        $account['has_password']  = $this->accountService->hasPassword($account['id']);
-
-        // Set profile params
-        $params = [
-            'user_id' => $account['id'],
-        ];
-
-        $profile = $this->accountService->getProfile($params);
+        $account = $this->accountService->viewAccount($account);
 
         // Set result array
         $result = [
             'result' => true,
-            'data'   => array_merge($account, $profile),
+            'data'   => $account,
             'error'  => [],
         ];
 
