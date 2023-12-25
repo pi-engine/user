@@ -72,6 +72,7 @@ return [
             Handler\Api\Authentication\Mfa\VerifyHandler::class      => Factory\Handler\Api\Authentication\Mfa\VerifyHandlerFactory::class,
             Handler\Api\Authentication\Oauth\GoogleHandler::class    => Factory\Handler\Api\Authentication\Oauth\GoogleHandlerFactory::class,
             Handler\Api\Authentication\Oauth\MicrosoftHandler::class => Factory\Handler\Api\Authentication\Oauth\MicrosoftHandlerFactory::class,
+            Handler\Api\Captcha\ReCaptcha\VerifyHandler::class       => Factory\Handler\Api\Captcha\ReCaptcha\VerifyHandlerFactory::class,
             Handler\ErrorHandler::class                              => Factory\Handler\ErrorHandlerFactory::class,
             Handler\InstallerHandler::class                          => Factory\Handler\InstallerHandlerFactory::class,
         ],
@@ -490,26 +491,43 @@ return [
                                     ],
                                 ],
                             ],
-                            /* 'refresh'  => [
-    'type'    => Literal::class,
-    'options' => [
-        'route'    => '/refresh',
-        'defaults' => [
-            'module'      => 'user',
-            'section'     => 'api',
-            'package'     => 'authentication',
-            'handler'     => 'refresh',
-            'permissions' => 'user-refresh',
-            'controller'  => PipeSpec::class,
-            'middleware'  => new PipeSpec(
-                Middleware\SecurityMiddleware::class,
-                Middleware\AuthenticationMiddleware::class,
-                Middleware\AuthorizationMiddleware::class,
-                Handler\Api\Authentication\RefreshHandler::class
-            ),
-        ],
-    ],
-], */
+                        ],
+                    ],
+
+                    // Api captcha section
+                    'captcha'        => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/captcha',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'recaptcha' => [
+                                'type'         => Literal::class,
+                                'options'      => [
+                                    'route'    => '/recaptcha',
+                                    'defaults' => [],
+                                ],
+                                'child_routes' => [
+                                    'verify' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/verify',
+                                            'defaults' => [
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'recaptcha',
+                                                'handler'    => 'verify',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Handler\Api\Captcha\ReCaptcha\VerifyHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                     ],
                 ],

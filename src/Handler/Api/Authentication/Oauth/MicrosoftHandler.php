@@ -70,8 +70,7 @@ class MicrosoftHandler implements RequestHandlerInterface
         $userData    = $authService->verifyToken($params);
 
         // Do log in
-        //$result = $this->accountService->loginOauth($userData);
-        $result = $userData;
+        $result = $this->accountService->loginOauth($userData);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

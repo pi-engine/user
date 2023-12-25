@@ -31,7 +31,7 @@ class MicrosoftHandlerFactory implements FactoryInterface
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
-            $config['account']['oauth']
+            $config['account']['oauth']['microsoft']
         );
     }
 }
