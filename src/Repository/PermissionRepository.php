@@ -25,18 +25,18 @@ class PermissionRepository implements PermissionRepositoryInterface
     private string $tablePermissionResource = 'permission_resource';
 
     /**
-     * Permission role Table name
-     *
-     * @var string
-     */
-    private string $tablePermissionRole = 'permission_role';
-
-    /**
      * Permission page Table name
      *
      * @var string
      */
     private string $tablePermissionPage = 'permission_page';
+
+    /**
+     * Permission role Table name
+     *
+     * @var string
+     */
+    private string $tablePermissionRole = 'permission_role';
 
     /**
      * @var AdapterInterface

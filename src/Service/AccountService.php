@@ -27,6 +27,9 @@ class AccountService implements ServiceInterface
     /* @var RoleService */
     protected RoleService $roleService;
 
+    /** @var PermissionService */
+    protected PermissionService $permissionService;
+
     /* @var TokenService */
     protected TokenService $tokenService;
 
@@ -92,6 +95,7 @@ class AccountService implements ServiceInterface
     /**
      * @param AccountRepositoryInterface $accountRepository
      * @param RoleService                $roleService
+     * @param PermissionService          $permissionService
      * @param TokenService               $tokenService
      * @param CacheService               $cacheService
      * @param UtilityService             $utilityService
@@ -102,6 +106,7 @@ class AccountService implements ServiceInterface
     public function __construct(
         AccountRepositoryInterface $accountRepository,
         RoleService $roleService,
+        PermissionService $permissionService,
         TokenService $tokenService,
         CacheService $cacheService,
         UtilityService $utilityService,
@@ -111,6 +116,7 @@ class AccountService implements ServiceInterface
     ) {
         $this->accountRepository   = $accountRepository;
         $this->roleService         = $roleService;
+        $this->permissionService = $permissionService;
         $this->tokenService        = $tokenService;
         $this->cacheService        = $cacheService;
         $this->utilityService      = $utilityService;
@@ -270,8 +276,15 @@ class AccountService implements ServiceInterface
         $account['refresh_token']       = $refreshToken['token'];
 
         // Set permission
+        // ToDo: use cache
+        $account['permission'] = null;
         if (isset($this->config['login_permission'])) {
-            $account['permission'] = [];
+            $permissionParams = [
+                'section' => 'api',
+                'role' => $account['roles']
+            ];
+
+            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
         }
 
         // Set source roles params
