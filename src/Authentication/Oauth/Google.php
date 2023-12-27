@@ -12,7 +12,7 @@ class Google implements OauthInterface
 
     public function __construct($config)
     {
-        $this->config              = $config;
+        $this->config = $config;
     }
 
     /**
