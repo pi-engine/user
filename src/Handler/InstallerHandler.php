@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use stdClass;
 use User\Service\InstallerService;
 
 class InstallerHandler implements RequestHandlerInterface
@@ -41,8 +42,8 @@ class InstallerHandler implements RequestHandlerInterface
         return new JsonResponse(
             [
                 'result' => true,
-                'data'   => [],
-                'error'  => [],
+                'data'   => new stdClass(),
+                'error'  => new stdClass(),
             ],
         );
     }

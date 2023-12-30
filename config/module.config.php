@@ -77,8 +77,7 @@ return [
             Handler\InstallerHandler::class                          => Factory\Handler\InstallerHandlerFactory::class,
         ],
     ],
-
-    'router' => [
+    'router'          => [
         'routes' => [
             // Api section
             'api_user'   => [
@@ -102,6 +101,7 @@ return [
                                 'options' => [
                                     'route'    => '/view',
                                     'defaults' => [
+                                        'title'       => 'User view',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'profile',
@@ -122,6 +122,7 @@ return [
                                 'options' => [
                                     'route'    => '/update',
                                     'defaults' => [
+                                        'title'       => 'User update',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'profile',
@@ -144,6 +145,7 @@ return [
                                 'options' => [
                                     'route'    => '/device-token',
                                     'defaults' => [
+                                        'title'       => 'User update device token',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'profile',
@@ -165,6 +167,7 @@ return [
                                 'options' => [
                                     'route'    => '/history',
                                     'defaults' => [
+                                        'title'       => 'User history',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'profile',
@@ -195,6 +198,7 @@ return [
                                 'options' => [
                                     'route'    => '/add',
                                     'defaults' => [
+                                        'title'       => 'User password add',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'password',
@@ -217,6 +221,7 @@ return [
                                 'options' => [
                                     'route'    => '/update',
                                     'defaults' => [
+                                        'title'       => 'User password update',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'password',
@@ -250,14 +255,14 @@ return [
                                 'options' => [
                                     'route'    => '/login',
                                     'defaults' => [
-                                        'module'      => 'user',
-                                        'section'     => 'api',
-                                        'package'     => 'authentication',
-                                        'handler'     => 'login',
-                                        'permissions' => 'user-login',
-                                        'validator'   => 'login',
-                                        'controller'  => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
+                                        'title'      => 'User login',
+                                        'module'     => 'user',
+                                        'section'    => 'api',
+                                        'package'    => 'authentication',
+                                        'handler'    => 'login',
+                                        'validator'  => 'login',
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
                                             Handler\Api\Authentication\LoginHandler::class
@@ -270,6 +275,7 @@ return [
                                 'options' => [
                                     'route'    => '/logout',
                                     'defaults' => [
+                                        'title'       => 'User logout',
                                         'module'      => 'user',
                                         'section'     => 'api',
                                         'package'     => 'authentication',
@@ -290,14 +296,13 @@ return [
                                 'options' => [
                                     'route'    => '/register',
                                     'defaults' => [
-                                        'module'      => 'user',
-                                        'section'     => 'api',
-                                        'package'     => 'authentication',
-                                        'handler'     => 'register',
-                                        'permissions' => 'user-register',
-                                        'validator'   => 'add',
-                                        'controller'  => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
+                                        'module'     => 'user',
+                                        'section'    => 'api',
+                                        'package'    => 'authentication',
+                                        'handler'    => 'register',
+                                        'validator'  => 'add',
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
                                             Handler\Api\Authentication\RegisterHandler::class
@@ -317,14 +322,13 @@ return [
                                         'options' => [
                                             'route'    => '/request',
                                             'defaults' => [
-                                                'module'      => 'user',
-                                                'section'     => 'api',
-                                                'package'     => 'authentication',
-                                                'handler'     => 'request',
-                                                'permissions' => 'user-email-request',
-                                                'validator'   => 'email-request',
-                                                'controller'  => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'request',
+                                                'validator'  => 'email-request',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
                                                     Handler\Api\Authentication\Email\RequestHandler::class
@@ -337,14 +341,13 @@ return [
                                         'options' => [
                                             'route'    => '/verify',
                                             'defaults' => [
-                                                'module'      => 'user',
-                                                'section'     => 'api',
-                                                'package'     => 'authentication',
-                                                'handler'     => 'verify',
-                                                'permissions' => 'user-email-verify',
-                                                'validator'   => 'email-verify',
-                                                'controller'  => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'verify',
+                                                'validator'  => 'email-verify',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
                                                     Handler\Api\Authentication\Email\VerifyHandler::class
@@ -366,14 +369,13 @@ return [
                                         'options' => [
                                             'route'    => '/request',
                                             'defaults' => [
-                                                'module'      => 'user',
-                                                'section'     => 'api',
-                                                'package'     => 'authentication',
-                                                'handler'     => 'request',
-                                                'permissions' => 'user-mobile-request',
-                                                'validator'   => 'mobile-request',
-                                                'controller'  => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'request',
+                                                'validator'  => 'mobile-request',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
                                                     Handler\Api\Authentication\Mobile\RequestHandler::class
@@ -386,14 +388,13 @@ return [
                                         'options' => [
                                             'route'    => '/verify',
                                             'defaults' => [
-                                                'module'      => 'user',
-                                                'section'     => 'api',
-                                                'package'     => 'authentication',
-                                                'handler'     => 'verify',
-                                                'permissions' => 'user-mobile-verify',
-                                                'validator'   => 'mobile-verify',
-                                                'controller'  => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'verify',
+                                                'validator'  => 'mobile-verify',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
                                                     Handler\Api\Authentication\Mobile\VerifyHandler::class
@@ -903,8 +904,7 @@ return [
             ],
         ],
     ],
-
-    'view_manager' => [
+    'view_manager'    => [
         'strategies' => [
             'ViewJsonStrategy',
         ],

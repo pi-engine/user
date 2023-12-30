@@ -3,16 +3,7 @@
 return [
     'admin' => [
         [
-            'module'      => 'user',
-            'section'     => 'admin',
-            'package'     => 'profile',
-            'handler'     => 'export',
-            'permissions' => 'admin-user-profile-export',
-            'role'        => [
-                'admin',
-            ],
-        ],
-        [
+            'title'       => 'Admin user profile list',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
@@ -23,6 +14,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user profile add',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
@@ -34,6 +26,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user profile edit',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
@@ -45,6 +38,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user profile password',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
@@ -56,6 +50,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user profile view',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
@@ -66,6 +61,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user profile export',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
@@ -76,6 +72,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user role list',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'role',
@@ -86,6 +83,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user role add',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'role',
@@ -96,6 +94,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user role edit',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'role',
@@ -106,6 +105,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user permission list',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'permission',
@@ -116,6 +116,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user permission view',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'permission',
@@ -126,6 +127,7 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user permission access',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'permission',
@@ -138,28 +140,7 @@ return [
     ],
     'api'   => [
         [
-            'module'      => 'user',
-            'section'     => 'api',
-            'package'     => 'profile',
-            'handler'     => 'refresh',
-            'permissions' => 'user-refresh',
-            'role'        => [
-                'member',
-                'admin',
-            ],
-        ],
-        [
-            'module'      => 'user',
-            'section'     => 'api',
-            'package'     => 'profile',
-            'handler'     => 'logout',
-            'permissions' => 'user-logout',
-            'role'        => [
-                'member',
-                'admin',
-            ],
-        ],
-        [
+            'title'       => 'User view',
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'profile',
@@ -171,6 +152,7 @@ return [
             ],
         ],
         [
+            'title'       => 'User update',
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'profile',
@@ -182,6 +164,7 @@ return [
             ],
         ],
         [
+            'title'       => 'User update device token',
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'profile',
@@ -193,6 +176,7 @@ return [
             ],
         ],
         [
+            'title'       => 'User password add',
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'password',
@@ -204,11 +188,36 @@ return [
             ],
         ],
         [
+            'title'       => 'User password update',
             'module'      => 'user',
             'section'     => 'api',
             'package'     => 'password',
             'handler'     => 'update',
             'permissions' => 'user-password-update',
+            'role'        => [
+                'member',
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'User refresh',
+            'module'      => 'user',
+            'section'     => 'api',
+            'package'     => 'profile',
+            'handler'     => 'refresh',
+            'permissions' => 'user-refresh',
+            'role'        => [
+                'member',
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'User logout',
+            'module'      => 'user',
+            'section'     => 'api',
+            'package'     => 'profile',
+            'handler'     => 'logout',
+            'permissions' => 'user-logout',
             'role'        => [
                 'member',
                 'admin',

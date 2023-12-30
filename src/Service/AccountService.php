@@ -116,7 +116,7 @@ class AccountService implements ServiceInterface
     ) {
         $this->accountRepository   = $accountRepository;
         $this->roleService         = $roleService;
-        $this->permissionService = $permissionService;
+        $this->permissionService   = $permissionService;
         $this->tokenService        = $tokenService;
         $this->cacheService        = $cacheService;
         $this->utilityService      = $utilityService;
@@ -281,7 +281,7 @@ class AccountService implements ServiceInterface
         if (isset($this->config['login_permission'])) {
             $permissionParams = [
                 'section' => 'api',
-                'role' => $account['roles']
+                'role'    => $account['roles'],
             ];
 
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
@@ -810,8 +810,15 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set permission
+        // ToDo: use cache
+        $account['permission'] = null;
         if (isset($this->config['login_permission'])) {
-            $account['permission'] = [];
+            $permissionParams = [
+                'section' => 'api',
+                'role'    => $account['roles'],
+            ];
+
+            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
         }
 
         return $account;
