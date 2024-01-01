@@ -152,6 +152,7 @@ class AccountService implements ServiceInterface
                     'mobile',
                     'identity',
                     'status',
+                    'time_created',
                     'multi_factor_status',
                     'multi_factor_secret',
                 ]
@@ -275,6 +276,12 @@ class AccountService implements ServiceInterface
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
 
+        // Set token payload
+        $account['token_payload'] = [
+            'iat' => $accessToken['payload']['iat'],
+            'exp' => $accessToken['payload']['exp'],
+        ];
+
         // Set permission
         // ToDo: use cache
         $account['permission'] = null;
@@ -302,12 +309,13 @@ class AccountService implements ServiceInterface
         // Set/Update user data to cache
         $this->cacheService->setUser($account['id'], [
             'account'      => [
-                'id'         => (int)$account['id'],
-                'name'       => $account['name'],
-                'email'      => $account['email'],
-                'identity'   => $account['identity'],
-                'mobile'     => $account['mobile'],
-                'last_login' => $account['last_login'],
+                'id'           => (int)$account['id'],
+                'name'         => $account['name'],
+                'email'        => $account['email'],
+                'identity'     => $account['identity'],
+                'mobile'       => $account['mobile'],
+                'time_created' => $account['time_created'],
+                'last_login'   => $account['last_login'],
             ],
             'roles'        => $account['roles'],
             'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
@@ -382,12 +390,13 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id'         => (int)$account['id'],
-                    'name'       => $account['name'],
-                    'email'      => $account['email'],
-                    'identity'   => $account['identity'],
-                    'mobile'     => $account['mobile'],
-                    'last_login' => $user['account']['last_login'] ?? time(),
+                    'id'           => (int)$account['id'],
+                    'name'         => $account['name'],
+                    'email'        => $account['email'],
+                    'identity'     => $account['identity'],
+                    'mobile'       => $account['mobile'],
+                    'time_created' => $account['time_created'],
+                    'last_login'   => $user['account']['last_login'] ?? time(),
                 ],
                 'otp'     => [
                     'code'        => $otpCode,
@@ -469,12 +478,13 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id'         => (int)$account['id'],
-                    'name'       => $account['name'],
-                    'email'      => $account['email'],
-                    'identity'   => $account['identity'],
-                    'mobile'     => $account['mobile'],
-                    'last_login' => $user['account']['last_login'] ?? time(),
+                    'id'           => (int)$account['id'],
+                    'name'         => $account['name'],
+                    'email'        => $account['email'],
+                    'identity'     => $account['identity'],
+                    'mobile'       => $account['mobile'],
+                    'time_created' => $account['time_created'],
+                    'last_login'   => $user['account']['last_login'] ?? time(),
                 ],
                 'otp'     => [
                     'code'        => $otpCode,
