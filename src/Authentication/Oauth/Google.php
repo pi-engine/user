@@ -2,8 +2,8 @@
 
 namespace User\Authentication\Oauth;
 
+use Google\Auth\AccessToken;
 use Hybridauth\Exception\UnexpectedApiResponseException;
-use Hybridauth\Provider\Google as HybridauthGoogle;
 
 class Google implements OauthInterface
 {
@@ -21,24 +21,17 @@ class Google implements OauthInterface
     public function verifyToken($params): array
     {
         // Set config
-        $configHybridauth = [
-            'callback' => $this->config['google_callback'],
-            'keys'     => [
-                'id'     => $this->config['google_client_id'],
-                'secret' => $this->config['google_client_secret'],
-            ],
-        ];
+        $config = [];
 
         // Call service
-        $adapter = new HybridauthGoogle($configHybridauth);
-        $adapter->setAccessToken($params['token']);
-        $userProfile = (array)$adapter->getUserProfile();
+        $accessToken = new AccessToken();
+        $userProfile = $accessToken->verify($params['credential'], $config);
 
         return [
             'email'      => $userProfile['email'],
-            'name'       => $userProfile['displayName'],
-            'first_name' => $userProfile['firstName'],
-            'last_name'  => $userProfile['lastName'],
+            'name'       => $userProfile['name'],
+            'first_name' => $userProfile['given_name'],
+            'last_name'  => $userProfile['family_name'],
         ];
     }
 }

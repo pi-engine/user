@@ -3,9 +3,6 @@
 namespace User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-use Google\Auth\AccessToken;
 use Hybridauth\Exception\UnexpectedApiResponseException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -13,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use User\Authentication\Oauth\Google;
 use User\Service\AccountService;
 
 class GoogleHandler implements RequestHandlerInterface
@@ -64,27 +62,15 @@ class GoogleHandler implements RequestHandlerInterface
             return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
         }
 
-
-        $secret_key = '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';
-        $access_token = new AccessToken();
-        $claims = $access_token->verify($requestBody['credential'], [
-            'client_id' => $secret_key,
-        ]);
-
-        echo '<pre>';
-        var_dump($claims);
-        die;
-
-
         // Set params
-        $params = ['token' => ['access_token' => $requestBody['credential']]];
+        $params = ['credential' => $requestBody['credential']];
 
         // Check
-        /* $authService = new Google($this->config);
+        $authService = new Google($this->config);
         $userData    = $authService->verifyToken($params);
 
         // Do log in
-        $result = $this->accountService->loginOauth($userData); */
+        $result = $this->accountService->loginOauth($userData);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
