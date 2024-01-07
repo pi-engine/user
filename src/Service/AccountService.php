@@ -342,8 +342,10 @@ class AccountService implements ServiceInterface
     public function postLoginError($params): array
     {
         // Save log
-        $account = $this->getAccount([$this->identityColumn => $params[$this->identityColumn]]);
-        $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
+        $account = $this->getAccount([$this->identityColumn => $params['identity']]);
+        if (!empty($account)) {
+            $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
+        }
 
         return [
             'result' => false,
