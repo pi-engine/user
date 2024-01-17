@@ -22,7 +22,7 @@
     }
   ],
   "require": {
-    "php": "~8.1.0 || ~8.2.0",
+    "php": "^8.1|^8.2",
     "ext-redis": "*",
     "ext-ctype": "*",
     "ext-fileinfo": "*",
@@ -68,16 +68,17 @@
     "laminas/laminas-server": "*",
     "laminas/laminas-diagnostics": "*",
     "laminas/laminas-uri": "*",
+    "laminas/laminas-recaptcha": "*",
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*",
-    "automattic/woocommerce": "*",
     "voku/anti-xss": "*",
     "phpoffice/phpspreadsheet": "*",
-    "hybridauth/hybridauth": "*",
     "robthree/twofactorauth": "*",
     "endroid/qr-code": "*",
-    "orhanerday/open-ai": "*"
+    "hybridauth/hybridauth": "*",
+    "google/auth": "*",
+    "phpseclib/phpseclib": "*"
   },
   "autoload": {
     "psr-4": {
