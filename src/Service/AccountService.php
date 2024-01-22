@@ -124,10 +124,6 @@ class AccountService implements ServiceInterface
         $this->historyService      = $historyService;
         $this->config              = $config;
         $this->hashPattern         = $config['hash_pattern'] ?? 'bcrypt';
-
-        //if (isset($config['hash_pattern']) && !empty($config['hash_pattern'])) {
-        //    $this->hashPattern = $config['hash_pattern'];
-        //}
     }
 
     public function login($params): array
@@ -275,6 +271,7 @@ class AccountService implements ServiceInterface
         $account['multi_factor_verify'] = $multiFactorVerify;
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
+        $account['is_company_setup']    = false;
 
         // Set token payload
         $account['token_payload'] = [
