@@ -206,7 +206,7 @@ class AccountService implements ServiceInterface
             $this->cacheService->deleteUser($params['user_id']);
             $message = 'You are logout successfully from all of your sessions !';
         } else {
-            $this->cacheService->removeItem($params['user_id'], 'access_keys', $params['token_id']);
+            $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
             $message = 'You are logout successfully from this session !';
         }
 
@@ -221,6 +221,9 @@ class AccountService implements ServiceInterface
 
     public function postLoginSuccess($account, $params): array
     {
+        // Get from cache if exist
+        $user = $this->cacheService->getUser($account['id']);
+
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
         $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
@@ -273,6 +276,11 @@ class AccountService implements ServiceInterface
         $account['refresh_token']       = $refreshToken['token'];
         $account['is_company_setup']    = false;
 
+        // Check company setup
+        if (isset($user['authorization']['company']['is_company_setup'])) {
+            $account['is_company_setup'] = $user['authorization']['company']['is_company_setup'];
+        }
+
         // Set token payload
         $account['token_payload'] = [
             'iat' => $accessToken['payload']['iat'],
@@ -280,7 +288,6 @@ class AccountService implements ServiceInterface
         ];
 
         // Set permission
-        // ToDo: use cache
         $account['permission'] = null;
         if (isset($this->config['login_permission'])) {
             $permissionParams = [
@@ -300,21 +307,26 @@ class AccountService implements ServiceInterface
             $account['roles']   = array_values($account['roles']);
         }
 
-        // Get from cache if exist
-        $user = $this->cacheService->getUser($account['id']);
-
         // Set/Update user data to cache
         $this->cacheService->setUser($account['id'], [
             'account'      => [
-                'id'           => (int)$account['id'],
-                'name'         => $account['name'],
-                'email'        => $account['email'],
-                'identity'     => $account['identity'],
-                'mobile'       => $account['mobile'],
-                'time_created' => $account['time_created'],
-                'last_login'   => $account['last_login'],
+                'id'                  => (int)$account['id'],
+                'name'                => $account['name'],
+                'email'               => $account['email'],
+                'identity'            => $account['identity'],
+                'mobile'              => $account['mobile'],
+                'first_name'          => $account['first_name'],
+                'last_name'           => $account['last_name'],
+                'time_created'        => $account['time_created'],
+                'last_login'          => $account['last_login'],
+                'has_password'        => $account['has_password'],
+                'multi_factor_global' => $account['multi_factor_global'],
+                'multi_factor_status' => $account['multi_factor_status'],
+                'multi_factor_verify' => $account['multi_factor_verify'],
+                'is_company_setup'    => $account['is_company_setup'],
             ],
             'roles'        => $account['roles'],
+            'permission'   => $account['permission'],
             'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
                 ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
                 : [$accessToken['key']],
@@ -805,6 +817,9 @@ class AccountService implements ServiceInterface
 
     public function viewAccount($account): array
     {
+        // Get user from cache
+        $user = $this->cacheService->getUser((int)$account['id']);
+
         // Check user has password or not
         $account['has_password'] = $this->hasPassword((int)$account['id']);
 
@@ -819,15 +834,17 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set permission
-        // ToDo: use cache
-        $account['permission'] = null;
         if (isset($this->config['login_permission'])) {
-            $permissionParams = [
-                'section' => 'api',
-                'role'    => $account['roles'],
-            ];
+            if (isset($user['permission']) && !empty($user['permission'])) {
+                $account['permission'] = $user['permission'];
+            } else {
+                $permissionParams = [
+                    'section' => 'api',
+                    'role'    => $account['roles'],
+                ];
 
-            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+                $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+            }
         }
 
         return $account;
@@ -923,7 +940,7 @@ class AccountService implements ServiceInterface
     public function updatedDeviceToken($params, $account): void
     {
         // Update cache
-        $this->cacheService->addItem($account['id'], 'device_tokens', $params['device_token']);
+        $this->cacheService->setUserItem($account['id'], 'device_tokens', $params['device_token']);
 
         // Save log
         $this->historyService->logger('updatedDeviceToken', ['params' => $params, 'account' => $account]);
@@ -1212,7 +1229,7 @@ class AccountService implements ServiceInterface
         );
 
         // Update cache
-        $this->cacheService->addItem($params['user_id'], 'access_keys', $accessToken['key']);
+        $this->cacheService->setUserItem($params['user_id'], 'access_keys', $accessToken['key']);
 
         // Set result array
         return [

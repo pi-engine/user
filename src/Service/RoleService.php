@@ -295,7 +295,7 @@ class RoleService implements ServiceInterface
 
     public function resetRoleListInCache(): void
     {
-        $this->cacheService->deleteItem([
+        $this->cacheService->deleteItems([
             'roles-admin',
             'roles-api',
             'roles-light',
