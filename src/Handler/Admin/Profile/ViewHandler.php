@@ -10,7 +10,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
-use function array_merge;
 
 class ViewHandler implements RequestHandlerInterface
 {

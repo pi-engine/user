@@ -2,14 +2,12 @@
 
 namespace User\Handler\Admin\Role;
 
-use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Model\Permission\Role;
 use User\Service\RoleService;
 
 class ListHandler implements RequestHandlerInterface
@@ -25,27 +23,26 @@ class ListHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory,
-        RoleService              $roleService,
-    )
-    {
-        $this->responseFactory  = $responseFactory;
-        $this->streamFactory    = $streamFactory;
-        $this->roleService      = $roleService;
+        StreamFactoryInterface $streamFactory,
+        RoleService $roleService,
+    ) {
+        $this->responseFactory = $responseFactory;
+        $this->streamFactory   = $streamFactory;
+        $this->roleService     = $roleService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
 
-        $result =
-            [
-                'result' => true,
-                'data' => [
-                    "list" => $this->roleService->getRoleResourceList($requestBody)
-                ],
-                'error' => new \stdClass(),];
+        $result
+            = [
+            'result' => true,
+            'data'   => [
+                "list" => $this->roleService->getRoleResourceList($requestBody),
+            ],
+            'error'  => new \stdClass(),
+        ];
         return new JsonResponse($result);
-
-   }
+    }
 }

@@ -5,12 +5,13 @@ namespace User\Validator;
 use Laminas\Validator\AbstractValidator;
 use User\Service\AccountService;
 use User\Service\CacheService;
+
 use function array_merge;
 
 class OtpValidator extends AbstractValidator
 {
     const TOO_SHORT = 'stringLengthTooShort';
-    const TOO_LONG = 'stringLengthTooLong';
+    const TOO_LONG  = 'stringLengthTooLong';
     const NOT_FOUND = 'stringAccountNotFound';
     const NOT_VALID = 'stringOtpNotTrue';
 

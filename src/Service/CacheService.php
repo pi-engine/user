@@ -5,7 +5,6 @@ namespace User\Service;
 use Laminas\Cache\Psr\SimpleCache\SimpleCacheDecorator;
 use Laminas\Cache\Service\StorageAdapterFactoryInterface;
 use Laminas\Cache\Storage\Plugin\Serializer;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class CacheService implements ServiceInterface
 {
@@ -17,7 +16,7 @@ class CacheService implements ServiceInterface
             'refresh_keys'  => [],
             'otp'           => [],
             'device_tokens' => [],
-            'multi_factor'    => [],
+            'multi_factor'  => [],
         ];
 
     /* @var SimpleCacheDecorator */

@@ -3,7 +3,6 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\InputFilter\Input;
 use Laminas\InputFilter\InputFilter;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -21,6 +20,7 @@ use User\Validator\MobileValidator;
 use User\Validator\NameValidator;
 use User\Validator\OtpValidator;
 use User\Validator\PasswordValidator;
+
 use function sprintf;
 
 class RawDataValidationMiddleware implements MiddlewareInterface
@@ -63,9 +63,9 @@ class RawDataValidationMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Get information from request
-        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
-        $stream = $this->streamFactory->createStreamFromFile('php://input');
-        $rawData = $stream->getContents();
+        $routeMatch = $request->getAttribute('Laminas\Router\RouteMatch');
+        $stream     = $this->streamFactory->createStreamFromFile('php://input');
+        $rawData    = $stream->getContents();
 
         // Decode the raw JSON data into an associative array
         $parsedBody = json_decode($rawData, true);
@@ -74,8 +74,9 @@ class RawDataValidationMiddleware implements MiddlewareInterface
         if (json_last_error() !== JSON_ERROR_NONE) {
             // JSON decoding failed
             $errorMessage = 'Invalid JSON data';
-            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-            $request = $request->withAttribute('error',
+            $request      = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request      = $request->withAttribute(
+                'error',
                 [
                     'message' => 'Invalid JSON data !',
                     'code'    => StatusCodeInterface::STATUS_BAD_REQUEST,
@@ -139,7 +140,8 @@ class RawDataValidationMiddleware implements MiddlewareInterface
 
             default:
                 $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-                $request = $request->withAttribute('error',
+                $request = $request->withAttribute(
+                    'error',
                     [
                         'message' => 'Validator not set !',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
@@ -152,7 +154,8 @@ class RawDataValidationMiddleware implements MiddlewareInterface
         // Check if validator result is not true
         if (!$this->validationResult['status']) {
             $request = $request->withAttribute('status', $this->validationResult['code']);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => $this->validationResult['message'],
                     'code'    => $this->validationResult['code'],
@@ -357,7 +360,7 @@ class RawDataValidationMiddleware implements MiddlewareInterface
 
     protected function deviceTokenIsValid($params, $account)
     {
-        if(!isset($params['device_token']) || empty($params['device_token']) || !is_string($params['device_token'])) {
+        if (!isset($params['device_token']) || empty($params['device_token']) || !is_string($params['device_token'])) {
             return $this->validationResult = [
                 'status'  => false,
                 'code'    => StatusCodeInterface::STATUS_FORBIDDEN,

@@ -36,7 +36,7 @@ class PasswordHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
         $operator    = $request->getAttribute('account');
-        $result      = $this->accountService->updatePasswordByAdmin($requestBody,$operator);
+        $result      = $this->accountService->updatePasswordByAdmin($requestBody, $operator);
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

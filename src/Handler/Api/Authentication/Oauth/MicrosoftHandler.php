@@ -36,7 +36,7 @@ class MicrosoftHandler implements RequestHandlerInterface
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->config              = $config;
+        $this->config          = $config;
     }
 
     /**

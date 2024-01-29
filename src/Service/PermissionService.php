@@ -167,7 +167,7 @@ class PermissionService implements ServiceInterface
 
     public function getPermissionRole($params): array
     {
-        $roles       = $this->permissionRepository->getPermissionRoleList($params);
+        $roles    = $this->permissionRepository->getPermissionRoleList($params);
         $roleList = [];
         foreach ($roles as $role) {
             $roleList[$role->getResource()] = $role->getResource();

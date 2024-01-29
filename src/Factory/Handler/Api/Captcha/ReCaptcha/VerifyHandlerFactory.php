@@ -24,7 +24,7 @@ class VerifyHandlerFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): VerifyHandler
     {
         // Get config
-        $config  = $container->get('config');
+        $config = $container->get('config');
 
         return new VerifyHandler(
             $container->get(ResponseFactoryInterface::class),

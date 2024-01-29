@@ -62,7 +62,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
             default:
                 $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-                $request = $request->withAttribute('error',
+                $request = $request->withAttribute(
+                    'error',
                     [
                         'message' => 'Section not set !',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
@@ -84,7 +85,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
         // Check section
         if (empty($userRoles)) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => 'You dont have access to this area ! 1',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
@@ -107,7 +109,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $access = $this->permissionService->checkPermissionBefore($pageName, $userRoles);
         if (!$access) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => 'You dont have access to this area ! 2',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,

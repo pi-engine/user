@@ -25,7 +25,7 @@ class MicrosoftHandlerFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): MicrosoftHandler
     {
         // Get config
-        $config  = $container->get('config');
+        $config = $container->get('config');
 
         return new MicrosoftHandler(
             $container->get(ResponseFactoryInterface::class),

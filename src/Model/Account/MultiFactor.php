@@ -5,7 +5,7 @@ namespace User\Model\Account;
 class MultiFactor
 {
     private mixed   $id;
-    private int $multi_factor_status;
+    private int     $multi_factor_status;
     private ?string $multi_factor_secret;
 
     public function __construct(
@@ -15,7 +15,7 @@ class MultiFactor
     ) {
         $this->multi_factor_status = $multi_factor_status;
         $this->multi_factor_secret = $multi_factor_secret;
-        $this->id         = $id;
+        $this->id                  = $id;
     }
 
     /**

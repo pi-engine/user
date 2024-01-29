@@ -15,8 +15,8 @@ class ListHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
      *
      * @return ListHandler
      * @throws ContainerExceptionInterface

@@ -11,7 +11,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 use User\Service\TokenService;
-use function array_merge;
 
 class ViewHandler implements RequestHandlerInterface
 {
