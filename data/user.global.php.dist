@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'db'           => [
+    'db'      => [
         'driver'         => 'Pdo',
         'dsn'            => 'mysql:dbname=XXX;host=XXX;charset=utf8',
         'username'       => 'XXX',
@@ -12,10 +12,10 @@ return [
         ],
         'options'        => [],
     ],
-    'global'       => [
+    'global'  => [
         'sitename' => 'Lamines',
     ],
-    'cache'        => [
+    'cache'   => [
         'storage' => 'redis',
         'options' => [
             'namespace' => 'local_laminas',
@@ -31,17 +31,25 @@ return [
             ],
         ],
     ],
-    'jwt'          => [
+    'roles'   => [
+        'default_roles' => [
+            [
+                'name'    => 'member',
+                'section' => 'api',
+            ],
+        ],
+    ],
+    'jwt'     => [
         'secret'      => 'XXX',
         'exp_access'  => 1209600, // 14 days, for development, for production set new value
         'exp_refresh' => 7776000, // 90 days
     ],
-    'account'      => [
-        'otp_email'    => [
+    'account' => [
+        'otp_email'        => [
             'subject' => 'Login by one-time token',
             'body'    => 'Your one-time token is <strong>%s</strong> and it is valid just for 2 minutes.',
         ],
-        'multi_factor' => [
+        'multi_factor'     => [
             'status' => 0,
         ],
         'oauth'            => [
@@ -63,17 +71,17 @@ return [
         ],
         'login_permission' => 0,
     ],
-    'captcha'          => [
+    'captcha' => [
         'recaptcha' => [
             'public' => 'XXX',
             'secret' => 'XXX',
         ],
     ],
-    'export'       => [
-        'format'      => 'csv',
+    'export'  => [
+        'format'    => 'csv',
         'file_path' => 'PATH_TO/data/export',
     ],
-    'utility'      => [
+    'utility' => [
         'local'         => 'en_US',
         'currency'      => 'USD',
         'timezone'      => 'Asia/Dubai',

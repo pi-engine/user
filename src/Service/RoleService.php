@@ -23,13 +23,12 @@ class RoleService implements ServiceInterface
                 'name'    => 'member',
                 'section' => 'api',
             ],
-            /* [
-                'name'    => 'admin',
-                'section' => 'admin',
-            ], */
         ];
 
     //protected array $sectionList = ['api', 'admin'];
+
+    /* @var array */
+    protected array $config;
 
     /**
      * @param RoleRepositoryInterface $roleRepository
@@ -39,11 +38,13 @@ class RoleService implements ServiceInterface
     public function __construct(
         RoleRepositoryInterface $roleRepository,
         CacheService $cacheService,
-        HistoryService $historyService
+        HistoryService $historyService,
+        $config
     ) {
         $this->roleRepository = $roleRepository;
         $this->cacheService   = $cacheService;
         $this->historyService = $historyService;
+        $this->config         = $config;
     }
 
     public function getApiRoleList(): array
@@ -175,12 +176,13 @@ class RoleService implements ServiceInterface
 
     public function addDefaultRoles($account, $operator = []): void
     {
-        foreach ($this->defaultRoles as $role) {
+        $roleList = $this->config['default_roles'] ?? $this->defaultRoles;
+        foreach ($roleList as $role) {
             $this->roleRepository->addRoleAccount((int)$account['id'], $role['name'], $role['section']);
         }
 
         // Save log
-        $this->historyService->logger('addDefaultRoles', ['params' => $this->defaultRoles, 'account' => $account, 'operator' => $operator]);
+        $this->historyService->logger('addDefaultRoles', ['params' => $roleList, 'account' => $account, 'operator' => $operator]);
     }
 
     public function addRoleAccount(array $account, string $roleName, string $section = 'api', $operator = []): void
@@ -264,20 +266,18 @@ class RoleService implements ServiceInterface
 
     public function updateAccountRoles($roles, $account, string $section = 'api', $operator = []): void
     {
-        // Get role list
+        // Set role list
         $roleList    = $this->getRoleList($section);
         $defaultList = $this->getDefaultRolesLight();
+        $userRoles   = array_unique(array_merge($roles, $defaultList));
 
         // Delete all roles and add defaults
         $this->deleteAllRoleAccount($account, $section, $operator);
-        $this->addDefaultRoles($account, $operator);
 
         // Check and add new roles
-        foreach ($roles as $roleName) {
-            if (!in_array($roleName, $defaultList)) {
-                if (in_array($roleName, $roleList)) {
-                    $this->roleRepository->addRoleAccount((int)$account['id'], $roleName, $section);
-                }
+        foreach ($userRoles as $roleName) {
+            if (in_array($roleName, $roleList)) {
+                $this->roleRepository->addRoleAccount((int)$account['id'], $roleName, $section);
             }
         }
 

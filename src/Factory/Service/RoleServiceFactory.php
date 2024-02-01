@@ -24,10 +24,15 @@ class RoleServiceFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): RoleService
     {
+        // Get config
+        $config = $container->get('config');
+        $config = $config['roles'] ?? [];
+
         return new RoleService(
             $container->get(RoleRepositoryInterface::class),
             $container->get(CacheService::class),
             $container->get(HistoryService::class),
+            $config
         );
     }
 }

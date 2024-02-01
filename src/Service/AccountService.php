@@ -548,21 +548,6 @@ class AccountService implements ServiceInterface
         $otp        = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
-            // Todo: Check password validator and remove it
-            $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
-            if (!$isPasswordStrong) {
-                // Save log
-                $this->historyService->logger('setPasswordFailedInRegister', ['params' => $params, 'account' => [], 'operator' => $operator]);
-                return [
-                    'result' => false,
-                    'data'   => new stdClass(),
-                    'error'  => [
-                        'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                        'code'    => 400,
-                    ],
-                    'status' => 400,
-                ];
-            }
             $credential = $this->generatePassword($params['credential']);
         }
         if (isset($params['otp']) && !empty($params['otp'])) {
