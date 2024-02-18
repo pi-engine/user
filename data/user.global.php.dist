@@ -69,7 +69,12 @@ return [
                 'google_client_secret' => 'XXX',
             ],
         ],
-        'login_permission' => 0,
+        'register'         => [
+            'status' => 1,
+        ],
+        'login'            => [
+            'permission' => 1,
+        ],
     ],
     'captcha' => [
         'recaptcha' => [

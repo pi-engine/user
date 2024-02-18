@@ -21,7 +21,7 @@ interface AccountRepositoryInterface
 
     public function updateAccount(int $userId, array $params = []): void;
 
-    public function count(array $params = []): int;
+    public function duplicatedAccount(array $params = []): int;
 
     public function addProfile(array $params = []): array|object;
 

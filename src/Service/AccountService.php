@@ -9,7 +9,6 @@ use Notification\Service\NotificationService;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
-use stdClass;
 use User\Repository\AccountRepositoryInterface;
 
 use function array_merge;
@@ -289,7 +288,7 @@ class AccountService implements ServiceInterface
 
         // Set permission
         $account['permission'] = null;
-        if (isset($this->config['login_permission'])) {
+        if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
             $permissionParams = [
                 'section' => 'api',
                 'role'    => $account['roles'],
@@ -595,6 +594,11 @@ class AccountService implements ServiceInterface
             'bank_account'    => $params['bank_account'] ?? null,
         ];
 
+        $profileParams['information'] = json_encode(
+            $profileParams,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+        );
+
         $profile = $this->accountRepository->addProfile($profileParams);
         $profile = $this->canonizeProfile($profile);
 
@@ -819,7 +823,7 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set permission
-        if (isset($this->config['login_permission'])) {
+        if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
             if (isset($user['permission']) && !empty($user['permission'])) {
                 $account['permission'] = $user['permission'];
             } else {
@@ -886,6 +890,15 @@ class AccountService implements ServiceInterface
         }
 
         if (!empty($profileParams)) {
+            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+            foreach ($profileParams as $key => $value) {
+                $profile['information'][$key] = $value;
+            }
+            $profileParams['information'] = json_encode(
+                $profile['information'],
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+            );
+
             $this->accountRepository->updateProfile((int)$account['id'], $profileParams);
         }
 
@@ -1057,7 +1070,7 @@ class AccountService implements ServiceInterface
     public function updatePassword($params, $account, $operator = []): array
     {
         // Todo: Check password validator and remove it
-        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['new_credential'] ?? '');
+        /* $isPasswordStrong = $this->utilityService->isPasswordStrong($params['new_credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger('updatePasswordFailed', ['params' => $params, 'account' => $account, 'operator' => $operator]);
@@ -1070,7 +1083,7 @@ class AccountService implements ServiceInterface
                 ],
                 'status' => 400,
             ];
-        }
+        } */
 
         $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
         if ($this->passwordEqualityCheck($params['current_credential'], $hash)) {
@@ -1107,7 +1120,7 @@ class AccountService implements ServiceInterface
     public function updatePasswordByAdmin($params, $operator = []): array
     {
         // Todo: Check password validator and remove it
-        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+        /* $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger(
@@ -1123,7 +1136,7 @@ class AccountService implements ServiceInterface
                 ],
                 'status' => 400,
             ];
-        }
+        } */
 
         $credential = $this->generatePassword($params['credential']);
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
@@ -1339,6 +1352,7 @@ class AccountService implements ServiceInterface
                 'bank_name'       => $profile->getBankName(),
                 'bank_card'       => $profile->getBankCard(),
                 'bank_account'    => $profile->getBankAccount(),
+                'information'     => $profile->getInformation(),
             ];
         } else {
             $profile = [
@@ -1363,15 +1377,18 @@ class AccountService implements ServiceInterface
                 'bank_name'       => $profile['bank_name'],
                 'bank_card'       => $profile['bank_card'],
                 'bank_account'    => $profile['bank_account'],
+                'information'     => $profile['information'],
             ];
         }
+
+        $profile['information'] = !empty($profile['information']) ? json_decode($profile['information'], true) : [];
 
         return $profile;
     }
 
     public function isDuplicated($type, $value, $id = 0): bool
     {
-        return (bool)$this->accountRepository->count(
+        return (bool)$this->accountRepository->duplicatedAccount(
             [
                 'field' => $type,
                 'value' => $value,
@@ -1382,8 +1399,7 @@ class AccountService implements ServiceInterface
 
     public function userRegisterStatus(): int
     {
-        // ToDo: call it from config
-        return 1;
+        return $this->config['register']['status'] ?? 1;
     }
 
     public function prepareFilter($params): array
@@ -1604,7 +1620,7 @@ class AccountService implements ServiceInterface
     public function updatePasswordByOperator($params, $operator = []): array
     {
         // Todo: Check password validator and remove it
-        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+        /* $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger(
@@ -1620,7 +1636,7 @@ class AccountService implements ServiceInterface
                 ],
                 'status' => 403,
             ];
-        }
+        } */
 
         $credential = $this->generatePassword($params['credential']);
 

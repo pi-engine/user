@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `user_profile`
     `bank_name`       VARCHAR(32)                        DEFAULT NULL,
     `bank_card`       VARCHAR(32)                        DEFAULT NULL,
     `bank_account`    VARCHAR(32)                        DEFAULT NULL,
+    `information`     JSON                               DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `user_id` (`user_id`)
 );

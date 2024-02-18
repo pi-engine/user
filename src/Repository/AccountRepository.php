@@ -349,7 +349,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
     }
 
-    public function count(array $params = []): int
+    public function duplicatedAccount(array $params = []): int
     {
         // Set where
         $columns = ['count' => new Expression('count(*)')];
@@ -384,6 +384,23 @@ class AccountRepository implements AccountRepositoryInterface
         $id = $result->getGeneratedValue();
 
         return $this->getProfile(['id' => $id]);
+    }
+
+    public function updateProfile(int $userId, array $params = []): void
+    {
+        $update = new Update($this->tableProfile);
+        $update->set($params);
+        $update->where(['user_id' => $userId]);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
     }
 
     public function getProfile(array $params = []): array|object
@@ -421,7 +438,6 @@ class AccountRepository implements AccountRepositoryInterface
         return $profile;
     }
 
-
     public function getAccountProfileList($params = []): HydratingResultSet
     {
         $where['time_deleted'] = 0;
@@ -453,7 +469,7 @@ class AccountRepository implements AccountRepositoryInterface
             $where['account.id'] = $params['id'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
-            $where['time_created >= ?'] = $params['data_from'];
+            $where['account.time_created >= ?'] = $params['data_from'];
         }
         if (isset($params['data_to']) && !empty($params['data_to'])) {
             $where['account.time_created <= ?'] = $params['data_to'];
@@ -519,23 +535,6 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         return $profile;
-    }
-
-    public function updateProfile(int $userId, array $params = []): void
-    {
-        $update = new Update($this->tableProfile);
-        $update->set($params);
-        $update->where(['user_id' => $userId]);
-
-        $sql       = new Sql($this->db);
-        $statement = $sql->prepareStatementForSqlObject($update);
-        $result    = $statement->execute();
-
-        if (!$result instanceof ResultInterface) {
-            throw new RuntimeException(
-                'Database error occurred during update operation'
-            );
-        }
     }
 
     public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService
