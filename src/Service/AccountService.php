@@ -1448,7 +1448,6 @@ class AccountService implements ServiceInterface
             $listParams['identity'] = $params['identity'];
         }
         if (isset($params['email']) && !empty($params['email'])) {
-            echo "d";
             $listParams['email'] = $params['email'];
         }
         if (isset($params['mobile']) && !empty($params['mobile'])) {
