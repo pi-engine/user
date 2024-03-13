@@ -1688,4 +1688,12 @@ class AccountService implements ServiceInterface
             'error' => [],
         ];
     }
+
+    ///TODO:set functions as bottom for other actions
+    public function todoRemoveData(){
+        ///TODO:remove user cache from redis
+        ///TODO:remove profile cache from redis
+        ///TODO:remove role cache from redis
+        ///TODO:remove role account cache from redis
+    }
 }
