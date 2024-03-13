@@ -3,6 +3,7 @@
 namespace User\Repository;
 
 use Laminas\Authentication\AuthenticationService;
+use Laminas\Authentication\Result as AuthenticationResult;
 use Laminas\Db\ResultSet\HydratingResultSet;
 use User\Model\Account\Account;
 
@@ -20,7 +21,7 @@ interface AccountRepositoryInterface
 
     public function updateAccount(int $userId, array $params = []): void;
 
-    public function count(array $params = []): int;
+    public function duplicatedAccount(array $params = []): int;
 
     public function addProfile(array $params = []): array|object;
 
@@ -30,9 +31,13 @@ interface AccountRepositoryInterface
 
     public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService;
 
+    public function authenticationOauth($params): AuthenticationResult;
+
     public function getIdFromFilter(array $filter = []): HydratingResultSet|array;
 
     public function getMultiFactor(int $userId): array|null;
+
     public function getAccountProfileList($params = []): HydratingResultSet;
+
     public function getAccountProfile($params = []): array|object;
 }

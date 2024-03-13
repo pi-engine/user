@@ -37,7 +37,7 @@ class RequestHandler implements RequestHandlerInterface
         $requestBody = $request->getParsedBody();
 
         // Do log in
-        $result = $this->accountService->prepareMobileLogin($requestBody);
+        $result = $this->accountService->perMobileLogin($requestBody);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

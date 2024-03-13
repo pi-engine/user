@@ -10,10 +10,10 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Model\Account\Account;
 use User\Model\Account\AccountProfile;
-use User\Model\Account\MultiFactor;
-use User\Model\Role\Account as AccountRole;
 use User\Model\Account\Credential;
+use User\Model\Account\MultiFactor;
 use User\Model\Account\Profile;
+use User\Model\Role\Account as AccountRole;
 use User\Repository\AccountRepository;
 
 class AccountRepositoryFactory implements FactoryInterface
@@ -33,9 +33,9 @@ class AccountRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new Account('', '', '', '', 0, 0, 0),
-            new AccountProfile(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            new Profile(0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''),
-            new AccountRole(0,  0,  0,  0 ),
+            new AccountProfile(0, '', '', '', '', 0, 0, '', '', '', '', ''),
+            new Profile(0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0),
+            new AccountRole(0, '', '', 0),
             new Credential('', 0),
             new MultiFactor(0, '', 0),
         );

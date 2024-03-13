@@ -69,7 +69,7 @@ class RoleRepository implements RoleRepositoryInterface
         if (isset($params['section']) && !empty($params['section'])) {
             $where['section'] = $params['section'];
         }
-        if (isset($params['status'])  ) {
+        if (isset($params['status'])) {
             $where['status'] = (int)$params['status'];
         }
 
@@ -261,11 +261,12 @@ class RoleRepository implements RoleRepositoryInterface
             );
         }
     }
+
     public function deleteAllRoleAccount(int $userId, string $section = 'api'): void
     {
         $where = [
             'user_id' => $userId,
-            'section' => $section
+            'section' => $section,
         ];
 
         $delete = new Delete($this->tableRoleAccount);

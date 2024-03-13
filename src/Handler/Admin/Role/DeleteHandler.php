@@ -2,7 +2,6 @@
 
 namespace User\Handler\Admin\Role;
 
-use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -26,7 +25,7 @@ class DeleteHandler implements RequestHandlerInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        RoleService              $roleService
+        RoleService $roleService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -35,9 +34,9 @@ class DeleteHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody    = $request->getParsedBody();
-        $operator       = $request->getAttribute('account');
-        $this->roleService->deleteRoleResource($requestBody,$operator);
+        $requestBody = $request->getParsedBody();
+        $operator    = $request->getAttribute('account');
+        $this->roleService->deleteRoleResource($requestBody, $operator);
         return new JsonResponse(
             [
                 'result' => true,

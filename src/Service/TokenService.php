@@ -5,10 +5,7 @@ namespace User\Service;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Laminas\Config\Config;
 use Laminas\Math\Rand;
-use function array_merge;
-use function var_dump;
 
 class TokenService implements ServiceInterface
 {

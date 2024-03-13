@@ -69,7 +69,6 @@ class InstallerService implements ServiceInterface
 
                     // Check roles
                     foreach ($permissionSingle['role'] as $role) {
-
                         // Set name
                         $name = sprintf('%s-%s', $role, $permissionSingle['permissions']);
 
@@ -105,7 +104,6 @@ class InstallerService implements ServiceInterface
     {
         foreach ($permissionConfig as $permissionSection => $permissionList) {
             foreach ($permissionList as $permissionSingleKey => $permissionSingle) {
-
                 if (!isset($permissionSingle['page']) || empty($permissionSingle['page'])) {
                     $permissionSingle['page'] = sprintf(
                         '%s-%s-%s-%s',

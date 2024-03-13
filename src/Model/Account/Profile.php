@@ -26,6 +26,7 @@ class Profile
     private mixed $bank_name;
     private mixed $bank_card;
     private mixed $bank_account;
+    private mixed $information;
 
     public function __construct(
         $user_id,
@@ -49,6 +50,7 @@ class Profile
         $bank_name,
         $bank_card,
         $bank_account,
+        $information,
         $id = null
     ) {
         $this->user_id         = $user_id;
@@ -72,6 +74,7 @@ class Profile
         $this->bank_name       = $bank_name;
         $this->bank_card       = $bank_card;
         $this->bank_account    = $bank_account;
+        $this->information = $information;
         $this->id              = $id;
     }
 
@@ -243,5 +246,10 @@ class Profile
     public function getBankAccount(): ?string
     {
         return $this->bank_account;
+    }
+
+    public function getInformation(): ?string
+    {
+        return $this->information;
     }
 }

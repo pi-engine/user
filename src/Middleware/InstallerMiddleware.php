@@ -37,11 +37,11 @@ class InstallerMiddleware implements MiddlewareInterface
         PermissionService $permissionService,
         ErrorHandler $errorHandler
     ) {
-        $this->responseFactory   = $responseFactory;
-        $this->streamFactory     = $streamFactory;
-        $this->roleService       = $roleService;
+        $this->responseFactory = $responseFactory;
+        $this->streamFactory = $streamFactory;
+        $this->roleService = $roleService;
         $this->permissionService = $permissionService;
-        $this->errorHandler      = $errorHandler;
+        $this->errorHandler = $errorHandler;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -51,7 +51,8 @@ class InstallerMiddleware implements MiddlewareInterface
 
         if (!in_array('admin', $userRoles)) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-            $request = $request->withAttribute('error',
+            $request = $request->withAttribute(
+                'error',
                 [
                     'message' => 'You dont have access to this area !',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,

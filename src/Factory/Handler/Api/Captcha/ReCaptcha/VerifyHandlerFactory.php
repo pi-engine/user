@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api\Authentication\Oauth;
+namespace User\Factory\Handler\Api\Captcha\ReCaptcha;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -8,30 +8,28 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Authentication\Oauth\MicrosoftHandler;
-use User\Service\AccountService;
+use User\Handler\Api\Captcha\ReCaptcha\VerifyHandler;
 
-class MicrosoftHandlerFactory implements FactoryInterface
+class VerifyHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return MicrosoftHandler
+     * @return VerifyHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): MicrosoftHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): VerifyHandler
     {
         // Get config
         $config = $container->get('config');
 
-        return new MicrosoftHandler(
+        return new VerifyHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(AccountService::class),
-            $config['account']['oauth']['microsoft']
+            $config['captcha']
         );
     }
 }

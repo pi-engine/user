@@ -3,22 +3,13 @@
 namespace User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Hybridauth\Exception\UnexpectedValueException;
-use Hybridauth\Hybridauth;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
-use Psr\SimpleCache\InvalidArgumentException;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
-use stdClass;
 use User\Repository\AccountRepositoryInterface;
-use Hybridauth\Provider\Facebook as HybridauthFacebook;
-use Hybridauth\Provider\GitHub as HybridauthGitHub;
-use Hybridauth\Provider\Google as HybridauthGoogle;
-use Hybridauth\Provider\Twitter as HybridauthTwitter;
-use Hybridauth\Provider\MicrosoftGraph as HybridauthMicrosoftGraph;
 
 use function array_merge;
 use function in_array;
@@ -34,6 +25,9 @@ class AccountService implements ServiceInterface
 
     /* @var RoleService */
     protected RoleService $roleService;
+
+    /** @var PermissionService */
+    protected PermissionService $permissionService;
 
     /* @var TokenService */
     protected TokenService $tokenService;
@@ -52,6 +46,12 @@ class AccountService implements ServiceInterface
 
     /* @var array */
     protected array $config;
+
+    /* @var string */
+    protected string $identityColumn = 'identity';
+
+    /* @var string */
+    protected string $credentialColumn = 'credential';
 
     protected array $accountFields
         = [
@@ -93,51 +93,47 @@ class AccountService implements ServiceInterface
 
     /**
      * @param AccountRepositoryInterface $accountRepository
-     * @param RoleService $roleService
-     * @param TokenService $tokenService
-     * @param CacheService $cacheService
-     * @param UtilityService $utilityService
-     * @param NotificationService $notificationService
-     * @param HistoryService $historyService
+     * @param RoleService                $roleService
+     * @param PermissionService          $permissionService
+     * @param TokenService               $tokenService
+     * @param CacheService               $cacheService
+     * @param UtilityService             $utilityService
+     * @param NotificationService        $notificationService
+     * @param HistoryService             $historyService
      * @param                            $config
      */
     public function __construct(
         AccountRepositoryInterface $accountRepository,
-        RoleService                $roleService,
-        TokenService               $tokenService,
-        CacheService               $cacheService,
-        UtilityService             $utilityService,
-        NotificationService        $notificationService,
-        HistoryService             $historyService,
-                                   $config
-    )
-    {
-        $this->accountRepository = $accountRepository;
-        $this->roleService = $roleService;
-        $this->tokenService = $tokenService;
-        $this->cacheService = $cacheService;
-        $this->utilityService = $utilityService;
+        RoleService $roleService,
+        PermissionService $permissionService,
+        TokenService $tokenService,
+        CacheService $cacheService,
+        UtilityService $utilityService,
+        NotificationService $notificationService,
+        HistoryService $historyService,
+        $config
+    ) {
+        $this->accountRepository   = $accountRepository;
+        $this->roleService         = $roleService;
+        $this->permissionService   = $permissionService;
+        $this->tokenService        = $tokenService;
+        $this->cacheService        = $cacheService;
+        $this->utilityService      = $utilityService;
         $this->notificationService = $notificationService;
-        $this->historyService = $historyService;
-        $this->config = $config;
-        $this->hashPattern = 'bcrypt';
-        if (isset($config['hash_pattern']) && !empty($config['hash_pattern'])) {
-            $this->hashPattern = $config['hash_pattern'];
-        }
+        $this->historyService      = $historyService;
+        $this->config              = $config;
+        $this->hashPattern         = $config['hash_pattern'] ?? 'bcrypt';
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function login($params): array
     {
         // Set login column
-        $identityColumn = $params['identityColumn'] ?? 'identity';
-        $credentialColumn = $params['credentialColumn'] ?? 'credential';
+        $this->identityColumn   = $params['identityColumn'] ?? $this->identityColumn;
+        $this->credentialColumn = $params['credentialColumn'] ?? $this->credentialColumn;
 
         // Do log in
-        $authentication = $this->accountRepository->authentication($identityColumn, $credentialColumn, $this->hashPattern);
-        $adapter = $authentication->getAdapter();
+        $authentication = $this->accountRepository->authentication($this->identityColumn, $this->credentialColumn, $this->hashPattern);
+        $adapter        = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
 
         // Check login
@@ -151,118 +147,49 @@ class AccountService implements ServiceInterface
                     'mobile',
                     'identity',
                     'status',
+                    'time_created',
                     'multi_factor_status',
                     'multi_factor_secret',
                 ]
             );
 
-            // Set multi factor
-            $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
-            $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
-            $multiFactorVerify = 0;
+            // Canonize account
+            $account = $this->canonizeAccount($account);
+
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
+        } else {
+            $result = $this->postLoginError($params);
+        }
+
+        return $result;
+    }
+
+    public function loginOauth($params): array
+    {
+        // Set login column
+        $this->identityColumn = 'email';
+
+        // Do log in
+        $authAdapter = $this->accountRepository->authenticationOauth($params);
+
+        // Check login
+        if ($authAdapter->isValid()) {
+            // Get user account
+            $account = $authAdapter->getIdentity();
 
             // Canonize account
             $account = $this->canonizeAccount($account);
 
-            // Get profile
-            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
-
-            // Sync profile and account
-            $account = array_merge($account, $profile);
-
-            // Get roles
-            $account['roles'] = $this->roleService->getRoleAccount((int)$account['id']);
-
-            // Generate access token
-            $accessToken = $this->tokenService->generate(
-                [
-                    'account' => $account,
-                    'type' => 'access',
-                ]
-            );
-
-            // Generate refresh token
-            $refreshToken = $this->tokenService->generate(
-                [
-                    'account' => $account,
-                    'type' => 'refresh',
-                ]
-            );
-
-            // Set multi factor
-            $multiFactor = [
-                $accessToken['key'] => [
-                    'key' => $accessToken['key'],
-                    'multi_factor_global' => $multiFactorGlobal,
-                    'multi_factor_status' => $multiFactorStatus,
-                    'multi_factor_verify' => $multiFactorVerify,
-                ],
-            ];
-
-            // Set extra info
-            $account['last_login'] = time();
-            $account['has_password'] = $this->hasPassword($account['id']);
-            $account['access_token'] = $accessToken['token'];
-            $account['refresh_token'] = $refreshToken['token'];
-            $account['multi_factor_global'] = $multiFactorGlobal;
-            $account['multi_factor_status'] = $multiFactorStatus;
-            $account['multi_factor_verify'] = $multiFactorVerify;
-
-            // Set source roles params
-            if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
-                $this->roleService->addRoleAccount($account, $params['source']);
-
-                // Set new role
-                $account['roles'][] = $params['source'];
-                $account['roles'] = array_values($account['roles']);
-            }
-
-            // Get from cache if exist
-            $user = $this->cacheService->getUser($account['id']);
-
-            // Set/Update user data to cache
-            $this->cacheService->setUser($account['id'], [
-                'account' => [
-                    'id' => (int)$account['id'],
-                    'name' => $account['name'],
-                    'email' => $account['email'],
-                    'identity' => $account['identity'],
-                    'mobile' => $account['mobile'],
-                    'last_login' => $account['last_login'],
-                ],
-                'roles' => $account['roles'],
-                'access_keys' => (isset($user['access_keys']) && !empty($user['access_keys']))
-                    ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
-                    : [$accessToken['key']],
-                'refresh_keys' => (isset($user['refresh_keys']) && !empty($user['refresh_keys']))
-                    ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
-                    : [$refreshToken['key']],
-                'multi_factor' => (isset($user['multi_factor']) && !empty($user['multi_factor']))
-                    ? array_merge($user['multi_factor'], $multiFactor)
-                    : $multiFactor,
-            ]);
-
-            // Save log
-            $this->historyService->logger('login', ['params' => $params, 'account' => $account]);
-
-            $result = [
-                'result' => true,
-                'data' => $account,
-                'error' => [],
-            ];
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
         } else {
-            // Save log
-            $account = $this->getAccount([$identityColumn => $params['identity']]);
-            $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
-
-            $result = [
-                'result' => false,
-                'data' => [],
-                'error' => [
-                    'message' => 'Invalid Username or Password',
-                ],
-                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
-            ];
+            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
+                $this->addAccount($params);
+                $result = $this->loginOauth($params);
+            } else {
+                $result = $this->postLoginError($params);
+            }
         }
 
         return $result;
@@ -278,25 +205,172 @@ class AccountService implements ServiceInterface
             $this->cacheService->deleteUser($params['user_id']);
             $message = 'You are logout successfully from all of your sessions !';
         } else {
-            $this->cacheService->removeItem($params['user_id'], 'access_keys', $params['token_id']);
+            $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
             $message = 'You are logout successfully from this session !';
         }
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => $message,
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
-    public function prepareMobileLogin($params): array
+    public function postLoginSuccess($account, $params): array
+    {
+        // Get from cache if exist
+        $user = $this->cacheService->getUser($account['id']);
+
+        // Set multi factor
+        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
+        $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
+        $multiFactorVerify = 0;
+        unset($account['multi_factor_status']);
+
+        // Get profile
+        $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+
+        // Sync profile and account
+        $account = array_merge($account, $profile);
+
+        // Get roles
+        $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
+        $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
+
+        // Generate access token
+        $accessToken = $this->tokenService->generate(
+            [
+                'account' => $account,
+                'type'    => 'access',
+            ]
+        );
+
+        // Generate refresh token
+        $refreshToken = $this->tokenService->generate(
+            [
+                'account' => $account,
+                'type'    => 'refresh',
+            ]
+        );
+
+        // Set multi factor
+        $multiFactor = [
+            $accessToken['key'] => [
+                'key'                 => $accessToken['key'],
+                'multi_factor_global' => $multiFactorGlobal,
+                'multi_factor_status' => $multiFactorStatus,
+                'multi_factor_verify' => $multiFactorVerify,
+            ],
+        ];
+
+        // Set extra info
+        $account['last_login']          = time();
+        $account['has_password']        = $this->hasPassword($account['id']);
+        $account['multi_factor_global'] = $multiFactorGlobal;
+        $account['multi_factor_status'] = $multiFactorStatus;
+        $account['multi_factor_verify'] = $multiFactorVerify;
+        $account['access_token']        = $accessToken['token'];
+        $account['refresh_token']       = $refreshToken['token'];
+        $account['is_company_setup']    = false;
+
+        // Check company setup
+        if (isset($user['authorization']['company']['is_company_setup'])) {
+            $account['is_company_setup'] = $user['authorization']['company']['is_company_setup'];
+        }
+
+        // Set token payload
+        $account['token_payload'] = [
+            'iat' => $accessToken['payload']['iat'],
+            'exp' => $accessToken['payload']['exp'],
+        ];
+
+        // Set permission
+        $account['permission'] = null;
+        if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
+            $permissionParams = [
+                'section' => 'api',
+                'role'    => $account['roles'],
+            ];
+
+            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+        }
+
+        // Set source roles params
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
+            $this->roleService->addRoleAccount($account, $params['source']);
+
+            // Set new role
+            $account['roles'][] = $params['source'];
+            $account['roles']   = array_values($account['roles']);
+        }
+
+        // Set/Update user data to cache
+        $this->cacheService->setUser($account['id'], [
+            'account'      => [
+                'id'                  => (int)$account['id'],
+                'name'                => $account['name'],
+                'email'               => $account['email'],
+                'identity'            => $account['identity'],
+                'mobile'              => $account['mobile'],
+                'first_name'          => $account['first_name'],
+                'last_name'           => $account['last_name'],
+                'time_created'        => $account['time_created'],
+                'last_login'          => $account['last_login'],
+                'has_password'        => $account['has_password'],
+                'multi_factor_global' => $account['multi_factor_global'],
+                'multi_factor_status' => $account['multi_factor_status'],
+                'multi_factor_verify' => $account['multi_factor_verify'],
+                'is_company_setup'    => $account['is_company_setup'],
+            ],
+            'roles'        => $account['roles'],
+            'permission'   => $account['permission'],
+            'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
+                ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
+                : [$accessToken['key']],
+            'refresh_keys' => (isset($user['refresh_keys']) && !empty($user['refresh_keys']))
+                ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
+                : [$refreshToken['key']],
+            'multi_factor' => (isset($user['multi_factor']) && !empty($user['multi_factor']))
+                ? array_merge($user['multi_factor'], $multiFactor)
+                : $multiFactor,
+        ]);
+
+        // Save log
+        $this->historyService->logger('login', ['params' => $params, 'account' => $account]);
+
+        return [
+            'result' => true,
+            'data'   => $account,
+            'error'  => [],
+        ];
+    }
+
+    public function postLoginError($params): array
+    {
+        // Save log
+        $account = $this->getAccount([$this->identityColumn => $params['identity']]);
+        if (!empty($account)) {
+            $this->historyService->logger('failedLogin', ['params' => $params, 'account' => $account]);
+        }
+
+        return [
+            'result' => false,
+            'data'   => [],
+            'error'  => [
+                'message' => 'Invalid Username or Password',
+            ],
+            'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
+        ];
+    }
+
+    public function perMobileLogin($params): array
     {
         // Set new password as OTP
-        $otpCode = Rand::getInteger(100000, 999999);
+        $otpCode   = Rand::getInteger(100000, 999999);
         $otpExpire = (time() + 120);
-        $isNew = 0;
+        $isNew     = 0;
 
         // Check account exist
         $account = $this->getAccount(['mobile' => $params['mobile']]);
@@ -306,18 +380,18 @@ class AccountService implements ServiceInterface
         if (empty($account)) {
             $account = $this->addAccount(
                 [
-                    'mobile' => $params['mobile'],
+                    'mobile'     => $params['mobile'],
                     'first_name' => $params['first_name'] ?? null,
-                    'last_name' => $params['last_name'] ?? null,
-                    'source' => $params['source'] ?? null,
-                    'otp' => $otpCode,
+                    'last_name'  => $params['last_name'] ?? null,
+                    'source'     => $params['source'] ?? null,
+                    'otp'        => $otpCode,
                 ]
             );
 
             // Set is new
             $isNew = 1;
         } else {
-            $otp = $this->generateHashPassword($otpCode);
+            $otp = $this->generatePassword($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -326,15 +400,16 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id' => (int)$account['id'],
-                    'name' => $account['name'],
-                    'email' => $account['email'],
-                    'identity' => $account['identity'],
-                    'mobile' => $account['mobile'],
-                    'last_login' => $user['account']['last_login'] ?? time(),
+                    'id'           => (int)$account['id'],
+                    'name'         => $account['name'],
+                    'email'        => $account['email'],
+                    'identity'     => $account['identity'],
+                    'mobile'       => $account['mobile'],
+                    'time_created' => $account['time_created'],
+                    'last_login'   => $user['account']['last_login'] ?? time(),
                 ],
-                'otp' => [
-                    'code' => $otpCode,
+                'otp'     => [
+                    'code'        => $otpCode,
                     'time_expire' => $otpExpire,
                 ],
             ]
@@ -356,8 +431,8 @@ class AccountService implements ServiceInterface
         $notificationParams = [
             'sms' => [
                 'message' => sprintf($message, $otpCode),
-                'mobile' => $account['mobile'],
-                'source' => $params['source'] ?? '',
+                'mobile'  => $account['mobile'],
+                'source'  => $params['source'] ?? '',
             ],
         ];
 
@@ -367,23 +442,23 @@ class AccountService implements ServiceInterface
         // Set result
         return [
             'result' => true,
-            'data' => [
-                'message' => 'Verify code send to your mobile number !',
-                'name' => $account['name'],
-                'mobile' => $account['mobile'],
-                'is_new' => $isNew,
+            'data'   => [
+                'message'    => 'Verify code send to your mobile number !',
+                'name'       => $account['name'],
+                'mobile'     => $account['mobile'],
+                'is_new'     => $isNew,
                 'otp_expire' => $otpExpire,
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
-    public function prepareMailLogin($params): array
+    public function preMailLogin($params): array
     {
         // Set new password as OTP
-        $otpCode = Rand::getInteger(100000, 999999);
+        $otpCode   = Rand::getInteger(100000, 999999);
         $otpExpire = (time() + 180);
-        $isNew = 0;
+        $isNew     = 0;
 
         // Check account exist
         $account = $this->getAccount(['email' => $params['email']]);
@@ -393,18 +468,18 @@ class AccountService implements ServiceInterface
         if (empty($account)) {
             $account = $this->addAccount(
                 [
-                    'email' => $params['email'],
-                    'source' => $params['source'] ?? null,
+                    'email'      => $params['email'],
+                    'source'     => $params['source'] ?? null,
                     'first_name' => $params['first_name'] ?? null,
-                    'last_name' => $params['last_name'] ?? null,
-                    'otp' => $otpCode,
+                    'last_name'  => $params['last_name'] ?? null,
+                    'otp'        => $otpCode,
                 ]
             );
 
             // Set is new
             $isNew = 1;
         } else {
-            $otp = $this->generateHashPassword($otpCode);
+            $otp = $this->generatePassword($otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -413,15 +488,16 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id' => (int)$account['id'],
-                    'name' => $account['name'],
-                    'email' => $account['email'],
-                    'identity' => $account['identity'],
-                    'mobile' => $account['mobile'],
-                    'last_login' => $user['account']['last_login'] ?? time(),
+                    'id'           => (int)$account['id'],
+                    'name'         => $account['name'],
+                    'email'        => $account['email'],
+                    'identity'     => $account['identity'],
+                    'mobile'       => $account['mobile'],
+                    'time_created' => $account['time_created'],
+                    'last_login'   => $user['account']['last_login'] ?? time(),
                 ],
-                'otp' => [
-                    'code' => $otpCode,
+                'otp'     => [
+                    'code'        => $otpCode,
                     'time_expire' => $otpExpire,
                 ],
             ]
@@ -430,12 +506,12 @@ class AccountService implements ServiceInterface
         // Set notification params
         $notificationParams = [
             'email' => [
-                'to' => [
+                'to'      => [
                     'email' => $account['email'],
-                    'name' => $account['name'],
+                    'name'  => $account['name'],
                 ],
                 'subject' => $this->config['otp_email']['subject'],
-                'body' => sprintf($this->config['otp_email']['body'], $otpCode),
+                'body'    => sprintf($this->config['otp_email']['body'], $otpCode),
             ],
         ];
 
@@ -445,14 +521,14 @@ class AccountService implements ServiceInterface
         // Set result
         return [
             'result' => true,
-            'data' => [
-                'message' => 'Verify code send to your email !',
-                'name' => $account['name'],
-                'email' => $account['email'],
-                'is_new' => $isNew,
+            'data'   => [
+                'message'    => 'Verify code send to your email !',
+                'name'       => $account['name'],
+                'email'      => $account['email'],
+                'is_new'     => $isNew,
                 'otp_expire' => $otpExpire,
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
@@ -468,23 +544,9 @@ class AccountService implements ServiceInterface
             $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
         }
 
-        $otp = null;
+        $otp        = null;
         $credential = null;
         if (isset($params['credential']) && !empty($params['credential'])) {
-            $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
-            if (!$isPasswordStrong) {
-                // Save log
-                $this->historyService->logger('setPasswordFailedInRegister', ['params' => $params, 'account' => [], 'operator' => $operator]);
-                return [
-                    'result' => false,
-                    'data' => new stdClass(),
-                    'error' => [
-                        'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                        'code' => 400,
-                    ],
-                    'status' => 400,
-                ];
-            }
             $credential = $this->generatePassword($params['credential']);
         }
         if (isset($params['otp']) && !empty($params['otp'])) {
@@ -492,13 +554,13 @@ class AccountService implements ServiceInterface
         }
 
         $paramsAccount = [
-            'name' => $params['name'] ?? null,
-            'email' => $params['email'] ?? null,
-            'identity' => $params['identity'] ?? null,
-            'mobile' => $params['mobile'] ?? null,
-            'credential' => $credential,
-            'otp' => $otp,
-            'status' => $this->userRegisterStatus(),
+            'name'         => $params['name'] ?? null,
+            'email'        => $params['email'] ?? null,
+            'identity'     => $params['identity'] ?? null,
+            'mobile'       => $params['mobile'] ?? null,
+            'credential'   => $credential,
+            'otp'          => $otp,
+            'status'       => $this->userRegisterStatus(),
             'time_created' => time(),
         ];
 
@@ -509,28 +571,33 @@ class AccountService implements ServiceInterface
         $this->historyService->logger('register', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
         $profileParams = [
-            'user_id' => (int)$account['id'],
-            'first_name' => $params['first_name'] ?? null,
-            'last_name' => $params['last_name'] ?? null,
-            'id_number' => $params['id_number'] ?? null,
-            'birthdate' => $params['birthdate'] ?? null,
-            'gender' => $params['gender'] ?? null,
-            'avatar' => $params['avatar'] ?? null,
-            'ip_register' => $params['ip_register'] ?? null,
+            'user_id'         => (int)$account['id'],
+            'first_name'      => $params['first_name'] ?? null,
+            'last_name'       => $params['last_name'] ?? null,
+            'id_number'       => $params['id_number'] ?? null,
+            'birthdate'       => $params['birthdate'] ?? null,
+            'gender'          => $params['gender'] ?? null,
+            'avatar'          => $params['avatar'] ?? null,
+            'ip_register'     => $params['ip_register'] ?? null,
             'register_source' => $params['register_source'] ?? null,
-            'homepage' => $params['homepage'] ?? null,
-            'phone' => $params['phone'] ?? null,
-            'address_1' => $params['address_1'] ?? null,
-            'address_2' => $params['address_2'] ?? null,
-            'item_id' => $params['item_id'] ?? 0,
-            'country' => $params['country'] ?? null,
-            'state' => $params['state'] ?? null,
-            'city' => $params['city'] ?? null,
-            'zip_code' => $params['zip_code'] ?? null,
-            'bank_name' => $params['bank_name'] ?? null,
-            'bank_card' => $params['bank_card'] ?? null,
-            'bank_account' => $params['bank_account'] ?? null,
+            'homepage'        => $params['homepage'] ?? null,
+            'phone'           => $params['phone'] ?? null,
+            'address_1'       => $params['address_1'] ?? null,
+            'address_2'       => $params['address_2'] ?? null,
+            'item_id'         => $params['item_id'] ?? 0,
+            'country'         => $params['country'] ?? null,
+            'state'           => $params['state'] ?? null,
+            'city'            => $params['city'] ?? null,
+            'zip_code'        => $params['zip_code'] ?? null,
+            'bank_name'       => $params['bank_name'] ?? null,
+            'bank_card'       => $params['bank_card'] ?? null,
+            'bank_account'    => $params['bank_account'] ?? null,
         ];
+
+        $profileParams['information'] = json_encode(
+            $profileParams,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+        );
 
         $profile = $this->accountRepository->addProfile($profileParams);
         $profile = $this->canonizeProfile($profile);
@@ -583,29 +650,30 @@ class AccountService implements ServiceInterface
 
         if (empty($account)) {
             $addParams = [
-                'email' => $params['email'] ?? null,
-                'mobile' => $params['mobile'] ?? null,
-                'identity' => $params['identity'] ?? null,
-                'credential' => $params['credential'] ?? null,
-                'source' => $params['source'] ?? null,
-                'first_name' => $params['first_name'] ?? null,
-                'last_name' => $params['last_name'] ?? null,
-                'id_number' => $params['id_number'] ?? null,
-                'birthdate' => $params['birthdate'] ?? null,
-                'gender' => $params['gender'] ?? null,
-                'avatar' => $params['avatar'] ?? null,
-                'ip_register' => $params['ip_register'] ?? null,
+                'email'           => $params['email'] ?? null,
+                'mobile'          => $params['mobile'] ?? null,
+                'identity'        => $params['identity'] ?? null,
+                'credential'      => $params['credential'] ?? null,
+                'source'          => $params['source'] ?? null,
+                'first_name'      => $params['first_name'] ?? null,
+                'last_name'       => $params['last_name'] ?? null,
+                'id_number'       => $params['id_number'] ?? null,
+                'birthdate'       => $params['birthdate'] ?? null,
+                'gender'          => $params['gender'] ?? null,
+                'avatar'          => $params['avatar'] ?? null,
+                'ip_register'     => $params['ip_register'] ?? null,
                 'register_source' => $params['register_source'] ?? null,
-                'homepage' => $params['homepage'] ?? null,
-                'phone' => $params['phone'] ?? null,
-                'address_1' => $params['address_1'] ?? null,
-                'address_2' => $params['address_2'] ?? null,
-                'item_id' => $params['item_id'] ?? 0,
-                'country' => $params['country'] ?? null,
-                'state' => $params['state'] ?? null,
-                'city' => $params['city'] ?? null,
-                'zip_code' => $params['zip_code'] ?? null,
+                'homepage'        => $params['homepage'] ?? null,
+                'phone'           => $params['phone'] ?? null,
+                'address_1'       => $params['address_1'] ?? null,
+                'address_2'       => $params['address_2'] ?? null,
+                'item_id'         => $params['item_id'] ?? 0,
+                'country'         => $params['country'] ?? null,
+                'state'           => $params['state'] ?? null,
+                'city'            => $params['city'] ?? null,
+                'zip_code'        => $params['zip_code'] ?? null,
             ];
+
             $account = $this->addAccount($addParams);
         } else {
             $profile = $this->getProfile(['user_id' => (int)$account['id']]);
@@ -621,7 +689,7 @@ class AccountService implements ServiceInterface
 
         return [
             'account' => $user['account'],
-            'roles' => $user['roles'],
+            'roles'   => $user['roles'],
         ];
     }
 
@@ -638,20 +706,20 @@ class AccountService implements ServiceInterface
     public function getAccountList($params): array
     {
         $limit = $params['limit'] ?? 10;
-        $page = $params['page'] ?? 1;
+        $page  = $params['page'] ?? 1;
         /// changed by kerloper
-        $key = $params['key'] ?? '';
-        $order = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $key    = $params['key'] ?? '';
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
         /// changed by kerloper
         $listParams = [
-            'page' => (int)$page,
-            'limit' => (int)$limit,
-            'order' => $order,
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
             'offset' => $offset,
-            'key' => $key,
+            'key'    => $key,
         ];
 
         if (isset($params['name']) && !empty($params['name'])) {
@@ -694,7 +762,7 @@ class AccountService implements ServiceInterface
         if (!empty($filters)) {
             foreach ($filters as $filter) {
                 $itemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
                 foreach ($rowSet as $row) {
                     $itemIdList[] = $this->canonizeAccountId($row);
                 }
@@ -703,7 +771,7 @@ class AccountService implements ServiceInterface
         }
 
         // Get list
-        $list = [];
+        $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
             /// changed by kerloper
@@ -718,7 +786,7 @@ class AccountService implements ServiceInterface
 
 
         $list = array_values($list);
-        $i = 0;
+        $i    = 0;
         ///TODO:check
         foreach ($list as $user) {
             $list[$i]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
@@ -726,14 +794,49 @@ class AccountService implements ServiceInterface
         }
 
         return [
-            'list' => $list,
-            'roles' => $roleList,
+            'list'      => $list,
+            'roles'     => $roleList,
             'paginator' => [
                 'count' => $count,
                 'limit' => $limit,
-                'page' => $page,
+                'page'  => $page,
             ],
         ];
+    }
+
+    public function viewAccount($account): array
+    {
+        // Get user from cache
+        $user = $this->cacheService->getUser((int)$account['id']);
+
+        // Check user has password or not
+        $account['has_password'] = $this->hasPassword((int)$account['id']);
+
+        // Set profile params
+        $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+
+        // Sync profile and account
+        $account = array_merge($account, $profile);
+
+        // Get roles
+        $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
+        $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
+
+        // Set permission
+        if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
+            if (isset($user['permission']) && !empty($user['permission'])) {
+                $account['permission'] = $user['permission'];
+            } else {
+                $permissionParams = [
+                    'section' => 'api',
+                    'role'    => $account['roles'],
+                ];
+
+                $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+            }
+        }
+
+        return $account;
     }
 
     public function canonizeAccountId(object|array $roleAccountList): int|null
@@ -787,6 +890,15 @@ class AccountService implements ServiceInterface
         }
 
         if (!empty($profileParams)) {
+            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+            foreach ($profileParams as $key => $value) {
+                $profile['information'][$key] = $value;
+            }
+            $profileParams['information'] = json_encode(
+                $profile['information'],
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+            );
+
             $this->accountRepository->updateProfile((int)$account['id'], $profileParams);
         }
 
@@ -802,11 +914,11 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id' => $account['id'],
-                    'name' => $account['name'],
-                    'email' => $account['email'],
-                    'identity' => $account['identity'],
-                    'mobile' => $account['mobile'],
+                    'id'         => $account['id'],
+                    'name'       => $account['name'],
+                    'email'      => $account['email'],
+                    'identity'   => $account['identity'],
+                    'mobile'     => $account['mobile'],
                     'last_login' => $user['account']['last_login'] ?? time(),
                 ],
             ]
@@ -818,15 +930,15 @@ class AccountService implements ServiceInterface
         return array_merge($account, $profile);
     }
 
-    public function updateAccountRoles($roles, $account, $operator = []): void
+    public function updateAccountRoles($roles, $account, $section = 'api', $operator = []): void
     {
-        $this->roleService->updateAccountRoles($roles, $account, $operator);
+        $this->roleService->updateAccountRoles($roles, $account, $section, $operator);
     }
 
     public function updatedDeviceToken($params, $account): void
     {
         // Update cache
-        $this->cacheService->addItem($account['id'], 'device_tokens', $params['device_token']);
+        $this->cacheService->setUserItem($account['id'], 'device_tokens', $params['device_token']);
 
         // Save log
         $this->historyService->logger('updatedDeviceToken', ['params' => $params, 'account' => $account]);
@@ -838,24 +950,23 @@ class AccountService implements ServiceInterface
         return $this->canonizeProfile($profile);
     }
 
-
     public function getAccountProfileList($params): array
     {
         $limit = $params['limit'] ?? 10;
-        $page = $params['page'] ?? 1;
+        $page  = $params['page'] ?? 1;
         /// changed by kerloper
-        $key = $params['key'] ?? '';
-        $order = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $key    = $params['key'] ?? '';
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
         /// changed by kerloper
         $listParams = [
-            'page' => (int)$page,
-            'limit' => (int)$limit,
-            'order' => $order,
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
             'offset' => $offset,
-            'key' => $key,
+            'key'    => $key,
         ];
 
         if (isset($params['name']) && !empty($params['name'])) {
@@ -901,7 +1012,7 @@ class AccountService implements ServiceInterface
         if (!empty($filters)) {
             foreach ($filters as $filter) {
                 $itemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
                 foreach ($rowSet as $row) {
                     $itemIdList[] = $this->canonizeAccountId($row);
                 }
@@ -910,7 +1021,7 @@ class AccountService implements ServiceInterface
         }
 
         // Get list
-        $list = [];
+        $list   = [];
         $rowSet = $this->accountRepository->getAccountProfileList($listParams);
         foreach ($rowSet as $row) {
             /// changed by kerloper
@@ -922,33 +1033,23 @@ class AccountService implements ServiceInterface
 
 
         return [
-            'list' => $list,
+            'list'      => $list,
             'paginator' => [
                 'count' => $count,
                 'limit' => $limit,
-                'page' => $page,
+                'page'  => $page,
             ],
         ];
     }
 
     public function getAccountProfile($params): array
     {
-        return  $this->canonizeAccountProfile($this->accountRepository->getAccountProfile($params));
-    }
-
-
-    ///TODO: check && should remove this method and only use generateHashPassword method
-    public function generatePassword($credential): string
-    {
-        //$bcrypt = new Bcrypt();
-        //return $bcrypt->create($credential);
-        ///TODO:check
-        return $this->generateHashPassword($credential);
+        return $this->canonizeAccountProfile($this->accountRepository->getAccountProfile($params));
     }
 
     public function addPassword($params, $account = []): array
     {
-        $userId = $account['id'] ?? $params['user_id'];
+        $userId     = $account['id'] ?? $params['user_id'];
         $credential = $this->generatePassword($params['credential']);
 
         $this->accountRepository->updateAccount((int)$userId, ['credential' => $credential]);
@@ -959,33 +1060,34 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Password set successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
     public function updatePassword($params, $account, $operator = []): array
     {
-        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['new_credential'] ?? '');
+        // Todo: Check password validator and remove it
+        /* $isPasswordStrong = $this->utilityService->isPasswordStrong($params['new_credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger('updatePasswordFailed', ['params' => $params, 'account' => $account, 'operator' => $operator]);
             return [
                 'result' => false,
-                'data' => new stdClass(),
-                'error' => [
+                'data'   => new stdClass(),
+                'error'  => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code' => 400,
+                    'code'    => 400,
                 ],
                 'status' => 400,
             ];
-        }
+        } */
 
         $hash = $this->accountRepository->getAccountPassword((int)$account['id']);
         if ($this->passwordEqualityCheck($params['current_credential'], $hash)) {
-            $credential = $this->generateHashPassword($params['new_credential']);
+            $credential = $this->generatePassword($params['new_credential']);
             $this->accountRepository->updateAccount((int)$account['id'], ['credential' => $credential]);
 
             // Save log
@@ -993,10 +1095,10 @@ class AccountService implements ServiceInterface
 
             $result = [
                 'result' => true,
-                'data' => [
+                'data'   => [
                     'message' => 'Password update successfully !',
                 ],
-                'error' => [],
+                'error'  => [],
             ];
         } else {
             // Save log
@@ -1004,8 +1106,8 @@ class AccountService implements ServiceInterface
 
             $result = [
                 'result' => false,
-                'data' => [],
-                'error' => [
+                'data'   => [],
+                'error'  => [
                     'message' => 'Error to update password !',
                 ],
                 'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
@@ -1017,7 +1119,8 @@ class AccountService implements ServiceInterface
 
     public function updatePasswordByAdmin($params, $operator = []): array
     {
-        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+        // Todo: Check password validator and remove it
+        /* $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger(
@@ -1026,14 +1129,14 @@ class AccountService implements ServiceInterface
             );
             return [
                 'result' => false,
-                'data' => new stdClass(),
-                'error' => [
+                'data'   => new stdClass(),
+                'error'  => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code' => 400,
+                    'code'    => 400,
                 ],
                 'status' => 400,
             ];
-        }
+        } */
 
         $credential = $this->generatePassword($params['credential']);
         $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => $credential]);
@@ -1046,18 +1149,18 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Password set successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
     public function updateStatusByAdmin($params, $operator = []): array
     {
         $params['status'] = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
-        $paramsList = [
-            'status' => $params['status'],
+        $paramsList       = [
+            'status'                                               => $params['status'],
             $params['status'] ? 'time_activated' : 'time_disabled' => time(),
         ];
         $this->accountRepository->updateAccount((int)$params['user_id'], $paramsList);
@@ -1074,10 +1177,10 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Status change successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
@@ -1093,10 +1196,10 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Delete user successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
@@ -1116,23 +1219,23 @@ class AccountService implements ServiceInterface
         $accessToken = $this->tokenService->generate(
             [
                 'user_id' => $params['user_id'],
-                'type' => 'access',
-                'roles' => [
+                'type'    => 'access',
+                'roles'   => [
                     'member',
                 ],
             ]
         );
 
         // Update cache
-        $this->cacheService->addItem($params['user_id'], 'access_keys', $accessToken['key']);
+        $this->cacheService->setUserItem($params['user_id'], 'access_keys', $accessToken['key']);
 
         // Set result array
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'access_token' => $accessToken['token'],
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
@@ -1144,23 +1247,25 @@ class AccountService implements ServiceInterface
 
         if (is_object($account)) {
             $account = [
-                'id' => (int)$account->getId(),
-                'name' => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email' => $account->getEmail(),
-                'mobile' => $account->getMobile(),
-                'status' => (int)$account->getStatus(),
-                'time_created' => $account->getTimeCreated(),
+                'id'                  => (int)$account->getId(),
+                'name'                => $account->getName(),
+                'identity'            => $account->getIdentity(),
+                'email'               => $account->getEmail(),
+                'mobile'              => $account->getMobile(),
+                'status'              => (int)$account->getStatus(),
+                'time_created'        => $account->getTimeCreated(),
+                'multi_factor_status' => (int)$account->getMultiFactorStatus(),
             ];
         } else {
             $account = [
-                'id' => (int)$account['id'],
-                'name' => $account['name'] ?? '',
-                'email' => $account['email'] ?? '',
-                'identity' => $account['identity'] ?? '',
-                'mobile' => $account['mobile'] ?? '',
-                'status' => (int)$account['status'],
-                'time_created' => $account['time_created'] ?? '',
+                'id'                  => (int)$account['id'],
+                'name'                => $account['name'] ?? '',
+                'email'               => $account['email'] ?? '',
+                'identity'            => $account['identity'] ?? '',
+                'mobile'              => $account['mobile'] ?? '',
+                'status'              => (int)$account['status'],
+                'time_created'        => $account['time_created'] ?? '',
+                'multi_factor_status' => (int)$account['multi_factor_status'],
             ];
         }
 
@@ -1180,33 +1285,33 @@ class AccountService implements ServiceInterface
 
         if (is_object($account)) {
             $account = [
-                'id' => (int)$account->getId(),
-                'name' => $account->getName(),
-                'identity' => $account->getIdentity(),
-                'email' => $account->getEmail(),
-                'mobile' => $account->getMobile(),
-                'status' => (int)$account->getStatus(),
+                'id'           => (int)$account->getId(),
+                'name'         => $account->getName(),
+                'identity'     => $account->getIdentity(),
+                'email'        => $account->getEmail(),
+                'mobile'       => $account->getMobile(),
+                'status'       => (int)$account->getStatus(),
                 'time_created' => $account->getTimeCreated(),
-                'first_name' => $account->getFirstName(),
-                'last_name' => $account->getLastName(),
-                'birthdate' => $account->getBirthdate(),
-                'gender' => $account->getGender(),
-                'avatar' => $account->getAvatar(),
+                'first_name'   => $account->getFirstName(),
+                'last_name'    => $account->getLastName(),
+                'birthdate'    => $account->getBirthdate(),
+                'gender'       => $account->getGender(),
+                'avatar'       => $account->getAvatar(),
             ];
         } else {
             $account = [
-                'id' => (int)$account['id'],
-                'name' => $account['name'] ?? '',
-                'email' => $account['email'] ?? '',
-                'identity' => $account['identity'] ?? '',
-                'mobile' => $account['mobile'] ?? '',
-                'status' => (int)$account['status'],
+                'id'           => (int)$account['id'],
+                'name'         => $account['name'] ?? '',
+                'email'        => $account['email'] ?? '',
+                'identity'     => $account['identity'] ?? '',
+                'mobile'       => $account['mobile'] ?? '',
+                'status'       => (int)$account['status'],
                 'time_created' => $account['time_created'] ?? '',
-                'first_name' => $account['first_name'] ?? '',
-                'last_name' => $account['last_name'] ?? '',
-                'birthdate' => $account['birthdate'] ?? '',
-                'gender' => $account['gender'] ?? '',
-                'avatar' => $account['avatar'] ?? '',
+                'first_name'   => $account['first_name'] ?? '',
+                'last_name'    => $account['last_name'] ?? '',
+                'birthdate'    => $account['birthdate'] ?? '',
+                'gender'       => $account['gender'] ?? '',
+                'avatar'       => $account['avatar'] ?? '',
             ];
         }
 
@@ -1226,72 +1331,75 @@ class AccountService implements ServiceInterface
 
         if (is_object($profile)) {
             $profile = [
-                'user_id' => $profile->getUserId(),
-                'first_name' => $profile->getFirstName(),
-                'last_name' => $profile->getLastName(),
-                'id_number' => $profile->getIdNumber(),
-                'birthdate' => $profile->getBirthdate(),
-                'gender' => $profile->getGender(),
-                'avatar' => $profile->getAvatar(),
-                'ip_register' => $profile->getIpRegister(),
+                'user_id'         => $profile->getUserId(),
+                'first_name'      => $profile->getFirstName(),
+                'last_name'       => $profile->getLastName(),
+                'id_number'       => $profile->getIdNumber(),
+                'birthdate'       => $profile->getBirthdate(),
+                'gender'          => $profile->getGender(),
+                'avatar'          => $profile->getAvatar(),
+                'ip_register'     => $profile->getIpRegister(),
                 'register_source' => $profile->getRegisterSource(),
-                'homepage' => $profile->getHomepage(),
-                'phone' => $profile->getPhone(),
-                'address_1' => $profile->getAddress1(),
-                'address_2' => $profile->getAddress2(),
-                'item_id' => $profile->getItemId(),
-                'country' => $profile->getCountry(),
-                'state' => $profile->getState(),
-                'city' => $profile->getCity(),
-                'zip_code' => $profile->getZipCode(),
-                'bank_name' => $profile->getBankName(),
-                'bank_card' => $profile->getBankCard(),
-                'bank_account' => $profile->getBankAccount(),
+                'homepage'        => $profile->getHomepage(),
+                'phone'           => $profile->getPhone(),
+                'address_1'       => $profile->getAddress1(),
+                'address_2'       => $profile->getAddress2(),
+                'item_id'         => $profile->getItemId(),
+                'country'         => $profile->getCountry(),
+                'state'           => $profile->getState(),
+                'city'            => $profile->getCity(),
+                'zip_code'        => $profile->getZipCode(),
+                'bank_name'       => $profile->getBankName(),
+                'bank_card'       => $profile->getBankCard(),
+                'bank_account'    => $profile->getBankAccount(),
+                'information'     => $profile->getInformation(),
             ];
         } else {
             $profile = [
-                'user_id' => $profile['user_id'],
-                'first_name' => $profile['first_name'],
-                'last_name' => $profile['last_name'],
-                'id_number' => $profile['id_number'],
-                'birthdate' => $profile['birthdate'],
-                'gender' => $profile['gender'],
-                'avatar' => $profile['avatar'],
-                'ip_register' => $profile['ip_register'],
+                'user_id'         => $profile['user_id'],
+                'first_name'      => $profile['first_name'],
+                'last_name'       => $profile['last_name'],
+                'id_number'       => $profile['id_number'],
+                'birthdate'       => $profile['birthdate'],
+                'gender'          => $profile['gender'],
+                'avatar'          => $profile['avatar'],
+                'ip_register'     => $profile['ip_register'],
                 'register_source' => $profile['register_source'],
-                'homepage' => $profile['homepage'],
-                'phone' => $profile['phone'],
-                'address_1' => $profile['address_1'],
-                'address_2' => $profile['address_2'],
-                'item_id' => $profile['item_id'],
-                'country' => $profile['country'],
-                'state' => $profile['state'],
-                'city' => $profile['city'],
-                'zip_code' => $profile['zip_code'],
-                'bank_name' => $profile['bank_name'],
-                'bank_card' => $profile['bank_card'],
-                'bank_account' => $profile['bank_account'],
+                'homepage'        => $profile['homepage'],
+                'phone'           => $profile['phone'],
+                'address_1'       => $profile['address_1'],
+                'address_2'       => $profile['address_2'],
+                'item_id'         => $profile['item_id'],
+                'country'         => $profile['country'],
+                'state'           => $profile['state'],
+                'city'            => $profile['city'],
+                'zip_code'        => $profile['zip_code'],
+                'bank_name'       => $profile['bank_name'],
+                'bank_card'       => $profile['bank_card'],
+                'bank_account'    => $profile['bank_account'],
+                'information'     => $profile['information'],
             ];
         }
+
+        $profile['information'] = !empty($profile['information']) ? json_decode($profile['information'], true) : [];
 
         return $profile;
     }
 
     public function isDuplicated($type, $value, $id = 0): bool
     {
-        return (bool)$this->accountRepository->count(
+        return (bool)$this->accountRepository->duplicatedAccount(
             [
                 'field' => $type,
                 'value' => $value,
-                'id' => $id,
+                'id'    => $id,
             ]
         );
     }
 
     public function userRegisterStatus(): int
     {
-        // ToDo: call it from config
-        return 1;
+        return $this->config['register']['status'] ?? 1;
     }
 
     public function prepareFilter($params): array
@@ -1303,9 +1411,9 @@ class AccountService implements ServiceInterface
                 case 'roles':
                     if (($value != '') && !empty($value) && ($value != null)) {
                         $filters[$key] = [
-                            'role' => $key,
+                            'role'  => $key,
                             'value' => explode(',', $value),
-                            'type' => 'string',
+                            'type'  => 'string',
                         ];
                     }
                     break;
@@ -1317,20 +1425,20 @@ class AccountService implements ServiceInterface
     public function getAccountListByOperator($params): array
     {
         $limit = $params['limit'] ?? 10;
-        $page = $params['page'] ?? 1;
+        $page  = $params['page'] ?? 1;
         /// changed by kerloper
-        $key = $params['key'] ?? '';
-        $order = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $key    = $params['key'] ?? '';
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
         /// changed by kerloper
         $listParams = [
-            'page' => (int)$page,
-            'limit' => (int)$limit,
-            'order' => $order,
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
             'offset' => $offset,
-            'key' => $key,
+            'key'    => $key,
         ];
 
         if (isset($params['name']) && !empty($params['name'])) {
@@ -1340,7 +1448,6 @@ class AccountService implements ServiceInterface
             $listParams['identity'] = $params['identity'];
         }
         if (isset($params['email']) && !empty($params['email'])) {
-            echo "d";
             $listParams['email'] = $params['email'];
         }
         if (isset($params['mobile']) && !empty($params['mobile'])) {
@@ -1371,7 +1478,7 @@ class AccountService implements ServiceInterface
         if (!empty($filters)) {
             foreach ($filters as $filter) {
                 $itemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
                 foreach ($rowSet as $row) {
                     $itemIdList[] = $this->canonizeAccountId($row);
                 }
@@ -1383,7 +1490,7 @@ class AccountService implements ServiceInterface
         if (!empty($notAllow)) {
             foreach ($notAllow as $filter) {
                 $notAllowItemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                $rowSet             = $this->accountRepository->getIdFromFilter($filter);
                 foreach ($rowSet as $row) {
                     $notAllowItemIdList[] = $this->canonizeAccountId($row);
                 }
@@ -1392,7 +1499,7 @@ class AccountService implements ServiceInterface
         }
 
         // Get list
-        $list = [];
+        $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
             /// changed by kerloper
@@ -1407,7 +1514,7 @@ class AccountService implements ServiceInterface
 
 
         $list = array_values($list);
-        $i = 0;
+        $i    = 0;
         ///TODO:check
         foreach ($list as $user) {
             $list[$i]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
@@ -1415,12 +1522,12 @@ class AccountService implements ServiceInterface
         }
 
         return [
-            'list' => $list,
-            'roles' => $roleList,
+            'list'      => $list,
+            'roles'     => $roleList,
             'paginator' => [
                 'count' => $count,
                 'limit' => $limit,
-                'page' => $page,
+                'page'  => $page,
             ],
         ];
     }
@@ -1431,7 +1538,7 @@ class AccountService implements ServiceInterface
         if (!empty($notAllow)) {
             foreach ($notAllow as $filter) {
                 $notAllowItemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                $rowSet             = $this->accountRepository->getIdFromFilter($filter);
                 foreach ($rowSet as $row) {
                     $notAllowItemIdList[] = $this->canonizeAccountId($row);
                 }
@@ -1448,7 +1555,7 @@ class AccountService implements ServiceInterface
         if (!empty($notAllow)) {
             foreach ($notAllow as $filter) {
                 $notAllowItemIdList = [];
-                $rowSet = $this->accountRepository->getIdFromFilter($filter);
+                $rowSet             = $this->accountRepository->getIdFromFilter($filter);
                 foreach ($rowSet as $row) {
                     $notAllowItemIdList[] = $this->canonizeAccountId($row);
                 }
@@ -1463,8 +1570,8 @@ class AccountService implements ServiceInterface
     public function updateStatusByOperator($params, $operator = []): array
     {
         $params['status'] = (isset($params['status']) && !empty($params['status'])) ? $params['status'] : 0;
-        $paramsList = [
-            'status' => $params['status'],
+        $paramsList       = [
+            'status'                                               => $params['status'],
             $params['status'] ? 'time_activated' : 'time_disabled' => time(),
         ];
         $this->accountRepository->updateAccount((int)$params['user_id'], $paramsList);
@@ -1481,10 +1588,10 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Status change successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
@@ -1501,17 +1608,18 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Delete user successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
     ///TODO: set control for check role of target user in function (must check target user has not admin role)
     public function updatePasswordByOperator($params, $operator = []): array
     {
-        $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
+        // Todo: Check password validator and remove it
+        /* $isPasswordStrong = $this->utilityService->isPasswordStrong($params['credential'] ?? '');
         if (!$isPasswordStrong) {
             // Save log
             $this->historyService->logger(
@@ -1520,14 +1628,14 @@ class AccountService implements ServiceInterface
             );
             return [
                 'result' => false,
-                'data' => new stdClass(),
-                'error' => [
+                'data'   => new stdClass(),
+                'error'  => [
                     'message' => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
-                    'code' => 400,
+                    'code'    => 403,
                 ],
-                'status' => 400,
+                'status' => 403,
             ];
-        }
+        } */
 
         $credential = $this->generatePassword($params['credential']);
 
@@ -1541,10 +1649,10 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
+            'data'   => [
                 'message' => 'Password set successfully !',
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 
@@ -1553,13 +1661,13 @@ class AccountService implements ServiceInterface
      *
      * @return string
      */
-    protected function generateHashPassword(mixed $password): string
+    protected function generatePassword(mixed $password): string
     {
         switch ($this->hashPattern) {
             default:
             case'bcrypt':
                 $bcrypt = new Bcrypt();
-                $hash = $bcrypt->create($password);
+                $hash   = $bcrypt->create($password);
                 break;
             case'sha512':
                 $hash = hash('sha512', $password);
@@ -1590,7 +1698,7 @@ class AccountService implements ServiceInterface
         return $result;
     }
 
-    public function prepareMfa($account): array
+    public function requestMfa($account): array
     {
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
@@ -1603,16 +1711,16 @@ class AccountService implements ServiceInterface
 
         // Set data
         $secret = null;
-        $image = null;
+        $image  = null;
         if (!isset($mfa['multi_factor_secret']) || empty($mfa['multi_factor_secret'])) {
             $secret = $multiFactorAuth->createSecret(160);
-            $image = $multiFactorAuth->getQRCodeImageAsDataUri($account['email'], $secret);
+            $image  = $multiFactorAuth->getQRCodeImageAsDataUri($account['email'], $secret);
         }
 
         return [
             'multi_factor_status' => $mfa['multi_factor_status'],
             'multi_factor_secret' => $secret,
-            'multi_factor_image' => $image,
+            'multi_factor_image'  => $image,
             'multi_factor_global' => $multiFactorGlobal,
             'multi_factor_verify' => 0,
         ];
@@ -1646,10 +1754,10 @@ class AccountService implements ServiceInterface
         if (!$result) {
             return [
                 'result' => false,
-                'data' => [],
-                'error' => [
+                'data'   => [],
+                'error'  => [
                     'message' => 'Error to verify code !',
-                    'code' => StatusCodeInterface::STATUS_FORBIDDEN,
+                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ],
                 'status' => StatusCodeInterface::STATUS_FORBIDDEN,
             ];
@@ -1679,13 +1787,13 @@ class AccountService implements ServiceInterface
 
         return [
             'result' => true,
-            'data' => [
-                'message' => 'Congratulations! Your multi-factor authentication (MFA) has been successfully verified. Your account is now secure.',
+            'data'   => [
+                'message'             => 'Congratulations! Your multi-factor authentication (MFA) has been successfully verified. Your account is now secure.',
                 'multi_factor_global' => $multiFactorGlobal,
                 'multi_factor_status' => 1,
                 'multi_factor_verify' => 1,
             ],
-            'error' => [],
+            'error'  => [],
         ];
     }
 

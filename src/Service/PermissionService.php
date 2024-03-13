@@ -43,91 +43,6 @@ class PermissionService implements ServiceInterface
         return false;
     }
 
-    public function getPermission($pageName): array
-    {
-        $page = $this->permissionRepository->getPermissionPage(['name' => $pageName]);
-        $page = $this->canonizePage($page);
-
-        $resource = $this->permissionRepository->getPermissionResource(['name' => $page['resource']]);
-        $resource = $this->canonizeResource($resource);
-
-        $roles       = $this->permissionRepository->getPermissionRoleList(['resource' => $page['resource']]);
-        $systemRoles = [];
-        foreach ($roles as $role) {
-            $systemRoles[] = $this->canonizeRole($role);
-        }
-
-        return [
-            'resource'    => $resource,
-            'systemRoles' => $systemRoles,
-        ];
-    }
-
-    public function canonizePage($page)
-    {
-        if (empty($page)) {
-            return [];
-        }
-
-        if (is_object($page)) {
-            $page = [
-                'id'          => $page->getId(),
-                'title'       => $page->getTitle(),
-                'section'     => $page->getSection(),
-                'module'      => $page->getModule(),
-                'package'     => $page->getPackage(),
-                'handler'     => $page->getHandler(),
-                'resource'    => $page->getResource(),
-                'name'        => $page->getName(),
-                'cache_type'  => $page->getCacheType(),
-                'cache_ttl'   => $page->getCacheTtl(),
-                'cache_level' => $page->getCacheLevel(),
-            ];
-        }
-
-        return $page;
-    }
-
-    public function canonizeResource($resource)
-    {
-        if (empty($resource)) {
-            return [];
-        }
-
-        if (is_object($resource)) {
-            $resource = [
-                'id'      => $resource->getId(),
-                'title'   => $resource->getTitle(),
-                'section' => $resource->getSection(),
-                'module'  => $resource->getModule(),
-                'name'    => $resource->getName(),
-                'type'    => $resource->getType(),
-            ];
-        }
-
-        return $resource;
-    }
-
-    public function canonizeRole($role)
-    {
-        if (empty($role)) {
-            return [];
-        }
-
-        if (is_object($role)) {
-            $role = [
-                'id'       => $role->getId(),
-                'resource' => $role->getResource(),
-                'section'  => $role->getSection(),
-                'module'   => $role->getModule(),
-                'role'     => $role->getRole(),
-                'name'     => $role->getName(),
-            ];
-        }
-
-        return $role;
-    }
-
     public function checkPermissionAfter(array $current = [], array $validate = [], array $items = []): bool
     {
         foreach ($items as $item) {
@@ -155,7 +70,27 @@ class PermissionService implements ServiceInterface
         return true;
     }
 
-    public function getInstallerList($params)
+    public function getPermission($pageName): array
+    {
+        $page = $this->permissionRepository->getPermissionPage(['name' => $pageName]);
+        $page = $this->canonizePage($page);
+
+        $resource = $this->permissionRepository->getPermissionResource(['name' => $page['resource']]);
+        $resource = $this->canonizeResource($resource);
+
+        $roles       = $this->permissionRepository->getPermissionRoleList(['resource' => $page['resource']]);
+        $systemRoles = [];
+        foreach ($roles as $role) {
+            $systemRoles[] = $this->canonizeRole($role);
+        }
+
+        return [
+            'resource'    => $resource,
+            'systemRoles' => $systemRoles,
+        ];
+    }
+
+    public function getInstallerList($params): array
     {
         $result = [
             'page_list'     => [],
@@ -228,5 +163,81 @@ class PermissionService implements ServiceInterface
         $role = $this->permissionRepository->addPermissionRole($values);
 
         return $this->canonizeRole($role);
+    }
+
+    public function getPermissionRole($params): array
+    {
+        $roles    = $this->permissionRepository->getPermissionRoleList($params);
+        $roleList = [];
+        foreach ($roles as $role) {
+            $roleList[$role->getResource()] = $role->getResource();
+        }
+
+        return array_values($roleList);
+    }
+
+    public function canonizePage($page)
+    {
+        if (empty($page)) {
+            return [];
+        }
+
+        if (is_object($page)) {
+            $page = [
+                'id'          => $page->getId(),
+                'title'       => $page->getTitle(),
+                'section'     => $page->getSection(),
+                'module'      => $page->getModule(),
+                'package'     => $page->getPackage(),
+                'handler'     => $page->getHandler(),
+                'resource'    => $page->getResource(),
+                'name'        => $page->getName(),
+                'cache_type'  => $page->getCacheType(),
+                'cache_ttl'   => $page->getCacheTtl(),
+                'cache_level' => $page->getCacheLevel(),
+            ];
+        }
+
+        return $page;
+    }
+
+    public function canonizeResource($resource)
+    {
+        if (empty($resource)) {
+            return [];
+        }
+
+        if (is_object($resource)) {
+            $resource = [
+                'id'      => $resource->getId(),
+                'title'   => $resource->getTitle(),
+                'section' => $resource->getSection(),
+                'module'  => $resource->getModule(),
+                'name'    => $resource->getName(),
+                'type'    => $resource->getType(),
+            ];
+        }
+
+        return $resource;
+    }
+
+    public function canonizeRole($role)
+    {
+        if (empty($role)) {
+            return [];
+        }
+
+        if (is_object($role)) {
+            $role = [
+                'id'       => $role->getId(),
+                'resource' => $role->getResource(),
+                'section'  => $role->getSection(),
+                'module'   => $role->getModule(),
+                'role'     => $role->getRole(),
+                'name'     => $role->getName(),
+            ];
+        }
+
+        return $role;
     }
 }

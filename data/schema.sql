@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `user_profile`
     `bank_name`       VARCHAR(32)                        DEFAULT NULL,
     `bank_card`       VARCHAR(32)                        DEFAULT NULL,
     `bank_account`    VARCHAR(32)                        DEFAULT NULL,
+    `information`     JSON                               DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `user_id` (`user_id`)
 );
@@ -85,19 +86,6 @@ CREATE TABLE IF NOT EXISTS `permission_resource`
     UNIQUE KEY `key` (`section`, `module`, `name`, `type`)
 );
 
-CREATE TABLE IF NOT EXISTS `permission_role`
-(
-    `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
-    `resource` VARCHAR(64)           NOT NULL DEFAULT '',
-    `section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
-    `module`   VARCHAR(64)           NOT NULL DEFAULT '',
-    `role`     VARCHAR(64)           NOT NULL DEFAULT '',
-    `name`     VARCHAR(64)           NULL     DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`),
-    UNIQUE KEY `key` (`resource`, `section`, `module`, `role`, `name`)
-);
-
 CREATE TABLE IF NOT EXISTS `permission_page`
 (
     `id`          INT(8) UNSIGNED         NOT NULL AUTO_INCREMENT,
@@ -114,6 +102,19 @@ CREATE TABLE IF NOT EXISTS `permission_page`
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`),
     UNIQUE KEY `key` (`section`, `module`, `package`, `handler`, `resource`, `name`)
+);
+
+CREATE TABLE IF NOT EXISTS `permission_role`
+(
+    `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
+    `resource` VARCHAR(64)           NOT NULL DEFAULT '',
+    `section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
+    `module`   VARCHAR(64)           NOT NULL DEFAULT '',
+    `role`     VARCHAR(64)           NOT NULL DEFAULT '',
+    `name`     VARCHAR(64)           NULL     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`),
+    UNIQUE KEY `key` (`resource`, `section`, `module`, `role`, `name`)
 );
 
 INSERT INTO `role_resource` (`id`, `name`, `title`, `status`, `section`)

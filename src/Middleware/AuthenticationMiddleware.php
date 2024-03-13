@@ -145,8 +145,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
                 $request = $request->withAttribute(
                     'error',
                     [
-                        'message'           => 'To complete your login, please enter the 6-digit code from your multi factor app.',
-                        'code'              => StatusCodeInterface::STATUS_FORBIDDEN,
+                        'message'             => 'To complete your login, please enter the 6-digit code from your multi factor app.',
+                        'code'                => StatusCodeInterface::STATUS_FORBIDDEN,
                         'multi_factor_global' => $multiFactorGlobal,
                         'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],
                         'multi_factor_verify' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'],

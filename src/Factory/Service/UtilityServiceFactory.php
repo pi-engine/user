@@ -6,7 +6,6 @@ use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Service\RoleService;
 use User\Service\UtilityService;
 
 class UtilityServiceFactory implements FactoryInterface

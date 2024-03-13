@@ -8,7 +8,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Admin\Role\AddHandler;
 use User\Handler\Admin\Role\DeleteHandler;
 use User\Service\RoleService;
 

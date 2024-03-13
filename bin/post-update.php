@@ -18,7 +18,7 @@ $config     = new Config(include realpath(__DIR__ . '/../../../config/autoload/g
 $adapter    = new Adapter($config->db->toArray());
 $role       = new RoleService();
 $permission = new PermissionService();
-$install = new Update($adapter, $role, $permission);
+$install    = new Update($adapter, $role, $permission);
 echo $install->database();
 echo $install->config();
 echo $install->permission();

@@ -18,12 +18,13 @@ class UtilityService implements ServiceInterface
     /* @var array */
     protected array $config;
 
-    protected array $slugOptions         = [
-        // Force lower case
-        'force_lower'     => true,
-        // Force normalize chars
-        'normalize_chars' => true,
-    ];
+    protected array $slugOptions
+        = [
+            // Force lower case
+            'force_lower'     => true,
+            // Force normalize chars
+            'normalize_chars' => true,
+        ];
 
     public function __construct($config)
     {
@@ -324,7 +325,7 @@ class UtilityService implements ServiceInterface
         return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
     }
 
-    function isPasswordStrong($password)
+    public function isPasswordStrong($password): bool
     {
         // Define your password strength rules
         $minLength                = 8;

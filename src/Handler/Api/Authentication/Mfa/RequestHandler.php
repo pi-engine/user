@@ -37,7 +37,7 @@ class RequestHandler implements RequestHandlerInterface
         $account = $request->getAttribute('account');
 
         // Do log in
-        $result = $this->accountService->prepareMfa($account);
+        $result = $this->accountService->requestMfa($account);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

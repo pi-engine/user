@@ -22,5 +22,6 @@ interface RoleRepositoryInterface
     public function addRoleAccount(int $userId, string $roleName, string $section = 'api'): void;
 
     public function deleteRoleAccount(int $userId, string $roleName): void;
-    public function deleteAllRoleAccount(int $userId): void;
+
+    public function deleteAllRoleAccount(int $userId, string $section = 'api'): void;
 }

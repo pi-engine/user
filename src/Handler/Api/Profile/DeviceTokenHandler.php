@@ -48,7 +48,7 @@ class DeviceTokenHandler implements RequestHandlerInterface
         $result = [
             'result' => true,
             'data'   => [
-                'message' => 'This device token added !'
+                'message' => 'This device token added !',
             ],
             'error'  => [],
         ];

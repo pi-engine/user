@@ -34,8 +34,8 @@ class VerifyHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account = $request->getAttribute('account');
-        $tokenId = $request->getAttribute('token_id');
+        $account     = $request->getAttribute('account');
+        $tokenId     = $request->getAttribute('token_id');
         $requestBody = $request->getParsedBody();
 
         $result = $this->accountService->verifyMfa($account, $requestBody, $tokenId);
