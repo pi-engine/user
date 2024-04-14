@@ -276,8 +276,16 @@ class AccountService implements ServiceInterface
         $account['is_company_setup']    = false;
 
         // Check company setup
-        if (isset($user['authorization']['company']['is_company_setup'])) {
-            $account['is_company_setup'] = $user['authorization']['company']['is_company_setup'];
+        if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+            $isCompanySetup = false;
+
+            if (isset($user['authorization']['company']['is_company_setup'])) {
+                $isCompanySetup = $user['authorization']['company']['is_company_setup'];
+            } elseif (isset($user['account']['is_company_setup'])) {
+                $isCompanySetup = $user['account']['is_company_setup'];
+            }
+
+            $account['is_company_setup'] = $isCompanySetup;
         }
 
         // Set token payload
@@ -1798,7 +1806,8 @@ class AccountService implements ServiceInterface
     }
 
     ///TODO:set functions as bottom for other actions
-    public function todoRemoveData(){
+    public function todoRemoveData()
+    {
         ///TODO:remove user cache from redis
         ///TODO:remove profile cache from redis
         ///TODO:remove role cache from redis

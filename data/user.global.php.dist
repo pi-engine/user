@@ -73,7 +73,8 @@ return [
             'status' => 1,
         ],
         'login'            => [
-            'permission' => 1,
+            'permission'  => 1,
+            'get_company' => 0,
         ],
     ],
     'captcha' => [
