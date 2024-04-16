@@ -150,17 +150,6 @@ class AccountRepository implements AccountRepositoryInterface
 
         $sql    = new Sql($this->db);
         $select = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
-        /* if (isset($params['key']) && !empty($params['key'])) {
-            $select->where->addPredicate(
-                new Like('name', '%' . $params['key'] . '%')
-            )->or;
-            $select->where->addPredicate(
-                new Like('email', '%' . $params['key'] . '%')
-            )->or;
-            $select->where->addPredicate(
-                new Like('mobile', '%' . $params['key'] . '%')
-            )->or;
-        } */
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -218,17 +207,6 @@ class AccountRepository implements AccountRepositoryInterface
         // Get count
         $sql    = new Sql($this->db);
         $select = $sql->select($this->tableAccount)->columns($columns)->where($where);
-        /* if (isset($params['key']) && !empty($params['key'])) {
-            $select->where->addPredicate(
-                new Like('name', '%' . $params['key'] . '%')
-            )->or;
-            $select->where->addPredicate(
-                new Like('email', '%' . $params['key'] . '%')
-            )->or;
-            $select->where->addPredicate(
-                new Like('mobile', '%' . $params['key'] . '%')
-            )->or;
-        } */
         $statement = $sql->prepareStatementForSqlObject($select);
         $row       = $statement->execute()->current();
 

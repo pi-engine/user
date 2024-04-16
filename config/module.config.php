@@ -22,6 +22,7 @@ return [
             Repository\ProfileRepository::class                      => Factory\Repository\ProfileRepositoryFactory::class,
             Repository\RoleRepository::class                         => Factory\Repository\RoleRepositoryFactory::class,
             Service\AccountService::class                            => Factory\Service\AccountServiceFactory::class,
+            Service\AvatarService::class                             => Factory\Service\AvatarServiceFactory::class,
             Service\TokenService::class                              => Factory\Service\TokenServiceFactory::class,
             Service\CacheService::class                              => Factory\Service\CacheServiceFactory::class,
             Service\RoleService::class                               => Factory\Service\RoleServiceFactory::class,
@@ -32,6 +33,7 @@ return [
             Service\InstallerService::class                          => Factory\Service\InstallerServiceFactory::class,
             Middleware\AuthenticationMiddleware::class               => Factory\Middleware\AuthenticationMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class                => Factory\Middleware\AuthorizationMiddlewareFactory::class,
+            Middleware\AvatarUploadMiddleware::class                 => Factory\Middleware\AvatarUploadMiddlewareFactory::class,
             Middleware\SecurityMiddleware::class                     => Factory\Middleware\SecurityMiddlewareFactory::class,
             Middleware\ValidationMiddleware::class                   => Factory\Middleware\ValidationMiddlewareFactory::class,
             Middleware\InstallerMiddleware::class                    => Factory\Middleware\InstallerMiddlewareFactory::class,
@@ -73,6 +75,7 @@ return [
             Handler\Api\Authentication\Oauth\GoogleHandler::class    => Factory\Handler\Api\Authentication\Oauth\GoogleHandlerFactory::class,
             Handler\Api\Authentication\Oauth\MicrosoftHandler::class => Factory\Handler\Api\Authentication\Oauth\MicrosoftHandlerFactory::class,
             Handler\Api\Captcha\ReCaptcha\VerifyHandler::class       => Factory\Handler\Api\Captcha\ReCaptcha\VerifyHandlerFactory::class,
+            Handler\Api\Avatar\UploadHandler::class                  => Factory\Handler\Api\Avatar\UploadHandlerFactory::class,
             Handler\ErrorHandler::class                              => Factory\Handler\ErrorHandlerFactory::class,
             Handler\InstallerHandler::class                          => Factory\Handler\InstallerHandlerFactory::class,
         ],
@@ -178,6 +181,39 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Handler\Api\Profile\HistoryHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+
+                    // Api avatar section
+                    'avatar'        => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/avatar',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'view'         => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/upload',
+                                    'defaults' => [
+                                        'title'       => 'User avatar upload',
+                                        'module'      => 'user',
+                                        'section'     => 'api',
+                                        'package'     => 'avatar',
+                                        'handler'     => 'upload',
+                                        'permissions' => 'user-avatar-upload',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Middleware\AvatarUploadMiddleware::class,
+                                            Handler\Api\Avatar\UploadHandler::class
                                         ),
                                     ],
                                 ],

@@ -223,5 +223,17 @@ return [
                 'admin',
             ],
         ],
+        [
+            'title'       => 'User avatar upload',
+            'module'      => 'user',
+            'section'     => 'api',
+            'package'     => 'avatar',
+            'handler'     => 'upload',
+            'permissions' => 'user-avatar-upload',
+            'role'        => [
+                'member',
+                'admin',
+            ],
+        ],
     ],
 ];

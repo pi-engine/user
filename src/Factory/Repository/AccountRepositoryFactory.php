@@ -34,7 +34,7 @@ class AccountRepositoryFactory implements FactoryInterface
             new ReflectionHydrator(),
             new Account('', '', '', '', 0, 0, 0),
             new AccountProfile(0, '', '', '', '', 0, 0, '', '', '', '', ''),
-            new Profile(0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0),
+            new Profile(0, '', '', '', '', '', '', 0),
             new AccountRole(0, '', '', 0),
             new Credential('', 0),
             new MultiFactor(0, '', 0),

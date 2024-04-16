@@ -72,6 +72,37 @@ class AccountService implements ServiceInterface
             'birthdate',
             'gender',
             'avatar',
+            /* 'ip_register',
+            'register_source',
+            'id_number',
+            'homepage',
+            'phone',
+            'address_1',
+            'address_2',
+            'item_id',
+            'country',
+            'state',
+            'city',
+            'zip_code',
+            'bank_name',
+            'bank_card',
+            'bank_account', */
+        ];
+
+    protected array $informationFields
+        = [
+            'user_id',
+            'name',
+            'email',
+            'identity',
+            'mobile',
+            'status',
+            'first_name',
+            'last_name',
+            'birthdate',
+            'gender',
+            'avatar',
+            'avatar_params',
             'ip_register',
             'register_source',
             'id_number',
@@ -87,6 +118,8 @@ class AccountService implements ServiceInterface
             'bank_name',
             'bank_card',
             'bank_account',
+            'multi_factor_status',
+            'multi_factor_secret',
         ];
 
     protected string $hashPattern;
@@ -578,32 +611,33 @@ class AccountService implements ServiceInterface
         // Save log
         $this->historyService->logger('register', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
+
+
+        // Clean up
         $profileParams = [
             'user_id'         => (int)$account['id'],
-            'first_name'      => $params['first_name'] ?? null,
-            'last_name'       => $params['last_name'] ?? null,
-            'id_number'       => $params['id_number'] ?? null,
-            'birthdate'       => $params['birthdate'] ?? null,
-            'gender'          => $params['gender'] ?? null,
-            'avatar'          => $params['avatar'] ?? null,
-            'ip_register'     => $params['ip_register'] ?? null,
-            'register_source' => $params['register_source'] ?? null,
-            'homepage'        => $params['homepage'] ?? null,
-            'phone'           => $params['phone'] ?? null,
-            'address_1'       => $params['address_1'] ?? null,
-            'address_2'       => $params['address_2'] ?? null,
-            'item_id'         => $params['item_id'] ?? 0,
-            'country'         => $params['country'] ?? null,
-            'state'           => $params['state'] ?? null,
-            'city'            => $params['city'] ?? null,
-            'zip_code'        => $params['zip_code'] ?? null,
-            'bank_name'       => $params['bank_name'] ?? null,
-            'bank_card'       => $params['bank_card'] ?? null,
-            'bank_account'    => $params['bank_account'] ?? null,
         ];
+        $informationParams = [];
+        foreach ($params as $key => $value) {
+            if (in_array($key, $this->profileFields)) {
+                if (empty($value)) {
+                    $profileParams[$key] = null;
+                } else {
+                    $profileParams[$key] = $value;
+                }
+            }
+
+            if (in_array($key, $this->informationFields)) {
+                if (empty($value)) {
+                    $informationParams[$key] = null;
+                } else {
+                    $informationParams[$key] = $value;
+                }
+            }
+        }
 
         $profileParams['information'] = json_encode(
-            $profileParams,
+            $informationParams,
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
         );
 
@@ -877,6 +911,7 @@ class AccountService implements ServiceInterface
         // Clean up
         $accountParams = [];
         $profileParams = [];
+        $informationParams = [];
         foreach ($params as $key => $value) {
             if (in_array($key, $this->accountFields)) {
                 if (!empty($value)) {
@@ -891,6 +926,29 @@ class AccountService implements ServiceInterface
                     $profileParams[$key] = $value;
                 }
             }
+
+            if (in_array($key, $this->informationFields)) {
+                if (empty($value)) {
+                    $informationParams[$key] = null;
+                } else {
+                    $informationParams[$key] = $value;
+                }
+            }
+        }
+
+        if (!empty($informationParams)) {
+            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+            foreach ($profile['information'] as $key => $value) {
+                if (!isset($informationParams[$key])) {
+                    $informationParams[$key] = $value;
+                }
+            }
+
+
+            $profileParams['information'] = json_encode(
+                $informationParams,
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+            );
         }
 
         if (!empty($accountParams)) {
@@ -898,15 +956,6 @@ class AccountService implements ServiceInterface
         }
 
         if (!empty($profileParams)) {
-            $profile = $this->getProfile(['user_id' => (int)$account['id']]);
-            foreach ($profileParams as $key => $value) {
-                $profile['information'][$key] = $value;
-            }
-            $profileParams['information'] = json_encode(
-                $profile['information'],
-                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
-            );
-
             $this->accountRepository->updateProfile((int)$account['id'], $profileParams);
         }
 
@@ -1342,10 +1391,10 @@ class AccountService implements ServiceInterface
                 'user_id'         => $profile->getUserId(),
                 'first_name'      => $profile->getFirstName(),
                 'last_name'       => $profile->getLastName(),
-                'id_number'       => $profile->getIdNumber(),
                 'birthdate'       => $profile->getBirthdate(),
                 'gender'          => $profile->getGender(),
                 'avatar'          => $profile->getAvatar(),
+                /* 'id_number'       => $profile->getIdNumber(),
                 'ip_register'     => $profile->getIpRegister(),
                 'register_source' => $profile->getRegisterSource(),
                 'homepage'        => $profile->getHomepage(),
@@ -1359,7 +1408,7 @@ class AccountService implements ServiceInterface
                 'zip_code'        => $profile->getZipCode(),
                 'bank_name'       => $profile->getBankName(),
                 'bank_card'       => $profile->getBankCard(),
-                'bank_account'    => $profile->getBankAccount(),
+                'bank_account'    => $profile->getBankAccount(), */
                 'information'     => $profile->getInformation(),
             ];
         } else {
@@ -1367,10 +1416,10 @@ class AccountService implements ServiceInterface
                 'user_id'         => $profile['user_id'],
                 'first_name'      => $profile['first_name'],
                 'last_name'       => $profile['last_name'],
-                'id_number'       => $profile['id_number'],
                 'birthdate'       => $profile['birthdate'],
                 'gender'          => $profile['gender'],
                 'avatar'          => $profile['avatar'],
+                /* 'id_number'       => $profile['id_number'],
                 'ip_register'     => $profile['ip_register'],
                 'register_source' => $profile['register_source'],
                 'homepage'        => $profile['homepage'],
@@ -1384,7 +1433,7 @@ class AccountService implements ServiceInterface
                 'zip_code'        => $profile['zip_code'],
                 'bank_name'       => $profile['bank_name'],
                 'bank_card'       => $profile['bank_card'],
-                'bank_account'    => $profile['bank_account'],
+                'bank_account'    => $profile['bank_account'], */
                 'information'     => $profile['information'],
             ];
         }

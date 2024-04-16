@@ -45,14 +45,14 @@ return [
         'exp_refresh' => 7776000, // 90 days
     ],
     'account' => [
-        'otp_email'        => [
+        'otp_email'    => [
             'subject' => 'Login by one-time token',
             'body'    => 'Your one-time token is <strong>%s</strong> and it is valid just for 2 minutes.',
         ],
-        'multi_factor'     => [
+        'multi_factor' => [
             'status' => 0,
         ],
-        'oauth'            => [
+        'oauth'        => [
             'oauth_login'    => 1,
             'oauth_register' => 1,
             'microsoft'      => [
@@ -69,10 +69,10 @@ return [
                 'google_client_secret' => 'XXX',
             ],
         ],
-        'register'         => [
+        'register'     => [
             'status' => 1,
         ],
-        'login'            => [
+        'login'        => [
             'permission'  => 1,
             'get_company' => 0,
         ],
@@ -86,6 +86,20 @@ return [
     'export'  => [
         'format'    => 'csv',
         'file_path' => 'PATH_TO/data/export',
+    ],
+    'avatar'  => [
+        'avatar_uri'        => 'https://...',
+        'public_path'       => 'PUBLIC_AVATAR_PATH',
+        'allowed_extension' => [
+            'jpg',
+            'jpeg',
+            'png',
+        ],
+        'mime_type'         => [],
+        'allowed_size'      => [
+            'min' => '1kB',
+            'max' => '2MB',
+        ],
     ],
     'utility' => [
         'local'         => 'en_US',
