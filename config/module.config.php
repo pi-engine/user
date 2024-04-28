@@ -74,6 +74,7 @@ return [
             Handler\Api\Authentication\Mfa\VerifyHandler::class      => Factory\Handler\Api\Authentication\Mfa\VerifyHandlerFactory::class,
             Handler\Api\Authentication\Oauth\GoogleHandler::class    => Factory\Handler\Api\Authentication\Oauth\GoogleHandlerFactory::class,
             Handler\Api\Authentication\Oauth\MicrosoftHandler::class => Factory\Handler\Api\Authentication\Oauth\MicrosoftHandlerFactory::class,
+            Handler\Api\Authentication\Oauth\SettingHandler::class => Factory\Handler\Api\Authentication\Oauth\SettingHandlerFactory::class,
             Handler\Api\Captcha\ReCaptcha\VerifyHandler::class       => Factory\Handler\Api\Captcha\ReCaptcha\VerifyHandlerFactory::class,
             Handler\Api\Avatar\UploadHandler::class                  => Factory\Handler\Api\Avatar\UploadHandlerFactory::class,
             Handler\ErrorHandler::class                              => Factory\Handler\ErrorHandlerFactory::class,
@@ -522,6 +523,23 @@ return [
                                                 'middleware' => new PipeSpec(
                                                     Middleware\SecurityMiddleware::class,
                                                     Handler\Api\Authentication\Oauth\MicrosoftHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'setting' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/setting',
+                                            'defaults' => [
+                                                'module'     => 'user',
+                                                'section'    => 'api',
+                                                'package'    => 'authentication',
+                                                'handler'    => 'oauth',
+                                                'controller' => PipeSpec::class,
+                                                'middleware' => new PipeSpec(
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Handler\Api\Authentication\Oauth\SettingHandler::class
                                                 ),
                                             ],
                                         ],
