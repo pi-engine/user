@@ -68,6 +68,19 @@ return [
                 'google_client_id'     => 'XXX',
                 'google_client_secret' => 'XXX',
             ],
+            'oauth2' => [
+                            'base_url' => 'XXX',
+                            'authorize_url' => 'XXX',
+                            'token_url' => 'XXX',
+                            'user_info_url' => 'XXX',
+                            'client_id' => 'XXX',
+                            'response_Type' => 'XXX',
+                            'scope' => 'XXX',
+                            'redirect_Uri' => 'XXX',
+                            'state' => 'XXX',
+                            'nonce' => 'XXX',
+                            'response_mode' => 'XXX',
+                        ]
         ],
         'register'     => [
             'status' => 1,

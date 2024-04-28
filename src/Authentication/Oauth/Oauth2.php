@@ -17,7 +17,6 @@ class Oauth2 implements OauthInterface
     }
 
     /**
-     * @throws UnexpectedApiResponseException
      */
     public function verifyToken($params): array
     {

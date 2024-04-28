@@ -3,14 +3,12 @@
 namespace User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Hybridauth\Exception\UnexpectedApiResponseException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Authentication\Oauth\Microsoft;
 use User\Service\AccountService;
 
 class SettingHandler implements RequestHandlerInterface
@@ -40,12 +38,11 @@ class SettingHandler implements RequestHandlerInterface
     }
 
     /**
-     * @throws UnexpectedApiResponseException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
 
-        $data = $this->config;
+        $data['oauth2'] = $this->config['oauth2'];
         $data['oauth2']['authorize_url'] = sprintf(
             $this->config['oauth2']['authorize_url'],
             $this->config['oauth2']['client_id'],

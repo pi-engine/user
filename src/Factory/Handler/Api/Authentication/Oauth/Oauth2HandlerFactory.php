@@ -9,30 +9,30 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\Api\Authentication\Oauth\MicrosoftHandler;
-use User\Handler\Api\Authentication\Oauth\SettingHandler;
+use User\Handler\Api\Authentication\Oauth\Oauth2Handler;
 use User\Service\AccountService;
 
-class SettingHandlerFactory implements FactoryInterface
+class Oauth2HandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
      *
-     * @return SettingHandler
+     * @return MicrosoftHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SettingHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): Oauth2Handler
     {
         // Get config
         $config = $container->get('config');
 
-        return new SettingHandler(
+        return new Oauth2Handler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
-            $config['account']['oauth']
+            $config['account']['oauth']['microsoft']
         );
     }
 }
