@@ -227,6 +227,35 @@ class AccountService implements ServiceInterface
 
         return $result;
     }
+    public function loginOauth2($params): array
+    {
+        // Set login column
+        $this->identityColumn = 'identity';
+
+        // Do log in
+        $authAdapter = $this->accountRepository->authenticationOauth2($params);
+
+        // Check login
+        if ($authAdapter->isValid()) {
+            // Get user account
+            $account = $authAdapter->getIdentity();
+
+            // Canonize account
+            $account = $this->canonizeAccount($account);
+
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
+        } else {
+            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
+                $this->addAccount($params);
+                $result = $this->loginOauth2($params);
+            } else {
+                $result = $this->postLoginError($params);
+            }
+        }
+
+        return $result;
+    }
 
     public function logout($params): array
     {

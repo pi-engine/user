@@ -32,6 +32,7 @@ interface AccountRepositoryInterface
     public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService;
 
     public function authenticationOauth($params): AuthenticationResult;
+    public function authenticationOauth2($params): AuthenticationResult;
 
     public function getIdFromFilter(array $filter = []): HydratingResultSet|array;
 

@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Authentication\Oauth\Microsoft;
+use User\Authentication\Oauth\Oauth2;
 use User\Service\AccountService;
 
 class Oauth2Handler implements RequestHandlerInterface
@@ -29,24 +30,24 @@ class Oauth2Handler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        $config
-    ) {
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+                                 $config
+    )
+    {
         $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->accountService  = $accountService;
-        $this->config          = $config;
+        $this->streamFactory = $streamFactory;
+        $this->accountService = $accountService;
+        $this->config = $config;
     }
 
     /**
-     * @throws UnexpectedApiResponseException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // Retrieve the raw JSON data from the request body
-        $stream      = $this->streamFactory->createStreamFromFile('php://input');
-        $rawData     = $stream->getContents();
+        $stream = $this->streamFactory->createStreamFromFile('php://input');
+        $rawData = $stream->getContents();
         $requestBody = json_decode($rawData, true);
 
         // Check if decoding was successful
@@ -54,23 +55,36 @@ class Oauth2Handler implements RequestHandlerInterface
             // JSON decoding failed
             $errorResponse = [
                 'result' => false,
-                'data'   => null,
-                'error'  => [
+                'data' => null,
+                'error' => [
                     'message' => 'Invalid JSON data',
                 ],
             ];
             return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
         }
 
-        // Set params
-        $params = ['token' => ['access_token' => $requestBody['accessToken']]];
+        if (!isset($requestBody['code'])) {
+            $errorResponse = [
+                'result' => false,
+                'data' => null,
+                'error' => [
+                    'message' => 'Invalid authentication data. please try again!',
+                ],
+            ];
+            return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
+        }
+
 
         // Check
-        $authService = new Microsoft($this->config);
-        $userData    = $authService->verifyToken($params);
+        $authService = new Oauth2($this->config);
+        $result = $authService->verifyToken($requestBody);
+
+        if (!$result['result']) {
+            return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        }
 
         // Do log in
-        $result = $this->accountService->loginOauth($userData);
+        $result = $this->accountService->loginOauth2($result['data']);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

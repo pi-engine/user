@@ -555,6 +555,16 @@ class AccountRepository implements AccountRepositoryInterface
 
         return new AuthenticationResult(AuthenticationResult::FAILURE, null, ['Invalid email']);
     }
+ public function authenticationOauth2($params): AuthenticationResult
+    {
+        // Get account
+        $account = $this->getAccount(['identity' => $params['identity']/*, 'status' => 1*/]);
+        if ($account) {
+            return new AuthenticationResult(AuthenticationResult::SUCCESS, $account);
+        }
+
+        return new AuthenticationResult(AuthenticationResult::FAILURE, null, ['Invalid identity']);
+    }
 
     public function getIdFromFilter(array $filter = []): HydratingResultSet|array
     {

@@ -32,7 +32,7 @@ class Oauth2HandlerFactory implements FactoryInterface
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
-            $config['account']['oauth']['microsoft']
+            $config['account']['oauth']['oauth2']
         );
     }
 }
