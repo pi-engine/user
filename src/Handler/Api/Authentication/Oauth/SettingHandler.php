@@ -48,7 +48,7 @@ class SettingHandler implements RequestHandlerInterface
             $this->config['oauth2']['client_id'],
             $this->config['oauth2']['response_type'],
             $this->config['oauth2']['scope'],
-            $this->config['oauth2']['redirect_url'],
+            $this->config['oauth2']['redirect_uri'],
             $this->config['oauth2']['state'],
             $this->config['oauth2']['nonce'],
             $this->config['oauth2']['response_mode'],
