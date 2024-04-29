@@ -74,12 +74,13 @@ return [
                             'token_url' => 'XXX',
                             'user_info_url' => 'XXX',
                             'client_id' => 'XXX',
-                            'response_Type' => 'XXX',
+                            'response_type' => 'XXX',
                             'scope' => 'XXX',
-                            'redirect_Uri' => 'XXX',
+                            'redirect_uri' => 'XXX',
                             'state' => 'XXX',
                             'nonce' => 'XXX',
                             'response_mode' => 'XXX',
+                            'client_login_url' => 'XXX'
                         ]
         ],
         'register'     => [

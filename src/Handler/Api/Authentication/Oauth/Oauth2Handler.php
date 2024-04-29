@@ -46,22 +46,23 @@ class Oauth2Handler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // Retrieve the raw JSON data from the request body
-        $stream = $this->streamFactory->createStreamFromFile('php://input');
-        $rawData = $stream->getContents();
-        $requestBody = json_decode($rawData, true);
-
-        // Check if decoding was successful
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // JSON decoding failed
-            $errorResponse = [
-                'result' => false,
-                'data' => null,
-                'error' => [
-                    'message' => 'Invalid JSON data',
-                ],
-            ];
-            return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
-        }
+//        $stream = $this->streamFactory->createStreamFromFile('php://input');
+//        $rawData = $stream->getContents();
+//        $requestBody = json_decode($rawData, true);
+//
+//        // Check if decoding was successful
+//        if (json_last_error() !== JSON_ERROR_NONE) {
+//            // JSON decoding failed
+//            $errorResponse = [
+//                'result' => false,
+//                'data' => null,
+//                'error' => [
+//                    'message' => 'Invalid JSON data',
+//                ],
+//            ];
+//            return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
+//        }
+        $requestBody = $request->getParsedBody();
 
         if (!isset($requestBody['code'])) {
             $errorResponse = [
