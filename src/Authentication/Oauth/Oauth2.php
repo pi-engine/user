@@ -35,6 +35,9 @@ class Oauth2 implements OauthInterface
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->config['token_url']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
              'Content-Type: application/x-www-form-urlencoded',
@@ -62,6 +65,8 @@ class Oauth2 implements OauthInterface
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->config['user_info_url']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             sprintf('Authorization: Bearer %s',$response['access_token']),
