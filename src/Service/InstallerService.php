@@ -12,7 +12,7 @@ class InstallerService implements ServiceInterface
         $this->permissionService = $permissionService;
     }
 
-    public function installPermission($module, array $permissionConfig)
+    public function installPermission($module, array $permissionConfig): void
     {
         // Canonize
         $permissionConfig = $this->canonizePermission($permissionConfig);
