@@ -53,12 +53,12 @@ class Profile
         $information,
         $id = null
     ) {
-        $this->user_id         = $user_id;
-        $this->first_name      = $first_name;
-        $this->last_name       = $last_name;
-        $this->birthdate       = $birthdate;
-        $this->gender          = $gender;
-        $this->avatar          = $avatar;
+        $this->user_id    = $user_id;
+        $this->first_name = $first_name;
+        $this->last_name  = $last_name;
+        $this->birthdate  = $birthdate;
+        $this->gender     = $gender;
+        $this->avatar     = $avatar;
         //$this->id_number       = $id_number;
         //$this->ip_register     = $ip_register;
         //$this->register_source = $register_source;
@@ -75,7 +75,7 @@ class Profile
         //$this->bank_card       = $bank_card;
         //$this->bank_account    = $bank_account;
         $this->information = $information;
-        $this->id              = $id;
+        $this->id          = $id;
     }
 
     public function getId(): ?int

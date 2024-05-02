@@ -227,6 +227,7 @@ class AccountService implements ServiceInterface
 
         return $result;
     }
+
     public function loginOauth2($params): array
     {
         // Set login column
@@ -641,10 +642,9 @@ class AccountService implements ServiceInterface
         $this->historyService->logger('register', ['params' => $params, 'account' => $account, 'operator' => $operator]);
 
 
-
         // Clean up
-        $profileParams = [
-            'user_id'         => (int)$account['id'],
+        $profileParams     = [
+            'user_id' => (int)$account['id'],
         ];
         $informationParams = [];
         foreach ($params as $key => $value) {
@@ -938,8 +938,8 @@ class AccountService implements ServiceInterface
         }
 
         // Clean up
-        $accountParams = [];
-        $profileParams = [];
+        $accountParams     = [];
+        $profileParams     = [];
         $informationParams = [];
         foreach ($params as $key => $value) {
             if (in_array($key, $this->accountFields)) {
@@ -1417,12 +1417,12 @@ class AccountService implements ServiceInterface
 
         if (is_object($profile)) {
             $profile = [
-                'user_id'         => $profile->getUserId(),
-                'first_name'      => $profile->getFirstName(),
-                'last_name'       => $profile->getLastName(),
-                'birthdate'       => $profile->getBirthdate(),
-                'gender'          => $profile->getGender(),
-                'avatar'          => $profile->getAvatar(),
+                'user_id'     => $profile->getUserId(),
+                'first_name'  => $profile->getFirstName(),
+                'last_name'   => $profile->getLastName(),
+                'birthdate'   => $profile->getBirthdate(),
+                'gender'      => $profile->getGender(),
+                'avatar'      => $profile->getAvatar(),
                 /* 'id_number'       => $profile->getIdNumber(),
                 'ip_register'     => $profile->getIpRegister(),
                 'register_source' => $profile->getRegisterSource(),
@@ -1438,16 +1438,16 @@ class AccountService implements ServiceInterface
                 'bank_name'       => $profile->getBankName(),
                 'bank_card'       => $profile->getBankCard(),
                 'bank_account'    => $profile->getBankAccount(), */
-                'information'     => $profile->getInformation(),
+                'information' => $profile->getInformation(),
             ];
         } else {
             $profile = [
-                'user_id'         => $profile['user_id'],
-                'first_name'      => $profile['first_name'],
-                'last_name'       => $profile['last_name'],
-                'birthdate'       => $profile['birthdate'],
-                'gender'          => $profile['gender'],
-                'avatar'          => $profile['avatar'],
+                'user_id'     => $profile['user_id'],
+                'first_name'  => $profile['first_name'],
+                'last_name'   => $profile['last_name'],
+                'birthdate'   => $profile['birthdate'],
+                'gender'      => $profile['gender'],
+                'avatar'      => $profile['avatar'],
                 /* 'id_number'       => $profile['id_number'],
                 'ip_register'     => $profile['ip_register'],
                 'register_source' => $profile['register_source'],
@@ -1463,7 +1463,7 @@ class AccountService implements ServiceInterface
                 'bank_name'       => $profile['bank_name'],
                 'bank_card'       => $profile['bank_card'],
                 'bank_account'    => $profile['bank_account'], */
-                'information'     => $profile['information'],
+                'information' => $profile['information'],
             ];
         }
 

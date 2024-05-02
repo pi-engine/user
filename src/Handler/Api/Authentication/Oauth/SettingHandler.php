@@ -41,8 +41,7 @@ class SettingHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-
-        $data['oauth2'] = $this->config['oauth2'];
+        $data['oauth2']                  = $this->config['oauth2'];
         $data['oauth2']['authorize_url'] = sprintf(
             $this->config['oauth2']['authorize_url'],
             $this->config['oauth2']['client_id'],
@@ -53,10 +52,10 @@ class SettingHandler implements RequestHandlerInterface
             $this->config['oauth2']['nonce'],
             $this->config['oauth2']['response_mode'],
         );
-        $result = [
+        $result                          = [
             'result' => true,
-            'data' =>  $data,
-            'error' => [],
+            'data'   => $data,
+            'error'  => [],
         ];
 
         return new JsonResponse($result, StatusCodeInterface::STATUS_OK);

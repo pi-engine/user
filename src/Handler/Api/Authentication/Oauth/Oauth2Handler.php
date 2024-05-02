@@ -3,14 +3,12 @@
 namespace User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Hybridauth\Exception\UnexpectedApiResponseException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Authentication\Oauth\Microsoft;
 use User\Authentication\Oauth\Oauth2;
 use User\Service\AccountService;
 
@@ -30,15 +28,14 @@ class Oauth2Handler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory,
-        AccountService           $accountService,
-                                 $config
-    )
-    {
+        StreamFactoryInterface $streamFactory,
+        AccountService $accountService,
+        $config
+    ) {
         $this->responseFactory = $responseFactory;
-        $this->streamFactory = $streamFactory;
-        $this->accountService = $accountService;
-        $this->config = $config;
+        $this->streamFactory   = $streamFactory;
+        $this->accountService  = $accountService;
+        $this->config          = $config;
     }
 
     /**
@@ -67,8 +64,8 @@ class Oauth2Handler implements RequestHandlerInterface
         if (!isset($requestBody['code'])) {
             $errorResponse = [
                 'result' => false,
-                'data' => null,
-                'error' => [
+                'data'   => null,
+                'error'  => [
                     'message' => 'Invalid authentication data. please try again!',
                 ],
             ];
@@ -78,7 +75,7 @@ class Oauth2Handler implements RequestHandlerInterface
 
         // Check
         $authService = new Oauth2($this->config);
-        $result = $authService->verifyToken($requestBody);
+        $result      = $authService->verifyToken($requestBody);
 
         if (!$result['result']) {
             return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);

@@ -8,7 +8,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Authentication\Oauth\MicrosoftHandler;
 use User\Handler\Api\Authentication\Oauth\SettingHandler;
 use User\Service\AccountService;
 
@@ -16,8 +15,8 @@ class SettingHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $requestedName
-     * @param null|array $options
+     * @param string             $requestedName
+     * @param null|array         $options
      *
      * @return SettingHandler
      * @throws ContainerExceptionInterface

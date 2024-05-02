@@ -2,9 +2,6 @@
 
 namespace User\Authentication\Oauth;
 
-use Hybridauth\Exception\UnexpectedApiResponseException;
-use Hybridauth\Provider\MicrosoftGraph as HybridauthMicrosoftGraph;
-
 
 class Oauth2 implements OauthInterface
 {
@@ -20,7 +17,6 @@ class Oauth2 implements OauthInterface
      */
     public function verifyToken($params): array
     {
-
         $tokenQueryFormat = "client_id=%s&client_secret=%s&grant_type=%s&code=%s&redirect_uri=%s";
         // Use sprintf to format the string with variables from the parsed query
         $formattedString = sprintf(
@@ -40,7 +36,7 @@ class Oauth2 implements OauthInterface
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-             'Content-Type: application/x-www-form-urlencoded',
+            'Content-Type: application/x-www-form-urlencoded',
         ]);
         //curl_setopt($ch, CURLOPT_COOKIE, '.AspNetCore.Antiforgery.5i-g8aAvrt8=CfDJ8HmUtFbpSIpLuxobDPXFk9EX73Y3cntxabkGAn1g0OHt2oNKUtK4bwU33aAL1894IzTQXmnZD6BfOMCQpfVIdjPAfaB_xjdHruhZ7-saQV-9vvojBw9olYJg8IoA7y5AX3DUrrc1zNg6g_utQXjjNNw; .AspNetCore.Culture=c%3Dfa%7Cuic%3Dfa');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $formattedString);
@@ -50,8 +46,8 @@ class Oauth2 implements OauthInterface
         curl_close($ch);
 
 
-        $response = json_decode($response,true);
-        if(!isset($response['access_token'])){
+        $response = json_decode($response, true);
+        if (!isset($response['access_token'])) {
             return [
                 'result' => false,
                 'data'   => null,
@@ -69,7 +65,7 @@ class Oauth2 implements OauthInterface
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            sprintf('Authorization: Bearer %s',$response['access_token']),
+            sprintf('Authorization: Bearer %s', $response['access_token']),
         ]);
         //curl_setopt($ch, CURLOPT_COOKIE, '.AspNetCore.Antiforgery.5i-g8aAvrt8=CfDJ8HmUtFbpSIpLuxobDPXFk9EX73Y3cntxabkGAn1g0OHt2oNKUtK4bwU33aAL1894IzTQXmnZD6BfOMCQpfVIdjPAfaB_xjdHruhZ7-saQV-9vvojBw9olYJg8IoA7y5AX3DUrrc1zNg6g_utQXjjNNw; .AspNetCore.Culture=c%3Dfa%7Cuic%3Dfa');
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -77,8 +73,8 @@ class Oauth2 implements OauthInterface
         $userInfo = curl_exec($ch);
         curl_close($ch);
 
-        $userInfo = json_decode($userInfo,true);
-        if(!isset($userInfo['NId'])){
+        $userInfo = json_decode($userInfo, true);
+        if (!isset($userInfo['NId'])) {
             return [
                 'result' => false,
                 'data'   => null,
@@ -89,14 +85,14 @@ class Oauth2 implements OauthInterface
         }
 
         return [
-            'result'=>true,
-            'data'=>[
-                'identity'      =>$userInfo['NId'],
+            'result' => true,
+            'data'   => [
+                'identity'   => $userInfo['NId'],
                 'name'       => $userInfo['name'],
-                'first_name' =>  $userInfo['given_name'],
-                'last_name'  =>  $userInfo['family_name'],
+                'first_name' => $userInfo['given_name'],
+                'last_name'  => $userInfo['family_name'],
             ],
-            'error'=>[]
+            'error'  => [],
         ];
     }
 }

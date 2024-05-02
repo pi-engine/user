@@ -3,13 +3,10 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\InputFilter\Input;
-use Laminas\InputFilter\InputFilter;
 use Laminas\Validator\File\Extension;
 use Laminas\Validator\File\MimeType;
 use Laminas\Validator\File\Size;
 use Laminas\Validator\File\UploadFile;
-use Media\Validator\SlugValidator;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -58,7 +55,7 @@ class AvatarUploadMiddleware implements MiddlewareInterface
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
-        $this->avatarService  = $avatarService;
+        $this->avatarService   = $avatarService;
         $this->errorHandler    = $errorHandler;
         $this->config          = $config;
     }

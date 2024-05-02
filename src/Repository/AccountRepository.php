@@ -148,8 +148,8 @@ class AccountRepository implements AccountRepositoryInterface
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
-        $sql    = new Sql($this->db);
-        $select = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -205,8 +205,8 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         // Get count
-        $sql    = new Sql($this->db);
-        $select = $sql->select($this->tableAccount)->columns($columns)->where($where);
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableAccount)->columns($columns)->where($where);
         $statement = $sql->prepareStatementForSqlObject($select);
         $row       = $statement->execute()->current();
 
@@ -555,7 +555,8 @@ class AccountRepository implements AccountRepositoryInterface
 
         return new AuthenticationResult(AuthenticationResult::FAILURE, null, ['Invalid email']);
     }
- public function authenticationOauth2($params): AuthenticationResult
+
+    public function authenticationOauth2($params): AuthenticationResult
     {
         // Get account
         $account = $this->getAccount(['identity' => $params['identity']/*, 'status' => 1*/]);
