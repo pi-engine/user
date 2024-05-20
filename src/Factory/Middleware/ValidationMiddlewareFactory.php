@@ -27,13 +27,18 @@ class ValidationMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ValidationMiddleware
     {
+        // Get config
+        $config  = $container->get('config');
+        $config  = $config['validation'] ?? [];
+
         return new ValidationMiddleware(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class),
             $container->get(UtilityService::class),
             $container->get(CacheService::class),
-            $container->get(ErrorHandler::class)
+            $container->get(ErrorHandler::class),
+            $config
         );
     }
 }
