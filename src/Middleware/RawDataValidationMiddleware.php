@@ -14,6 +14,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
 use User\Service\AccountService;
 use User\Service\CacheService;
+use User\Service\UtilityService;
 use User\Validator\EmailValidator;
 use User\Validator\IdentityValidator;
 use User\Validator\MobileValidator;
@@ -40,6 +41,9 @@ class RawDataValidationMiddleware implements MiddlewareInterface
     /** @var AccountService */
     protected AccountService $accountService;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /* @var CacheService */
     protected CacheService $cacheService;
 
@@ -50,12 +54,14 @@ class RawDataValidationMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
+        UtilityService $utilityService,
         CacheService $cacheService,
         ErrorHandler $errorHandler
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->accountService  = $accountService;
+        $this->utilityService  = $utilityService;
         $this->cacheService    = $cacheService;
         $this->errorHandler    = $errorHandler;
     }
@@ -224,7 +230,7 @@ class RawDataValidationMiddleware implements MiddlewareInterface
 
         // Check credential
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService,$this->utilityService));
         $inputFilter->add($credential);
 
         // Set data and check
@@ -287,7 +293,7 @@ class RawDataValidationMiddleware implements MiddlewareInterface
         // Check identity
         if (isset($params['credential']) && !empty($params['credential'])) {
             $credential = new Input('credential');
-            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService,$this->utilityService));
             $inputFilter->add($credential);
         }
 
@@ -378,7 +384,7 @@ class RawDataValidationMiddleware implements MiddlewareInterface
         ];
 
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $option));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService,$this->utilityService,$option));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($credential);
@@ -392,10 +398,10 @@ class RawDataValidationMiddleware implements MiddlewareInterface
     protected function passwordEditIsValid($params)
     {
         $currentCredential = new Input('current_credential');
-        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService,$this->utilityService));
 
         $newCredential = new Input('new_credential');
-        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService,$this->utilityService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($currentCredential);
@@ -410,7 +416,7 @@ class RawDataValidationMiddleware implements MiddlewareInterface
     protected function passwordAdminIsValid($params)
     {
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService,$this->utilityService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($credential);
