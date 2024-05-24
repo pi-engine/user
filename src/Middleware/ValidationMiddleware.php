@@ -50,13 +50,17 @@ class ValidationMiddleware implements MiddlewareInterface
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
+    /* @var array */
+    protected array $config;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         AccountService $accountService,
         UtilityService $utilityService,
         CacheService $cacheService,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
+        $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -64,6 +68,7 @@ class ValidationMiddleware implements MiddlewareInterface
         $this->utilityService  = $utilityService;
         $this->cacheService    = $cacheService;
         $this->errorHandler    = $errorHandler;
+        $this->config          = $config;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

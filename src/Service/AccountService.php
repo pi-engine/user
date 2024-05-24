@@ -1006,6 +1006,9 @@ class AccountService implements ServiceInterface
                     'identity'   => $account['identity'],
                     'mobile'     => $account['mobile'],
                     'last_login' => $user['account']['last_login'] ?? time(),
+                    'status'              => (int)$account['status'],
+                    'time_created'        => $account['time_created'] ?? '',
+                    'multi_factor_status' => (int)$account['multi_factor_status'],
                 ],
             ]
         );
