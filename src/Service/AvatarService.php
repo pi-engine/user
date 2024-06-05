@@ -8,6 +8,7 @@ use Laminas\Filter\FilterChain;
 use Laminas\Filter\PregReplace;
 use Laminas\Filter\StringToLower;
 use Laminas\Filter\Word\SeparatorToDash;
+use Laminas\Math\Rand;
 use Logger\Service\LoggerService;
 use Traversable;
 
@@ -33,7 +34,7 @@ class AvatarService implements ServiceInterface
         $userPath   = hash('sha256', $account['id']);
         $uploadPath = sprintf('%s/%s', $this->config['public_path'], $userPath);
         $avatarName = $this->makeFileName($fileInfo['filename']);
-        $avatarName = strtolower(sprintf('%s-%s-%s.%s', $avatarName, date('Y-m-d-H-i-s'), rand(1000, 9999), $fileInfo['extension']));
+        $avatarName = strtolower(sprintf('%s-%s.%s', $avatarName, Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789'), $fileInfo['extension']));
         $avatarPath = sprintf('%s/%s', $uploadPath, $avatarName);
         $avatarUri  = sprintf('%s/%s/%s', $this->config['avatar_uri'], $userPath, $avatarName);
 
