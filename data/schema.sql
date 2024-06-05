@@ -24,13 +24,14 @@ CREATE TABLE IF NOT EXISTS `user_account`
 
 CREATE TABLE IF NOT EXISTS `user_profile`
 (
-    `id`              INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `user_id`         INT(10) UNSIGNED NOT NULL          DEFAULT 0,
-    `first_name`      VARCHAR(64)                        DEFAULT NULL,
-    `last_name`       VARCHAR(64)                        DEFAULT NULL,
-    `birthdate`       VARCHAR(16)                        DEFAULT NULL,
-    `gender`          ENUM ('male', 'female', 'unknown') DEFAULT NULL,
-    `avatar`          VARCHAR(256)                       DEFAULT NULL,
+    `id`          INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id`     INT(10) UNSIGNED NOT NULL          DEFAULT 0,
+    `first_name`  VARCHAR(64)                        DEFAULT NULL,
+    `last_name`   VARCHAR(64)                        DEFAULT NULL,
+    `birthdate`   VARCHAR(16)                        DEFAULT NULL,
+    `gender`      ENUM ('male', 'female', 'unknown') DEFAULT NULL,
+    `avatar`      VARCHAR(1000)                      DEFAULT NULL,
+    `information` JSON                               DEFAULT NULL,
     #`ip_register`     VARCHAR(128)                       DEFAULT NULL,
     #`register_source` VARCHAR(16)                        DEFAULT NULL,
     #`id_number`       VARCHAR(16)                        DEFAULT NULL,
@@ -46,7 +47,6 @@ CREATE TABLE IF NOT EXISTS `user_profile`
     #`bank_name`       VARCHAR(32)                        DEFAULT NULL,
     #`bank_card`       VARCHAR(32)                        DEFAULT NULL,
     #`bank_account`    VARCHAR(32)                        DEFAULT NULL,
-    `information`     JSON                               DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `user_id` (`user_id`)
 );
