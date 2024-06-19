@@ -44,6 +44,8 @@ class AccountService implements ServiceInterface
     /** @var HistoryService */
     protected HistoryService $historyService;
 
+    protected TranslatorService $translatorService;
+
     /* @var array */
     protected array $config;
 
@@ -144,6 +146,7 @@ class AccountService implements ServiceInterface
         UtilityService $utilityService,
         NotificationService $notificationService,
         HistoryService $historyService,
+        TranslatorService $translatorService,
         $config
     ) {
         $this->accountRepository   = $accountRepository;
@@ -154,6 +157,7 @@ class AccountService implements ServiceInterface
         $this->utilityService      = $utilityService;
         $this->notificationService = $notificationService;
         $this->historyService      = $historyService;
+        $this->translatorService   = $translatorService;
         $this->config              = $config;
         $this->hashPattern         = $config['hash_pattern'] ?? 'bcrypt';
     }
@@ -754,6 +758,69 @@ class AccountService implements ServiceInterface
         return $account;
     }
 
+    public function addOrUpdateAccount($params): array
+    {
+        $account = [];
+        if (isset($params['email']) && !empty($params['email'])) {
+            $account = $this->getAccount(['email' => $params['email']]);
+        } elseif (isset($params['mobile']) && !empty($params['mobile'])) {
+            $account = $this->getAccount(['mobile' => $params['mobile']]);
+        } elseif (isset($params['identity']) && !empty($params['identity'])) {
+            $account = $this->getAccount(['identity' => $params['identity']]);
+        }
+
+        if (empty($account)) {
+            $addParams = [
+                'email'           => $params['email'] ?? null,
+                'mobile'          => $params['mobile'] ?? null,
+                'identity'        => $params['identity'] ?? null,
+                'credential'      => $params['credential'] ?? null,
+                'source'          => $params['source'] ?? null,
+                'first_name'      => $params['first_name'] ?? null,
+                'last_name'       => $params['last_name'] ?? null,
+                'id_number'       => $params['id_number'] ?? null,
+                'birthdate'       => $params['birthdate'] ?? null,
+                'gender'          => $params['gender'] ?? null,
+                'avatar'          => $params['avatar'] ?? null,
+                'ip_register'     => $params['ip_register'] ?? null,
+                'register_source' => $params['register_source'] ?? null,
+                'homepage'        => $params['homepage'] ?? null,
+                'phone'           => $params['phone'] ?? null,
+                'address_1'       => $params['address_1'] ?? null,
+                'address_2'       => $params['address_2'] ?? null,
+                'item_id'         => $params['item_id'] ?? 0,
+                'country'         => $params['country'] ?? null,
+                'state'           => $params['state'] ?? null,
+                'city'            => $params['city'] ?? null,
+                'zip_code'        => $params['zip_code'] ?? null,
+            ];
+
+            $account = $this->addAccount($addParams);
+        } else {
+            $account = $this->updateAccount($params, $account);
+
+            // Get roles
+            $roles = $this->roleService->getRoleAccount((int)$account['id']);
+
+            // Set new role
+            if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
+                $this->roleService->addRoleAccount($account, $params['source']);
+            }
+
+            // Delete old role
+            if (isset($params['remove_role']) && !empty($params['remove_role']) && is_string($params['remove_role'])
+                && in_array(
+                    $params['remove_role'],
+                    $roles
+                )
+            ) {
+                $this->roleService->deleteRoleAccount($account, $params['remove_role']);
+            }
+        }
+
+        return $account;
+    }
+
     public function getUserFromCache($id): array
     {
         $user = $this->cacheService->getUser($id);
@@ -1000,12 +1067,12 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id'         => $account['id'],
-                    'name'       => $account['name'],
-                    'email'      => $account['email'],
-                    'identity'   => $account['identity'],
-                    'mobile'     => $account['mobile'],
-                    'last_login' => $user['account']['last_login'] ?? time(),
+                    'id'                  => $account['id'],
+                    'name'                => $account['name'],
+                    'email'               => $account['email'],
+                    'identity'            => $account['identity'],
+                    'mobile'              => $account['mobile'],
+                    'last_login'          => $user['account']['last_login'] ?? time(),
                     'status'              => (int)$account['status'],
                     'time_created'        => $account['time_created'] ?? '',
                     'multi_factor_status' => (int)$account['multi_factor_status'],

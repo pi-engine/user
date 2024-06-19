@@ -7,6 +7,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Notification\Service\NotificationService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Task\Service\TaskService;
 use User\Repository\AccountRepositoryInterface;
 use User\Service\AccountService;
 use User\Service\CacheService;
@@ -14,6 +15,7 @@ use User\Service\HistoryService;
 use User\Service\PermissionService;
 use User\Service\RoleService;
 use User\Service\TokenService;
+use User\Service\TranslatorService;
 use User\Service\UtilityService;
 
 class AccountServiceFactory implements FactoryInterface
@@ -44,6 +46,7 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(UtilityService::class),
             $container->get(NotificationService::class),
             $container->get(HistoryService::class),
+            $container->get(TranslatorService::class),
             $config
         );
     }
