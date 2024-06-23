@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `permission_resource`
     `title`   VARCHAR(255)              NOT NULL DEFAULT '',
     `section` ENUM ('api', 'admin')     NOT NULL DEFAULT 'api',
     `module`  VARCHAR(64)               NOT NULL DEFAULT '',
-    `name`    VARCHAR(64)               NULL     DEFAULT NULL,
+    `name`    VARCHAR(255)              NULL     DEFAULT NULL,
     `type`    ENUM ('system', 'custom') NOT NULL DEFAULT 'system',
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`),
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `permission_page`
     `package`     VARCHAR(64)             NOT NULL DEFAULT '',
     `handler`     VARCHAR(64)             NOT NULL DEFAULT '',
     `resource`    VARCHAR(64)             NOT NULL DEFAULT '',
-    `name`        VARCHAR(64)             NULL     DEFAULT NULL,
+    `name`        VARCHAR(255)            NULL     DEFAULT NULL,
     `cache_type`  ENUM ('page', 'action') NOT NULL DEFAULT 'page',
     `cache_ttl`   INT(10)                 NOT NULL DEFAULT '0', # positive: for cache TTL; negative: for inheritance
     `cache_level` VARCHAR(64)             NOT NULL DEFAULT '',
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `permission_role`
     `section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
     `module`   VARCHAR(64)           NOT NULL DEFAULT '',
     `role`     VARCHAR(64)           NOT NULL DEFAULT '',
-    `name`     VARCHAR(64)           NULL     DEFAULT NULL,
+    `name`     VARCHAR(255)          NULL     DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`),
     UNIQUE KEY `key` (`resource`, `section`, `module`, `role`, `name`)
