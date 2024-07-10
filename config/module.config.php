@@ -21,6 +21,19 @@ return [
             Repository\PermissionRepository::class                   => Factory\Repository\PermissionRepositoryFactory::class,
             Repository\ProfileRepository::class                      => Factory\Repository\ProfileRepositoryFactory::class,
             Repository\RoleRepository::class                         => Factory\Repository\RoleRepositoryFactory::class,
+            Middleware\AuthenticationMiddleware::class               => Factory\Middleware\AuthenticationMiddlewareFactory::class,
+            Middleware\AuthorizationMiddleware::class                => Factory\Middleware\AuthorizationMiddlewareFactory::class,
+            Middleware\AvatarUploadMiddleware::class                 => Factory\Middleware\AvatarUploadMiddlewareFactory::class,
+            Middleware\SecurityMiddleware::class                     => Factory\Middleware\SecurityMiddlewareFactory::class,
+            Middleware\ValidationMiddleware::class                   => Factory\Middleware\ValidationMiddlewareFactory::class,
+            Middleware\JsonToArrayMiddleware::class                  => Factory\Middleware\JsonToArrayMiddlewareFactory::class,
+            Middleware\InstallerMiddleware::class                    => Factory\Middleware\InstallerMiddlewareFactory::class,
+            Validator\EmailValidator::class                          => Factory\Validator\EmailValidatorFactory::class,
+            Validator\IdentityValidator::class                       => Factory\Validator\IdentityValidatorFactory::class,
+            Validator\NameValidator::class                           => Factory\Validator\NameValidatorFactory::class,
+            Validator\MobileValidator::class                         => Factory\Validator\MobileValidatorFactory::class,
+            Validator\OtpValidator::class                            => Factory\Validator\OtpValidatorFactory::class,
+            Validator\PasswordValidator::class                       => Factory\Validator\PasswordValidatorFactory::class,
             Service\AccountService::class                            => Factory\Service\AccountServiceFactory::class,
             Service\AvatarService::class                             => Factory\Service\AvatarServiceFactory::class,
             Service\TokenService::class                              => Factory\Service\TokenServiceFactory::class,
@@ -32,18 +45,6 @@ return [
             Service\ExportService::class                             => Factory\Service\ExportServiceFactory::class,
             Service\TranslatorService::class                         => Factory\Service\TranslatorServiceFactory::class,
             Service\InstallerService::class                          => Factory\Service\InstallerServiceFactory::class,
-            Middleware\AuthenticationMiddleware::class               => Factory\Middleware\AuthenticationMiddlewareFactory::class,
-            Middleware\AuthorizationMiddleware::class                => Factory\Middleware\AuthorizationMiddlewareFactory::class,
-            Middleware\AvatarUploadMiddleware::class                 => Factory\Middleware\AvatarUploadMiddlewareFactory::class,
-            Middleware\SecurityMiddleware::class                     => Factory\Middleware\SecurityMiddlewareFactory::class,
-            Middleware\ValidationMiddleware::class                   => Factory\Middleware\ValidationMiddlewareFactory::class,
-            Middleware\InstallerMiddleware::class                    => Factory\Middleware\InstallerMiddlewareFactory::class,
-            Validator\EmailValidator::class                          => Factory\Validator\EmailValidatorFactory::class,
-            Validator\IdentityValidator::class                       => Factory\Validator\IdentityValidatorFactory::class,
-            Validator\NameValidator::class                           => Factory\Validator\NameValidatorFactory::class,
-            Validator\MobileValidator::class                         => Factory\Validator\MobileValidatorFactory::class,
-            Validator\OtpValidator::class                            => Factory\Validator\OtpValidatorFactory::class,
-            Validator\PasswordValidator::class                       => Factory\Validator\PasswordValidatorFactory::class,
             Handler\Admin\Profile\AddHandler::class                  => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
             Handler\Admin\Profile\EditHandler::class                 => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
             Handler\Admin\Profile\ListHandler::class                 => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
@@ -634,6 +635,7 @@ return [
                                         'permissions' => 'user-profile-list',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -655,6 +657,7 @@ return [
                                         'validator'   => 'add',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -677,6 +680,7 @@ return [
                                         'validator'   => 'edit',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -699,6 +703,7 @@ return [
                                         'validator'   => 'edit',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -721,6 +726,7 @@ return [
                                         'validator'   => 'password-admin',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -743,6 +749,7 @@ return [
                                         'validator'   => 'password-admin',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -763,6 +770,7 @@ return [
                                         'permissions' => 'user-profile-view',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -783,6 +791,7 @@ return [
                                         'permissions' => 'user-profile-export',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -813,6 +822,7 @@ return [
                                         'permissions' => 'user-role-list',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -833,6 +843,7 @@ return [
                                         'permissions' => 'user-role-add',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -853,6 +864,7 @@ return [
                                         'permissions' => 'user-role-edit',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -873,6 +885,7 @@ return [
                                         'permissions' => 'user-role-edit',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -903,6 +916,7 @@ return [
                                         'permissions' => 'user-permission-list',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -923,6 +937,7 @@ return [
                                         'permissions' => 'user-permission-view',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
@@ -943,6 +958,7 @@ return [
                                         'permissions' => 'user-permission-access',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
+                                            Middleware\JsonToArrayMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
