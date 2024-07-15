@@ -419,9 +419,6 @@ class AccountRepository implements AccountRepositoryInterface
     public function getAccountProfileList($params = []): HydratingResultSet
     {
         $where['time_deleted'] = 0;
-        if (isset($params['key']) && !empty($params['key'])) {
-            $where = ["account.name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
-        }
         if (isset($params['name']) && !empty($params['name'])) {
             $where['account.name like ?'] = '%' . $params['name'] . '%';
         }

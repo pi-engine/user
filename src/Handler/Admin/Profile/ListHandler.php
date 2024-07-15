@@ -34,7 +34,7 @@ class ListHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->accountService->getAccountList($requestBody);
+        $result      = $this->accountService->getAccountProfileList($requestBody);
 
         return new JsonResponse(
             [

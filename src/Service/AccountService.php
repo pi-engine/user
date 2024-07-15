@@ -845,19 +845,15 @@ class AccountService implements ServiceInterface
     {
         $limit = $params['limit'] ?? 10;
         $page  = $params['page'] ?? 1;
-        /// changed by kerloper
-        $key    = $params['key'] ?? '';
         $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
-        /// changed by kerloper
         $listParams = [
             'page'   => (int)$page,
             'limit'  => (int)$limit,
             'order'  => $order,
             'offset' => $offset,
-            'key'    => $key,
         ];
 
         if (isset($params['name']) && !empty($params['name'])) {
@@ -912,7 +908,6 @@ class AccountService implements ServiceInterface
         $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
-            /// changed by kerloper
             $list[$row->getId()] = $this->canonizeAccount($row);
         }
 
@@ -921,7 +916,6 @@ class AccountService implements ServiceInterface
 
         // Get count
         $count = $this->accountRepository->getAccountCount($listParams);
-
 
         $list = array_values($list);
         $i    = 0;
@@ -1110,19 +1104,15 @@ class AccountService implements ServiceInterface
     {
         $limit = $params['limit'] ?? 10;
         $page  = $params['page'] ?? 1;
-        /// changed by kerloper
-        $key    = $params['key'] ?? '';
         $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
-        /// changed by kerloper
         $listParams = [
             'page'   => (int)$page,
             'limit'  => (int)$limit,
             'order'  => $order,
             'offset' => $offset,
-            'key'    => $key,
         ];
 
         if (isset($params['name']) && !empty($params['name'])) {
@@ -1180,13 +1170,22 @@ class AccountService implements ServiceInterface
         $list   = [];
         $rowSet = $this->accountRepository->getAccountProfileList($listParams);
         foreach ($rowSet as $row) {
-            /// changed by kerloper
-            $list[] = $this->canonizeAccountProfile($row);
+            $list[$row->getId()] = $this->canonizeAccountProfile($row);
         }
 
         // Get count
         $count = $this->accountRepository->getAccountCount($listParams);
 
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
+
+        $list = array_values($list);
+        $i    = 0;
+        ///TODO:check
+        foreach ($list as $user) {
+            $list[$i]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
+            $i++;
+        }
 
         return [
             'list'      => $list,
