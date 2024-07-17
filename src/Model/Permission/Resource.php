@@ -8,21 +8,21 @@ class Resource
     private string $title;
     private string $section;
     private string $module;
-    private string $name;
+    private string $key;
     private string $type;
 
     public function __construct(
         $title,
         $section,
         $module,
-        $name,
+        $key,
         $type,
         $id = null
     ) {
         $this->title   = $title;
         $this->section = $section;
         $this->module  = $module;
-        $this->name    = $name;
+        $this->key    = $key;
         $this->type    = $type;
         $this->id      = $id;
     }
@@ -62,9 +62,9 @@ class Resource
     /**
      * @return string
      */
-    public function getName(): string
+    public function getKey(): string
     {
-        return $this->name;
+        return $this->key;
     }
 
     /**

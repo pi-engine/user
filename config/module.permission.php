@@ -104,13 +104,16 @@ return [
                 'admin',
             ],
         ],
+
+
+
         [
             'title'       => 'Admin user permission list',
             'module'      => 'user',
             'section'     => 'admin',
-            'package'     => 'permission',
+            'package'     => 'permission-resource',
             'handler'     => 'list',
-            'permissions' => 'user-permission-list',
+            'permissions' => 'user-permission-resource-list',
             'role'        => [
                 'admin',
             ],
@@ -119,9 +122,9 @@ return [
             'title'       => 'Admin user permission view',
             'module'      => 'user',
             'section'     => 'admin',
-            'package'     => 'permission',
-            'handler'     => 'view',
-            'permissions' => 'user-permission-view',
+            'package'     => 'permission-page',
+            'handler'     => 'list',
+            'permissions' => 'user-permission-page-list',
             'role'        => [
                 'admin',
             ],
@@ -130,9 +133,9 @@ return [
             'title'       => 'Admin user permission access',
             'module'      => 'user',
             'section'     => 'admin',
-            'package'     => 'permission',
-            'handler'     => 'access',
-            'permissions' => 'user-permission-access',
+            'package'     => 'permission-role',
+            'handler'     => 'list',
+            'permissions' => 'user-permission-role-list',
             'role'        => [
                 'admin',
             ],

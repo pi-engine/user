@@ -114,9 +114,6 @@ class AccountRepository implements AccountRepositoryInterface
     {
         // Add filter
         $where['time_deleted'] = 0;
-        if (isset($params['key']) && !empty($params['key'])) {
-            $where = ["name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
-        }
         if (isset($params['name']) && !empty($params['name'])) {
             $where['name like ?'] = '%' . $params['name'] . '%';
         }
@@ -170,9 +167,6 @@ class AccountRepository implements AccountRepositoryInterface
 
         // Add filter
         $where['time_deleted'] = 0;
-        if (isset($params['key']) && !empty($params['key'])) {
-            $where = ["name LIKE '%" . $params['key'] . "%' OR  email LIKE '%" . $params['key'] . "%' OR mobile LIKE '%" . $params['key'] . "%'"];
-        }
         if (isset($params['name']) && !empty($params['name'])) {
             $where['name like ?'] = '%' . $params['name'] . '%';
         }

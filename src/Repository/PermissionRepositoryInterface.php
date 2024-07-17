@@ -15,9 +15,11 @@ interface PermissionRepositoryInterface
 
     public function addPermissionResource(array $params = []): Resource;
 
-    public function updatePermissionResource(string $resourceName, array $params = []): void;
+    public function updatePermissionResource(string $resourceKey, array $params = []): void;
 
-    public function deletePermissionResource(string $roleName): void;
+    public function deletePermissionResource(string $roleKey): void;
+
+    public function getPermissionResourceCount($params = []): int;
 
     public function getPermissionRoleList(array $params = []): HydratingResultSet;
 
@@ -25,9 +27,11 @@ interface PermissionRepositoryInterface
 
     public function addPermissionRole(array $params = []): Role;
 
-    public function updatePermissionRole(string $roleName, array $params = []): void;
+    public function updatePermissionRole(string $roleKey, array $params = []): void;
 
     public function deletePermissionRole(array $params = []): void;
+
+    public function getPermissionRoleCount($params = []): int;
 
     public function getPermissionPageList(array $params = []): HydratingResultSet;
 
@@ -35,7 +39,9 @@ interface PermissionRepositoryInterface
 
     public function addPermissionPage(array $params = []): Page;
 
-    public function updatePermissionPage(string $pageName, array $params = []): void;
+    public function updatePermissionPage(string $pageKey, array $params = []): void;
 
     public function deletePermissionPage(array $params = []): void;
+
+    public function getPermissionPageCount($params = []): int;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Admin\Permission;
+namespace User\Factory\Handler\Admin\Permission\Resource;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -8,7 +8,8 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Admin\Permission\ListHandler;
+use User\Handler\Admin\Permission\Resource\ListHandler;
+use User\Service\PermissionService;
 
 class ListHandlerFactory implements FactoryInterface
 {
@@ -25,7 +26,8 @@ class ListHandlerFactory implements FactoryInterface
     {
         return new ListHandler(
             $container->get(ResponseFactoryInterface::class),
-            $container->get(StreamFactoryInterface::class)
+            $container->get(StreamFactoryInterface::class),
+            $container->get(PermissionService::class)
         );
     }
 }

@@ -27,14 +27,14 @@ class PermissionService implements ServiceInterface
         $this->cacheService         = $cacheService;
     }
 
-    public function checkPermissionBefore($pageName, $userRoles): bool
+    public function checkPermissionBefore($pageKey, $userRoles): bool
     {
-        $permission = $this->getPermission($pageName);
+        $permission = $this->getPermission($pageKey);
 
         $rbac      = new Rbac();
         $assertion = new AssertRolesMatches($userRoles, $permission['systemRoles'], $permission['resource']);
         foreach ($permission['systemRoles'] as $systemRole) {
-            $result = $assertion->assert($rbac, new Role($systemRole['role']), $permission['resource']['name']);
+            $result = $assertion->assert($rbac, new Role($systemRole['role']), $permission['resource']['key']);
             if ($result) {
                 return true;
             }
@@ -70,12 +70,12 @@ class PermissionService implements ServiceInterface
         return true;
     }
 
-    public function getPermission($pageName): array
+    public function getPermission($pageKey): array
     {
-        $page = $this->permissionRepository->getPermissionPage(['name' => $pageName]);
+        $page = $this->permissionRepository->getPermissionPage(['key' => $pageKey]);
         $page = $this->canonizePage($page);
 
-        $resource = $this->permissionRepository->getPermissionResource(['name' => $page['resource']]);
+        $resource = $this->permissionRepository->getPermissionResource(['key' => $page['resource']]);
         $resource = $this->canonizeResource($resource);
 
         $roles       = $this->permissionRepository->getPermissionRoleList(['resource' => $page['resource']]);
@@ -101,18 +101,18 @@ class PermissionService implements ServiceInterface
         // Get list
         $rowSet = $this->permissionRepository->getPermissionPageList(['module' => $params['module']]);
         foreach ($rowSet as $row) {
-            $result['page_list'][$row->getName()] = $this->canonizePage($row);
+            $result['page_list'][$row->getKey()] = $this->canonizePage($row);
         }
 
         // Get list
         $rowSet = $this->permissionRepository->getPermissionResourceList(['module' => $params['module']]);
         foreach ($rowSet as $row) {
-            $result['resource_list'][$row->getName()] = $this->canonizeResource($row);
+            $result['resource_list'][$row->getKey()] = $this->canonizeResource($row);
         }
 
         $rowSet = $this->permissionRepository->getPermissionRoleList(['module' => $params['module']]);
         foreach ($rowSet as $row) {
-            $result['role_list'][$row->getName()] = $this->canonizeRole($row);
+            $result['role_list'][$row->getKey()] = $this->canonizeRole($row);
         }
 
         return $result;
@@ -121,10 +121,10 @@ class PermissionService implements ServiceInterface
     public function addPermissionResource($params)
     {
         $values = [
-            'title'   => $params['title'] ?? $params['name'],
+            'title'   => $params['title'] ?? $params['key'],
             'section' => $params['section'],
             'module'  => $params['module'],
-            'name'    => $params['name'],
+            'key'    => $params['key'],
             'type'    => $params['type'] ?? 'system',
         ];
 
@@ -136,13 +136,13 @@ class PermissionService implements ServiceInterface
     public function addPermissionPage($params)
     {
         $values = [
-            'title'    => $params['title'] ?? $params['name'],
+            'title'    => $params['title'] ?? $params['key'],
             'section'  => $params['section'],
             'module'   => $params['module'],
             'package'  => $params['package'],
             'handler'  => $params['handler'],
             'resource' => $params['resource'],
-            'name'     => $params['name'],
+            'key'     => $params['key'],
         ];
 
         $page = $this->permissionRepository->addPermissionPage($values);
@@ -157,7 +157,7 @@ class PermissionService implements ServiceInterface
             'section'  => $params['section'],
             'module'   => $params['module'],
             'role'     => $params['role'],
-            'name'     => $params['name'],
+            'key'     => $params['key'],
         ];
 
         $role = $this->permissionRepository->addPermissionRole($values);
@@ -176,6 +176,165 @@ class PermissionService implements ServiceInterface
         return array_values($roleList);
     }
 
+    public function getResourceList($params): array
+    {
+        $limit = $params['limit'] ?? 100;
+        $page  = $params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        $listParams = [
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        if (isset($params['title']) && !empty($params['title'])) {
+            $listParams['title'] = $params['title'];
+        }
+        if (isset($params['key']) && !empty($params['key'])) {
+            $listParams['key'] = $params['key'];
+        }
+        if (isset($params['section']) && !empty($params['section'])) {
+            $listParams['section'] = $params['section'];
+        }
+        if (isset($params['module']) && !empty($params['module'])) {
+            $listParams['module'] = $params['module'];
+        }
+        if (isset($params['type']) && !empty($params['type'])) {
+            $listParams['type'] = $params['type'];
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->permissionRepository->getPermissionResourceList($listParams);
+        foreach ($rowSet as $row) {
+            $list[] = $this->canonizeResource($row);
+        }
+
+        // Get count
+        $count = $this->permissionRepository->getPermissionResourceCount($listParams);
+
+        return [
+            'list'      => $list,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
+    public function getPageList($params): array
+    {
+        $limit = $params['limit'] ?? 100;
+        $page  = $params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        $listParams = [
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        if (isset($params['title']) && !empty($params['title'])) {
+            $listParams['title'] = $params['title'];
+        }
+        if (isset($params['key']) && !empty($params['key'])) {
+            $listParams['key'] = $params['key'];
+        }
+        if (isset($params['resource']) && !empty($params['resource'])) {
+            $listParams['resource'] = $params['resource'];
+        }
+        if (isset($params['section']) && !empty($params['section'])) {
+            $listParams['section'] = $params['section'];
+        }
+        if (isset($params['module']) && !empty($params['module'])) {
+            $listParams['module'] = $params['module'];
+        }
+        if (isset($params['package']) && !empty($params['package'])) {
+            $listParams['package'] = $params['package'];
+        }
+        if (isset($params['handler']) && !empty($params['handler'])) {
+            $listParams['handler'] = $params['handler'];
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->permissionRepository->getPermissionPageList($listParams);
+        foreach ($rowSet as $row) {
+            $list[] = $this->canonizePage($row);
+        }
+
+        // Get count
+        $count = $this->permissionRepository->getPermissionPageCount($listParams);
+
+        return [
+            'list'      => $list,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
+    public function getRoleList($params): array
+    {
+        $limit = $params['limit'] ?? 100;
+        $page  = $params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        $listParams = [
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        if (isset($params['key']) && !empty($params['key'])) {
+            $listParams['key'] = $params['key'];
+        }
+        if (isset($params['resource']) && !empty($params['resource'])) {
+            $listParams['resource'] = $params['resource'];
+        }
+        if (isset($params['section']) && !empty($params['section'])) {
+            $listParams['section'] = $params['section'];
+        }
+        if (isset($params['module']) && !empty($params['module'])) {
+            $listParams['module'] = $params['module'];
+        }
+        if (isset($params['role']) && !empty($params['role'])) {
+            $listParams['role'] = $params['role'];
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->permissionRepository->getPermissionRoleList($listParams);
+        foreach ($rowSet as $row) {
+            $list[] = $this->canonizeRole($row);
+        }
+
+        // Get count
+        $count = $this->permissionRepository->getPermissionRoleCount($listParams);
+
+        return [
+            'list'      => $list,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
     public function canonizePage($page)
     {
         if (empty($page)) {
@@ -191,7 +350,7 @@ class PermissionService implements ServiceInterface
                 'package'     => $page->getPackage(),
                 'handler'     => $page->getHandler(),
                 'resource'    => $page->getResource(),
-                'name'        => $page->getName(),
+                'key'        => $page->getKey(),
                 'cache_type'  => $page->getCacheType(),
                 'cache_ttl'   => $page->getCacheTtl(),
                 'cache_level' => $page->getCacheLevel(),
@@ -213,7 +372,7 @@ class PermissionService implements ServiceInterface
                 'title'   => $resource->getTitle(),
                 'section' => $resource->getSection(),
                 'module'  => $resource->getModule(),
-                'name'    => $resource->getName(),
+                'key'    => $resource->getKey(),
                 'type'    => $resource->getType(),
             ];
         }
@@ -234,7 +393,7 @@ class PermissionService implements ServiceInterface
                 'section'  => $role->getSection(),
                 'module'   => $role->getModule(),
                 'role'     => $role->getRole(),
-                'name'     => $role->getName(),
+                'key'     => $role->getKey(),
             ];
         }
 

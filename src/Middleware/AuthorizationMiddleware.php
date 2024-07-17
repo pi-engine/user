@@ -96,8 +96,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
         }
 
 
-        // Set page name
-        $pageName = sprintf(
+        // Set page key
+        $pageKey = sprintf(
             '%s-%s-%s-%s',
             $routeParams['section'],
             $routeParams['module'],
@@ -106,7 +106,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         );
 
         // Get and check access
-        $access = $this->permissionService->checkPermissionBefore($pageName, $userRoles);
+        $access = $this->permissionService->checkPermissionBefore($pageKey, $userRoles);
         if (!$access) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute(

@@ -9,21 +9,21 @@ class Role
     private string $section;
     private string $module;
     private string $role;
-    private string $name;
+    private string $key;
 
     public function __construct(
         $resource,
         $section,
         $module,
         $role,
-        $name,
+        $key,
         $id = null
     ) {
         $this->resource = $resource;
         $this->section  = $section;
         $this->module   = $module;
         $this->role     = $role;
-        $this->name     = $name;
+        $this->key     = $key;
         $this->id       = $id;
     }
 
@@ -70,8 +70,8 @@ class Role
     /**
      * @return string
      */
-    public function getName(): string
+    public function getKey(): string
     {
-        return $this->name;
+        return $this->key;
     }
 }

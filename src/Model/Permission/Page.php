@@ -11,7 +11,7 @@ class Page
     private string  $package;
     private string  $handler;
     private string  $resource;
-    private string  $name;
+    private string  $key;
     private ?string $cache_type;
     private ?int    $cache_ttl;
     private ?string $cache_level;
@@ -23,7 +23,7 @@ class Page
         $package,
         $handler,
         $resource,
-        $name,
+        $key,
         $cache_type,
         $cache_ttl,
         $cache_level,
@@ -35,7 +35,7 @@ class Page
         $this->package     = $package;
         $this->handler     = $handler;
         $this->resource    = $resource;
-        $this->name        = $name;
+        $this->key        = $key;
         $this->cache_type  = $cache_type;
         $this->cache_ttl   = $cache_ttl;
         $this->cache_level = $cache_level;
@@ -102,9 +102,9 @@ class Page
     /**
      * @return string
      */
-    public function getName(): string
+    public function getKey(): string
     {
-        return $this->name;
+        return $this->key;
     }
 
     /**

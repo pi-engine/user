@@ -7,6 +7,8 @@ use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
 use Laminas\Db\Sql\Insert;
+use Laminas\Db\Sql\Predicate\Expression;
+use Laminas\Db\Sql\Predicate\NotIn;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
@@ -85,14 +87,17 @@ class PermissionRepository implements PermissionRepositoryInterface
     public function getPermissionResourceList(array $params = []): HydratingResultSet
     {
         $where = [];
+        if (isset($params['title']) && !empty($params['title'])) {
+            $where['title like ?'] = '%' . $params['title'] . '%';
+        }
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
+        }
         if (isset($params['section']) && !empty($params['section'])) {
             $where['section'] = $params['section'];
         }
         if (isset($params['module']) && !empty($params['module'])) {
             $where['module'] = $params['module'];
-        }
-        if (isset($params['name']) && !empty($params['name'])) {
-            $where['name'] = $params['name'];
         }
         if (isset($params['type']) && !empty($params['type'])) {
             $where['type'] = $params['type'];
@@ -149,8 +154,8 @@ class PermissionRepository implements PermissionRepositoryInterface
         $where = [];
         if (isset($params['id']) && (int)$params['id'] > 0) {
             $where['id'] = (int)$params['id'];
-        } elseif (isset($params['name']) && !empty($params['name'])) {
-            $where['name'] = $params['name'];
+        } elseif (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
         }
 
         $sql       = new Sql($this->db);
@@ -184,14 +189,14 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param string $resourceName
+     * @param string $resourceKey
      * @param array  $params
      */
-    public function updatePermissionResource(string $resourceName, array $params = []): void
+    public function updatePermissionResource(string $resourceKey, array $params = []): void
     {
         $update = new Update($this->tablePermissionResource);
         $update->set($params);
-        $update->where(['name' => $resourceName]);
+        $update->where(['key' => $resourceKey]);
 
         $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
@@ -205,11 +210,42 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param string $roleName
+     * @param string $roleKey
      */
-    public function deletePermissionResource(string $roleName): void
+    public function deletePermissionResource(string $roleKey): void
     {
         // TODO: Implement deletePermissionResource() method.
+    }
+
+    public function getPermissionResourceCount($params = []): int
+    {
+        // Set columns
+        $columns = ['count' => new Expression('count(*)')];
+
+        $where = [];
+        if (isset($params['title']) && !empty($params['title'])) {
+            $where['title like ?'] = '%' . $params['title'] . '%';
+        }
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
+        }
+        if (isset($params['section']) && !empty($params['section'])) {
+            $where['section'] = $params['section'];
+        }
+        if (isset($params['module']) && !empty($params['module'])) {
+            $where['module'] = $params['module'];
+        }
+        if (isset($params['type']) && !empty($params['type'])) {
+            $where['type'] = $params['type'];
+        }
+
+        // Get count
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tablePermissionResource)->columns($columns)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $row       = $statement->execute()->current();
+
+        return (int)$row['count'];
     }
 
     /**
@@ -220,6 +256,9 @@ class PermissionRepository implements PermissionRepositoryInterface
     public function getPermissionRoleList(array $params = []): HydratingResultSet
     {
         $where = [];
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
+        }
         if (isset($params['resource']) && !empty($params['resource'])) {
             $where['resource'] = $params['resource'];
         }
@@ -284,8 +323,8 @@ class PermissionRepository implements PermissionRepositoryInterface
         $where = [];
         if (isset($params['id']) && (int)$params['id'] > 0) {
             $where['id'] = (int)$params['id'];
-        } elseif (isset($params['name']) && !empty($params['name'])) {
-            $where['name'] = $params['name'];
+        } elseif (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
         }
 
         $sql       = new Sql($this->db);
@@ -319,14 +358,14 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param string $roleName
+     * @param string $roleKey
      * @param array  $params
      */
-    public function updatePermissionRole(string $roleName, array $params = []): void
+    public function updatePermissionRole(string $roleKey, array $params = []): void
     {
         $update = new Update($this->tablePermissionRole);
         $update->set($params);
-        $update->where(['name' => $roleName]);
+        $update->where(['key' => $roleKey]);
 
         $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
@@ -347,6 +386,37 @@ class PermissionRepository implements PermissionRepositoryInterface
         // TODO: Implement deletePermissionRole() method.
     }
 
+    public function getPermissionRoleCount($params = []): int
+    {
+        // Set columns
+        $columns = ['count' => new Expression('count(*)')];
+
+        $where = [];
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
+        }
+        if (isset($params['resource']) && !empty($params['resource'])) {
+            $where['resource'] = $params['resource'];
+        }
+        if (isset($params['section']) && !empty($params['section'])) {
+            $where['section'] = $params['section'];
+        }
+        if (isset($params['module']) && !empty($params['module'])) {
+            $where['module'] = $params['module'];
+        }
+        if (isset($params['role']) && !empty($params['role'])) {
+            $where['role'] = $params['role'];
+        }
+
+        // Get count
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tablePermissionRole)->columns($columns)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $row       = $statement->execute()->current();
+
+        return (int)$row['count'];
+    }
+
     /**
      * @param array $params
      *
@@ -355,6 +425,15 @@ class PermissionRepository implements PermissionRepositoryInterface
     public function getPermissionPageList(array $params = []): HydratingResultSet
     {
         $where = [];
+        if (isset($params['title']) && !empty($params['title'])) {
+            $where['title like ?'] = '%' . $params['title'] . '%';
+        }
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
+        }
+        if (isset($params['resource']) && !empty($params['resource'])) {
+            $where['resource'] = $params['resource'];
+        }
         if (isset($params['section']) && !empty($params['section'])) {
             $where['section'] = $params['section'];
         }
@@ -366,9 +445,6 @@ class PermissionRepository implements PermissionRepositoryInterface
         }
         if (isset($params['handler']) && !empty($params['handler'])) {
             $where['handler'] = $params['handler'];
-        }
-        if (isset($params['resource']) && !empty($params['resource'])) {
-            $where['resource'] = $params['resource'];
         }
 
         $sql       = new Sql($this->db);
@@ -422,8 +498,8 @@ class PermissionRepository implements PermissionRepositoryInterface
         $where = [];
         if (isset($params['id']) && (int)$params['id'] > 0) {
             $where['id'] = (int)$params['id'];
-        } elseif (isset($params['name']) && !empty($params['name'])) {
-            $where['name'] = $params['name'];
+        } elseif (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
         }
 
         $sql       = new Sql($this->db);
@@ -448,7 +524,7 @@ class PermissionRepository implements PermissionRepositoryInterface
             throw new InvalidArgumentException(
                 sprintf(
                     'Role with identifier "%s" not found.',
-                    $params['name']
+                    $params['key']
                 )
             );
         }
@@ -457,14 +533,14 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param string $pageName
+     * @param string $pageKey
      * @param array  $params
      */
-    public function updatePermissionPage(string $pageName, array $params = []): void
+    public function updatePermissionPage(string $pageKey, array $params = []): void
     {
         $update = new Update($this->tablePermissionPage);
         $update->set($params);
-        $update->where(['name' => $pageName]);
+        $update->where(['key' => $pageKey]);
 
         $sql       = new Sql($this->db);
         $statement = $sql->prepareStatementForSqlObject($update);
@@ -483,5 +559,42 @@ class PermissionRepository implements PermissionRepositoryInterface
     public function deletePermissionPage(array $params = []): void
     {
         // TODO: Implement deletePermissionPage() method.
+    }
+
+    public function getPermissionPageCount($params = []): int
+    {
+        // Set columns
+        $columns = ['count' => new Expression('count(*)')];
+
+        $where = [];
+        if (isset($params['title']) && !empty($params['title'])) {
+            $where['title like ?'] = '%' . $params['title'] . '%';
+        }
+        if (isset($params['key']) && !empty($params['key'])) {
+            $where['key'] = $params['key'];
+        }
+        if (isset($params['resource']) && !empty($params['resource'])) {
+            $where['resource'] = $params['resource'];
+        }
+        if (isset($params['section']) && !empty($params['section'])) {
+            $where['section'] = $params['section'];
+        }
+        if (isset($params['module']) && !empty($params['module'])) {
+            $where['module'] = $params['module'];
+        }
+        if (isset($params['package']) && !empty($params['package'])) {
+            $where['package'] = $params['package'];
+        }
+        if (isset($params['handler']) && !empty($params['handler'])) {
+            $where['handler'] = $params['handler'];
+        }
+
+        // Get count
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tablePermissionPage)->columns($columns)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $row       = $statement->execute()->current();
+
+        return (int)$row['count'];
     }
 }

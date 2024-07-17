@@ -55,9 +55,9 @@ return [
             Handler\Admin\Role\EditHandler::class                    => Factory\Handler\Admin\Role\EditHandlerFactory::class,
             Handler\Admin\Role\ListHandler::class                    => Factory\Handler\Admin\Role\ListHandlerFactory::class,
             Handler\Admin\Role\DeleteHandler::class                  => Factory\Handler\Admin\Role\DeleteHandlerFactory::class,
-            Handler\Admin\Permission\ListHandler::class              => Factory\Handler\Admin\Permission\ListHandlerFactory::class,
-            Handler\Admin\Permission\AccessHandler::class            => Factory\Handler\Admin\Permission\AccessHandlerFactory::class,
-            Handler\Admin\Permission\ViewHandler::class              => Factory\Handler\Admin\Permission\ViewHandlerFactory::class,
+            Handler\Admin\Permission\Page\ListHandler::class         => Factory\Handler\Admin\Permission\Page\ListHandlerFactory::class,
+            Handler\Admin\Permission\Resource\ListHandler::class     => Factory\Handler\Admin\Permission\Resource\ListHandlerFactory::class,
+            Handler\Admin\Permission\Role\ListHandler::class         => Factory\Handler\Admin\Permission\Role\ListHandlerFactory::class,
             Handler\Api\Profile\ViewHandler::class                   => Factory\Handler\Api\Profile\ViewHandlerFactory::class,
             Handler\Api\Profile\UpdateHandler::class                 => Factory\Handler\Api\Profile\UpdateHandlerFactory::class,
             Handler\Api\Profile\DeviceTokenHandler::class            => Factory\Handler\Api\Profile\DeviceTokenHandlerFactory::class,
@@ -904,66 +904,93 @@ return [
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'list'   => [
-                                'type'    => Literal::class,
-                                'options' => [
-                                    'route'    => '/list',
-                                    'defaults' => [
-                                        'module'      => 'user',
-                                        'section'     => 'admin',
-                                        'package'     => 'permission',
-                                        'handler'     => 'list',
-                                        'permissions' => 'user-permission-list',
-                                        'controller'  => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
-                                            Middleware\JsonToArrayMiddleware::class,
-                                            Middleware\SecurityMiddleware::class,
-                                            Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationMiddleware::class,
-                                            Handler\Admin\Permission\ListHandler::class
-                                        ),
+                            'resource' => [
+                                'type'         => Literal::class,
+                                'options'      => [
+                                    'route'    => '/resource',
+                                    'defaults' => [],
+                                ],
+                                'child_routes' => [
+                                    'list'   => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/list',
+                                            'defaults' => [
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-resource',
+                                                'handler'     => 'list',
+                                                'permissions' => 'user-permission-resource-list',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    Middleware\JsonToArrayMiddleware::class,
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    Handler\Admin\Permission\Resource\ListHandler::class
+                                                ),
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
-                            'view'   => [
-                                'type'    => Literal::class,
-                                'options' => [
-                                    'route'    => '/view',
-                                    'defaults' => [
-                                        'module'      => 'user',
-                                        'section'     => 'admin',
-                                        'package'     => 'permission',
-                                        'handler'     => 'view',
-                                        'permissions' => 'user-permission-view',
-                                        'controller'  => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
-                                            Middleware\JsonToArrayMiddleware::class,
-                                            Middleware\SecurityMiddleware::class,
-                                            Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationMiddleware::class,
-                                            Handler\Admin\Permission\ViewHandler::class
-                                        ),
+                            'page' => [
+                                'type'         => Literal::class,
+                                'options'      => [
+                                    'route'    => '/page',
+                                    'defaults' => [],
+                                ],
+                                'child_routes' => [
+                                    'list'   => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/list',
+                                            'defaults' => [
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-page',
+                                                'handler'     => 'list',
+                                                'permissions' => 'user-permission-page-list',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    Middleware\JsonToArrayMiddleware::class,
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    Handler\Admin\Permission\Page\ListHandler::class
+                                                ),
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
-                            'access' => [
-                                'type'    => Literal::class,
-                                'options' => [
-                                    'route'    => '/access',
-                                    'defaults' => [
-                                        'module'      => 'user',
-                                        'section'     => 'admin',
-                                        'package'     => 'permission',
-                                        'handler'     => 'access',
-                                        'permissions' => 'user-permission-access',
-                                        'controller'  => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
-                                            Middleware\JsonToArrayMiddleware::class,
-                                            Middleware\SecurityMiddleware::class,
-                                            Middleware\AuthenticationMiddleware::class,
-                                            Middleware\AuthorizationMiddleware::class,
-                                            Handler\Admin\Permission\AccessHandler::class
-                                        ),
+                            'role' => [
+                                'type'         => Literal::class,
+                                'options'      => [
+                                    'route'    => '/role',
+                                    'defaults' => [],
+                                ],
+                                'child_routes' => [
+                                    'list'   => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/list',
+                                            'defaults' => [
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-role',
+                                                'handler'     => 'list',
+                                                'permissions' => 'user-permission-role-list',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    Middleware\JsonToArrayMiddleware::class,
+                                                    Middleware\SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    Handler\Admin\Permission\Role\ListHandler::class
+                                                ),
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],

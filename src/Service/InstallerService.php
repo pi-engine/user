@@ -40,7 +40,7 @@ class InstallerService implements ServiceInterface
                         $resourceParams = array_merge(
                             $permissionSingle,
                             [
-                                'name' => $permissionSingle['permissions'],
+                                'key' => $permissionSingle['permissions'],
                             ]
                         );
 
@@ -48,7 +48,7 @@ class InstallerService implements ServiceInterface
                         $resource = $this->permissionService->addPermissionResource($resourceParams);
                     } else {
                         $resource = [
-                            'name' => $permissionSingle['permissions'],
+                            'key' => $permissionSingle['permissions'],
                         ];
                     }
 
@@ -58,8 +58,8 @@ class InstallerService implements ServiceInterface
                         $pageParams = array_merge(
                             $permissionSingle,
                             [
-                                'name'     => $permissionSingle['page'],
-                                'resource' => $resource['name'],
+                                'key'     => $permissionSingle['page'],
+                                'resource' => $resource['key'],
                             ]
                         );
 
@@ -69,17 +69,17 @@ class InstallerService implements ServiceInterface
 
                     // Check roles
                     foreach ($permissionSingle['role'] as $role) {
-                        // Set name
-                        $name = sprintf('%s-%s', $role, $permissionSingle['permissions']);
+                        // Set key
+                        $key = sprintf('%s-%s', $role, $permissionSingle['permissions']);
 
                         // Check for duplicate
-                        if (!in_array($name, $insertList['role'])) {
+                        if (!in_array($key, $insertList['role'])) {
                             // Set role params
                             $roleParams = array_merge(
                                 $permissionSingle,
                                 [
-                                    'name'     => $name,
-                                    'resource' => $resource['name'],
+                                    'key'     => $key,
+                                    'resource' => $resource['key'],
                                     'role'     => $role,
                                 ]
                             );
@@ -88,7 +88,7 @@ class InstallerService implements ServiceInterface
                             $this->permissionService->addPermissionRole($roleParams);
 
                             // Add to list
-                            $insertList['role'][$name] = $name;
+                            $insertList['role'][$key] = $key;
                         }
                     }
 

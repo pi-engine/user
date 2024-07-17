@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `user_profile`
     `last_name`   VARCHAR(64)                        DEFAULT NULL,
     `birthdate`   VARCHAR(16)                        DEFAULT NULL,
     `gender`      ENUM ('male', 'female', 'unknown') DEFAULT NULL,
-    `avatar`      VARCHAR(1000)                      DEFAULT NULL,
+    `avatar`      VARCHAR(255)                      DEFAULT NULL,
     `information` JSON                               DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `user_id` (`user_id`)
@@ -61,45 +61,45 @@ CREATE TABLE IF NOT EXISTS `role_account`
 CREATE TABLE IF NOT EXISTS `permission_resource`
 (
     `id`      INT(10) UNSIGNED          NOT NULL AUTO_INCREMENT,
-    `title`   VARCHAR(255)              NOT NULL DEFAULT '',
+    `title`   VARCHAR(255)             NOT NULL DEFAULT '',
+    `key`     VARCHAR(255)             NULL     DEFAULT NULL,
     `section` ENUM ('api', 'admin')     NOT NULL DEFAULT 'api',
     `module`  VARCHAR(64)               NOT NULL DEFAULT '',
-    `name`    VARCHAR(255)              NULL     DEFAULT NULL,
     `type`    ENUM ('system', 'custom') NOT NULL DEFAULT 'system',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`),
-    UNIQUE KEY `key` (`section`, `module`, `name`, `type`)
+    UNIQUE KEY `key` (`key`),
+    UNIQUE KEY `keys` (`key`, `section`, `module`, `type`)
 );
 
 CREATE TABLE IF NOT EXISTS `permission_page`
 (
     `id`          INT(8) UNSIGNED         NOT NULL AUTO_INCREMENT,
-    `title`       VARCHAR(64)             NOT NULL DEFAULT '',
+    `title`       VARCHAR(255)           NOT NULL DEFAULT '',
+    `key`         VARCHAR(255)           NULL     DEFAULT NULL,
+    `resource`    VARCHAR(255)           NOT NULL DEFAULT '',
     `section`     ENUM ('api', 'admin')   NOT NULL DEFAULT 'api',
     `module`      VARCHAR(64)             NOT NULL DEFAULT '',
     `package`     VARCHAR(64)             NOT NULL DEFAULT '',
     `handler`     VARCHAR(64)             NOT NULL DEFAULT '',
-    `resource`    VARCHAR(64)             NOT NULL DEFAULT '',
-    `name`        VARCHAR(255)            NULL     DEFAULT NULL,
     `cache_type`  ENUM ('page', 'action') NOT NULL DEFAULT 'page',
     `cache_ttl`   INT(10)                 NOT NULL DEFAULT '0', # positive: for cache TTL; negative: for inheritance
     `cache_level` VARCHAR(64)             NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`),
-    UNIQUE KEY `key` (`section`, `module`, `package`, `handler`, `resource`, `name`)
+    UNIQUE KEY `key` (`key`),
+    UNIQUE KEY `keys` (`key`, `resource`, `section`, `module`, `package`, `handler`)
 );
 
 CREATE TABLE IF NOT EXISTS `permission_role`
 (
     `id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
-    `resource` VARCHAR(64)           NOT NULL DEFAULT '',
+    `key`      VARCHAR(255)         NULL     DEFAULT NULL,
+    `resource` VARCHAR(255)         NOT NULL DEFAULT '',
     `section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
     `module`   VARCHAR(64)           NOT NULL DEFAULT '',
     `role`     VARCHAR(64)           NOT NULL DEFAULT '',
-    `name`     VARCHAR(255)          NULL     DEFAULT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`),
-    UNIQUE KEY `key` (`resource`, `section`, `module`, `role`, `name`)
+    UNIQUE KEY `key` (`key`),
+    UNIQUE KEY `keys` (`key`, `resource`, `section`, `module`, `role`)
 );
 
 INSERT INTO `role_resource` (`id`, `name`, `title`, `status`, `section`)
