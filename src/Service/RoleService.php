@@ -305,8 +305,24 @@ class RoleService implements ServiceInterface
 
     public function deleteRoleResource(object|array|null $params, mixed $operator): void
     {
-        $name = (isset($params['name']) && !empty($params['name'])) ? $params['name'] : '';
-        $this->roleRepository->updateRoleResource($name, ['status' => 0]);
+        if (isset($params['name']) && !empty($params['name'])) {
+            $this->roleRepository->updateRoleResource($params['name'], ['status' => 0]);
+        }
+        $this->resetRoleListInCache();
+    }
+
+    public function updateRoleResource($params): void
+    {
+        $updateParams = [];
+        if (isset($params['title']) && !empty($params['title'])) {
+            $updateParams['title'] = $params['title'];
+        }
+        if (isset($params['status']) && !empty($params['status'])) {
+            $updateParams['status'] = $params['status'];
+        }
+        if (!empty($updateParams) && isset($params['name']) && !empty($params['name'])) {
+            $this->roleRepository->updateRoleResource($params['name'], $updateParams);
+        }
         $this->resetRoleListInCache();
     }
 

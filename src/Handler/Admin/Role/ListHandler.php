@@ -35,11 +35,17 @@ class ListHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
 
+        // Reset cache
+        $this->roleService->resetRoleListInCache();
+
+        // Get role list
+        $list = $this->roleService->getRoleResourceList($requestBody);
+
         $result
             = [
             'result' => true,
             'data'   => [
-                "list" => $this->roleService->getRoleResourceList($requestBody),
+                'list' => $list,
             ],
             'error'  => new \stdClass(),
         ];

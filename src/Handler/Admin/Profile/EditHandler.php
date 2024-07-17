@@ -33,11 +33,21 @@ class EditHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody    = $request->getParsedBody();
-        $account        = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
-        $operator       = $request->getAttribute('account');
+        $requestBody = $request->getParsedBody();
+        $operator    = $request->getAttribute('account');
+
+        // Get account
+        $account = $this->accountService->getAccount(['id' => (int)$requestBody['user_id']]);
+
+        // Update account
         $updatedAccount = $this->accountService->updateAccount($requestBody, $account, $operator);
-        $this->accountService->addRoleAccountByAdmin($requestBody, $updatedAccount, $operator);
+
+        // Update account role
+        if (isset($requestBody['roles']) && !empty($requestBody['roles'])) {
+            $requestBody['roles'] = explode(',', $requestBody['roles']);
+            $this->accountService->updateAccountRoles($requestBody['roles'], $updatedAccount, 'api', $operator);
+        }
+
         return new JsonResponse(
             [
                 'result' => true,

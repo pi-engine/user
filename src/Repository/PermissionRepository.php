@@ -105,6 +105,15 @@ class PermissionRepository implements PermissionRepositoryInterface
 
         $sql       = new Sql($this->db);
         $select    = $sql->select($this->tablePermissionResource)->where($where);
+        if (isset($params['order']) && !empty($params['order'])) {
+            $select->order($params['order']);
+        }
+        if (isset($params['offset']) && !empty($params['offset'])) {
+            $select->offset($params['offset']);
+        }
+        if (isset($params['limit']) && !empty($params['limit'])) {
+            $select->limit($params['limit']);
+        }
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -274,6 +283,15 @@ class PermissionRepository implements PermissionRepositoryInterface
 
         $sql       = new Sql($this->db);
         $select    = $sql->select($this->tablePermissionRole)->where($where);
+        if (isset($params['order']) && !empty($params['order'])) {
+            $select->order($params['order']);
+        }
+        if (isset($params['offset']) && !empty($params['offset'])) {
+            $select->offset($params['offset']);
+        }
+        if (isset($params['limit']) && !empty($params['limit'])) {
+            $select->limit($params['limit']);
+        }
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -449,6 +467,15 @@ class PermissionRepository implements PermissionRepositoryInterface
 
         $sql       = new Sql($this->db);
         $select    = $sql->select($this->tablePermissionPage)->where($where);
+        if (isset($params['order']) && !empty($params['order'])) {
+            $select->order($params['order']);
+        }
+        if (isset($params['offset']) && !empty($params['offset'])) {
+            $select->offset($params['offset']);
+        }
+        if (isset($params['limit']) && !empty($params['limit'])) {
+            $select->limit($params['limit']);
+        }
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 

@@ -41,7 +41,9 @@ class AddHandler implements RequestHandlerInterface
         $this->roleService->resetRoleListInCache();
 
         // Get role list
-        $list        = $this->roleService->getRoleResourceListByAdmin();
+        $list = $this->roleService->getRoleResourceListByAdmin();
+
+        // Check duplicate
         $isDuplicate = false;
         foreach ($list as $item) {
             if ($item["name"] === $requestBody['name'] ?? '') {
@@ -56,14 +58,16 @@ class AddHandler implements RequestHandlerInterface
                     'result' => false,
                     'data'   => new stdClass(),
                     'error'  => [
-                        'message' => 'Bad request!',
-                        'code'    => 400,
+                        'message' => 'This role added before!',
+                        'code'    => 403,
                     ],
                 ]
             );
         }
 
+        // Add role
         $result = $this->roleService->addRoleResource($requestBody, $operator);
+
         return new JsonResponse(
             [
                 'result' => true,

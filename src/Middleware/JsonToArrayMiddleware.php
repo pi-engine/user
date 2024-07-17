@@ -38,25 +38,29 @@ class JsonToArrayMiddleware implements MiddlewareInterface
         $stream     = $this->streamFactory->createStreamFromFile('php://input');
         $rawData    = $stream->getContents();
 
-        // Decode the raw JSON data into an associative array
-        $parsedBody = json_decode($rawData, true);
+        // Check content
+        if (!empty($rawData)) {
+            // Decode the raw JSON data into an associative array
+            $parsedBody = json_decode($rawData, true);
 
-        // Check if decoding was successful
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // JSON decoding failed
-            $request      = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-            $request      = $request->withAttribute(
-                'error',
-                [
-                    'message' => 'Invalid JSON data !',
-                    'code'    => StatusCodeInterface::STATUS_BAD_REQUEST,
-                ]
-            );
-            return $this->errorHandler->handle($request);
+            // Check if decoding was successful
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // JSON decoding failed
+                $request      = $request->withAttribute('status', StatusCodeInterface::STATUS_BAD_REQUEST);
+                $request      = $request->withAttribute(
+                    'error',
+                    [
+                        'message' => 'Invalid JSON data !',
+                        'code'    => StatusCodeInterface::STATUS_BAD_REQUEST,
+                    ]
+                );
+                return $this->errorHandler->handle($request);
+            }
+
+            // Set attribute
+            $request = $request->withParsedBody($parsedBody);
         }
 
-        // Set attribute
-        $request = $request->withParsedBody($parsedBody);
         return $handler->handle($request);
     }
 }

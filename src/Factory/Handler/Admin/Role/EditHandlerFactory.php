@@ -9,6 +9,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\Admin\Role\EditHandler;
+use User\Service\RoleService;
 
 class EditHandlerFactory implements FactoryInterface
 {
@@ -25,7 +26,8 @@ class EditHandlerFactory implements FactoryInterface
     {
         return new EditHandler(
             $container->get(ResponseFactoryInterface::class),
-            $container->get(StreamFactoryInterface::class)
+            $container->get(StreamFactoryInterface::class),
+            $container->get(RoleService::class)
         );
     }
 }

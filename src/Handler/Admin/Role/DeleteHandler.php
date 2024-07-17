@@ -36,7 +36,10 @@ class DeleteHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
         $operator    = $request->getAttribute('account');
+
+        // Delete
         $this->roleService->deleteRoleResource($requestBody, $operator);
+
         return new JsonResponse(
             [
                 'result' => true,

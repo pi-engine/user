@@ -180,7 +180,7 @@ class PermissionService implements ServiceInterface
     {
         $limit = $params['limit'] ?? 100;
         $page  = $params['page'] ?? 1;
-        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $order  = $params['order'] ?? ['id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
@@ -231,7 +231,7 @@ class PermissionService implements ServiceInterface
     {
         $limit = $params['limit'] ?? 100;
         $page  = $params['page'] ?? 1;
-        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $order  = $params['order'] ?? ['id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
@@ -288,7 +288,7 @@ class PermissionService implements ServiceInterface
     {
         $limit = $params['limit'] ?? 100;
         $page  = $params['page'] ?? 1;
-        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $order  = $params['order'] ?? ['id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
         // Set params
