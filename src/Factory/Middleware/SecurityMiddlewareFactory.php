@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
 use User\Middleware\SecurityMiddleware;
+use User\Service\CacheService;
 
 class SecurityMiddlewareFactory implements FactoryInterface
 {
@@ -24,10 +25,16 @@ class SecurityMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SecurityMiddleware
     {
+        // Get config
+        $config  = $container->get('config');
+        $config  = $config['security'] ?? [];
+
         return new SecurityMiddleware(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(ErrorHandler::class)
+            $container->get(CacheService::class),
+            $container->get(ErrorHandler::class),
+            $config
         );
     }
 }

@@ -47,9 +47,9 @@ class CacheService implements ServiceInterface
         return $item;
     }
 
-    public function setItem(string $key, array $value = []): array
+    public function setItem(string $key, array $value = [], $ttl = null): array
     {
-        $this->cache->set($key, $value);
+        $this->cache->set($key, $value, $ttl);
 
         return $value;
     }

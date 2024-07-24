@@ -1,0 +1,175 @@
+<?php
+
+namespace User\Security;
+
+use Fig\Http\Message\StatusCodeInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+
+class Ip implements SecurityInterface
+{
+    /** @var ResponseFactoryInterface */
+    protected ResponseFactoryInterface $responseFactory;
+
+    /** @var StreamFactoryInterface */
+    protected StreamFactoryInterface $streamFactory;
+
+    /* @var array */
+    protected array $config;
+
+    /* @var string */
+    protected string $name = 'ip';
+
+    public function __construct(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+        $config
+    ) {
+        $this->responseFactory = $responseFactory;
+        $this->streamFactory   = $streamFactory;
+        $this->config          = $config;
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param array                  $securityStream
+     *
+     * @return array
+     */
+    public function check(ServerRequestInterface $request, array $securityStream = []): array
+    {
+        // Get client ip
+        $clientIp = $request->getServerParams()['REMOTE_ADDR'] ?? 'unknown';
+
+        // Check whitelist
+        if ($this->isWhitelist($clientIp)) {
+            return [
+                'result' => true,
+                'name'   => $this->name,
+                'status' => 'successful',
+                'data'   => [
+                    'client_ip'    => $clientIp,
+                    'in_whitelist' => true,
+                ],
+            ];
+        }
+
+        // Check blacklist
+        if ($this->isBlacklisted($clientIp)) {
+            return [
+                'result' => false,
+                'name'   => $this->name,
+                'status' => 'unsuccessful',
+                'data'   => [],
+            ];
+        }
+
+        return [
+            'result' => true,
+            'name'   => $this->name,
+            'status' => 'successful',
+            'data'   => [
+                'client_ip'    => $clientIp,
+                'in_whitelist' => false,
+            ],
+        ];
+    }
+
+    /**
+     * Checks if the IP is in the whitelist.
+     *
+     * @param string $clientIp
+     *
+     * @return bool
+     */
+    public function isWhitelist(string $clientIp): bool
+    {
+        foreach ($this->config['ip']['whitelist'] as $entry) {
+            if ($this->ipMatches($clientIp, $entry)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the IP is in the blacklist.
+     *
+     * @param string $clientIp
+     *
+     * @return bool
+     */
+    public function isBlacklisted(string $clientIp): bool
+    {
+        foreach ($this->config['ip']['blacklist'] as $entry) {
+            if ($this->ipMatches($clientIp, $entry)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if an IP matches a given rule (single IP or range).
+     *
+     * @param string $clientIp
+     * @param string $rule
+     *
+     * @return bool
+     */
+    private function ipMatches(string $clientIp, string $rule): bool
+    {
+        if (strpos($rule, '/') !== false) {
+            // Handle CIDR notation for IP ranges
+            return $this->ipInRange($clientIp, $rule);
+        }
+
+        // Handle single IP addresses
+        return $clientIp === $rule;
+    }
+
+    /**
+     * Checks if an IP is within a specified IP range.
+     *
+     * @param string $clientIp
+     * @param string $cidr
+     *
+     * @return bool
+     */
+    private function ipInRange(string $clientIp, string $cidr): bool
+    {
+        [$range, $prefix] = explode('/', $cidr, 2);
+        $prefix = (int)$prefix;
+
+        // Convert IP addresses to binary format
+        $clientIp = inet_pton($clientIp);
+        $range    = inet_pton($range);
+
+        // Calculate the subnet mask
+        $mask = str_repeat('1', $prefix) . str_repeat('0', 128 - $prefix);
+        $mask = pack('H*', str_pad(base_convert($mask, 2, 16), 32, '0', STR_PAD_LEFT));
+
+        // Apply the subnet mask to the range and IP
+        $range    = $range & $mask;
+        $clientIp = $clientIp & $mask;
+
+        return $range === $clientIp;
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorMessage(): string
+    {
+        return 'Access denied';
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatusCode(): int
+    {
+        return StatusCodeInterface::STATUS_BAD_REQUEST;
+    }
+}

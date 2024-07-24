@@ -7,23 +7,42 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Method implements SecurityInterface
 {
-    /** @var array|string[] */
-    protected array $allowMethod = ['POST'];
+    /* @var array */
+    protected array $config;
+
+    /* @var string */
+    protected string $name = 'method';
+
+    public function __construct($config)
+    {
+        $this->config = $config;
+    }
 
     /**
      * @param ServerRequestInterface $request
+     * @param array                  $securityStream
      *
-     * @return bool
+     * @return array
      */
-    public function check(ServerRequestInterface $request): bool
+    public function check(ServerRequestInterface $request, array $securityStream = []): array
     {
         // Get request method
         $method = $request->getMethod();
-        if (!in_array($method, $this->allowMethod)) {
-            return false;
+        if (!in_array($method, $this->config['method']['allow_method'] ?? ['POST'])) {
+            return [
+                'result' => false,
+                'name'   => $this->name,
+                'status' => 'unsuccessful',
+                'data'   => [],
+            ];
         }
 
-        return true;
+        return [
+            'result' => true,
+            'name'   => $this->name,
+            'status' => 'successful',
+            'data'   => [],
+        ];
     }
 
     /**

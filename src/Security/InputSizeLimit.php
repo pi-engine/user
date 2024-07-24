@@ -6,9 +6,8 @@ use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use voku\helper\AntiXSS;
 
-class Xss implements SecurityInterface
+class InputSizeLimit implements SecurityInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -20,7 +19,7 @@ class Xss implements SecurityInterface
     protected array $config;
 
     /* @var string */
-    protected string $name = 'xss';
+    protected string $name = 'inputSizeLimit';
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
@@ -40,37 +39,13 @@ class Xss implements SecurityInterface
      */
     public function check(ServerRequestInterface $request, array $securityStream = []): array
     {
-        // Check if the IP is in the whitelist
-        if (
-            (bool)$this->config['xss']['ignore_whitelist'] === true
-            && isset($securityStream['ip']['data']['in_whitelist'])
-            && (bool)$securityStream['ip']['data']['in_whitelist'] === true
-        ) {
+        if ($this->isLargeInput($request)) {
             return [
-                'result' => true,
+                'result' => false,
                 'name'   => $this->name,
-                'status' => 'ignore',
+                'status' => 'unsuccessful',
                 'data'   => [],
             ];
-        }
-
-        // Get request body
-        $requestParams = $request->getParsedBody();
-
-        // Call XSS checker
-        $antiXss = new AntiXSS();
-
-        // Check request
-        if (!empty($requestParams)) {
-            $antiXss->xss_clean($requestParams);
-            if ($antiXss->isXssFound()) {
-                return [
-                    'result' => false,
-                    'name'   => $this->name,
-                    'status' => 'unsuccessful',
-                    'data'   => [],
-                ];
-            }
         }
 
         return [
@@ -82,11 +57,25 @@ class Xss implements SecurityInterface
     }
 
     /**
+     * Checks if the request input exceeds the maximum allowed size.
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return bool
+     */
+    private function isLargeInput(ServerRequestInterface $request): bool
+    {
+        $body = $request->getBody();
+        $size = $body->getSize();
+        return $size > $this->config['inputSizeLimit']['max_input_size'];
+    }
+
+    /**
      * @return string
      */
     public function getErrorMessage(): string
     {
-        return 'XSS attack detected';
+        return 'Input data is too large';
     }
 
     /**
