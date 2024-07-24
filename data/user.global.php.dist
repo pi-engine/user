@@ -68,20 +68,20 @@ return [
                 'google_client_id'     => 'XXX',
                 'google_client_secret' => 'XXX',
             ],
-            'oauth2' => [
-                            'base_url' => 'XXX',
-                            'authorize_url' => 'XXX',
-                            'token_url' => 'XXX',
-                            'user_info_url' => 'XXX',
-                            'client_id' => 'XXX',
-                            'response_type' => 'XXX',
-                            'scope' => 'XXX',
-                            'redirect_uri' => 'XXX',
-                            'state' => 'XXX',
-                            'nonce' => 'XXX',
-                            'response_mode' => 'XXX',
-                            'client_login_url' => 'XXX'
-                        ]
+            'oauth2'         => [
+                'base_url'         => 'XXX',
+                'authorize_url'    => 'XXX',
+                'token_url'        => 'XXX',
+                'user_info_url'    => 'XXX',
+                'client_id'        => 'XXX',
+                'response_type'    => 'XXX',
+                'scope'            => 'XXX',
+                'redirect_uri'     => 'XXX',
+                'state'            => 'XXX',
+                'nonce'            => 'XXX',
+                'response_mode'    => 'XXX',
+                'client_login_url' => 'XXX',
+            ],
         ],
         'register'     => [
             'status' => 1,
@@ -124,5 +124,38 @@ return [
         'time_type'     => IntlDateFormatter::NONE,
         'date_calendar' => IntlDateFormatter::TRADITIONAL,
         'date_pattern'  => 'dd/MM/yyyy',
+    ],
+    'security'     => [
+        'ip'             => [
+            'is_active' => true,
+            'whitelist' => [
+                '172.18.0.1',
+                '192.168.1.1',
+                '10.0.0.0/24', // Range
+            ],
+            'blacklist' => [
+                'unknown',
+                '203.0.113.5',
+                '198.51.100.0/24', // Range
+            ],
+        ],
+        'method'         => [
+            'is_active'    => true,
+            'allow_method' => ['POST', 'GET'],
+        ],
+        'xss'            => [
+            'is_active'        => true,
+            'ignore_whitelist' => true,
+        ],
+        'inputSizeLimit' => [
+            'is_active'      => true,
+            'max_input_size' => 1048576, // 1MB in bytes
+        ],
+        'requestLimit'   => [
+            'is_active'        => true,
+            'ignore_whitelist' => true,
+            'max_requests'     => 100,
+            'rate_limit'       => 60, // Time window in seconds
+        ],
     ],
 ];

@@ -8,10 +8,11 @@ interface SecurityInterface
 {
     /**
      * @param ServerRequestInterface $request
+     * @param array                  $securityStream
      *
-     * @return bool
+     * @return array
      */
-    public function check(ServerRequestInterface $request): bool;
+    public function check(ServerRequestInterface $request, array $securityStream = []): array;
 
     /**
      * @return string
