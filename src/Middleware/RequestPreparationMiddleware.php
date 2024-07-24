@@ -57,7 +57,8 @@ class RequestPreparationMiddleware implements MiddlewareInterface
 
     private function isJson(string $contentType): bool
     {
-        return stripos($contentType, 'application/json') !== false;
+        return stripos($contentType, 'application/json') !== false ||
+               stripos($contentType, 'text/plain') !== false;
     }
 
     private function isFormData(string $contentType): bool
