@@ -43,8 +43,10 @@ class RequestPreparationMiddleware implements MiddlewareInterface
             // Handle form data, if necessary
             return $handler->handle($request);
         } else {
+            // Todo: Fix it
             // Unsupported content type
-            return $this->createErrorResponse($request, 'Unsupported content type', StatusCodeInterface::STATUS_BAD_REQUEST);
+            //return $this->createErrorResponse($request, 'Unsupported content type', StatusCodeInterface::STATUS_BAD_REQUEST);
+            return $handler->handle($request);
         }
     }
 
@@ -57,19 +59,19 @@ class RequestPreparationMiddleware implements MiddlewareInterface
 
     private function isJson(string $contentType): bool
     {
-        return stripos($contentType, 'application/json') !== false ||
-               stripos($contentType, 'text/plain') !== false;
+        return stripos($contentType, 'application/json') !== false
+               || stripos($contentType, 'text/plain') !== false;
     }
 
     private function isFormData(string $contentType): bool
     {
-        return stripos($contentType, 'application/x-www-form-urlencoded') !== false ||
-               stripos($contentType, 'multipart/form-data') !== false;
+        return stripos($contentType, 'application/x-www-form-urlencoded') !== false
+               || stripos($contentType, 'multipart/form-data') !== false;
     }
 
     private function processJsonRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $stream = $this->streamFactory->createStreamFromFile('php://input');
+        $stream  = $this->streamFactory->createStreamFromFile('php://input');
         $rawData = $stream->getContents();
 
         if (!empty($rawData)) {

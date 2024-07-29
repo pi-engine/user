@@ -104,9 +104,17 @@ return [
                 'admin',
             ],
         ],
-
-
-
+        [
+            'title'       => 'Admin user role delete',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'role',
+            'handler'     => 'delete',
+            'permissions' => 'user-role-delete',
+            'role'        => [
+                'admin',
+            ],
+        ],
         [
             'title'       => 'Admin user permission list',
             'module'      => 'user',
@@ -136,6 +144,39 @@ return [
             'package'     => 'permission-role',
             'handler'     => 'list',
             'permissions' => 'user-permission-role-list',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'Admin user cache list',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'cache',
+            'handler'     => 'list',
+            'permissions' => 'user-cache-list',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'Admin user cache view',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'cache',
+            'handler'     => 'view',
+            'permissions' => 'user-cache-view',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'Admin user cache delete',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'cache',
+            'handler'     => 'delete',
+            'permissions' => 'user-cache-delete',
             'role'        => [
                 'admin',
             ],
