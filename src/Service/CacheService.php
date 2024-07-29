@@ -239,7 +239,7 @@ class CacheService implements ServiceInterface
         return $user;
     }
 
-    public function getCacheList()
+    public function getCacheList(): array
     {
         // Setup redis
         $redis = new Redis();
@@ -281,8 +281,7 @@ class CacheService implements ServiceInterface
             ];
         }
 
-        echo '<pre>';
-        print_r($list);
-        die;
+
+        return $list;
     }
 }

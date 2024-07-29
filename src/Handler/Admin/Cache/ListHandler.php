@@ -33,10 +33,8 @@ class ListHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody = $request->getParsedBody();
-
         // Get role list
-        $list = $this->cacheService->getCacheList($requestBody);
+        $list = $this->cacheService->getCacheList();
 
         $result
             = [
