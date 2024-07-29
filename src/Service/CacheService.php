@@ -252,7 +252,7 @@ class CacheService implements ServiceInterface
         $list = [];
         foreach ($keys as $key) {
             // Set new key name
-            $key = str_replace(sprintf('%s:', $this->config['options']['namespace']), '', $key);
+            $simpleKey = str_replace(sprintf('%s:', $this->config['options']['namespace']), '', $key);
 
             // Get ttl
             $ttl = $redis->ttl($key);
@@ -266,10 +266,19 @@ class CacheService implements ServiceInterface
             $expirationDate = $expirationTime->format('Y-m-d H:i:s');
             $interval       = $currentTime->diff($expirationTime);
 
+            // Status
+            $status = 'Active';
+            if ($ttl === -1) {
+                $status = 'Perpetual (No Expiration)';
+            } elseif ($ttl === -2) {
+                $status = 'Deleted';
+            }
+
             // Add to list
             $list[] = [
-                'key'        => $key,
+                'key'        => $simpleKey,
                 'ttl'        => $ttl,
+                'status'     => $status,
                 'expiration' => [
                     'date'     => $expirationDate,
                     'interval' => [
@@ -281,7 +290,17 @@ class CacheService implements ServiceInterface
             ];
         }
 
-
         return $list;
+    }
+
+    public function setPersist(string $key): void
+    {
+        // Set key
+        $key = sprintf('%s:%s', $this->config['options']['namespace'], $key);
+
+        // Setup redis
+        $redis = new Redis();
+        $redis->connect($this->config['options']['server']['host'], $this->config['options']['server']['port']);
+        $redis->persist($key);
     }
 }

@@ -171,6 +171,17 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user cache persist',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'cache',
+            'handler'     => 'persist',
+            'permissions' => 'user-cache-persist',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
             'title'       => 'Admin user cache delete',
             'module'      => 'user',
             'section'     => 'admin',
