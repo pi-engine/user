@@ -16,27 +16,27 @@ return [
         'factories' => [
             Installer\Install::class                                 => Factory\Installer\InstallFactory::class,
             Installer\Update::class                                  => Factory\Installer\UpdateFactory::class,
-            Installer\Remove::class                        => Factory\Installer\RemoveFactory::class,
-            Repository\AccountRepository::class            => Factory\Repository\AccountRepositoryFactory::class,
-            Repository\PermissionRepository::class         => Factory\Repository\PermissionRepositoryFactory::class,
-            Repository\ProfileRepository::class            => Factory\Repository\ProfileRepositoryFactory::class,
-            Repository\RoleRepository::class               => Factory\Repository\RoleRepositoryFactory::class,
-            Middleware\AuthenticationMiddleware::class     => Factory\Middleware\AuthenticationMiddlewareFactory::class,
-            Middleware\AuthorizationMiddleware::class      => Factory\Middleware\AuthorizationMiddlewareFactory::class,
-            Middleware\AvatarUploadMiddleware::class       => Factory\Middleware\AvatarUploadMiddlewareFactory::class,
-            Middleware\SecurityMiddleware::class           => Factory\Middleware\SecurityMiddlewareFactory::class,
-            Middleware\ValidationMiddleware::class         => Factory\Middleware\ValidationMiddlewareFactory::class,
-            Middleware\RequestPreparationMiddleware::class => Factory\Middleware\JsonToArrayMiddlewareFactory::class,
-            Middleware\InstallerMiddleware::class          => Factory\Middleware\InstallerMiddlewareFactory::class,
-            Validator\EmailValidator::class                => Factory\Validator\EmailValidatorFactory::class,
-            Validator\IdentityValidator::class             => Factory\Validator\IdentityValidatorFactory::class,
-            Validator\NameValidator::class                 => Factory\Validator\NameValidatorFactory::class,
-            Validator\MobileValidator::class               => Factory\Validator\MobileValidatorFactory::class,
-            Validator\OtpValidator::class                  => Factory\Validator\OtpValidatorFactory::class,
-            Validator\PasswordValidator::class             => Factory\Validator\PasswordValidatorFactory::class,
-            Service\AccountService::class                  => Factory\Service\AccountServiceFactory::class,
-            Service\AvatarService::class                   => Factory\Service\AvatarServiceFactory::class,
-            Service\TokenService::class                    => Factory\Service\TokenServiceFactory::class,
+            Installer\Remove::class                                  => Factory\Installer\RemoveFactory::class,
+            Repository\AccountRepository::class                      => Factory\Repository\AccountRepositoryFactory::class,
+            Repository\PermissionRepository::class                   => Factory\Repository\PermissionRepositoryFactory::class,
+            Repository\ProfileRepository::class                      => Factory\Repository\ProfileRepositoryFactory::class,
+            Repository\RoleRepository::class                         => Factory\Repository\RoleRepositoryFactory::class,
+            Middleware\AuthenticationMiddleware::class               => Factory\Middleware\AuthenticationMiddlewareFactory::class,
+            Middleware\AuthorizationMiddleware::class                => Factory\Middleware\AuthorizationMiddlewareFactory::class,
+            Middleware\AvatarUploadMiddleware::class                 => Factory\Middleware\AvatarUploadMiddlewareFactory::class,
+            Middleware\SecurityMiddleware::class                     => Factory\Middleware\SecurityMiddlewareFactory::class,
+            Middleware\ValidationMiddleware::class                   => Factory\Middleware\ValidationMiddlewareFactory::class,
+            Middleware\RequestPreparationMiddleware::class           => Factory\Middleware\JsonToArrayMiddlewareFactory::class,
+            Middleware\InstallerMiddleware::class                    => Factory\Middleware\InstallerMiddlewareFactory::class,
+            Validator\EmailValidator::class                          => Factory\Validator\EmailValidatorFactory::class,
+            Validator\IdentityValidator::class                       => Factory\Validator\IdentityValidatorFactory::class,
+            Validator\NameValidator::class                           => Factory\Validator\NameValidatorFactory::class,
+            Validator\MobileValidator::class                         => Factory\Validator\MobileValidatorFactory::class,
+            Validator\OtpValidator::class                            => Factory\Validator\OtpValidatorFactory::class,
+            Validator\PasswordValidator::class                       => Factory\Validator\PasswordValidatorFactory::class,
+            Service\AccountService::class                            => Factory\Service\AccountServiceFactory::class,
+            Service\AvatarService::class                             => Factory\Service\AvatarServiceFactory::class,
+            Service\TokenService::class                              => Factory\Service\TokenServiceFactory::class,
             Service\CacheService::class                              => Factory\Service\CacheServiceFactory::class,
             Service\RoleService::class                               => Factory\Service\RoleServiceFactory::class,
             Service\PermissionService::class                         => Factory\Service\PermissionServiceFactory::class,
@@ -58,6 +58,10 @@ return [
             Handler\Admin\Permission\Page\ListHandler::class         => Factory\Handler\Admin\Permission\Page\ListHandlerFactory::class,
             Handler\Admin\Permission\Resource\ListHandler::class     => Factory\Handler\Admin\Permission\Resource\ListHandlerFactory::class,
             Handler\Admin\Permission\Role\ListHandler::class         => Factory\Handler\Admin\Permission\Role\ListHandlerFactory::class,
+            Handler\Admin\Cache\ListHandler::class                   => Factory\Handler\Admin\Cache\ListHandlerFactory::class,
+            Handler\Admin\Cache\ViewHandler::class                   => Factory\Handler\Admin\Cache\ViewHandlerFactory::class,
+            Handler\Admin\Cache\PersistHandler::class                => Factory\Handler\Admin\Cache\PersistHandlerFactory::class,
+            Handler\Admin\Cache\DeleteHandler::class                 => Factory\Handler\Admin\Cache\DeleteHandlerFactory::class,
             Handler\Api\Profile\ViewHandler::class                   => Factory\Handler\Api\Profile\ViewHandlerFactory::class,
             Handler\Api\Profile\UpdateHandler::class                 => Factory\Handler\Api\Profile\UpdateHandlerFactory::class,
             Handler\Api\Profile\DeviceTokenHandler::class            => Factory\Handler\Api\Profile\DeviceTokenHandlerFactory::class,
@@ -309,7 +313,7 @@ return [
                                         'handler'    => 'login',
                                         'validator'  => 'login',
                                         'controller' => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
+                                        'middleware' => new PipeSpec(
                                             Middleware\RequestPreparationMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
@@ -351,7 +355,7 @@ return [
                                         'handler'    => 'register',
                                         'validator'  => 'add',
                                         'controller' => PipeSpec::class,
-                                        'middleware'  => new PipeSpec(
+                                        'middleware' => new PipeSpec(
                                             Middleware\RequestPreparationMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
@@ -378,7 +382,7 @@ return [
                                                 'handler'    => 'request',
                                                 'validator'  => 'email-request',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
@@ -398,7 +402,7 @@ return [
                                                 'handler'    => 'verify',
                                                 'validator'  => 'email-verify',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
@@ -427,7 +431,7 @@ return [
                                                 'handler'    => 'request',
                                                 'validator'  => 'mobile-request',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
@@ -447,7 +451,7 @@ return [
                                                 'handler'    => 'verify',
                                                 'validator'  => 'mobile-verify',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\ValidationMiddleware::class,
@@ -475,7 +479,7 @@ return [
                                                 'package'    => 'authentication',
                                                 'handler'    => 'request',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
@@ -494,7 +498,7 @@ return [
                                                 'package'    => 'authentication',
                                                 'handler'    => 'verify',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
@@ -522,7 +526,7 @@ return [
                                                 'package'    => 'authentication',
                                                 'handler'    => 'google',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Handler\Api\Authentication\Oauth\GoogleHandler::class
@@ -540,7 +544,7 @@ return [
                                                 'package'    => 'authentication',
                                                 'handler'    => 'microsoft',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Handler\Api\Authentication\Oauth\MicrosoftHandler::class
@@ -558,7 +562,7 @@ return [
                                                 'package'    => 'authentication',
                                                 'handler'    => 'oauth2',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Handler\Api\Authentication\Oauth\Oauth2Handler::class
@@ -576,7 +580,7 @@ return [
                                                 'package'    => 'authentication',
                                                 'handler'    => 'oauth',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Handler\Api\Authentication\Oauth\SettingHandler::class
@@ -614,7 +618,7 @@ return [
                                                 'package'    => 'recaptcha',
                                                 'handler'    => 'verify',
                                                 'controller' => PipeSpec::class,
-                                                'middleware'  => new PipeSpec(
+                                                'middleware' => new PipeSpec(
                                                     Middleware\RequestPreparationMiddleware::class,
                                                     Middleware\SecurityMiddleware::class,
                                                     Handler\Api\Captcha\ReCaptcha\VerifyHandler::class
@@ -902,8 +906,8 @@ return [
                                         'module'      => 'user',
                                         'section'     => 'admin',
                                         'package'     => 'role',
-                                        'handler'     => 'edit',
-                                        'permissions' => 'user-role-edit',
+                                        'handler'     => 'delete',
+                                        'permissions' => 'user-role-delete',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             Middleware\RequestPreparationMiddleware::class,
@@ -932,7 +936,7 @@ return [
                                     'defaults' => [],
                                 ],
                                 'child_routes' => [
-                                    'list'   => [
+                                    'list' => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/list',
@@ -955,14 +959,14 @@ return [
                                     ],
                                 ],
                             ],
-                            'page' => [
+                            'page'     => [
                                 'type'         => Literal::class,
                                 'options'      => [
                                     'route'    => '/page',
                                     'defaults' => [],
                                 ],
                                 'child_routes' => [
-                                    'list'   => [
+                                    'list' => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/list',
@@ -985,14 +989,14 @@ return [
                                     ],
                                 ],
                             ],
-                            'role' => [
+                            'role'     => [
                                 'type'         => Literal::class,
                                 'options'      => [
                                     'route'    => '/role',
                                     'defaults' => [],
                                 ],
                                 'child_routes' => [
-                                    'list'   => [
+                                    'list' => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/list',
@@ -1017,6 +1021,100 @@ return [
                             ],
                         ],
                     ],
+                    // Admin cache section
+                    'cache'      => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/cache',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'list'   => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/list',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'cache',
+                                        'handler'     => 'list',
+                                        'permissions' => 'user-cache-list',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\RequestPreparationMiddleware::class,
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Cache\ListHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'view'   => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/view',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'cache',
+                                        'handler'     => 'view',
+                                        'permissions' => 'user-cache-view',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\RequestPreparationMiddleware::class,
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Cache\ViewHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'persist'   => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/persist',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'cache',
+                                        'handler'     => 'persist',
+                                        'permissions' => 'user-cache-persist',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\RequestPreparationMiddleware::class,
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Cache\PersistHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'delete' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/delete',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'cache',
+                                        'handler'     => 'delete',
+                                        'permissions' => 'user-cache-delete',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\RequestPreparationMiddleware::class,
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            Handler\Admin\Cache\DeleteHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     // Admin installer
                     'installer'  => [
                         'type'    => Literal::class,
@@ -1028,7 +1126,7 @@ return [
                                 'package'    => 'installer',
                                 'handler'    => 'installer',
                                 'controller' => PipeSpec::class,
-                                'middleware'  => new PipeSpec(
+                                'middleware' => new PipeSpec(
                                     Middleware\RequestPreparationMiddleware::class,
                                     Middleware\SecurityMiddleware::class,
                                     Middleware\AuthenticationMiddleware::class,

@@ -2,9 +2,11 @@
 
 namespace User\Service;
 
+use DateTime;
 use Laminas\Cache\Psr\SimpleCache\SimpleCacheDecorator;
 use Laminas\Cache\Service\StorageAdapterFactoryInterface;
 use Laminas\Cache\Storage\Plugin\Serializer;
+use Redis;
 
 class CacheService implements ServiceInterface
 {
@@ -34,7 +36,8 @@ class CacheService implements ServiceInterface
         // Set cache
         $cache = $storageFactory->create($config['storage'], $config['options'], $config['plugins']);
         $cache->addPlugin(new Serializer());
-        $this->cache = new SimpleCacheDecorator($cache);
+        $this->cache  = new SimpleCacheDecorator($cache);
+        $this->config = $config;
     }
 
     public function getItem($key): array
@@ -234,5 +237,70 @@ class CacheService implements ServiceInterface
         }
 
         return $user;
+    }
+
+    public function getCacheList(): array
+    {
+        // Setup redis
+        $redis = new Redis();
+        $redis->connect($this->config['options']['server']['host'], $this->config['options']['server']['port']);
+
+        // Get keys
+        $keys = $redis->keys(sprintf('%s:*', $this->config['options']['namespace']));
+
+        // Set list
+        $list = [];
+        foreach ($keys as $key) {
+            // Set new key name
+            $simpleKey = str_replace(sprintf('%s:', $this->config['options']['namespace']), '', $key);
+
+            // Get ttl
+            $ttl = $redis->ttl($key);
+
+            // Set date
+            $currentTime    = new DateTime();
+            $expirationTime = new DateTime();
+            $expirationTime->setTimestamp(time() + $ttl);
+
+            // Set date
+            $expirationDate = $expirationTime->format('Y-m-d H:i:s');
+            $interval       = $currentTime->diff($expirationTime);
+
+            // Status
+            $status = 'Active';
+            if ($ttl === -1) {
+                $status = 'Perpetual (No Expiration)';
+            } elseif ($ttl === -2) {
+                $status = 'Deleted';
+            }
+
+            // Add to list
+            $list[] = [
+                'key'        => $simpleKey,
+                'ttl'        => $ttl,
+                'status'     => $status,
+                'expiration' => [
+                    'date'     => $expirationDate,
+                    'interval' => [
+                        'days'    => $interval->days,
+                        'hours'   => $interval->h,
+                        'minutes' => $interval->i,
+                    ],
+                ],
+            ];
+        }
+
+        return $list;
+    }
+
+    public function setPersist(string $key): void
+    {
+        // Set key
+        $key = sprintf('%s:%s', $this->config['options']['namespace'], $key);
+
+        // Setup redis
+        $redis = new Redis();
+        $redis->connect($this->config['options']['server']['host'], $this->config['options']['server']['port']);
+        $redis->persist($key);
     }
 }
