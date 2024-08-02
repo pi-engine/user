@@ -450,7 +450,7 @@ class AccountRepository implements AccountRepositoryInterface
         $sql    = new Sql($this->db);
         $select = $sql->select();
         $select->from(['account' => $this->tableAccount])
-            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name', 'avatar', 'birthdate', 'gender',])
+            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name', 'avatar', 'birthdate', 'gender', 'information'])
             ->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);;
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();

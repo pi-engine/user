@@ -1467,6 +1467,7 @@ class AccountService implements ServiceInterface
                 'birthdate' => $account->getBirthdate(),
                 'gender' => $account->getGender(),
                 'avatar' => $account->getAvatar(),
+                'information' => $account->getInformation(),
             ];
         } else {
             $account = [
@@ -1482,9 +1483,11 @@ class AccountService implements ServiceInterface
                 'birthdate' => $account['birthdate'] ?? '',
                 'gender' => $account['gender'] ?? '',
                 'avatar' => $account['avatar'] ?? '',
+                'information' => $account['information'] ?? '',
             ];
         }
 
+        $account['information'] = json_decode($account['information'], true);
         $account['time_created_view'] = ' - ';
         if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
             $account['time_created_view'] = $this->utilityService->date($account['time_created']);
