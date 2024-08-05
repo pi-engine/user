@@ -51,7 +51,7 @@ class PasswordValidator extends AbstractValidator
             self::TOO_SHORT     => sprintf('Password is less than %s characters long', (int)$this->options['min']),
             self::TOO_LONG      => sprintf('Password is more than %s characters long', (int)$this->options['max']),
             self::HAS_PASSWORD  => 'User set password before !',
-            self::WEAK_PASSWORD => 'XXX Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
+            self::WEAK_PASSWORD => 'Please enter a stronger password for added security. Ensure it includes uppercase and lowercase letters, a number, and a special character.',
         ];
 
         parent::__construct();

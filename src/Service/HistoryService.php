@@ -12,7 +12,26 @@ class HistoryService implements ServiceInterface
     /* @var array */
     protected array $config;
 
-    protected array $forbiddenParams = ['credential', 'credentialColumn', 'access_token', 'refresh_token'];
+    protected array $forbiddenParams
+        = [
+            'credential',
+            'credentialColumn',
+            'access_token',
+            'refresh_token',
+            'birthdate',
+            'gender',
+            'avatar',
+            'information',
+            'roles',
+            'roles_full',
+            'has_password',
+            'multi_factor_global',
+            'multi_factor_status',
+            'multi_factor_verify',
+            'is_company_setup',
+            'token_payload',
+            'permission',
+        ];
 
     public function __construct(
         LoggerService $loggerService,
@@ -24,8 +43,8 @@ class HistoryService implements ServiceInterface
 
     public function logger(string $state, array $params): void
     {
-        // TODO: improve this
-        $params['params']['serverParams'] = $_SERVER;
+        // Set user ip
+        $params['ip'] = $_SERVER['REMOTE_ADDR'];
 
         // Clean up
         $params = $this->cleanupForbiddenKeys($params);

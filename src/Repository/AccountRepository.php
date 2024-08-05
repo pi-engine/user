@@ -538,7 +538,7 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function authenticationOauth($params): AuthenticationResult
     {
-        // Get account
+        // Get an account
         $account = $this->getAccount(['email' => $params['email']/*, 'status' => 1*/]);
         if ($account) {
             return new AuthenticationResult(AuthenticationResult::SUCCESS, $account);
@@ -549,7 +549,7 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function authenticationOauth2($params): AuthenticationResult
     {
-        // Get account
+        // Get an account
         $account = $this->getAccount(['identity' => $params['identity']/*, 'status' => 1*/]);
         if ($account) {
             return new AuthenticationResult(AuthenticationResult::SUCCESS, $account);

@@ -87,8 +87,9 @@ return [
             'status' => 1,
         ],
         'login'        => [
-            'permission'  => 1,
-            'get_company' => 0,
+            'session_policy' => 'multi', // multi,single
+            'permission'     => 1,
+            'get_company'    => 1,
         ],
     ],
     'captcha' => [

@@ -182,7 +182,7 @@ class RoleService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('addDefaultRoles', ['params' => $roleList, 'account' => $account, 'operator' => $operator]);
+        $this->historyService->logger('addDefaultRoles', ['request' => $roleList, 'account' => $account, 'operator' => $operator]);
     }
 
     public function addRoleAccount(array $account, string $roleName, string $section = 'api', $operator = []): void
@@ -201,7 +201,7 @@ class RoleService implements ServiceInterface
         // Save log
         $this->historyService->logger(
             'addRoleAccount',
-            ['params' => ['role' => $roleName, 'section' => $section], 'account' => $account, 'operator' => $operator]
+            ['request' => ['role' => $roleName, 'section' => $section], 'account' => $account, 'operator' => $operator]
         );
     }
 
@@ -253,7 +253,7 @@ class RoleService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('deleteRoleAccount', ['params' => ['role' => $roleName], 'account' => $account, 'operator' => $operator]);
+        $this->historyService->logger('deleteRoleAccount', ['request' => ['role' => $roleName], 'account' => $account, 'operator' => $operator]);
     }
 
     public function deleteAllRoleAccount($account, string $section = 'api', $operator = []): void
@@ -261,7 +261,7 @@ class RoleService implements ServiceInterface
         $this->roleRepository->deleteAllRoleAccount((int)$account['id'], $section);
 
         // Save log
-        $this->historyService->logger('deleteAllRoleAccount', ['params' => ['role' => null], 'account' => $account, 'operator' => $operator]);
+        $this->historyService->logger('deleteAllRoleAccount', ['request' => ['role' => null], 'account' => $account, 'operator' => $operator]);
     }
 
     public function updateAccountRoles($roles, $account, string $section = 'api', $operator = []): void
@@ -282,7 +282,7 @@ class RoleService implements ServiceInterface
         }
 
         // Save log
-        $this->historyService->logger('updateRoleAccount', ['params' => ['role' => $roles], 'account' => $account, 'operator' => $operator]);
+        $this->historyService->logger('updateRoleAccount', ['request' => ['role' => $roles], 'account' => $account, 'operator' => $operator]);
     }
 
     public function addRoleResource(object|array|null $params, mixed $operator)
