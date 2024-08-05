@@ -4,6 +4,7 @@ namespace User;
 
 use Laminas\Mvc\Middleware\PipeSpec;
 use Laminas\Router\Http\Literal;
+use Logger\Middleware\LoggerRequestResponseMiddleware;
 
 return [
     'service_manager' => [
@@ -98,7 +99,6 @@ return [
                     'defaults' => [],
                 ],
                 'child_routes' => [
-
                     // Api profile section
                     'profile'        => [
                         'type'         => Literal::class,
@@ -124,6 +124,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Profile\ViewHandler::class
                                         ),
                                     ],
@@ -148,6 +149,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Profile\UpdateHandler::class
                                         ),
                                     ],
@@ -171,6 +173,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Profile\DeviceTokenHandler::class
                                         ),
                                     ],
@@ -192,6 +195,7 @@ return [
                                             Middleware\RequestPreparationMiddleware::class,
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Profile\HistoryHandler::class
                                         ),
                                     ],
@@ -199,7 +203,6 @@ return [
                             ],
                         ],
                     ],
-
                     // Api avatar section
                     'avatar'         => [
                         'type'         => Literal::class,
@@ -226,6 +229,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\AvatarUploadMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Avatar\UploadHandler::class
                                         ),
                                     ],
@@ -233,7 +237,6 @@ return [
                             ],
                         ],
                     ],
-
                     // Api profile section
                     'password'       => [
                         'type'         => Literal::class,
@@ -261,6 +264,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Password\AddHandler::class
                                         ),
                                     ],
@@ -285,6 +289,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Api\Password\UpdateHandler::class
                                         ),
                                     ],
@@ -292,7 +297,6 @@ return [
                             ],
                         ],
                     ],
-
                     // Api Authentication section
                     'authentication' => [
                         'type'         => Literal::class,
@@ -592,7 +596,6 @@ return [
                             ],
                         ],
                     ],
-
                     // Api captcha section
                     'captcha'        => [
                         'type'         => Literal::class,
@@ -664,6 +667,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\ListHandler::class
                                         ),
                                     ],
@@ -687,6 +691,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\AddHandler::class
                                         ),
                                     ],
@@ -710,6 +715,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\EditHandler::class
                                         ),
                                     ],
@@ -733,6 +739,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\StatusHandler::class
                                         ),
                                     ],
@@ -756,6 +763,7 @@ return [
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
                                             Middleware\ValidationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\PasswordHandler::class
                                         ),
                                     ],
@@ -778,6 +786,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\DeleteHandler::class
                                         ),
                                     ],
@@ -799,6 +808,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\ViewHandler::class
                                         ),
                                     ],
@@ -820,6 +830,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\ExportHandler::class
                                         ),
                                     ],
@@ -851,6 +862,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Role\ListHandler::class
                                         ),
                                     ],
@@ -872,6 +884,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Role\AddHandler::class
                                         ),
                                     ],
@@ -893,6 +906,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Role\EditHandler::class
                                         ),
                                     ],
@@ -914,6 +928,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Role\DeleteHandler::class
                                         ),
                                     ],
@@ -952,6 +967,7 @@ return [
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
                                                     Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
                                                     Handler\Admin\Permission\Resource\ListHandler::class
                                                 ),
                                             ],
@@ -982,6 +998,7 @@ return [
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
                                                     Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
                                                     Handler\Admin\Permission\Page\ListHandler::class
                                                 ),
                                             ],
@@ -1012,6 +1029,7 @@ return [
                                                     Middleware\SecurityMiddleware::class,
                                                     Middleware\AuthenticationMiddleware::class,
                                                     Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
                                                     Handler\Admin\Permission\Role\ListHandler::class
                                                 ),
                                             ],
@@ -1045,6 +1063,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Cache\ListHandler::class
                                         ),
                                     ],
@@ -1066,6 +1085,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Cache\ViewHandler::class
                                         ),
                                     ],
@@ -1087,6 +1107,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Cache\PersistHandler::class
                                         ),
                                     ],
@@ -1108,6 +1129,7 @@ return [
                                             Middleware\SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Cache\DeleteHandler::class
                                         ),
                                     ],

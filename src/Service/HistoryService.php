@@ -44,7 +44,8 @@ class HistoryService implements ServiceInterface
     public function logger(string $state, array $params): void
     {
         // Set user ip
-        $params['ip'] = $_SERVER['REMOTE_ADDR'];
+        $params['ip']     = $_SERVER['REMOTE_ADDR'];
+        $params['method'] = $_SERVER['REQUEST_METHOD'];
 
         // Clean up
         $params = $this->cleanupForbiddenKeys($params);
