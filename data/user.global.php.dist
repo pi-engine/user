@@ -158,5 +158,9 @@ return [
             'max_requests'     => 100,
             'rate_limit'       => 60, // Time window in seconds
         ],
+        'account'        => [
+            'attempts' => 5,
+            'ttl'      => 3600,
+        ],
     ],
 ];

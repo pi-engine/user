@@ -6,6 +6,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use User\Service\CacheService;
 
 class Ip implements SecurityInterface
 {
@@ -14,6 +15,9 @@ class Ip implements SecurityInterface
 
     /** @var StreamFactoryInterface */
     protected StreamFactoryInterface $streamFactory;
+
+    /* @var CacheService */
+    protected CacheService $cacheService;
 
     /* @var array */
     protected array $config;
@@ -24,10 +28,12 @@ class Ip implements SecurityInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
+        CacheService $cacheService,
         $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
+        $this->cacheService    = $cacheService;
         $this->config          = $config;
     }
 
@@ -42,7 +48,17 @@ class Ip implements SecurityInterface
         // Get client ip
         $clientIp = $request->getServerParams()['REMOTE_ADDR'] ?? 'unknown';
 
-        // Check whitelist
+        // Check ip is not lock
+        if ($this->isIpLocked($clientIp)) {
+            return [
+                'result' => false,
+                'name'   => $this->name,
+                'status' => 'unsuccessful',
+                'data'   => [],
+            ];
+        }
+
+        // Check allow-list
         if ($this->isWhitelist($clientIp)) {
             return [
                 'result' => true,
@@ -77,7 +93,23 @@ class Ip implements SecurityInterface
     }
 
     /**
-     * Checks if the IP is in the whitelist.
+     * Checks if the IP is in the allow-list.
+     *
+     * @param string $clientIp
+     *
+     * @return bool
+     */
+    public function isIpLocked(string $clientIp): bool
+    {
+        $keyLocked = $this->sanitizeKey("locked_ip_{$clientIp}");
+        if ($this->cacheService->hasItem($keyLocked)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the IP is in the allow-list.
      *
      * @param string $clientIp
      *
@@ -171,5 +203,17 @@ class Ip implements SecurityInterface
     public function getStatusCode(): int
     {
         return StatusCodeInterface::STATUS_BAD_REQUEST;
+    }
+
+    /**
+     * Sanitizes the cache key to ensure it meets the allowed format.
+     *
+     * @param string $key The original key
+     *
+     * @return string The sanitized key
+     */
+    private function sanitizeKey(string $key): string
+    {
+        return preg_replace('/[^a-zA-Z0-9_]/', '_', $key);
     }
 }

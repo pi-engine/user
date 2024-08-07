@@ -40,6 +40,7 @@ class LoginHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $securityStream = $request->getAttribute('security_stream');
         $requestBody = $request->getParsedBody();
 
         // Set identity
@@ -60,6 +61,7 @@ class LoginHandler implements RequestHandlerInterface
             'identityColumn' => $identityColumn,
             'credential'     => $requestBody['credential'],
             'source'         => $requestBody['source'] ?? '',
+            'security_stream' => $securityStream,
         ];
 
         // Do log in

@@ -9,6 +9,8 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Task\Service\TaskService;
 use User\Repository\AccountRepositoryInterface;
+use User\Security\AccountLocked;
+use User\Security\AccountLoginAttempts;
 use User\Service\AccountService;
 use User\Service\CacheService;
 use User\Service\HistoryService;
@@ -47,6 +49,8 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(NotificationService::class),
             $container->get(HistoryService::class),
             $container->get(TranslatorService::class),
+            $container->get(AccountLoginAttempts::class),
+            $container->get(AccountLocked::class),
             $config
         );
     }

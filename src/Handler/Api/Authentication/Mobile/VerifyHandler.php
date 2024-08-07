@@ -32,11 +32,9 @@ class VerifyHandler implements RequestHandlerInterface
         $this->accountService  = $accountService;
     }
 
-    /**
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $securityStream = $request->getAttribute('security_stream');
         $requestBody = $request->getParsedBody();
 
         // Set login params
@@ -46,6 +44,7 @@ class VerifyHandler implements RequestHandlerInterface
             'identity'         => $requestBody['mobile'],
             'credential'       => $requestBody['otp'],
             'source'           => $requestBody['source'] ?? '',
+            'security_stream' => $securityStream,
         ];
 
         // Do log in

@@ -11,6 +11,8 @@ use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\TwoFactorAuthException;
 use User\Repository\AccountRepositoryInterface;
+use User\Security\AccountLocked;
+use User\Security\AccountLoginAttempts;
 
 use function array_merge;
 use function in_array;
@@ -47,6 +49,12 @@ class AccountService implements ServiceInterface
 
     /** @var TranslatorService */
     protected TranslatorService $translatorService;
+
+    /** @var AccountLoginAttempts */
+    protected AccountLoginAttempts $accountLoginAttempts;
+
+    /** @var AccountLocked */
+    protected AccountLocked $accountLocked;
 
     /* @var array */
     protected array $config;
@@ -127,6 +135,8 @@ class AccountService implements ServiceInterface
      * @param NotificationService        $notificationService
      * @param HistoryService             $historyService
      * @param TranslatorService          $translatorService
+     * @param AccountLoginAttempts       $accountLoginAttempts
+     * @param AccountLocked              $accountLocked
      * @param                            $config
      */
     public function __construct(
@@ -139,19 +149,23 @@ class AccountService implements ServiceInterface
         NotificationService $notificationService,
         HistoryService $historyService,
         TranslatorService $translatorService,
+        AccountLoginAttempts $accountLoginAttempts,
+        AccountLocked $accountLocked,
         $config
     ) {
-        $this->accountRepository   = $accountRepository;
-        $this->roleService         = $roleService;
-        $this->permissionService   = $permissionService;
-        $this->tokenService        = $tokenService;
-        $this->cacheService        = $cacheService;
-        $this->utilityService      = $utilityService;
-        $this->notificationService = $notificationService;
-        $this->historyService      = $historyService;
-        $this->translatorService   = $translatorService;
-        $this->config              = $config;
-        $this->hashPattern         = $config['hash_pattern'] ?? 'bcrypt';
+        $this->accountRepository    = $accountRepository;
+        $this->roleService          = $roleService;
+        $this->permissionService    = $permissionService;
+        $this->tokenService         = $tokenService;
+        $this->cacheService         = $cacheService;
+        $this->utilityService       = $utilityService;
+        $this->notificationService  = $notificationService;
+        $this->historyService       = $historyService;
+        $this->translatorService    = $translatorService;
+        $this->accountLoginAttempts = $accountLoginAttempts;
+        $this->accountLocked        = $accountLocked;
+        $this->config               = $config;
+        $this->hashPattern          = $config['hash_pattern'] ?? 'bcrypt';
     }
 
     /**
@@ -249,7 +263,7 @@ class AccountService implements ServiceInterface
 
         // Check login
         if ($authAdapter->isValid()) {
-            // Get user account
+            // Get a user account
             $account = $authAdapter->getIdentity();
 
             // Canonize account
@@ -305,6 +319,18 @@ class AccountService implements ServiceInterface
      */
     public function postLoginSuccess($account, $params): array
     {
+        // Check account is lock or not
+        if ($this->accountLocked->isLocked(['type' => 'id', 'user_id' => (int)$account['id'], 'security_stream' => $params['security_stream']])) {
+            return [
+                'result' => false,
+                'data'   => [],
+                'error'  => [
+                    'message' => $this->accountLocked->getErrorMessage(),
+                ],
+                'status' => $this->accountLocked->getStatusCode(),
+            ];
+        }
+
         // Get from cache if exist
         $user = $this->cacheService->getUser($account['id']);
 
@@ -456,17 +482,45 @@ class AccountService implements ServiceInterface
      */
     public function postLoginError($params): array
     {
-        // Save log
+        // Get a user account
         $account = $this->getAccount([$this->identityColumn => $params['identity']]);
+
+        // Check account exists
         if (!empty($account)) {
+            // Save log
             $this->historyService->logger('failedLogin', ['request' => $params, 'account' => $account]);
+
+            // Save failed attempts
+            $result = $this->accountLoginAttempts->incrementFailedAttempts(['type' => 'id', 'user_id' => (int)$account['id'], 'security_stream' => $params['security_stream']]);
+        } else {
+            // Save failed attempts
+            $userIp = $params['security_stream']['ip']['data']['client_ip'] ?? '';
+            $result = $this->accountLoginAttempts->incrementFailedAttempts(['type' => 'ip', 'user_ip' => $userIp, 'security_stream' => $params['security_stream']]);
+        }
+
+        // Check an attempt result
+        if (!$result['can_try']) {
+            return [
+                'result' => false,
+                'data'   => [],
+                'error'  => [
+                    'message' => $this->accountLoginAttempts->getErrorMessage(),
+                ],
+                'status' => $this->accountLoginAttempts->getStatusCode(),
+            ];
+        }
+
+        // Set message
+        $message = 'Invalid Username or Password';
+        if (isset($result['attempts_remind']) && is_numeric($result['attempts_remind']) && !$params['security_stream']['ip']['data']['in_whitelist']) {
+            $message = sprintf('Invalid Username or Password, You can try %s more times', $result['attempts_remind']);
         }
 
         return [
             'result' => false,
             'data'   => [],
             'error'  => [
-                'message' => 'Invalid Username or Password',
+                'message' => $message,
             ],
             'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
         ];

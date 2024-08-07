@@ -10,6 +10,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
+use User\Security\AccountLocked;
 use User\Service\AccountService;
 use User\Service\CacheService;
 use User\Service\TokenService;
@@ -31,6 +32,9 @@ class AuthenticationMiddleware implements MiddlewareInterface
     /** @var CacheService */
     protected CacheService $cacheService;
 
+    /** @var AccountLocked */
+    protected AccountLocked $accountLocked;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -43,6 +47,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         AccountService $accountService,
         TokenService $tokenService,
         CacheService $cacheService,
+        AccountLocked $accountLocked,
         ErrorHandler $errorHandler,
         $config
     ) {
@@ -51,6 +56,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $this->accountService  = $accountService;
         $this->tokenService    = $tokenService;
         $this->cacheService    = $cacheService;
+        $this->accountLocked        = $accountLocked;
         $this->errorHandler    = $errorHandler;
         $this->config          = $config;
     }
@@ -58,13 +64,14 @@ class AuthenticationMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Get token
+        $securityStream = $request->getAttribute('security_stream');
         $token = $request->getHeaderLine('token');
 
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
         $routeParams = $routeMatch->getParams();
 
-        // Check token set
+        // Check a token set
         if (empty($token)) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute(
@@ -104,7 +111,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
             $type = 'refresh';
         }
 
-        // Check token type
+        // Check a token type
         if ($tokenParsed['type'] != $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute(
@@ -117,9 +124,21 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
+        // Check account is lock or not
+        if ($this->accountLocked->isLocked(['type' => 'id', 'user_id' => (int)$tokenParsed['user_id'], 'security_stream' => $securityStream])) {
+            $request = $request->withAttribute('status', $this->accountLocked->getStatusCode());
+            $request = $request->withAttribute(
+                'error',
+                [
+                    'message' => $this->accountLocked->getErrorMessage(),
+                    'code'    => $this->accountLocked->getStatusCode(),
+                ]
+            );
+            return $this->errorHandler->handle($request);
+        }
+
         // Get account data from cache
         $user = $this->cacheService->getUser($tokenParsed['user_id']);
-
 
         // Check user is found
         if (empty($user['account'])) {

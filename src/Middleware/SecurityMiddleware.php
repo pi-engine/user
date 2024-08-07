@@ -74,7 +74,7 @@ class SecurityMiddleware implements MiddlewareInterface
     {
         $list = [];
         if ($this->config['ip']['is_active']) {
-            $list['ip'] = new SecurityIp($this->responseFactory, $this->streamFactory, $this->config);
+            $list['ip'] = new SecurityIp($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
         }
         if ($this->config['ip']['is_active']) {
             $list['method'] = new SecurityMethod($this->config);

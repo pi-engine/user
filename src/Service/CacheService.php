@@ -40,6 +40,11 @@ class CacheService implements ServiceInterface
         $this->config = $config;
     }
 
+    public function hasItem($key): bool
+    {
+        return $this->cache->has($key);
+    }
+
     public function getItem($key): array
     {
         $item = [];

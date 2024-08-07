@@ -63,7 +63,7 @@ class RequestLimit implements SecurityInterface
         $clientIp = $request->getServerParams()['REMOTE_ADDR'] ?? 'unknown';
 
         // Set key
-        $key = $this->sanitizeKey("rate_limit_$clientIp");
+        $key = $this->sanitizeKey("rate_limit_{$clientIp}");
 
         // Get and check key
         $cacheData = $this->cacheService->getItem($key);

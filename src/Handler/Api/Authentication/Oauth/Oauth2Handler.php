@@ -42,23 +42,7 @@ class Oauth2Handler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // Retrieve the raw JSON data from the request body
-//        $stream = $this->streamFactory->createStreamFromFile('php://input');
-//        $rawData = $stream->getContents();
-//        $requestBody = json_decode($rawData, true);
-//
-//        // Check if decoding was successful
-//        if (json_last_error() !== JSON_ERROR_NONE) {
-//            // JSON decoding failed
-//            $errorResponse = [
-//                'result' => false,
-//                'data' => null,
-//                'error' => [
-//                    'message' => 'Invalid JSON data',
-//                ],
-//            ];
-//            return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
-//        }
+        $securityStream = $request->getAttribute('security_stream');
         $requestBody = $request->getParsedBody();
 
         if (!isset($requestBody['code'])) {
@@ -76,13 +60,12 @@ class Oauth2Handler implements RequestHandlerInterface
         // Check
         $authService = new Oauth2($this->config);
         $result      = $authService->verifyToken($requestBody);
-
         if (!$result['result']) {
             return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
         }
 
         // Do log in
-        $result = $this->accountService->loginOauth2($result['data']);
+        $result = $this->accountService->loginOauth2(array_merge($result['data'], ['security_stream' => $securityStream]));
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

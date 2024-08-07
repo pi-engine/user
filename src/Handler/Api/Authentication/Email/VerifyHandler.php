@@ -34,6 +34,7 @@ class VerifyHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $securityStream = $request->getAttribute('security_stream');
         $requestBody = $request->getParsedBody();
 
         // Set login params
@@ -43,6 +44,7 @@ class VerifyHandler implements RequestHandlerInterface
             'identity'         => $requestBody['email'],
             'credential'       => $requestBody['otp'],
             'source'           => $requestBody['source'] ?? '',
+            'security_stream' => $securityStream,
         ];
 
         // Do log in

@@ -46,6 +46,8 @@ return [
             Service\ExportService::class                             => Factory\Service\ExportServiceFactory::class,
             Service\TranslatorService::class                         => Factory\Service\TranslatorServiceFactory::class,
             Service\InstallerService::class                          => Factory\Service\InstallerServiceFactory::class,
+            Security\AccountLoginAttempts::class                     => Factory\Security\AccountLoginAttemptsFactory::class,
+            Security\AccountLocked::class                            => Factory\Security\AccountLockedFactory::class,
             Handler\Admin\Profile\AddHandler::class                  => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
             Handler\Admin\Profile\EditHandler::class                 => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
             Handler\Admin\Profile\ListHandler::class                 => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
@@ -1047,7 +1049,7 @@ return [
                             'defaults' => [],
                         ],
                         'child_routes' => [
-                            'list'   => [
+                            'list'    => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/list',
@@ -1069,7 +1071,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'view'   => [
+                            'view'    => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/view',
@@ -1091,7 +1093,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'persist'   => [
+                            'persist' => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/persist',
@@ -1113,7 +1115,7 @@ return [
                                     ],
                                 ],
                             ],
-                            'delete' => [
+                            'delete'  => [
                                 'type'    => Literal::class,
                                 'options' => [
                                     'route'    => '/delete',
