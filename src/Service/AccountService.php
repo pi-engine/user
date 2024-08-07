@@ -491,11 +491,15 @@ class AccountService implements ServiceInterface
             $this->historyService->logger('failedLogin', ['request' => $params, 'account' => $account]);
 
             // Save failed attempts
-            $result = $this->accountLoginAttempts->incrementFailedAttempts(['type' => 'id', 'user_id' => (int)$account['id'], 'security_stream' => $params['security_stream']]);
+            $result = $this->accountLoginAttempts->incrementFailedAttempts(
+                ['type' => 'id', 'user_id' => (int)$account['id'], 'security_stream' => $params['security_stream']]
+            );
         } else {
             // Save failed attempts
             $userIp = $params['security_stream']['ip']['data']['client_ip'] ?? '';
-            $result = $this->accountLoginAttempts->incrementFailedAttempts(['type' => 'ip', 'user_ip' => $userIp, 'security_stream' => $params['security_stream']]);
+            $result = $this->accountLoginAttempts->incrementFailedAttempts(
+                ['type' => 'ip', 'user_ip' => $userIp, 'security_stream' => $params['security_stream']]
+            );
         }
 
         // Check an attempt result
@@ -812,6 +816,9 @@ class AccountService implements ServiceInterface
                     $this->roleService->addRoleAccount($account, $role, $role == 'admin' ? 'admin' : 'api', $operator);
                 }
             }
+
+            // Make user logout after edit role
+            $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
         }
     }
 
@@ -929,16 +936,21 @@ class AccountService implements ServiceInterface
             // Set new role
             if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
                 $this->roleService->addRoleAccount($account, $params['source']);
+
+                // Make user logout after edit role
+                $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
             }
 
             // Delete old role
-            if (isset($params['remove_role']) && !empty($params['remove_role']) && is_string($params['remove_role'])
-                && in_array(
-                    $params['remove_role'],
-                    $roles
-                )
+            if (isset($params['remove_role'])
+                && !empty($params['remove_role'])
+                && is_string($params['remove_role'])
+                && in_array($params['remove_role'], $roles)
             ) {
                 $this->roleService->deleteRoleAccount($account, $params['remove_role']);
+
+                // Make user logout after edit role
+                $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
             }
         }
 
@@ -1246,6 +1258,9 @@ class AccountService implements ServiceInterface
     public function updateAccountRoles($roles, $account, string $section = 'api', array $operator = []): void
     {
         $this->roleService->updateAccountRoles($roles, $account, $section, $operator);
+
+        // Make user logout after edit role
+        $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
     }
 
     /**
