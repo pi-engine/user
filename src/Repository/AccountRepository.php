@@ -179,14 +179,11 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['mobile like ?'] = '%' . $params['mobile'] . '%';
         }
-        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
-            $where['mobile'] = $params['mobiles'];
+        if (isset($params['id']) && !empty($params['id'])) {
+            $where['id'] = $params['id'];
         }
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['status'] = $params['status'];
-        }
-        if (isset($params['id'])) {
-            $where['id'] = $params['id'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
             $where['time_created >= ?'] = $params['data_from'];
@@ -412,7 +409,7 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function getAccountProfileList($params = []): HydratingResultSet
     {
-        $where['time_deleted'] = 0;
+        $where['account.time_deleted'] = 0;
         if (isset($params['name']) && !empty($params['name'])) {
             $where['account.name like ?'] = '%' . $params['name'] . '%';
         }
@@ -425,17 +422,11 @@ class AccountRepository implements AccountRepositoryInterface
         if (isset($params['mobile']) && !empty($params['mobile'])) {
             $where['account.mobile like ?'] = '%' . $params['mobile'] . '%';
         }
-        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
-            $where['account.mobile'] = $params['mobiles'];
-        }
         if (isset($params['id']) && !empty($params['id'])) {
             $where['account.id'] = $params['id'];
         }
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $where['account.status'] = $params['status'];
-        }
-        if (isset($params['id'])) {
-            $where['account.id'] = $params['id'];
         }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
             $where['account.time_created >= ?'] = $params['data_from'];
@@ -449,9 +440,20 @@ class AccountRepository implements AccountRepositoryInterface
 
         $sql    = new Sql($this->db);
         $select = $sql->select();
-        $select->from(['account' => $this->tableAccount])
-            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name', 'avatar', 'birthdate', 'gender', 'information'])
-            ->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);;
+        $select->from(['account' => $this->tableAccount])->where($where)->order($params['order'])->offset($params['offset'])->limit($params['limit']);;
+        $select->join(
+            ['profile' => $this->tableProfile],
+            'account.id=profile.user_id',
+            [
+                'first_name',
+                'last_name',
+                'avatar',
+                'birthdate',
+                'gender',
+                'information',
+            ],
+            $select::JOIN_LEFT . ' ' . $select::JOIN_OUTER
+        );
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
@@ -469,7 +471,6 @@ class AccountRepository implements AccountRepositoryInterface
     {
         // Set
         $where = [];
-
         if (isset($params['id']) && !empty($params['id'])) {
             $where['account.id'] = $params['id'];
         }
@@ -485,9 +486,20 @@ class AccountRepository implements AccountRepositoryInterface
 
         $sql    = new Sql($this->db);
         $select = $sql->select();
-        $select->from(['account' => $this->tableAccount])
-            ->join(['profile' => 'user_profile'], 'account.id = profile.user_id', ['first_name', 'last_name', 'avatar', 'birthdate', 'gender',])
-            ->where($where);
+        $select->from(['account' => $this->tableAccount])->where($where);
+        $select->join(
+            ['profile' => $this->tableProfile],
+            'account.id=profile.user_id',
+            [
+                'first_name',
+                'last_name',
+                'avatar',
+                'birthdate',
+                'gender',
+            ],
+            $select::JOIN_LEFT . ' ' . $select::JOIN_OUTER
+        );
+
         $statement = $sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 

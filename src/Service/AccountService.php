@@ -1330,9 +1330,6 @@ class AccountService implements ServiceInterface
         if (isset($params['status']) && in_array($params['status'], [0, 1])) {
             $listParams['status'] = $params['status'];
         }
-        if (isset($params['status'])) {
-            $listParams['status'] = $params['status'];
-        }
         if (isset($params['data_from']) && !empty($params['data_from'])) {
             $listParams['data_from'] = strtotime(
                 ($params['data_from']) != null
@@ -1372,17 +1369,13 @@ class AccountService implements ServiceInterface
 
         // Get roles
         $roleList = $this->roleService->getRoleAccountList(array_keys($list));
-
-        $list = array_values($list);
-        $i    = 0;
-        ///TODO:check
-        foreach ($list as $user) {
-            $list[$i]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
-            $i++;
+        foreach ($list as $id => $user) {
+            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
         }
 
         return [
-            'list'      => $list,
+            'list'      => array_values($list),
+            'list_count'      => count($list),
             'paginator' => [
                 'count' => $count,
                 'limit' => $limit,
