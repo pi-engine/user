@@ -121,6 +121,8 @@ class AccountService implements ServiceInterface
             'multi_factor_status',
             'multi_factor_secret',
         ];
+    
+    protected array $emptyRoles = ['api' => [], 'admin' => []];
 
     /* @var string */
     protected string $hashPattern;
@@ -1067,22 +1069,17 @@ class AccountService implements ServiceInterface
             $list[$row->getId()] = $this->canonizeAccount($row);
         }
 
-        // Get roles
-        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
-
         // Get count
         $count = $this->accountRepository->getAccountCount($listParams);
 
-        $list = array_values($list);
-        $i    = 0;
-        ///TODO:check
-        foreach ($list as $user) {
-            $list[$i]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
-            $i++;
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
+        foreach ($list as $id => $user) {
+            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
         }
 
         return [
-            'list'      => $list,
+            'list'      => array_values($list),
             'roles'     => $roleList,
             'paginator' => [
                 'count' => $count,
@@ -1370,12 +1367,11 @@ class AccountService implements ServiceInterface
         // Get roles
         $roleList = $this->roleService->getRoleAccountList(array_keys($list));
         foreach ($list as $id => $user) {
-            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
+            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
         }
 
         return [
             'list'      => array_values($list),
-            'list_count'      => count($list),
             'paginator' => [
                 'count' => $count,
                 'limit' => $limit,
@@ -1739,27 +1735,20 @@ class AccountService implements ServiceInterface
         $list   = [];
         $rowSet = $this->accountRepository->getAccountList($listParams);
         foreach ($rowSet as $row) {
-            /// changed by kerloper
             $list[$row->getId()] = $this->canonizeAccount($row);
         }
-
-        // Get roles
-        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
 
         // Get count
         $count = $this->accountRepository->getAccountCount($listParams);
 
-
-        $list = array_values($list);
-        $i    = 0;
-        ///TODO:check
-        foreach ($list as $user) {
-            $list[$i]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : ['api' => [], 'admin' => []];
-            $i++;
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
+        foreach ($list as $id => $user) {
+            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
         }
 
         return [
-            'list'      => $list,
+            'list'      => array_values($list),
             'roles'     => $roleList,
             'paginator' => [
                 'count' => $count,
