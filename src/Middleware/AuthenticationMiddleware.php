@@ -85,7 +85,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // parse token
-        $tokenParsed = $this->tokenService->parse($token);
+        $tokenParsed = $this->tokenService->decryptToken($token);
 
         // Check parsed token
         if (!$tokenParsed['status']) {

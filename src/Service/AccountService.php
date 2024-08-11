@@ -353,7 +353,7 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Generate access token
-        $accessToken = $this->tokenService->generate(
+        $accessToken = $this->tokenService->encryptToken(
             [
                 'account' => $account,
                 'type'    => 'access',
@@ -361,7 +361,7 @@ class AccountService implements ServiceInterface
         );
 
         // Generate refresh token
-        $refreshToken = $this->tokenService->generate(
+        $refreshToken = $this->tokenService->encryptToken(
             [
                 'account' => $account,
                 'type'    => 'refresh',
@@ -1582,7 +1582,7 @@ class AccountService implements ServiceInterface
      */
     public function refreshToken($params): array
     {
-        $accessToken = $this->tokenService->generate(
+        $accessToken = $this->tokenService->encryptToken(
             [
                 'user_id' => $params['user_id'],
                 'type'    => 'access',
