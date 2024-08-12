@@ -65,8 +65,19 @@ return [
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
-            'handler'     => 'view',
+            'handler'     => 'export',
             'permissions' => 'user-profile-export',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'Admin user profile reset',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'profile',
+            'handler'     => 'reset',
+            'permissions' => 'user-profile-reset',
             'role'        => [
                 'admin',
             ],

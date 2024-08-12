@@ -28,6 +28,9 @@ class AvatarService implements ServiceInterface
         $this->config        = $config;
     }
 
+    /**
+     * @throws Exception
+     */
     public function uploadAvatar($uploadFile, $account): array
     {
         $fileInfo   = pathinfo($uploadFile->getClientFilename());

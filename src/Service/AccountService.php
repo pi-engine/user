@@ -120,8 +120,10 @@ class AccountService implements ServiceInterface
             'bank_account',
             'multi_factor_status',
             'multi_factor_secret',
+            'device_type',
+            'device_token',
         ];
-    
+
     protected array $emptyRoles = ['api' => [], 'admin' => []];
 
     /* @var string */
@@ -1169,35 +1171,36 @@ class AccountService implements ServiceInterface
 
             if (in_array($key, $this->informationFields)) {
                 if (empty($value)) {
-                    $informationParams[$key] = null;
+                    $informationParams[$key] = '';
                 } else {
                     $informationParams[$key] = $value;
                 }
             }
         }
 
-        if (isset($params['device_type'])) {
-            $informationParams['device_type'] = $params['device_type'];
-        }
-        if (isset($params['device_token'])) {
-            $informationParams['device_token'] = $params['device_token'];
-        }
+        //if (isset($params['device_type'])) {
+        //    $informationParams['device_type'] = $params['device_type'];
+        //}
+        //if (isset($params['device_token'])) {
+        //    $informationParams['device_token'] = $params['device_token'];
+        //}
 
         if (!empty($informationParams)) {
             $profile = $this->getProfile(['user_id' => (int)$account['id']]);
             foreach ($profile['information'] as $key => $value) {
-                if (!isset($informationParams[$key])) {
+                if (isset($informationParams[$key]) && empty($informationParams[$key])) {
+                    $informationParams[$key] = null;
+                } elseif (!isset($informationParams[$key])) {
                     $informationParams[$key] = $value;
                 }
             }
 
-            if (isset($params['device_type'])) {
-                $informationParams['device_type'] = $params['device_type'];
-            }
-            if (isset($params['device_token'])) {
-                $informationParams['device_token'] = $params['device_token'];
-            }
-
+            //if (isset($params['device_type'])) {
+            //    $informationParams['device_type'] = $params['device_type'];
+            //}
+            //if (isset($params['device_token'])) {
+            //    $informationParams['device_token'] = $params['device_token'];
+            //}
 
             $profileParams['information'] = json_encode(
                 $informationParams,
@@ -1894,6 +1897,62 @@ class AccountService implements ServiceInterface
             ],
             'error'  => [],
         ];
+    }
+
+    /**
+     * @param       $params
+     * @param array $operator
+     *
+     * @return void
+     */
+    public function resetAccount($params, array $operator = []): void
+    {
+        switch ($params['type']) {
+            case 'password':
+                // Update account
+                $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => null]);
+
+                // Save log
+                $this->historyService->logger(
+                    'resetPasswordByOperator',
+                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                );
+                break;
+
+            case 'mfa':
+                // Update account
+                $this->accountRepository->updateAccount((int)$params['user_id'], ['multi_factor_status' => 0, 'multi_factor_secret' => null]);
+
+                // Save log
+                $this->historyService->logger(
+                    'resetMfaByOperator',
+                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                );
+                break;
+
+            case 'avatar':
+                // Set avatar params
+                $avatar = [
+                    'avatar'        => '',
+                    'avatar_params' => [],
+                ];
+
+                // Set account
+                $account = ['id' => (int)$params['user_id']];
+
+                // Update profile
+                $this->updateAccount($avatar, $account, $operator);
+
+                // Save log
+                $this->historyService->logger(
+                    'resetAvatarByOperator',
+                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                );
+                break;
+        }
+
+        // Make user logout after edit role
+        $this->logout(['user_id' => (int)$params['user_id'], 'all_session' => 1]);
     }
 
     /**

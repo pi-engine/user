@@ -54,6 +54,7 @@ return [
             Handler\Admin\Profile\PasswordHandler::class             => Factory\Handler\Admin\Profile\PasswordHandlerFactory::class,
             Handler\Admin\Profile\ViewHandler::class                 => Factory\Handler\Admin\Profile\ViewHandlerFactory::class,
             Handler\Admin\Profile\ExportHandler::class               => Factory\Handler\Admin\Profile\ExportHandlerFactory::class,
+            Handler\Admin\Profile\ResetHandler::class                => Factory\Handler\Admin\Profile\ResetHandlerFactory::class,
             Handler\Admin\Role\AddHandler::class                     => Factory\Handler\Admin\Role\AddHandlerFactory::class,
             Handler\Admin\Role\EditHandler::class                    => Factory\Handler\Admin\Role\EditHandlerFactory::class,
             Handler\Admin\Role\ListHandler::class                    => Factory\Handler\Admin\Role\ListHandlerFactory::class,
@@ -834,6 +835,29 @@ return [
                                             Middleware\AuthorizationMiddleware::class,
                                             LoggerRequestResponseMiddleware::class,
                                             Handler\Admin\Profile\ExportHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'reset'    => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/reset',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'profile',
+                                        'handler'     => 'reset',
+                                        'permissions' => 'user-profile-reset',
+                                        'validator'   => 'reset-admin',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            Middleware\RequestPreparationMiddleware::class,
+                                            Middleware\SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
+                                            Handler\Admin\Profile\ResetHandler::class
                                         ),
                                     ],
                                 ],
