@@ -11,7 +11,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Service\AccountService;
 
-class ResetHandler implements RequestHandlerInterface
+class CleanHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;

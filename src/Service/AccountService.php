@@ -294,16 +294,22 @@ class AccountService implements ServiceInterface
      */
     public function logout($params): array
     {
-        // Save log
-        $user = $this->cacheService->getUser($params['user_id']);
-        $this->historyService->logger('logout', ['request' => $params, 'account' => $user['account']]);
+        // Set message
+        $message = 'You are logout successfully from this session !';
 
-        if (isset($params['all_session']) && (int)$params['all_session'] === 1) {
-            $this->cacheService->deleteUserItem($params['user_id'], 'all_keys');
-            $message = 'You are logout successfully from all of your sessions !';
-        } else {
-            $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
-            $message = 'You are logout successfully from this session !';
+        // Get and check user
+        $user = $this->cacheService->getUser($params['user_id']);
+        if (!empty($user)) {
+            // Save log
+            $this->historyService->logger('logout', ['request' => $params, 'account' => $user['account']]);
+
+            // Check and clean user cache for logout
+            if (isset($params['all_session']) && (int)$params['all_session'] === 1) {
+                $this->cacheService->deleteUserItem($params['user_id'], 'all_keys', '');
+                $message = 'You are logout successfully from all of your sessions !';
+            } else {
+                $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
+            }
         }
 
         return [

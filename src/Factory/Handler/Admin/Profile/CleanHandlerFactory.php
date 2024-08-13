@@ -8,23 +8,23 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Admin\Profile\ResetHandler;
+use User\Handler\Admin\Profile\CleanHandler;
 use User\Service\AccountService;
 
-class ResetHandlerFactory implements FactoryInterface
+class CleanHandlerFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return ResetHandler
+     * @return CleanHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ResetHandler
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): CleanHandler
     {
-        return new ResetHandler(
+        return new CleanHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
             $container->get(AccountService::class)

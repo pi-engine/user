@@ -72,12 +72,12 @@ return [
             ],
         ],
         [
-            'title'       => 'Admin user profile reset',
+            'title'       => 'Admin user profile clean',
             'module'      => 'user',
             'section'     => 'admin',
             'package'     => 'profile',
-            'handler'     => 'reset',
-            'permissions' => 'user-profile-reset',
+            'handler'     => 'clean',
+            'permissions' => 'user-profile-clean',
             'role'        => [
                 'admin',
             ],

@@ -91,10 +91,10 @@ class CacheService implements ServiceInterface
 
             $user['account'] = $params['account'];
         }
-        if (isset($params['access_keys']) && !empty($params['access_keys'])) {
+        if (isset($params['access_keys'])/* && !empty($params['access_keys'])*/) {
             $user['access_keys'] = $params['access_keys'];
         }
-        if (isset($params['refresh_keys']) && !empty($params['refresh_keys'])) {
+        if (isset($params['refresh_keys'])/* && !empty($params['refresh_keys'])*/) {
             $user['refresh_keys'] = $params['refresh_keys'];
         }
         if (isset($params['roles']) && !empty($params['roles'])) {

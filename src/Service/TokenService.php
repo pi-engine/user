@@ -109,7 +109,7 @@ class TokenService implements ServiceInterface
             default:
             case 'access':
                 return hash(
-                    'sha512',
+                    'sha256',
                     sprintf(
                         'a-%s-%s',
                         $params['account']['id'],
@@ -119,7 +119,7 @@ class TokenService implements ServiceInterface
 
             case 'refresh':
                 return hash(
-                    'sha512',
+                    'sha256',
                     sprintf(
                         'r-%s-%s',
                         $params['account']['id'],
