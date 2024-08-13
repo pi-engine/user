@@ -176,8 +176,12 @@ class CacheService implements ServiceInterface
     public function deleteUserItem(int $userId, string $key, string $value): void
     {
         $user = $this->getUser($userId);
-        if (!empty($user) && !empty($value)) {
+        if (!empty($user)) {
             switch ($key) {
+                case 'all_keys':
+                    $this->setUser($userId, ['access_keys' => [], 'refresh_keys' => []]);
+                    break;
+
                 case 'access_keys':
                     $user['access_keys'] = array_combine($user['access_keys'], $user['access_keys']);
                     if (isset($user['access_keys'][$value])) {
