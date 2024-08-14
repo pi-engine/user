@@ -79,7 +79,7 @@ class AccountLoginAttempts implements AccountSecurityInterface
      */
     public function getErrorMessage(): string
     {
-        return 'Your account is locked due to too many failed login attempts. Please try again after 1 hour.';
+        return 'Access denied: Your account is locked due to too many failed login attempts. Please try again after 1 hour.';
     }
 
     /**

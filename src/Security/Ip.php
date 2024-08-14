@@ -194,7 +194,7 @@ class Ip implements SecurityInterface
      */
     public function getErrorMessage(): string
     {
-        return 'Access denied';
+        return 'Access denied: Bad IP';
     }
 
     /**

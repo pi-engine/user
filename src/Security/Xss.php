@@ -86,7 +86,7 @@ class Xss implements SecurityInterface
      */
     public function getErrorMessage(): string
     {
-        return 'XSS attack detected';
+        return 'Access denied: XSS attack detected';
     }
 
     /**

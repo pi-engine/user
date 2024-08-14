@@ -130,7 +130,7 @@ class RequestLimit implements SecurityInterface
      */
     public function getErrorMessage(): string
     {
-        return 'Rate limit exceeded. Please try again later';
+        return 'Access denied: Rate limit exceeded. Please try again later';
     }
 
     /**

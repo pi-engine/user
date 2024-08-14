@@ -50,7 +50,7 @@ class Method implements SecurityInterface
      */
     public function getErrorMessage(): string
     {
-        return 'Request method not allowed !';
+        return 'Access denied: Request method not allowed !';
     }
 
     /**

@@ -75,7 +75,7 @@ class InputSizeLimit implements SecurityInterface
      */
     public function getErrorMessage(): string
     {
-        return 'Input data is too large';
+        return 'Access denied: Input data is too large';
     }
 
     /**
