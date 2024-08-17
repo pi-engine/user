@@ -74,23 +74,23 @@ class SecurityMiddleware implements MiddlewareInterface
     protected function securityList(): array
     {
         $list = [];
-        if ($this->config['ip']['is_active']) {
+        if (isset($this->config['ip']['is_active']) && $this->config['ip']['is_active']) {
             $list['ip'] = new SecurityIp($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
         }
-        if ($this->config['method']['is_active']) {
+        if (isset($this->config['method']['is_active']) && $this->config['method']['is_active']) {
             $list['method'] = new SecurityMethod($this->config);
         }
-        if ($this->config['inputSizeLimit']['is_active']) {
+        if (isset($this->config['inputSizeLimit']['is_active']) && $this->config['inputSizeLimit']['is_active']) {
             $list['inputSizeLimit'] = new SecurityInputSizeLimit($this->responseFactory, $this->streamFactory, $this->config);
         }
-        if ($this->config['requestLimit']['is_active']) {
+        if (isset($this->config['requestLimit']['is_active']) && $this->config['requestLimit']['is_active']) {
             $list['requestLimit'] = new SecurityRequestLimit($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
         }
-        if ($this->config['xss']['is_active']) {
+        if (isset($this->config['xss']['is_active']) && $this->config['xss']['is_active']) {
             $list['xss'] = new SecurityXss($this->responseFactory, $this->streamFactory, $this->config);
         }
-        if ($this->config['inputValidation']['is_active']) {
-            //$list['inputValidation'] = new SecurityInputValidation($this->responseFactory, $this->streamFactory, $this->config);
+        if (isset($this->config['inputValidation']['is_active']) && $this->config['inputValidation']['is_active']) {
+            $list['inputValidation'] = new SecurityInputValidation($this->responseFactory, $this->streamFactory, $this->config);
         }
 
         return $list;
