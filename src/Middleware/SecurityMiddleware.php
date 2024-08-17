@@ -14,6 +14,7 @@ use User\Security\Ip as SecurityIp;
 use User\Security\Method as SecurityMethod;
 use User\Security\RequestLimit as SecurityRequestLimit;
 use User\Security\Xss as SecurityXss;
+use User\Security\InputValidation as SecurityInputValidation;
 use User\Service\CacheService;
 
 class SecurityMiddleware implements MiddlewareInterface
@@ -76,17 +77,20 @@ class SecurityMiddleware implements MiddlewareInterface
         if ($this->config['ip']['is_active']) {
             $list['ip'] = new SecurityIp($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
         }
-        if ($this->config['ip']['is_active']) {
+        if ($this->config['method']['is_active']) {
             $list['method'] = new SecurityMethod($this->config);
         }
-        if ($this->config['ip']['is_active']) {
+        if ($this->config['inputSizeLimit']['is_active']) {
             $list['inputSizeLimit'] = new SecurityInputSizeLimit($this->responseFactory, $this->streamFactory, $this->config);
         }
-        if ($this->config['ip']['is_active']) {
+        if ($this->config['requestLimit']['is_active']) {
             $list['requestLimit'] = new SecurityRequestLimit($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
         }
-        if ($this->config['ip']['is_active']) {
+        if ($this->config['xss']['is_active']) {
             $list['xss'] = new SecurityXss($this->responseFactory, $this->streamFactory, $this->config);
+        }
+        if ($this->config['inputValidation']['is_active']) {
+            //$list['inputValidation'] = new SecurityInputValidation($this->responseFactory, $this->streamFactory, $this->config);
         }
 
         return $list;

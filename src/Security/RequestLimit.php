@@ -73,8 +73,7 @@ class RequestLimit implements SecurityInterface
         } else {
             $cacheData = $this->validateCacheData($cacheData);
             if ($cacheData === false) {
-                $cacheData = ['count' => 1, 'timestamp' => time(),];
-                $this->cacheService->setItem($key, $cacheData);
+                $cacheData = ['count' => 1, 'timestamp' => time()];
             } else {
                 // Update request count if within the rate limit window
                 if ($cacheData['count'] >= $this->config['requestLimit']['max_requests']) {
@@ -86,8 +85,9 @@ class RequestLimit implements SecurityInterface
                     ];
                 }
                 $cacheData['count'] += 1;
-                $this->cacheService->setItem($key, $cacheData);
             }
+
+            $this->cacheService->setItem($key, $cacheData);
         }
 
         return [

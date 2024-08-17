@@ -54,8 +54,9 @@ class Xss implements SecurityInterface
             ];
         }
 
-        // Get request body
+        // Get request and query body
         $requestParams = $request->getParsedBody();
+        $QueryParams = $request->getQueryParams();
 
         // Call XSS checker
         $antiXss = new AntiXSS();
@@ -63,6 +64,19 @@ class Xss implements SecurityInterface
         // Check request
         if (!empty($requestParams)) {
             $antiXss->xss_clean($requestParams);
+            if ($antiXss->isXssFound()) {
+                return [
+                    'result' => false,
+                    'name'   => $this->name,
+                    'status' => 'unsuccessful',
+                    'data'   => [],
+                ];
+            }
+        }
+
+        // Check request
+        if (!empty($QueryParams)) {
+            $antiXss->xss_clean($QueryParams);
             if ($antiXss->isXssFound()) {
                 return [
                     'result' => false,

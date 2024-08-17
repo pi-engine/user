@@ -77,7 +77,9 @@ class Ip implements SecurityInterface
                 'result' => false,
                 'name'   => $this->name,
                 'status' => 'unsuccessful',
-                'data'   => [],
+                'data'   => [
+                    'in_blacklisted' => true,
+                ],
             ];
         }
 
