@@ -153,6 +153,10 @@ return [
             'is_active'        => true,
             'ignore_whitelist' => true,
         ],
+        'inputValidation'=> [
+            'is_active'        => true,
+            'ignore_whitelist' => true,
+        ],
         'inputSizeLimit' => [
             'is_active'      => true,
             'max_input_size' => 1048576, // 1MB in bytes

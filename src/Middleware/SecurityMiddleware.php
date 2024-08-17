@@ -10,11 +10,11 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
 use User\Security\InputSizeLimit as SecurityInputSizeLimit;
+use User\Security\InputValidation as SecurityInputValidation;
 use User\Security\Ip as SecurityIp;
 use User\Security\Method as SecurityMethod;
 use User\Security\RequestLimit as SecurityRequestLimit;
 use User\Security\Xss as SecurityXss;
-use User\Security\InputValidation as SecurityInputValidation;
 use User\Service\CacheService;
 
 class SecurityMiddleware implements MiddlewareInterface
