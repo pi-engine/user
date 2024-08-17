@@ -48,7 +48,7 @@ class InputValidation implements SecurityInterface
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->config          = $config;
-        $this->inputFilter = new InputFilter();
+        $this->inputFilter     = new InputFilter();
     }
 
     public function check(ServerRequestInterface $request, array $securityStream = []): array
@@ -77,7 +77,6 @@ class InputValidation implements SecurityInterface
             $this->processData($params);
             $this->inputFilter->setData($params);
             if (!$this->inputFilter->isValid()) {
-
                 // Set error message
                 $this->setErrorMessage($this->inputFilter->getMessages());
 
@@ -86,7 +85,7 @@ class InputValidation implements SecurityInterface
                     'name'   => $this->name,
                     'status' => 'unsuccessful',
                     'data'   => [
-                        'message' => $this->inputFilter->getMessages()
+                        'message' => $this->inputFilter->getMessages(),
                     ],
                 ];
             }
