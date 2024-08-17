@@ -65,23 +65,49 @@ class UtilityService implements ServiceInterface
     /**
      * Escape a string for corresponding context
      *
-     * @param string $value
-     * @param string $context
+     * @param string|array $value
+     * @param string       $context
      *      String context, valid value: html, htmlAttr, js, url, css
      *
-     * @return string
+     * @return string|array
      * @see \Laminas\Escaper\Escaper
      */
-    public function escape(string $value, string $context = 'html'): string
+    public function escape(string|array $value, string $context = 'html'): string|array
     {
         $context = $context ? ucfirst($context) : 'Html';
         $method  = 'escape' . $context;
         $escaper = new Escaper('utf-8');
-        if (method_exists($escaper, $method)) {
+
+        if (is_array($value)) {
+            $value = $this->escapeArray($escaper, $value, $method);
+        } elseif (method_exists($escaper, $method)) {
             $value = $escaper->{$method}($value);
         }
 
         return $value;
+    }
+
+    /**
+     * Escape a string for corresponding context
+     *
+     * @param Escaper $escaper
+     * @param array   $data
+     * @param string  $method
+     *
+     * @return array
+     * @see \Laminas\Escaper\Escaper
+     */
+    public function escapeArray(Escaper $escaper, array $data, string $method): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = $this->escapeArray($value, $method);
+            } elseif (is_string($data)) {
+                $data = $escaper->{$method}($data);
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -154,6 +180,13 @@ class UtilityService implements ServiceInterface
         return $text ? str_replace($pattern, $replacement, $text) : '';
     }
 
+    /**
+     * @param string $text    Text to be cleaned
+     * @param array  $options
+     * @param array  $pattern Custom pattern array
+     *
+     * @return string
+     */
     public function slug(string $text, array $options = [], array $pattern = []): string
     {
         $options = empty($options) ? $this->slugOptions : $options;
@@ -265,13 +298,13 @@ class UtilityService implements ServiceInterface
      * Locale-dependent formatting/parsing of number
      * using pattern strings and/or canned patterns
      *
-     * @param int|float   $value
+     * @param float|int   $value
      * @param string|null $currency
      * @param string|null $locale
      *
-     * @return string
+     * @return float|int|string
      */
-    public function setCurrency($value, $currency = null, $locale = null)
+    public function setCurrency(float|int $value, string $currency = null, string $locale = null): float|int|string
     {
         $result   = $value;
         $currency = (null === $currency) ? $this->config['currency'] : $currency;
@@ -295,7 +328,7 @@ class UtilityService implements ServiceInterface
      * @see NumberFormatter
      *
      */
-    public function getNumberFormatter($style = null, $pattern = null, $locale = null)
+    public function getNumberFormatter(string $style = null, string $pattern = null, string $locale = null): ?NumberFormatter
     {
         if (!class_exists('NumberFormatter')) {
             return null;
@@ -311,20 +344,14 @@ class UtilityService implements ServiceInterface
         return $formatter;
     }
 
-    public function canonizeJsonDecode(string $data): array
-    {
-        if (empty($data)) {
-            return [];
-        }
-
-        return json_decode($this->canonizeJsonEncode(json_decode($data, true)), true);
-    }
-
-    public function canonizeJsonEncode(array $data): string
-    {
-        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
-    }
-
+    /**
+     * Check password is strong or not
+     *
+     * @param $password
+     *
+     * @return bool
+     * @see NumberFormatter
+     */
     public function isPasswordStrong($password): bool
     {
         // Define your password strength rules
