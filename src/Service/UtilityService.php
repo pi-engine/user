@@ -345,48 +345,16 @@ class UtilityService implements ServiceInterface
     }
 
     /**
-     * Check password is strong or not
+     * Check password is strong
      *
      * @param $password
      *
      * @return bool
-     * @see NumberFormatter
      */
     public function isPasswordStrong($password): bool
     {
-        // Define your password strength rules
-        $minLength                = 8;
-        $requiresUppercase        = true;
-        $requiresLowercase        = true;
-        $requiresNumber           = true;
-        $requiresSpecialCharacter = true;
+        $pattern = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).+$/';
 
-        // Check length
-        if (strlen($password) < $minLength) {
-            return false;
-        }
-
-        // Check for uppercase letters
-        if ($requiresUppercase && !preg_match('/[A-Z]/', $password)) {
-            return false;
-        }
-
-        // Check for lowercase letters
-        if ($requiresLowercase && !preg_match('/[a-z]/', $password)) {
-            return false;
-        }
-
-        // Check for numbers
-        if ($requiresNumber && !preg_match('/[0-9]/', $password)) {
-            return false;
-        }
-
-        // Check for special characters
-        if ($requiresSpecialCharacter && !preg_match('/[^a-zA-Z0-9]/', $password)) {
-            return false;
-        }
-
-        // Password meets all rules
-        return true;
+        return preg_match($pattern, $password) === 1;
     }
 }
