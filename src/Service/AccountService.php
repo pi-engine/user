@@ -41,6 +41,9 @@ class AccountService implements ServiceInterface
     /** @var UtilityService */
     protected UtilityService $utilityService;
 
+    /** @var AvatarService */
+    protected AvatarService $avatarService;
+
     /** @var NotificationService */
     protected NotificationService $notificationService;
 
@@ -91,17 +94,19 @@ class AccountService implements ServiceInterface
     /* @var array */
     protected array $informationFields
         = [
-            'user_id',
-            'name',
-            'email',
-            'identity',
-            'mobile',
-            'status',
-            'first_name',
-            'last_name',
-            'birthdate',
-            'gender',
-            'avatar',
+            //'user_id',
+            //'name',
+            //'email',
+            //'identity',
+            //'mobile',
+            //'status',
+            //'multi_factor_status',
+            //'multi_factor_secret',
+            //'first_name',
+            //'last_name',
+            //'birthdate',
+            //'gender',
+            //'avatar',
             'avatar_params',
             'ip_register',
             'register_source',
@@ -118,8 +123,6 @@ class AccountService implements ServiceInterface
             'bank_name',
             'bank_card',
             'bank_account',
-            'multi_factor_status',
-            'multi_factor_secret',
             'device_type',
             'device_token',
         ];
@@ -136,6 +139,7 @@ class AccountService implements ServiceInterface
      * @param TokenService               $tokenService
      * @param CacheService               $cacheService
      * @param UtilityService             $utilityService
+     * @param AvatarService              $avatarService
      * @param NotificationService        $notificationService
      * @param HistoryService             $historyService
      * @param TranslatorService          $translatorService
@@ -150,6 +154,7 @@ class AccountService implements ServiceInterface
         TokenService $tokenService,
         CacheService $cacheService,
         UtilityService $utilityService,
+        AvatarService $avatarService,
         NotificationService $notificationService,
         HistoryService $historyService,
         TranslatorService $translatorService,
@@ -162,6 +167,7 @@ class AccountService implements ServiceInterface
         $this->permissionService    = $permissionService;
         $this->tokenService         = $tokenService;
         $this->cacheService         = $cacheService;
+        $this->avatarService        = $avatarService;
         $this->utilityService       = $utilityService;
         $this->notificationService  = $notificationService;
         $this->historyService       = $historyService;
@@ -2197,6 +2203,9 @@ class AccountService implements ServiceInterface
         // Set information
         $profile['information'] = !empty($profile['information']) ? json_decode($profile['information'], true) : [];
 
+        // Set avatar
+        $profile = $this->avatarService->createUri($profile);
+
         return $profile;
     }
 
@@ -2273,6 +2282,9 @@ class AccountService implements ServiceInterface
         if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
             $account['time_created_view'] = $this->utilityService->date($account['time_created']);
         }
+
+        // Set avatar
+        $account = $this->avatarService->createUri($account);
 
         return $account;
     }

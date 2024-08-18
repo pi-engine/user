@@ -4,10 +4,10 @@ namespace User\Factory\Service;
 
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Logger\Service\LoggerService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Service\AvatarService;
+use User\Service\HistoryService;
 
 class AvatarServiceFactory implements FactoryInterface
 {
@@ -27,7 +27,7 @@ class AvatarServiceFactory implements FactoryInterface
         $config = $config['avatar'] ?? [];
 
         return new AvatarService(
-            $container->get(LoggerService::class),
+            $container->get(HistoryService::class),
             $config
         );
     }

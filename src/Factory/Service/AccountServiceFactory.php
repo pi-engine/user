@@ -12,6 +12,7 @@ use User\Repository\AccountRepositoryInterface;
 use User\Security\AccountLocked;
 use User\Security\AccountLoginAttempts;
 use User\Service\AccountService;
+use User\Service\AvatarService;
 use User\Service\CacheService;
 use User\Service\HistoryService;
 use User\Service\PermissionService;
@@ -46,6 +47,7 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(TokenService::class),
             $container->get(CacheService::class),
             $container->get(UtilityService::class),
+            $container->get(AvatarService::class),
             $container->get(NotificationService::class),
             $container->get(HistoryService::class),
             $container->get(TranslatorService::class),

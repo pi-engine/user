@@ -4,82 +4,102 @@ namespace User\Service;
 
 use ArrayObject;
 use Exception;
-use Laminas\Filter\FilterChain;
-use Laminas\Filter\PregReplace;
-use Laminas\Filter\StringToLower;
-use Laminas\Filter\Word\SeparatorToDash;
-use Laminas\Math\Rand;
+use Imagine\Gd\Imagine;
+use Imagine\Image\Box;
 use Logger\Service\LoggerService;
 use Traversable;
 
 class AvatarService implements ServiceInterface
 {
-    /* @var LoggerService */
-    protected LoggerService $loggerService;
+    /** @var HistoryService */
+    protected HistoryService $historyService;
 
     /* @var array */
     protected array $config;
 
     public function __construct(
-        LoggerService $loggerService,
+        HistoryService $historyService,
         $config
     ) {
-        $this->loggerService = $loggerService;
+        $this->historyService       = $historyService;
         $this->config        = $config;
     }
 
-    /**
-     * @throws Exception
-     */
     public function uploadAvatar($uploadFile, $account): array
     {
-        $fileInfo   = pathinfo($uploadFile->getClientFilename());
-        $userPath   = hash('sha256', $account['id']);
-        $uploadPath = sprintf('%s/%s', $this->config['public_path'], $userPath);
-        $avatarName = $this->makeFileName($fileInfo['filename']);
-        $avatarName = strtolower(sprintf('%s-%s.%s', $avatarName, Rand::getString('16', 'abcdefghijklmnopqrstuvwxyz0123456789'), $fileInfo['extension']));
-        $avatarPath = sprintf('%s/%s', $uploadPath, $avatarName);
-        $avatarUri  = sprintf('%s/%s/%s', $this->config['avatar_uri'], $userPath, $avatarName);
+        $userPath = $this->getUserPath($account);
 
-        // Make a path storage
+        // Prepare an array to hold the URLs of the saved images
+        $uploadPath = sprintf('%s/%s', $this->config['public_path'], $userPath);
         $this->mkdir($uploadPath);
 
-        // Save file to storage
-        $uploadFile->moveTo($avatarPath);
-
-        $avatar = [
-            'type' => 'upload',
-            'name' => $avatarName,
-            'path' => $userPath,
-            'uri'  => $avatarUri,
+        // Define the standard avatar sizes
+        $sizes = [
+            '16'  => new Box(16, 16),
+            '32'  => new Box(32, 32),
+            '48'  => new Box(48, 48),
+            '64'  => new Box(64, 64),
+            '96'  => new Box(96, 96),
+            '128' => new Box(128, 128),
+            '256' => new Box(256, 256),
+            '512' => new Box(512, 512),
         ];
 
-        return $this->canonizeAvatar($avatar);
-    }
+        // Create an Imagine instance
+        $imagine = new Imagine();
 
-    public function canonizeAvatar($avatar): array
-    {
+        // Open the uploaded file with Imagine
+        $image = $imagine->open($uploadFile->getStream()->getMetadata('uri'));
+
+        // Process each size
+        $imageUris = [];
+        foreach ($sizes as $sizeName => $sizeBox) {
+            // Resize the image
+            $resizedImage = $image->copy()->resize($sizeBox);
+
+            // Define the filename and target path for each size
+            $avatarName = "{$sizeName}.png";
+            $avatarPath = rtrim($uploadPath, '/') . '/' . $avatarName;
+
+            // Save the resized image as a PNG file
+            $resizedImage->save($avatarPath);
+
+            // Generate the URL for the saved image
+            $imageUris[$sizeName] = sprintf('%s/%s',  $userPath, $avatarName);
+        }
+
+        // Save log
+        $this->historyService->logger('addAvatar', ['request' => [], 'account' => $account]);
+
         return [
-            'avatar'        => $avatar['uri'],
+            'avatar'        => $imageUris['48'],
             'avatar_params' => [
-                'type' => $avatar['type'],
-                'name' => $avatar['name'],
-                'path' => $avatar['path'],
+                'type' => 'local',
+                'path' => $userPath,
+                'uri'  => $imageUris,
             ],
         ];
     }
 
-    public function makeFileName($fileName)
+    public function createUri($profile): array
     {
-        $filterChain = new FilterChain();
-        $filterChain->attach(new StringToLower())
-            ->attach(new SeparatorToDash())
-            ->attach(new PregReplace('/[^a-zA-Z0-9-]/', '-'));
+        // Set avatar
+        if (
+            isset($profile['information']['avatar_params']['uri'])
+            && !empty($profile['information']['avatar_params']['uri'])
+            && $profile['information']['avatar_params']['type'] == 'local'
+        ) {
+            $profile['avatar'] = sprintf('%s/%s', $this->config['avatar_uri'], $profile['avatar']);
+            foreach ($profile['information']['avatar_params']['uri'] as $key => $value) {
+                $profile['information']['avatar_params']['uri'][$key] = sprintf('%s/%s', $this->config['avatar_uri'], $value);
+            }
 
-        return $filterChain->filter($fileName);
+        }
+
+        return $profile;
     }
 
-    public function mkdir($dirs, $mode = 0777)
+    protected function mkdir($dirs, $mode = 0777): static
     {
         foreach ($this->toIterator($dirs) as $dir) {
             if (is_dir($dir)) {
@@ -104,5 +124,10 @@ class AvatarService implements ServiceInterface
         }
 
         return $files;
+    }
+
+    protected function getUserPath($account): string
+    {
+        return hash('sha256', sprintf('%s-%s', $account['id'], $account['time_created']));
     }
 }

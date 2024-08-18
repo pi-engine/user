@@ -86,8 +86,8 @@ class AvatarUploadMiddleware implements MiddlewareInterface
     protected function setErrorHandler($inputFilter): array
     {
         $message = [];
-        foreach ($inputFilter->getInvalidInput() as $error) {
-            $message[$error->getName()] = $error->getName() . ': ' . implode(', ', $error->getMessages());
+        foreach ($inputFilter->getMessages() as $key => $value) {
+            $message[$key] = $value;
         }
 
         return $this->validationResult = [
