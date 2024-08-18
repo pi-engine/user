@@ -1,5 +1,9 @@
 <?php
 
+$local    = 'en_US';
+$basePath = '/app';
+$baseUrl  = 'http://localhost:8080';
+
 return [
     'db'      => [
         'driver'         => 'Pdo',
@@ -14,6 +18,7 @@ return [
     ],
     'global'  => [
         'sitename' => 'Lamines',
+        'baseurl'  => $baseUrl
     ],
     'cache'   => [
         'storage' => 'redis',
@@ -122,10 +127,10 @@ return [
         ],
     ],
     'utility' => [
-        'local'         => 'en_US',
+        'local'         => $local,
         'currency'      => 'USD',
         'timezone'      => 'Asia/Dubai',
-        'date_local'    => 'en_US',
+        'date_local'    => $local,
         'date_type'     => IntlDateFormatter::SHORT,
         'time_type'     => IntlDateFormatter::NONE,
         'date_calendar' => IntlDateFormatter::TRADITIONAL,

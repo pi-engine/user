@@ -72,19 +72,19 @@ class UtilityService implements ServiceInterface
      * @return string|array
      * @see \Laminas\Escaper\Escaper
      */
-    public function escape(string|array $value, string $context = 'html'): string|array
+    public function escape(string|array $data, string $context = 'html'): string|array
     {
         $context = $context ? ucfirst($context) : 'Html';
         $method  = 'escape' . $context;
         $escaper = new Escaper('utf-8');
 
-        if (is_array($value)) {
-            $value = $this->escapeArray($escaper, $value, $method);
+        if (is_array($data)) {
+            $data = $this->escapeArray($escaper, $data, $method);
         } elseif (method_exists($escaper, $method)) {
-            $value = $escaper->{$method}($value);
+            $data = $escaper->{$method}($data);
         }
 
-        return $value;
+        return $data;
     }
 
     /**
@@ -101,7 +101,7 @@ class UtilityService implements ServiceInterface
     {
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $data[$key] = $this->escapeArray($value, $method);
+                $data[$key] = $this->escapeArray($escaper, $value, $method);
             } elseif (is_string($data)) {
                 $data = $escaper->{$method}($data);
             }

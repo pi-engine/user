@@ -2,6 +2,7 @@
 
 namespace User\Middleware;
 
+use Laminas\Diactoros\Stream;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -16,6 +17,7 @@ use User\Security\Method as SecurityMethod;
 use User\Security\RequestLimit as SecurityRequestLimit;
 use User\Security\Xss as SecurityXss;
 use User\Service\CacheService;
+use User\Service\UtilityService;
 
 class SecurityMiddleware implements MiddlewareInterface
 {
@@ -28,6 +30,9 @@ class SecurityMiddleware implements MiddlewareInterface
     /* @var CacheService */
     protected CacheService $cacheService;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -38,12 +43,14 @@ class SecurityMiddleware implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
         CacheService $cacheService,
+        UtilityService $utilityService,
         ErrorHandler $errorHandler,
         $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->cacheService    = $cacheService;
+        $this->utilityService  = $utilityService;
         $this->errorHandler    = $errorHandler;
         $this->config          = $config;
     }
@@ -67,8 +74,34 @@ class SecurityMiddleware implements MiddlewareInterface
             }
         }
 
+        // Set security attribute
         $request = $request->withAttribute('security_stream', $securityStream);
-        return $handler->handle($request);
+
+        // Call the next middleware or handler
+        $response = $handler->handle($request);
+
+        // Set security headers in response
+        $response = $this->setSecurityHeader($response);
+
+        // ToDo: Check it and move it to true middleware
+        // Check if the response can be compressed and compressed it
+        if ($this->canCompress($request)) {
+            $body = (string) $response->getBody();
+            $compressedBody = gzencode($body, 9);
+
+            // Create a new stream with the compressed body
+            $stream = new Stream('php://temp', 'wb+');
+            $stream->write($compressedBody);
+            $stream->rewind();
+
+            // Return the response with the compressed body
+            return $response
+                ->withBody($stream)
+                ->withHeader('Content-Encoding', 'gzip')
+                ->withHeader('Content-Length', strlen($compressedBody));
+        }
+
+        return $response;
     }
 
     protected function securityList(): array
@@ -94,5 +127,60 @@ class SecurityMiddleware implements MiddlewareInterface
         }
 
         return $list;
+    }
+
+    protected function setSecurityHeader(ResponseInterface $response): ResponseInterface
+    {
+        return $response
+            // Content Security Policy (CSP)
+            ->withHeader(
+                'Content-Security-Policy',
+                "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+            )
+
+            // Strict-Transport-Security (HSTS)
+            ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+
+            // X-Content-Type-Options
+            ->withHeader('X-Content-Type-Options', 'nosniff')
+
+            // X-Frame-Options
+            ->withHeader('X-Frame-Options', 'DENY')
+
+            // Referrer-Policy
+            ->withHeader('Referrer-Policy', 'no-referrer')
+
+            // Permissions-Policy
+            ->withHeader('Permissions-Policy', "geolocation=(), microphone=(), camera=(), fullscreen=(), payment=(), usb=(), vibrate=(), sync-xhr=()")
+
+            // X-XSS-Protection
+            ->withHeader('X-XSS-Protection', '1; mode=block')
+
+            // X-Permitted-Cross-Domain-Policies
+            ->withHeader('X-Permitted-Cross-Domain-Policies', 'none')
+
+            // Cross-Origin Resource Sharing (CORS)
+            ->withHeader('Access-Control-Allow-Origin', $this->config['baseurl'])
+            ->withHeader('Access-Control-Allow-Methods', $this->config['method']['allow_method'])
+            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token')
+            ->withHeader('Access-Control-Max-Age', '3600')
+
+            // Expect-CT
+            ->withHeader('Expect-CT', 'max-age=86400, enforce')
+
+            // Cache-Control
+            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+
+            // X-Download-Options
+            ->withHeader('X-Download-Options', 'noopen')
+
+            // X-Powered-By
+            ->withoutHeader('X-Powered-By');
+    }
+
+    protected function canCompress(ServerRequestInterface $request): bool
+    {
+        $acceptEncoding = $request->getHeaderLine('Accept-Encoding');
+        return str_contains($acceptEncoding, 'gzip');
     }
 }
