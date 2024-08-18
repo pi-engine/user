@@ -40,8 +40,9 @@ class HistoryHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account = $request->getAttribute('account');
-        $result  = $this->historyService->getUserLog($account);
+        $requestBody = $request->getParsedBody();
+        $account     = $request->getAttribute('account');
+        $result      = $this->historyService->getUserLog($account, $requestBody);
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

@@ -54,12 +54,12 @@ class HistoryService implements ServiceInterface
         $this->loggerService->addUserLog($state, $params);
     }
 
-    public function getUserLog($account): array
+    public function getUserLog($account, $params): array
     {
         $params = [
             'user_id' => $account['id'],
-            'limit'   => 25,
-            'page'    => 1,
+            'limit'   => $params['limit'] ?? 25,
+            'page'    => $params['page'] ?? 1,
         ];
 
         return $this->loggerService->getUserLog($params);
