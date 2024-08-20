@@ -401,6 +401,21 @@ class AccountService implements ServiceInterface
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
         $account['is_company_setup']    = false;
+        $account['permission']          = null;
+        $account['token_payload']       = [
+            'iat' => $accessToken['payload']['iat'],
+            'exp' => $accessToken['payload']['exp'],
+        ];
+
+        // Set permission
+        if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
+            $permissionParams = [
+                'section' => 'api',
+                'role'    => $account['roles'],
+            ];
+
+            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+        }
 
         // Check company setup
         if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
@@ -415,21 +430,21 @@ class AccountService implements ServiceInterface
             $account['is_company_setup'] = $isCompanySetup;
         }
 
-        // Set token payload
-        $account['token_payload'] = [
-            'iat' => $accessToken['payload']['iat'],
-            'exp' => $accessToken['payload']['exp'],
-        ];
+        // Check permission for company package
+        if (isset($this->config['login']['permission_package']) && (int)$this->config['login']['permission_package'] === 1) {
+            if (isset($user['authorization']['package_id']) && (int)$user['authorization']['package_id'] > 0) {
+                $key     = sprintf('package-%s', $user['authorization']['package_id']);
+                $package = $this->cacheService->getItem($key);
 
-        // Set permission
-        $account['permission'] = null;
-        if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
-            $permissionParams = [
-                'section' => 'api',
-                'role'    => $account['roles'],
-            ];
-
-            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+                // Check and clean account permission base of package access
+                if (
+                    !empty($package)
+                    && isset($package['information']['access'])
+                    && !empty($package['information']['access'])
+                ) {
+                    $account['permission'] = array_intersect(array_values($account['permission']), array_values($package['information']['access']));
+                }
+            }
         }
 
         // Set source roles params
@@ -440,6 +455,9 @@ class AccountService implements ServiceInterface
             $account['roles'][] = $params['source'];
             $account['roles']   = array_values($account['roles']);
         }
+
+        // reset permission
+        $account['permission'] = array_values($account['permission']);
 
         // Set cache params
         $cacheParams = [
@@ -1128,17 +1146,71 @@ class AccountService implements ServiceInterface
 
         // Set permission
         if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
-            if (isset($user['permission']) && !empty($user['permission'])) {
-                $account['permission'] = $user['permission'];
-            } else {
-                $permissionParams = [
-                    'section' => 'api',
-                    'role'    => $account['roles'],
-                ];
+            $permissionParams = [
+                'section' => 'api',
+                'role'    => $account['roles'],
+            ];
 
-                $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+            $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+        }
+
+        // Check company setup
+        if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+            $isCompanySetup = false;
+
+            if (isset($user['authorization']['company']['is_company_setup'])) {
+                $isCompanySetup = $user['authorization']['company']['is_company_setup'];
+            } elseif (isset($user['account']['is_company_setup'])) {
+                $isCompanySetup = $user['account']['is_company_setup'];
+            }
+
+            $account['is_company_setup'] = $isCompanySetup;
+        }
+
+        // Check permission for company package
+        if (isset($this->config['login']['permission_package']) && (int)$this->config['login']['permission_package'] === 1) {
+            if (isset($user['authorization']['package_id']) && (int)$user['authorization']['package_id'] > 0) {
+                $key     = sprintf('package-%s', $user['authorization']['package_id']);
+                $package = $this->cacheService->getItem($key);
+
+                // Check and clean account permission base of package access
+                if (
+                    !empty($package)
+                    && isset($package['information']['access'])
+                    && !empty($package['information']['access'])
+                ) {
+                    $account['permission'] = array_intersect(array_values($account['permission']), array_values($package['information']['access']));
+                }
             }
         }
+
+        // reset permission
+        $account['permission'] = array_values($account['permission']);
+
+        // Set cache params
+        $cacheParams = [
+            'account'    => [
+                'id'                  => (int)$account['id'],
+                'name'                => $account['name'],
+                'email'               => $account['email'],
+                'identity'            => $account['identity'],
+                'mobile'              => $account['mobile'],
+                'first_name'          => $account['first_name'],
+                'last_name'           => $account['last_name'],
+                'time_created'        => $account['time_created'],
+                'last_login'          => $account['last_login'],
+                'has_password'        => $account['has_password'],
+                'multi_factor_global' => $account['multi_factor_global'],
+                'multi_factor_status' => $account['multi_factor_status'],
+                'multi_factor_verify' => $account['multi_factor_verify'],
+                'is_company_setup'    => $account['is_company_setup'],
+            ],
+            'roles'      => $account['roles'],
+            'permission' => $account['permission'],
+        ];
+
+        // Set/Update user data to cache
+        $this->cacheService->setUser($account['id'], $cacheParams);
 
         return $account;
     }
