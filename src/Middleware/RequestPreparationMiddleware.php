@@ -3,6 +3,7 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Laminas\Diactoros\Stream;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -38,16 +39,35 @@ class RequestPreparationMiddleware implements MiddlewareInterface
 
         // Check for JSON or form data content types
         if ($this->isJson($contentType)) {
-            return $this->processJsonRequest($request, $handler);
+            $response = $this->processJsonRequest($request, $handler);
         } elseif ($this->isFormData($contentType)) {
             // Handle form data, if necessary
-            return $handler->handle($request);
+            $response = $handler->handle($request);
         } else {
             // Todo: Fix it
             // Unsupported content type
             //return $this->createErrorResponse($request, 'Unsupported content type', StatusCodeInterface::STATUS_BAD_REQUEST);
-            return $handler->handle($request);
+            $response = $handler->handle($request);
         }
+
+        // Check if the response can be compressed and compressed it
+        if ($this->canCompress($request)) {
+            $body = (string) $response->getBody();
+            $compressedBody = gzencode($body, 9);
+
+            // Create a new stream with the compressed body
+            $stream = new Stream('php://temp', 'wb+');
+            $stream->write($compressedBody);
+            $stream->rewind();
+
+            // Return the response with the compressed body
+            return $response
+                ->withBody($stream)
+                ->withHeader('Content-Encoding', 'gzip')
+                ->withHeader('Content-Length', strlen($compressedBody));
+        }
+
+        return $response;
     }
 
     private function createErrorResponse(ServerRequestInterface $request, string $message): ResponseInterface
@@ -67,6 +87,12 @@ class RequestPreparationMiddleware implements MiddlewareInterface
     {
         return stripos($contentType, 'application/x-www-form-urlencoded') !== false
                || stripos($contentType, 'multipart/form-data') !== false;
+    }
+
+    private function canCompress(ServerRequestInterface $request): bool
+    {
+        $acceptEncoding = $request->getHeaderLine('Accept-Encoding');
+        return str_contains($acceptEncoding, 'gzip');
     }
 
     private function processJsonRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

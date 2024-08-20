@@ -81,27 +81,7 @@ class SecurityMiddleware implements MiddlewareInterface
         $response = $handler->handle($request);
 
         // Set security headers in response
-        $response = $this->setSecurityHeader($response);
-
-        // ToDo: Check it and move it to true middleware
-        // Check if the response can be compressed and compressed it
-        if ($this->canCompress($request)) {
-            $body = (string) $response->getBody();
-            $compressedBody = gzencode($body, 9);
-
-            // Create a new stream with the compressed body
-            $stream = new Stream('php://temp', 'wb+');
-            $stream->write($compressedBody);
-            $stream->rewind();
-
-            // Return the response with the compressed body
-            return $response
-                ->withBody($stream)
-                ->withHeader('Content-Encoding', 'gzip')
-                ->withHeader('Content-Length', strlen($compressedBody));
-        }
-
-        return $response;
+        return $this->setSecurityHeader($response);
     }
 
     protected function securityList(): array
@@ -176,11 +156,5 @@ class SecurityMiddleware implements MiddlewareInterface
 
             // X-Powered-By
             ->withoutHeader('X-Powered-By');
-    }
-
-    protected function canCompress(ServerRequestInterface $request): bool
-    {
-        $acceptEncoding = $request->getHeaderLine('Accept-Encoding');
-        return str_contains($acceptEncoding, 'gzip');
     }
 }
