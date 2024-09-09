@@ -10,6 +10,7 @@ use Redis;
 
 class CacheService implements ServiceInterface
 {
+    /* @var array */
     public array $userValuePattern
         = [
             'account'       => [],
@@ -19,14 +20,35 @@ class CacheService implements ServiceInterface
             'otp'           => [],
             'device_tokens' => [],
             'multi_factor'  => [],
+            'authorization' => [],
+        ];
+
+    /* @var array */
+    public array $userAccountValuePattern
+        = [
+            'id'                  => 0,
+            'name'                => null,
+            'email'               => null,
+            'identity'            => null,
+            'mobile'              => null,
+            'first_name'          => null,
+            'last_name'           => null,
+            'avatar'              => null,
+            'last_login'          => 0,
+            'status'              => 0,
+            'time_created'        => 0,
+            'has_password'        => 0,
+            'multi_factor_global' => 0,
+            'multi_factor_status' => 0,
+            'multi_factor_verify' => 0,
+            'is_company_setup'    => 0,
         ];
 
     /* @var SimpleCacheDecorator */
     protected SimpleCacheDecorator $cache;
 
+    /* @var string */
     protected string $userKeyPattern = 'user-%s';
-
-    protected string $roleKeyPattern = 'roles-list';
 
     /* @var array */
     protected array $config;
@@ -86,10 +108,16 @@ class CacheService implements ServiceInterface
 
         // Set params
         if (isset($params['account']) && !empty($params['account'])) {
-            // Set ID as int
-            $params['account']['id'] = (int)$params['account']['id'];
+            // Set user
+            $user['account']       = $params['account'];
+            $user['account']['id'] = (int)$user['account']['id'];
 
-            $user['account'] = $params['account'];
+            // Set user account template
+            foreach ($this->userAccountValuePattern as $key => $value) {
+                if (!isset($user['account'][$key])) {
+                    $user['account'][$key] = $value;
+                }
+            }
         }
         if (isset($params['access_keys'])/* && !empty($params['access_keys'])*/) {
             $user['access_keys'] = $params['access_keys'];

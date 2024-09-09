@@ -68,7 +68,7 @@ class MobileValidator extends AbstractValidator
 
         // Set mobile validator
         if (isset($this->options['country']) && $this->options['country'] == 'IR') {
-            $pattern = '/(\+?98|098|0|0098)?(9\d{9})/';
+            $pattern = '/^\+989\d{9}$/';
             if (!preg_match($pattern, $value)) {
                 $this->error(static::INVALID);
                 return false;

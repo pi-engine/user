@@ -469,13 +469,15 @@ class AccountService implements ServiceInterface
                 'mobile'              => $account['mobile'],
                 'first_name'          => $account['first_name'],
                 'last_name'           => $account['last_name'],
+                'avatar'              => $account['avatar'],
                 'time_created'        => $account['time_created'],
                 'last_login'          => $account['last_login'],
+                'status'              => (int)$account['status'],
                 'has_password'        => $account['has_password'],
                 'multi_factor_global' => $account['multi_factor_global'],
                 'multi_factor_status' => $account['multi_factor_status'],
                 'multi_factor_verify' => $account['multi_factor_verify'],
-                'is_company_setup'    => $account['is_company_setup'],
+                'is_company_setup'    => $account['is_company_setup'] ?? 0,
             ],
             'roles'        => $account['roles'],
             'permission'   => $account['permission'],
@@ -1197,13 +1199,15 @@ class AccountService implements ServiceInterface
                 'mobile'              => $account['mobile'],
                 'first_name'          => $account['first_name'],
                 'last_name'           => $account['last_name'],
+                'avatar'              => $account['avatar'],
                 'time_created'        => $account['time_created'],
                 'last_login'          => $account['last_login'],
+                'status'              => (int)$account['status'],
                 'has_password'        => $account['has_password'],
                 'multi_factor_global' => $account['multi_factor_global'],
                 'multi_factor_status' => $account['multi_factor_status'],
                 'multi_factor_verify' => $account['multi_factor_verify'],
-                'is_company_setup'    => $account['is_company_setup'],
+                'is_company_setup'    => $account['is_company_setup'] ?? 0,
             ],
             'roles'      => $account['roles'],
             'permission' => $account['permission'],
@@ -1303,6 +1307,20 @@ class AccountService implements ServiceInterface
         // Get account after update
         $account = $this->getAccount(['id' => (int)$account['id']]);
         $profile = $this->getProfile(['user_id' => (int)$account['id']]);
+        $account = array_merge($account, $profile);
+
+        // Check company setup
+        if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+            $isCompanySetup = false;
+
+            if (isset($user['authorization']['company']['is_company_setup'])) {
+                $isCompanySetup = $user['authorization']['company']['is_company_setup'];
+            } elseif (isset($user['account']['is_company_setup'])) {
+                $isCompanySetup = $user['account']['is_company_setup'];
+            }
+
+            $account['is_company_setup'] = $isCompanySetup;
+        }
 
         // Get user from cache if exist
         $user = $this->cacheService->getUser($account['id']);
@@ -1312,15 +1330,22 @@ class AccountService implements ServiceInterface
             $account['id'],
             [
                 'account' => [
-                    'id'                  => $account['id'],
+                    'id'                  => (int)$account['id'],
                     'name'                => $account['name'],
                     'email'               => $account['email'],
                     'identity'            => $account['identity'],
                     'mobile'              => $account['mobile'],
-                    'last_login'          => $user['account']['last_login'] ?? time(),
+                    'first_name'          => $account['first_name'],
+                    'last_name'           => $account['last_name'],
+                    'avatar'              => $account['avatar'],
+                    'time_created'        => $account['time_created'],
+                    'last_login'          => $account['last_login'],
                     'status'              => (int)$account['status'],
-                    'time_created'        => $account['time_created'] ?? '',
-                    'multi_factor_status' => (int)$account['multi_factor_status'],
+                    'has_password'        => $account['has_password'],
+                    'multi_factor_global' => $account['multi_factor_global'],
+                    'multi_factor_status' => $account['multi_factor_status'],
+                    'multi_factor_verify' => $account['multi_factor_verify'],
+                    'is_company_setup'    => $account['is_company_setup'] ?? 0,
                 ],
             ]
         );
@@ -1328,7 +1353,7 @@ class AccountService implements ServiceInterface
         // Save log
         $this->historyService->logger('update', ['request' => $params, 'account' => $account, 'operator' => $operator]);
 
-        return array_merge($account, $profile);
+        return $account;
     }
 
     /**
