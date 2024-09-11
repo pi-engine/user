@@ -81,7 +81,7 @@ class CacheService implements ServiceInterface
     {
         $this->cache->set($key, $value, $ttl);
 
-        return $value;
+        return $this->getItem($key);
     }
 
     public function deleteItem(string $key): void
@@ -113,9 +113,9 @@ class CacheService implements ServiceInterface
             $user['account']['id'] = (int)$user['account']['id'];
 
             // Set user account template
-            foreach ($this->userAccountValuePattern as $key => $value) {
-                if (!isset($user['account'][$key])) {
-                    $user['account'][$key] = $value;
+            foreach ($this->userAccountValuePattern as $accountKey => $accountValue) {
+                if (!isset($user['account'][$accountKey])) {
+                    $user['account'][$accountKey] = $accountValue;
                 }
             }
         }
@@ -145,9 +145,7 @@ class CacheService implements ServiceInterface
         }
 
         // Set/Reset cache
-        $this->setItem($key, $user);
-
-        return $user;
+        return $this->setItem($key, $user);
     }
 
     public function getUser(int $userId): array
