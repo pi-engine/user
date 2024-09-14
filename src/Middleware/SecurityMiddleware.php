@@ -140,10 +140,10 @@ class SecurityMiddleware implements MiddlewareInterface
             ->withHeader('X-Permitted-Cross-Domain-Policies', 'none')
 
             // Cross-Origin Resource Sharing (CORS)
-            ->withHeader('Access-Control-Allow-Origin', $this->config['baseurl'])
-            ->withHeader('Access-Control-Allow-Methods', $this->config['method']['allow_method'])
-            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token')
-            ->withHeader('Access-Control-Max-Age', '3600')
+            //->withHeader('Access-Control-Allow-Origin', $this->config['baseurl'])
+            //->withHeader('Access-Control-Allow-Methods', $this->config['method']['allow_method'])
+            //->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token')
+            //->withHeader('Access-Control-Max-Age', '3600')
 
             // Expect-CT
             ->withHeader('Expect-CT', 'max-age=86400, enforce')

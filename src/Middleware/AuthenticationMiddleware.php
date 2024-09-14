@@ -56,7 +56,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $this->accountService  = $accountService;
         $this->tokenService    = $tokenService;
         $this->cacheService    = $cacheService;
-        $this->accountLocked        = $accountLocked;
+        $this->accountLocked   = $accountLocked;
         $this->errorHandler    = $errorHandler;
         $this->config          = $config;
     }
@@ -65,7 +65,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
     {
         // Get token
         $securityStream = $request->getAttribute('security_stream');
-        $token = $request->getHeaderLine('token');
+        $token          = $request->getHeaderLine('token');
 
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');

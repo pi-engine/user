@@ -177,5 +177,8 @@ return [
             'attempts' => 5,
             'ttl'      => 3600,
         ],
+        'compress'        => [
+            'is_active' => true,
+        ],
     ],
 ];

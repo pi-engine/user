@@ -23,14 +23,19 @@ class RequestPreparationMiddleware implements MiddlewareInterface
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
+    /* @var array */
+    protected array $config;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
+        $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
         $this->errorHandler    = $errorHandler;
+        $this->config          = $config;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -51,20 +56,22 @@ class RequestPreparationMiddleware implements MiddlewareInterface
         }
 
         // Check if the response can be compressed and compressed it
-        if ($this->canCompress($request)) {
-            $body = (string) $response->getBody();
-            $compressedBody = gzencode($body, 9);
+        if (isset($this->config['compress']['is_active']) && $this->config['compress']['is_active']) {
+            if ($this->canCompress($request)) {
+                $body = (string) $response->getBody();
+                $compressedBody = gzencode($body, 9);
 
-            // Create a new stream with the compressed body
-            $stream = new Stream('php://temp', 'wb+');
-            $stream->write($compressedBody);
-            $stream->rewind();
+                // Create a new stream with the compressed body
+                $stream = new Stream('php://temp', 'wb+');
+                $stream->write($compressedBody);
+                $stream->rewind();
 
-            // Return the response with the compressed body
-            return $response
-                ->withBody($stream)
-                ->withHeader('Content-Encoding', 'gzip')
-                ->withHeader('Content-Length', strlen($compressedBody));
+                // Return the response with the compressed body
+                return $response
+                    ->withBody($stream)
+                    ->withHeader('Content-Encoding', 'gzip')
+                    ->withHeader('Content-Length', strlen($compressedBody));
+            }
         }
 
         return $response;

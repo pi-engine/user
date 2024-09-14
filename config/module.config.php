@@ -27,7 +27,7 @@ return [
             Middleware\AvatarUploadMiddleware::class                 => Factory\Middleware\AvatarUploadMiddlewareFactory::class,
             Middleware\SecurityMiddleware::class                     => Factory\Middleware\SecurityMiddlewareFactory::class,
             Middleware\ValidationMiddleware::class                   => Factory\Middleware\ValidationMiddlewareFactory::class,
-            Middleware\RequestPreparationMiddleware::class           => Factory\Middleware\JsonToArrayMiddlewareFactory::class,
+            Middleware\RequestPreparationMiddleware::class           => Factory\Middleware\RequestPreparationMiddlewareFactory::class,
             Middleware\InstallerMiddleware::class                    => Factory\Middleware\InstallerMiddlewareFactory::class,
             Validator\EmailValidator::class                          => Factory\Validator\EmailValidatorFactory::class,
             Validator\IdentityValidator::class                       => Factory\Validator\IdentityValidatorFactory::class,
