@@ -39,4 +39,10 @@ class TranslatorService implements ServiceInterface
 
         return $translator;
     }
+
+    public function translate($message): string
+    {
+        $translator = $this->translator();
+        return $translator->translate($message);
+    }
 }
