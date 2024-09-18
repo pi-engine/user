@@ -51,7 +51,7 @@
     "laminas/laminas-mvc-plugins": "*",
     "laminas/laminas-mvc-middleware": "*",
     "laminas/laminas-authentication": "*",
-    "laminas/laminas-crypt": "*",
+    "laminas/laminas-math": "*",
     "laminas/laminas-http": "*",
     "laminas/laminas-eventmanager": "*",
     "laminas/laminas-cache": "*",
