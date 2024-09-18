@@ -6,7 +6,6 @@ use InvalidArgumentException;
 use Laminas\Authentication\Adapter\DbTable\CallbackCheckAdapter;
 use Laminas\Authentication\AuthenticationService;
 use Laminas\Authentication\Result as AuthenticationResult;
-use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
@@ -518,7 +517,7 @@ class AccountRepository implements AccountRepositoryInterface
         return $profile;
     }
 
-    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'argon2id'): AuthenticationService
     {
         // Call authAdapter
         $authAdapter = new CallbackCheckAdapter(
@@ -529,10 +528,11 @@ class AccountRepository implements AccountRepositoryInterface
             function ($hash, $password) use ($hashPattern) {
                 $result = false;
                 switch ($hashPattern) {
+                    case'argon2id':
                     case'bcrypt':
-                        $bcrypt = new Bcrypt();
-                        $result = $bcrypt->verify($password, $hash);
+                        $result = password_verify($password, $hash);
                         break;
+
                     case'sha512':
                         $result = hash_equals($hash, hash('sha512', $password));
                         break;

@@ -29,7 +29,7 @@ interface AccountRepositoryInterface
 
     public function updateProfile(int $userId, array $params = []): void;
 
-    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'bcrypt'): AuthenticationService;
+    public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'argon2id'): AuthenticationService;
 
     public function authenticationOauth($params): AuthenticationResult;
 

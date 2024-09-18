@@ -3,7 +3,6 @@
 namespace User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
 use RobThree\Auth\Algorithm;
@@ -175,7 +174,7 @@ class AccountService implements ServiceInterface
         $this->accountLoginAttempts = $accountLoginAttempts;
         $this->accountLocked        = $accountLocked;
         $this->config               = $config;
-        $this->hashPattern          = $config['hash_pattern'] ?? 'bcrypt';
+        $this->hashPattern          = $config['hash_pattern'] ?? 'argon2id';
     }
 
     /**
@@ -2187,9 +2186,21 @@ class AccountService implements ServiceInterface
         switch ($this->hashPattern) {
             default:
             case'bcrypt':
-                $bcrypt = new Bcrypt();
-                $hash   = $bcrypt->create($password);
+                $hash = password_hash($password, PASSWORD_BCRYPT);
                 break;
+
+            case'argon2id':
+                // Set option for a High-Security ARGON2ID
+                $options = [
+                    'memory_cost' => 1<<19, // 512 MB
+                    'time_cost' => 6,       // 6 iterations
+                    'threads' => 2          // Default 2 threads
+                ];
+
+                // Make a High-Security hash password
+                $hash = password_hash($password, PASSWORD_ARGON2ID, $options);
+                break;
+
             case'sha512':
                 $hash = hash('sha512', $password);
                 break;
@@ -2208,10 +2219,11 @@ class AccountService implements ServiceInterface
     {
         switch ($this->hashPattern) {
             default:
+            case'argon2id':
             case'bcrypt':
-                $bcrypt = new Bcrypt();
-                $result = $bcrypt->verify($credential, $hash);
+                $result = password_verify($credential, $hash);
                 break;
+
             case'sha512':
                 $result = hash_equals($hash, hash('sha512', $credential));
                 break;
