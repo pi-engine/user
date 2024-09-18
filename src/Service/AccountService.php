@@ -400,7 +400,7 @@ class AccountService implements ServiceInterface
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
         $account['is_company_setup']    = false;
-        $account['permission']          = null;
+        $account['permission']          = [];
         $account['token_payload']       = [
             'iat' => $accessToken['payload']['iat'],
             'exp' => $accessToken['payload']['exp'],
