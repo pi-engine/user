@@ -2,7 +2,7 @@
 
 namespace User\Factory\Service;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\Cache\Service\StorageAdapterFactoryInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use User\Service\CacheService;

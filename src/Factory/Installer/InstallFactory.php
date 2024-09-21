@@ -2,7 +2,7 @@
 
 namespace User\Factory\Installer;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use User\Installer\Install;
 use User\Service\InstallerService;
