@@ -495,6 +495,9 @@ class AccountService implements ServiceInterface
         if (isset($this->config['login']['session_policy']) && $this->config['login']['session_policy'] == 'single') {
             $cacheParams['access_keys']  = [$accessToken['key']];
             $cacheParams['refresh_keys'] = [$refreshToken['key']];
+
+            // Save log
+            $this->historyService->logger('logout_all', ['request' => [], 'account' => $account]);
         }
 
         // Set/Update user data to cache
