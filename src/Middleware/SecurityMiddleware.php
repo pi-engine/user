@@ -16,6 +16,7 @@ use User\Security\Ip as SecurityIp;
 use User\Security\Method as SecurityMethod;
 use User\Security\RequestLimit as SecurityRequestLimit;
 use User\Security\Xss as SecurityXss;
+use User\Security\Injection as SecurityInjection;
 use User\Service\CacheService;
 use User\Service\UtilityService;
 
@@ -102,6 +103,9 @@ class SecurityMiddleware implements MiddlewareInterface
         if (isset($this->config['xss']['is_active']) && $this->config['xss']['is_active']) {
             $list['xss'] = new SecurityXss($this->responseFactory, $this->streamFactory, $this->config);
         }
+        if (isset($this->config['injection']['is_active']) && $this->config['injection']['is_active']) {
+            $list['injection'] = new SecurityInjection($this->responseFactory, $this->streamFactory, $this->config);
+        }
         if (isset($this->config['inputValidation']['is_active']) && $this->config['inputValidation']['is_active']) {
             $list['inputValidation'] = new SecurityInputValidation($this->responseFactory, $this->streamFactory, $this->config);
         }
@@ -140,10 +144,10 @@ class SecurityMiddleware implements MiddlewareInterface
             ->withHeader('X-Permitted-Cross-Domain-Policies', 'none')
 
             // Cross-Origin Resource Sharing (CORS)
-            //->withHeader('Access-Control-Allow-Origin', $this->config['baseurl'])
-            //->withHeader('Access-Control-Allow-Methods', $this->config['method']['allow_method'])
-            //->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token')
-            //->withHeader('Access-Control-Max-Age', '3600')
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Methods', $this->config['method']['allow_method'])
+            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token')
+            ->withHeader('Access-Control-Max-Age', '3600')
 
             // Expect-CT
             ->withHeader('Expect-CT', 'max-age=86400, enforce')

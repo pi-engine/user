@@ -24,8 +24,8 @@ class Xss implements SecurityInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        $config
+        StreamFactoryInterface   $streamFactory,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -56,27 +56,14 @@ class Xss implements SecurityInterface
 
         // Get request and query body
         $requestParams = $request->getParsedBody();
-        $QueryParams = $request->getQueryParams();
+        $QueryParams   = $request->getQueryParams();
+        $params        = array_merge($requestParams, $QueryParams);
 
-        // Call XSS checker
-        $antiXss = new AntiXSS();
-
-        // Check request
-        if (!empty($requestParams)) {
-            $antiXss->xss_clean($requestParams);
-            if ($antiXss->isXssFound()) {
-                return [
-                    'result' => false,
-                    'name'   => $this->name,
-                    'status' => 'unsuccessful',
-                    'data'   => [],
-                ];
-            }
-        }
-
-        // Check request
-        if (!empty($QueryParams)) {
-            $antiXss->xss_clean($QueryParams);
+        // Do check
+        if (!empty($params)) {
+            // Call XSS checker
+            $antiXss = new AntiXSS();
+            $antiXss->xss_clean($params);
             if ($antiXss->isXssFound()) {
                 return [
                     'result' => false,

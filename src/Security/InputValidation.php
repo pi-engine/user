@@ -38,7 +38,7 @@ class InputValidation implements SecurityInterface
     /* @var string */
     protected string $name = 'inputValidation';
 
-    protected string $message = 'Access denied: Input data not valid!';
+    protected string $message = 'Access denied: Input data not valid, ';
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
@@ -70,9 +70,9 @@ class InputValidation implements SecurityInterface
         // Get request and query body
         $requestParams = $request->getParsedBody();
         $QueryParams   = $request->getQueryParams();
+        $params = array_merge($requestParams, $QueryParams);
 
         // Do check
-        $params = array_merge($requestParams, $QueryParams);
         if (!empty($params)) {
             $this->processData($params);
             $this->inputFilter->setData($params);
@@ -108,10 +108,10 @@ class InputValidation implements SecurityInterface
             foreach ($messages as $field => $filedMessage) {
                 if (is_array($filedMessage)) {
                     foreach ($filedMessage as $subField => $subFiledMessage) {
-                        $errorMessage[$subField] = $subFiledMessage;
+                        $errorMessage[$subField] = $field . ': ' . $subFiledMessage;
                     }
                 } else {
-                    $errorMessage[$field] = $filedMessage;
+                    $errorMessage[$field] = $field . ': ' . $filedMessage;
                 }
             }
 
@@ -138,6 +138,12 @@ class InputValidation implements SecurityInterface
     private function processData(array $data): void
     {
         foreach ($data as $key => $value) {
+            // Allow null and empty strings as valid
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            // Set input
             $input = new Input($key);
 
             // Common filters
@@ -151,7 +157,10 @@ class InputValidation implements SecurityInterface
             } elseif (is_float($value)) {
                 $input->getValidatorChain()->attach(new IsFloat());
             } elseif (is_string($value)) {
+                // Check String Length - only if the string is not empty
                 $input->getValidatorChain()->attach(new StringLength(['min' => 1, 'max' => 65535]));
+
+                // Validate based on the type of string
                 if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     $input->getValidatorChain()->attach(new EmailAddress());
                 } elseif (filter_var($value, FILTER_VALIDATE_URL)) {
@@ -164,20 +173,33 @@ class InputValidation implements SecurityInterface
                     $input->getValidatorChain()->attach(new IsJsonString());
                 }
             } elseif (is_array($value)) {
+                // Recursively process the array
                 $this->processData($value);
                 continue;
             } else {
+                // Unrecognized data type
                 $input->getValidatorChain()->attach(new NotEmpty(['message' => 'Unrecognized data type']));
             }
 
-            // Add
+            // Add input to the filter
             $this->inputFilter->add($input);
         }
     }
 
     private function isJson($string): bool
     {
+        if (!is_string($string)) {
+            return false;
+        }
+
+        $string = trim($string);
         json_decode($string);
-        return (json_last_error() == JSON_ERROR_NONE);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->message = $this->message . ' ' . 'Invalid JSON: ' . json_last_error_msg();
+            return false;
+        }
+
+        return true;
     }
 }

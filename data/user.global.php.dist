@@ -159,6 +159,10 @@ return [
             'is_active'        => true,
             'ignore_whitelist' => true,
         ],
+        'injection'            => [
+            'is_active'        => true,
+            'ignore_whitelist' => true,
+        ],
         'inputValidation'=> [
             'is_active'        => true,
             'ignore_whitelist' => true,
