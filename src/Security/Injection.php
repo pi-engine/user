@@ -135,6 +135,7 @@ class Injection implements SecurityInterface
 
             // Miscellaneous suspicious patterns
             '/\b(select.*from|union.*select|insert.*into|update.*set|delete\s+from|drop\s+table|create\s+table|alter\s+table|truncate\s+table)\b/i',
+
             // Catching statements
             '/\b(or|and)\s+\d+\s*=\s*\d+/i', // Numeric equality checks
             '/\b(?:like|regexp)\b/i', // Check for pattern matching
