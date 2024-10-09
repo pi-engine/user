@@ -18,7 +18,8 @@ return [
     ],
     'global'  => [
         'sitename' => 'Lamines',
-        'baseurl'  => $baseUrl
+        'baseurl'  => $baseUrl,
+        'platform' => 'dev-123'
     ],
     'cache'   => [
         'storage' => 'redis',
