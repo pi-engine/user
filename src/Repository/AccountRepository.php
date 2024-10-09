@@ -24,7 +24,6 @@ use User\Model\Account\Credential;
 use User\Model\Account\MultiFactor;
 use User\Model\Account\Profile;
 use User\Model\Role\Account as AccountRole;
-
 use function sprintf;
 
 class AccountRepository implements AccountRepositoryInterface

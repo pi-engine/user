@@ -5,7 +5,6 @@ namespace User\Validator;
 use Laminas\Validator\AbstractValidator;
 use User\Service\AccountService;
 use User\Service\UtilityService;
-
 use function sprintf;
 
 class PasswordValidator extends AbstractValidator

@@ -12,7 +12,6 @@ use RobThree\Auth\TwoFactorAuthException;
 use User\Repository\AccountRepositoryInterface;
 use User\Security\AccountLocked;
 use User\Security\AccountLoginAttempts;
-
 use function array_merge;
 use function in_array;
 use function is_object;

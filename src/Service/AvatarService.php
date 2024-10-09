@@ -6,7 +6,6 @@ use ArrayObject;
 use Exception;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
-use Logger\Service\LoggerService;
 use Traversable;
 
 class AvatarService implements ServiceInterface

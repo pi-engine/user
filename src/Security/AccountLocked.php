@@ -3,7 +3,6 @@
 namespace User\Security;
 
 use Fig\Http\Message\StatusCodeInterface;
-use User\Security\Ip as SecurityIp;
 use User\Service\CacheService;
 
 class AccountLocked implements AccountSecurityInterface

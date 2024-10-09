@@ -3,7 +3,6 @@
 namespace User\Service;
 
 use User\Repository\RoleRepositoryInterface;
-
 use function in_array;
 
 class RoleService implements ServiceInterface

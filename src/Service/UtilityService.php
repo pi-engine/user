@@ -5,7 +5,6 @@ namespace User\Service;
 use IntlDateFormatter;
 use Laminas\Escaper\Escaper;
 use NumberFormatter;
-
 use function class_exists;
 use function method_exists;
 use function preg_replace;

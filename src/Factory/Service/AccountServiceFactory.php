@@ -2,12 +2,11 @@
 
 namespace User\Factory\Service;
 
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Notification\Service\NotificationService;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Task\Service\TaskService;
 use User\Repository\AccountRepositoryInterface;
 use User\Security\AccountLocked;
 use User\Security\AccountLoginAttempts;

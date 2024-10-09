@@ -2,9 +2,9 @@
 
 namespace User\Factory\Security;
 
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Security\AccountLocked;
 use User\Service\CacheService;

@@ -2,8 +2,8 @@
 
 namespace User\Factory\Installer;
 
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 use User\Installer\Remove;
 use User\Service\InstallerService;
 

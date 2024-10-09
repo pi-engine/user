@@ -2,9 +2,9 @@
 
 namespace User\Factory\Service;
 
-use Psr\Container\ContainerInterface;
 use Laminas\Cache\Service\StorageAdapterFactoryInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 use User\Service\CacheService;
 
 class CacheServiceFactory implements FactoryInterface

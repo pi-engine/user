@@ -2,8 +2,8 @@
 
 namespace User\Factory\Service;
 
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 use User\Service\TranslatorService;
 
 class TranslatorServiceFactory implements FactoryInterface

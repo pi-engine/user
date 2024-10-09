@@ -21,7 +21,6 @@ use User\Validator\MobileValidator;
 use User\Validator\NameValidator;
 use User\Validator\OtpValidator;
 use User\Validator\PasswordValidator;
-
 use function sprintf;
 
 class ValidationMiddleware implements MiddlewareInterface

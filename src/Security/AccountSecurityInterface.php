@@ -2,8 +2,6 @@
 
 namespace User\Security;
 
-use Psr\Http\Message\ServerRequestInterface;
-
 interface AccountSecurityInterface
 {
     /**
