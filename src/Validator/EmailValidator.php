@@ -19,26 +19,28 @@ class EmailValidator extends EmailAddress
     /** @var array */
     protected $options
         = [
-            'blacklist'         => [],
-            'check_duplication' => true,
-            'useMxCheck'        => false,
-            'useDeepMxCheck'    => false,
-            'useDomainCheck'    => true,
-            'allow'             => Hostname::ALLOW_DNS,
-            'strict'            => true,
-            'hostnameValidator' => null,
+            'blacklist'               => [],
+            'check_duplication'       => true,
+            'useMxCheck'              => false,
+            'useDeepMxCheck'          => false,
+            'useDomainCheck'          => true,
+            'allow'                   => Hostname::ALLOW_DNS,
+            'strict'                  => true,
+            'hostnameValidator'       => null,
+            'allow_commercial_emails' => false,
         ];
 
     /** @var array */
-    protected array $publicDomains = [
-        'gmail.com',
-        'yahoo.com',
-        'outlook.com',
-        'hotmail.com',
-        'live.com',
-        'aol.com',
-        'icloud.com',
-    ];
+    protected array $publicDomains
+        = [
+            'gmail.com',
+            'yahoo.com',
+            'outlook.com',
+            'hotmail.com',
+            'live.com',
+            'aol.com',
+            'icloud.com',
+        ];
 
     /** @var AccountService */
     protected AccountService $accountService;
@@ -48,14 +50,14 @@ class EmailValidator extends EmailAddress
      */
     public function __construct(
         AccountService $accountService,
-        $options = []
+                       $options = []
     ) {
         $this->accountService = $accountService;
         $this->options        = array_merge($this->options, $options);
 
         $this->messageTemplates = [
-            self::RESERVED => 'User email is reserved',
-            self::USED     => 'User email is already used',
+            self::RESERVED    => 'User email is reserved',
+            self::USED        => 'User email is already used',
             self::JustCompany => 'Just commercial emails allowed',
         ];
 
