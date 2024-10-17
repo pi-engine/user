@@ -22,7 +22,7 @@
     }
   ],
   "require": {
-    "php": "^8.2|^8.3",
+    "php": "^8.3",
     "ext-redis": "*",
     "ext-ctype": "*",
     "ext-fileinfo": "*",
@@ -73,9 +73,11 @@
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*",
-    "voku/anti-xss": "*",
     "imagine/imagine": "*",
+    "phpoffice/phppresentation": "*",
     "phpoffice/phpspreadsheet": "*",
+    "phpoffice/phpword": "*",
+    "smalot/pdfparser": "*",
     "robthree/twofactorauth": "*",
     "endroid/qr-code": "*",
     "hybridauth/hybridauth": "*",
@@ -84,7 +86,8 @@
     "mongodb/mongodb": "*",
     "triagens/arangodb": "*",
     "doctrine/mongodb-odm-bundle": "*",
-    "doctrine/doctrine-mongo-odm-module": "*"
+    "doctrine/doctrine-mongo-odm-module": "*",
+    "aws/aws-sdk-php": "*"
   },
   "autoload": {
     "psr-4": {
