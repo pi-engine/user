@@ -730,13 +730,13 @@ class AccountService implements ServiceInterface
             case'argon2id':
                 // Set option for a High-Security ARGON2ID
                 $options = [
-                    'memory_cost' => 1 << 19, // 512 MB
-                    'time_cost'   => 6,       // 6 iterations
-                    'threads'     => 2,          // Default 2 threads
+                    'memory_cost' => 1 << 17, // 131072 KB (128 MB)
+                    'time_cost'   => 4,         // 4 iterations (same as default)
+                    'threads'     => 2,            // 2 parallel threads
                 ];
 
                 // Make a High-Security hash password
-                $hash = password_hash($password, PASSWORD_ARGON2ID, $options);
+                $hash = password_hash($password, PASSWORD_ARGON2ID /*, $options*/);
                 break;
 
             case'sha512':
