@@ -14,6 +14,8 @@ class EmailValidator extends EmailAddress
     /** @var string */
     const USED = 'userEmailUsed';
 
+    const JustCompany = 'justCompany';
+
     /** @var array */
     protected $options
         = [
@@ -26,6 +28,17 @@ class EmailValidator extends EmailAddress
             'strict'            => true,
             'hostnameValidator' => null,
         ];
+
+    /** @var array */
+    protected array $publicDomains = [
+        'gmail.com',
+        'yahoo.com',
+        'outlook.com',
+        'hotmail.com',
+        'live.com',
+        'aol.com',
+        'icloud.com',
+    ];
 
     /** @var AccountService */
     protected AccountService $accountService;
@@ -43,6 +56,7 @@ class EmailValidator extends EmailAddress
         $this->messageTemplates = [
             self::RESERVED => 'User email is reserved',
             self::USED     => 'User email is already used',
+            self::JustCompany => 'Just commercial emails allowed',
         ];
 
         parent::__construct($this->options);
@@ -62,6 +76,14 @@ class EmailValidator extends EmailAddress
         $result = parent::isValid($value);
         if (!$result) {
             return false;
+        }
+
+        if ($this->options['allow_commercial_emails']) {
+            $emailDomain = substr(strrchr($value, "@"), 1);
+            if (in_array($emailDomain, $this->publicDomains)) {
+                $this->error(self::INVALID_FORMAT, $value);
+                return false;
+            }
         }
 
         if (isset($this->options['blacklist']) && !empty($this->options['blacklist'])) {
