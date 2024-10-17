@@ -9,7 +9,6 @@ use Laminas\Filter\StripTags;
 use Laminas\I18n\Validator\IsFloat;
 use Laminas\InputFilter\Input;
 use Laminas\InputFilter\InputFilter;
-use Laminas\Validator\Date;
 use Laminas\Validator\Digits;
 use Laminas\Validator\EmailAddress;
 use Laminas\Validator\Ip;
@@ -42,8 +41,8 @@ class InputValidation implements SecurityInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        $config
+        StreamFactoryInterface   $streamFactory,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -70,7 +69,7 @@ class InputValidation implements SecurityInterface
         // Get request and query body
         $requestParams = $request->getParsedBody();
         $QueryParams   = $request->getQueryParams();
-        $params = array_merge($requestParams, $QueryParams);
+        $params        = array_merge($requestParams, $QueryParams);
 
         // Do check
         if (!empty($params)) {
@@ -138,68 +137,58 @@ class InputValidation implements SecurityInterface
     private function processData(array $data): void
     {
         foreach ($data as $key => $value) {
-            // Allow null and empty strings as valid
-            if ($value === null || $value === '') {
+            if ($value !== null && $value !== '') {
                 continue;
             }
 
-            // Set input
+            // Initialize the input
             $input = new Input($key);
+            $input->getFilterChain()->attach(new StringTrim())->attach(new StripTags())->attach(new HtmlEntities());
 
-            // Common filters
-            $input->getFilterChain()->attach(new StringTrim());
-            $input->getFilterChain()->attach(new StripTags());
-            $input->getFilterChain()->attach(new HtmlEntities());
+            // Handle different types of data
+            switch (gettype($value)) {
+                case 'integer':
+                    $input->getValidatorChain()->attach(new Digits());
+                    break;
 
-            // Type-specific validators
-            if (is_int($value)) {
-                $input->getValidatorChain()->attach(new Digits());
-            } elseif (is_float($value)) {
-                $input->getValidatorChain()->attach(new IsFloat());
-            } elseif (is_string($value)) {
-                // Check String Length - only if the string is not empty
-                $input->getValidatorChain()->attach(new StringLength(['min' => 1, 'max' => 65535]));
+                case 'double': // Floats in PHP are of type 'double'
+                    $input->getValidatorChain()->attach(new IsFloat());
+                    break;
 
-                // Validate based on the type of string
-                if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    $input->getValidatorChain()->attach(new EmailAddress());
-                } elseif (filter_var($value, FILTER_VALIDATE_URL)) {
-                    $input->getValidatorChain()->attach(new Uri());
-                } elseif (filter_var($value, FILTER_VALIDATE_IP)) {
-                    $input->getValidatorChain()->attach(new Ip());
-                } elseif (strtotime($value) !== false) {
-                    $input->getValidatorChain()->attach(new Date(['format' => 'Y-m-d']));
-                } elseif ($this->isJson($value)) {
-                    $input->getValidatorChain()->attach(new IsJsonString());
-                }
-            } elseif (is_array($value)) {
-                // Recursively process the array
-                $this->processData($value);
-                continue;
-            } else {
-                // Unrecognized data type
-                $input->getValidatorChain()->attach(new NotEmpty(['message' => 'Unrecognized data type']));
+                case 'string':
+                    // Allow empty strings as valid inputs
+                    $input->getValidatorChain()->attach(new StringLength(['min' => 0, 'max' => 65535]));
+                    // Apply specific validators if applicable
+                    if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $input->getValidatorChain()->attach(new EmailAddress());
+                    } elseif (filter_var($value, FILTER_VALIDATE_URL)) {
+                        $input->getValidatorChain()->attach(new Uri());
+                    } elseif (filter_var($value, FILTER_VALIDATE_IP)) {
+                        $input->getValidatorChain()->attach(new Ip());
+                    } elseif ($this->isJson($value)) {
+                        $input->getValidatorChain()->attach(new IsJsonString());
+                    }
+                    break;
+
+                case 'array':
+                    $this->processData((array)$value);
+                    continue 2; // Continue outer loop
+
+                default:
+                    if ($value !== null && $value !== '') {
+                        $input->getValidatorChain()->attach(new NotEmpty());
+                        $this->inputFilter->setData([$key => $value]);
+                        $this->inputFilter->getMessages()[$key][] = "Key '{$key}' has an unrecognized type and cannot be empty.";
+                    }
+                    break;
             }
 
-            // Add input to the filter
             $this->inputFilter->add($input);
         }
     }
 
     private function isJson($string): bool
     {
-        if (!is_string($string)) {
-            return false;
-        }
-
-        $string = trim($string);
-        json_decode($string);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->message = $this->message . ' ' . 'Invalid JSON: ' . json_last_error_msg();
-            return false;
-        }
-
-        return true;
+        return is_string($string) && json_last_error() === JSON_ERROR_NONE && json_decode($string) !== null;
     }
 }
