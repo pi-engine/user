@@ -4,12 +4,12 @@ namespace User\Handler\Api\Captcha\ReCaptcha;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
-use Laminas\ReCaptcha\ReCaptcha;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use ReCaptcha\ReCaptcha;
 
 class VerifyHandler implements RequestHandlerInterface
 {
@@ -24,8 +24,8 @@ class VerifyHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        $config
+        StreamFactoryInterface   $streamFactory,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -46,22 +46,26 @@ class VerifyHandler implements RequestHandlerInterface
             'status' => StatusCodeInterface::STATUS_FORBIDDEN,
         ];
 
-        // Check params
-        if (isset($requestBody['g-recaptcha-response']) && !empty($requestBody['g-recaptcha-response'])) {
-            // Verify captcha
-            $recaptcha = new ReCaptcha($this->config['recaptcha']['public'], $this->config['recaptcha']['secret']);
-            $verify    = $recaptcha->verify($requestBody['g-recaptcha-response']);
-            if ($verify->isValid()) {
-                $result = [
-                    'result' => true,
-                    'data'   => [
-                        'message' => 'The captcha verified successfully !',
-                    ],
-                    'error'  => [],
-                ];
-            } else {
-                $result['error']['message'] = implode(',', $verify->getErrorCodes());
-            }
+        // Call ReCaptcha
+        $recaptcha = new ReCaptcha($this->config['recaptcha']['secret']);
+        $response  = $recaptcha->setExpectedAction('submit')->verify($requestBody['token'], $_SERVER['REMOTE_ADDR']);
+
+        // Check result
+        if ($response->isSuccess() && $response->getScore() > 0.5) {
+            $result = [
+                'result' => true,
+                'data'   => [
+                    'message' => 'The captcha verified successfully !',
+                    'score'   => $response->getScore(),
+                ],
+                'error'  => [],
+            ];
+        } else {
+            $result['error'] = [
+                'message' => 'Verification failed',
+                'code'    => $response->getErrorCodes(),
+                'score'   => $response->getScore(),
+            ];
         }
 
         return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
