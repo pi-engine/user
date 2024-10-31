@@ -3,7 +3,6 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Stream;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,21 +56,7 @@ class RequestPreparationMiddleware implements MiddlewareInterface
 
         // Check if the response can be compressed and compressed it
         if (isset($this->config['compress']['is_active']) && $this->config['compress']['is_active']) {
-            if ($this->canCompress($request)) {
-                $body           = (string)$response->getBody();
-                $compressedBody = gzencode($body, 9);
 
-                // Create a new stream with the compressed body
-                $stream = new Stream('php://temp', 'wb+');
-                $stream->write($compressedBody);
-                $stream->rewind();
-
-                // Return the response with the compressed body
-                return $response
-                    ->withBody($stream)
-                    ->withHeader('Content-Encoding', 'gzip')
-                    ->withHeader('Content-Length', strlen($compressedBody));
-            }
         }
 
         return $response;
@@ -94,12 +79,6 @@ class RequestPreparationMiddleware implements MiddlewareInterface
     {
         return stripos($contentType, 'application/x-www-form-urlencoded') !== false
                || stripos($contentType, 'multipart/form-data') !== false;
-    }
-
-    private function canCompress(ServerRequestInterface $request): bool
-    {
-        $acceptEncoding = $request->getHeaderLine('Accept-Encoding');
-        return str_contains($acceptEncoding, 'gzip');
     }
 
     private function processJsonRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

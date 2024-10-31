@@ -16,6 +16,7 @@ use User\Security\Request\Ip as RequestSecurityIp;
 use User\Security\Request\Method as RequestSecurityMethod;
 use User\Security\Request\RequestLimit as RequestSecurityRequestLimit;
 use User\Security\Request\Xss as RequestSecurityXss;
+use User\Security\Response\Compress as ResponseCompress;
 use User\Security\Response\Escape as ResponseEscape;
 use User\Security\Response\Headers as ResponseHeaders;
 use User\Service\CacheService;
@@ -86,7 +87,7 @@ class SecurityMiddleware implements MiddlewareInterface
 
         // Start security checks in response
         foreach ($this->securityResponseList() as $security) {
-            $response = $security->process($response);
+            $response = $security->process($request, $response);
         }
 
         // Set response
@@ -126,6 +127,7 @@ class SecurityMiddleware implements MiddlewareInterface
         return [
             'header' => new ResponseHeaders($this->config),
             'escape' => new ResponseEscape($this->config),
+            'compress' => new ResponseCompress($this->config),
         ];
     }
 }

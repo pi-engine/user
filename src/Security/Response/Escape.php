@@ -5,6 +5,7 @@ namespace User\Security\Response;
 use Laminas\Diactoros\Stream;
 use Laminas\Escaper\Escaper;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Escape implements ResponseSecurityInterface
 {
@@ -19,7 +20,7 @@ class Escape implements ResponseSecurityInterface
         $this->config = $config;
     }
 
-    public function process(ResponseInterface $response): ResponseInterface
+    public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $escaper = new Escaper('utf-8');
 

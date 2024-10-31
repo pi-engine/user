@@ -3,6 +3,7 @@
 namespace User\Security\Response;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Headers implements ResponseSecurityInterface
 {
@@ -17,7 +18,7 @@ class Headers implements ResponseSecurityInterface
         $this->config = $config;
     }
 
-    public function process(ResponseInterface $response): ResponseInterface
+    public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         return $response
             // Content Security Policy (CSP)

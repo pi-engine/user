@@ -3,6 +3,7 @@
 namespace User\Security\Response;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ResponseSecurityInterface
 {
@@ -11,5 +12,5 @@ interface ResponseSecurityInterface
      *
      * @return ResponseInterface
      */
-    public function process(ResponseInterface $response): ResponseInterface;
+    public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface;
 }
