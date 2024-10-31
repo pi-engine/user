@@ -27,8 +27,8 @@ class SecurityMiddlewareFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SecurityMiddleware
     {
         // Get config
-        $config  = $container->get('config');
-        $config  = array_merge($config['security'], $config['global']);
+        $config = $container->get('config');
+        $config = array_merge($config['security'], $config['global']);
 
         return new SecurityMiddleware(
             $container->get(ResponseFactoryInterface::class),

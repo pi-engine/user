@@ -89,14 +89,14 @@ class AccountRepository implements AccountRepositoryInterface
     private MultiFactor $multiFactorPrototype;
 
     public function __construct(
-        AdapterInterface $db,
+        AdapterInterface  $db,
         HydratorInterface $hydrator,
-        Account $accountPrototype,
-        AccountProfile $accountProfilePrototype,
-        Profile $profilePrototype,
-        AccountRole $accountRolePrototype,
-        Credential $credentialPrototype,
-        MultiFactor $multiFactorPrototype
+        Account           $accountPrototype,
+        AccountProfile    $accountProfilePrototype,
+        Profile           $profilePrototype,
+        AccountRole       $accountRolePrototype,
+        Credential        $credentialPrototype,
+        MultiFactor       $multiFactorPrototype
     ) {
         $this->db                      = $db;
         $this->hydrator                = $hydrator;

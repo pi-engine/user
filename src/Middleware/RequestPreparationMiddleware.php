@@ -28,9 +28,9 @@ class RequestPreparationMiddleware implements MiddlewareInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        ErrorHandler $errorHandler,
-        $config
+        StreamFactoryInterface   $streamFactory,
+        ErrorHandler             $errorHandler,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -58,7 +58,7 @@ class RequestPreparationMiddleware implements MiddlewareInterface
         // Check if the response can be compressed and compressed it
         if (isset($this->config['compress']['is_active']) && $this->config['compress']['is_active']) {
             if ($this->canCompress($request)) {
-                $body = (string) $response->getBody();
+                $body           = (string)$response->getBody();
                 $compressedBody = gzencode($body, 9);
 
                 // Create a new stream with the compressed body

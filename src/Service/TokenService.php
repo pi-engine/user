@@ -17,7 +17,7 @@ class TokenService implements ServiceInterface
 
     public function __construct(
         CacheService $cacheService,
-        $config
+                     $config
     ) {
         $this->cacheService = $cacheService;
         $this->config       = $config;

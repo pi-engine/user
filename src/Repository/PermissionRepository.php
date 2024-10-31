@@ -65,11 +65,11 @@ class PermissionRepository implements PermissionRepositoryInterface
     private Page $pagePrototype;
 
     public function __construct(
-        AdapterInterface $db,
+        AdapterInterface  $db,
         HydratorInterface $hydrator,
-        Resource $resourcePrototype,
-        Role $rolePrototype,
-        Page $pagePrototype
+        Resource          $resourcePrototype,
+        Role              $rolePrototype,
+        Page              $pagePrototype
     ) {
         $this->db                = $db;
         $this->hydrator          = $hydrator;
@@ -102,8 +102,8 @@ class PermissionRepository implements PermissionRepositoryInterface
             $where['type'] = $params['type'];
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tablePermissionResource)->where($where);
+        $sql    = new Sql($this->db);
+        $select = $sql->select($this->tablePermissionResource)->where($where);
         if (isset($params['order']) && !empty($params['order'])) {
             $select->order($params['order']);
         }
@@ -280,8 +280,8 @@ class PermissionRepository implements PermissionRepositoryInterface
             $where['role'] = $params['role'];
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tablePermissionRole)->where($where);
+        $sql    = new Sql($this->db);
+        $select = $sql->select($this->tablePermissionRole)->where($where);
         if (isset($params['order']) && !empty($params['order'])) {
             $select->order($params['order']);
         }
@@ -464,8 +464,8 @@ class PermissionRepository implements PermissionRepositoryInterface
             $where['handler'] = $params['handler'];
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tablePermissionPage)->where($where);
+        $sql    = new Sql($this->db);
+        $select = $sql->select($this->tablePermissionPage)->where($where);
         if (isset($params['order']) && !empty($params['order'])) {
             $select->order($params['order']);
         }

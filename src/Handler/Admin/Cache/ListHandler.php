@@ -23,12 +23,12 @@ class ListHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        CacheService $cacheService,
+        StreamFactoryInterface   $streamFactory,
+        CacheService             $cacheService,
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->cacheService     = $cacheService;
+        $this->cacheService    = $cacheService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

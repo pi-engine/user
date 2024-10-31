@@ -29,9 +29,9 @@ class MicrosoftHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        $config
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -45,12 +45,12 @@ class MicrosoftHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $securityStream = $request->getAttribute('security_stream');
-        $requestBody = $request->getParsedBody();
+        $requestBody    = $request->getParsedBody();
 
         // Set params
         $params = [
-            'token' => [
-                'access_token' => $requestBody['accessToken']
+            'token'           => [
+                'access_token' => $requestBody['accessToken'],
             ],
             'security_stream' => $securityStream,
         ];

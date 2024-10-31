@@ -20,9 +20,9 @@ class AccountLoginAttempts implements AccountSecurityInterface
     protected string $name = 'accountLoginAttempts';
 
     public function __construct(
-        CacheService $cacheService,
+        CacheService  $cacheService,
         AccountLocked $accountLocked,
-        $config
+                      $config
     ) {
         $this->cacheService  = $cacheService;
         $this->accountLocked = $accountLocked;

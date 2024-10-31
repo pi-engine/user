@@ -24,18 +24,18 @@ class ListHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        PermissionService $permissionService
+        StreamFactoryInterface   $streamFactory,
+        PermissionService        $permissionService
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->permissionService     = $permissionService;
+        $this->responseFactory   = $responseFactory;
+        $this->streamFactory     = $streamFactory;
+        $this->permissionService = $permissionService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result = $this->permissionService->getResourceList($requestBody);
+        $result      = $this->permissionService->getResourceList($requestBody);
 
         $result = [
             'result' => true,

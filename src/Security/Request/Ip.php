@@ -19,10 +19,10 @@ class Ip implements RequestSecurityInterface
 
     public function __construct(
         CacheService $cacheService,
-        $config
+                     $config
     ) {
-        $this->cacheService    = $cacheService;
-        $this->config          = $config;
+        $this->cacheService = $cacheService;
+        $this->config       = $config;
     }
 
     /**

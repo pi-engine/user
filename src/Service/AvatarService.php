@@ -18,10 +18,10 @@ class AvatarService implements ServiceInterface
 
     public function __construct(
         HistoryService $historyService,
-        $config
+                       $config
     ) {
-        $this->historyService       = $historyService;
-        $this->config        = $config;
+        $this->historyService = $historyService;
+        $this->config         = $config;
     }
 
     public function uploadAvatar($uploadFile, $account): array
@@ -64,7 +64,7 @@ class AvatarService implements ServiceInterface
             $resizedImage->save($avatarPath);
 
             // Generate the URL for the saved image
-            $imageUris[$sizeName] = sprintf('%s/%s',  $userPath, $avatarName);
+            $imageUris[$sizeName] = sprintf('%s/%s', $userPath, $avatarName);
         }
 
         // Save log

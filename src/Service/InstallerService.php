@@ -58,7 +58,7 @@ class InstallerService implements ServiceInterface
                         $pageParams = array_merge(
                             $permissionSingle,
                             [
-                                'key'     => $permissionSingle['page'],
+                                'key'      => $permissionSingle['page'],
                                 'resource' => $resource['key'],
                             ]
                         );
@@ -78,7 +78,7 @@ class InstallerService implements ServiceInterface
                             $roleParams = array_merge(
                                 $permissionSingle,
                                 [
-                                    'key'     => $key,
+                                    'key'      => $key,
                                     'resource' => $resource['key'],
                                     'role'     => $role,
                                 ]

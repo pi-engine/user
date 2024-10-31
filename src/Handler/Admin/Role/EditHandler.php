@@ -24,8 +24,8 @@ class EditHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        RoleService $roleService
+        StreamFactoryInterface   $streamFactory,
+        RoleService              $roleService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

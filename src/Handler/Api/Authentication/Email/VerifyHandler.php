@@ -24,8 +24,8 @@ class VerifyHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -35,7 +35,7 @@ class VerifyHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $securityStream = $request->getAttribute('security_stream');
-        $requestBody = $request->getParsedBody();
+        $requestBody    = $request->getParsedBody();
 
         // Set login params
         $params = [
@@ -44,7 +44,7 @@ class VerifyHandler implements RequestHandlerInterface
             'identity'         => $requestBody['email'],
             'credential'       => $requestBody['otp'],
             'source'           => $requestBody['source'] ?? '',
-            'security_stream' => $securityStream,
+            'security_stream'  => $securityStream,
         ];
 
         // Do log in

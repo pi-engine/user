@@ -22,7 +22,7 @@ class Resource
         $this->title   = $title;
         $this->section = $section;
         $this->module  = $module;
-        $this->key    = $key;
+        $this->key     = $key;
         $this->type    = $type;
         $this->id      = $id;
     }

@@ -43,13 +43,13 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        TokenService $tokenService,
-        CacheService $cacheService,
-        AccountLocked $accountLocked,
-        ErrorHandler $errorHandler,
-        $config
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        TokenService             $tokenService,
+        CacheService             $cacheService,
+        AccountLocked            $accountLocked,
+        ErrorHandler             $errorHandler,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

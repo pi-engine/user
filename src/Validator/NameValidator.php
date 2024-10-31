@@ -57,7 +57,7 @@ class NameValidator extends AbstractValidator
      */
     public function __construct(
         AccountService $accountService,
-        $options = []
+                       $options = []
     ) {
         $this->accountService = $accountService;
         $this->options        = array_merge($this->options, $options);

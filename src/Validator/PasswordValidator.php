@@ -40,7 +40,7 @@ class PasswordValidator extends AbstractValidator
     public function __construct(
         AccountService $accountService,
         UtilityService $utilityService,
-        $options = []
+                       $options = []
     ) {
         $this->accountService = $accountService;
         $this->utilityService = $utilityService;

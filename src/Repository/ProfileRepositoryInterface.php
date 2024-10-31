@@ -2,6 +2,4 @@
 
 namespace User\Repository;
 
-interface ProfileRepositoryInterface
-{
-}
+interface ProfileRepositoryInterface {}

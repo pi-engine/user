@@ -36,9 +36,9 @@ class RoleService implements ServiceInterface
      */
     public function __construct(
         RoleRepositoryInterface $roleRepository,
-        CacheService $cacheService,
-        HistoryService $historyService,
-        $config
+        CacheService            $cacheService,
+        HistoryService          $historyService,
+                                $config
     ) {
         $this->roleRepository = $roleRepository;
         $this->cacheService   = $cacheService;

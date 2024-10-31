@@ -2,6 +2,4 @@
 
 namespace User\Service;
 
-interface ServiceInterface
-{
-}
+interface ServiceInterface {}

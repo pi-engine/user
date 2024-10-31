@@ -28,9 +28,9 @@ class Oauth2Handler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        $config
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -43,7 +43,7 @@ class Oauth2Handler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $securityStream = $request->getAttribute('security_stream');
-        $requestBody = $request->getParsedBody();
+        $requestBody    = $request->getParsedBody();
 
         if (!isset($requestBody['code'])) {
             $errorResponse = [

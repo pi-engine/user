@@ -32,10 +32,10 @@ class ExportHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        ExportService $exportService,
-        MediaService $mediaService
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        ExportService            $exportService,
+        MediaService             $mediaService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

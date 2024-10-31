@@ -54,12 +54,12 @@ class ValidationMiddleware implements MiddlewareInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        UtilityService $utilityService,
-        CacheService $cacheService,
-        ErrorHandler $errorHandler,
-        $config
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        UtilityService           $utilityService,
+        CacheService             $cacheService,
+        ErrorHandler             $errorHandler,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

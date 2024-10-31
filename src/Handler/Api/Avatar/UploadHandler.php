@@ -28,9 +28,9 @@ class UploadHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        AvatarService $avatarService
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        AvatarService            $avatarService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

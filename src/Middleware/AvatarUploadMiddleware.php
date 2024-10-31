@@ -46,11 +46,11 @@ class AvatarUploadMiddleware implements MiddlewareInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        AvatarService $avatarService,
-        ErrorHandler $errorHandler,
-        $config
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        AvatarService            $avatarService,
+        ErrorHandler             $errorHandler,
+                                 $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

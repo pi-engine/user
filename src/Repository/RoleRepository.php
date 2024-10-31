@@ -52,10 +52,10 @@ class RoleRepository implements RoleRepositoryInterface
     private Account $accountPrototype;
 
     public function __construct(
-        AdapterInterface $db,
+        AdapterInterface  $db,
         HydratorInterface $hydrator,
-        Resource $rolePrototype,
-        Account $accountPrototype
+        Resource          $rolePrototype,
+        Account           $accountPrototype
     ) {
         $this->db               = $db;
         $this->hydrator         = $hydrator;

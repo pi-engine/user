@@ -35,7 +35,7 @@ class HistoryService implements ServiceInterface
 
     public function __construct(
         LoggerService $loggerService,
-        $config
+                      $config
     ) {
         $this->loggerService = $loggerService;
         $this->config        = $config;

@@ -28,9 +28,9 @@ class HistoryHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        HistoryService $historyService
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        HistoryService           $historyService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

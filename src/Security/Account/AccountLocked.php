@@ -18,7 +18,7 @@ class AccountLocked implements AccountSecurityInterface
 
     public function __construct(
         CacheService $cacheService,
-        $config
+                     $config
     ) {
         $this->cacheService = $cacheService;
         $this->config       = $config;
@@ -101,7 +101,9 @@ class AccountLocked implements AccountSecurityInterface
         } else {
             $days    = floor($ttl / 86400);
             $hours   = floor(($ttl % 86400) / 3600);
-            $message = sprintf('Access denied: Your account is locked due to too many failed login attempts. Please try again after %s days, %s hours.', $days, $hours);
+            $message = sprintf(
+                'Access denied: Your account is locked due to too many failed login attempts. Please try again after %s days, %s hours.', $days, $hours
+            );
         }
 
         return $message;

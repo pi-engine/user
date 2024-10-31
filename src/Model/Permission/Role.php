@@ -23,7 +23,7 @@ class Role
         $this->section  = $section;
         $this->module   = $module;
         $this->role     = $role;
-        $this->key     = $key;
+        $this->key      = $key;
         $this->id       = $id;
     }
 

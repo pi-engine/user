@@ -19,35 +19,37 @@ class AccountProfile
     private mixed   $information;
 
     /**
-     * @param mixed $id
+     * @param mixed       $id
      * @param string|null $name
      * @param string|null $identity
      * @param string|null $email
      * @param string|null $mobile
-     * @param mixed $status
-     * @param mixed $time_created
-     * @param mixed $first_name
-     * @param mixed $last_name
-     * @param mixed $avatar
-     * @param mixed $birthdate
-     * @param mixed $gender
-     * @param mixed $information
+     * @param mixed       $status
+     * @param mixed       $time_created
+     * @param mixed       $first_name
+     * @param mixed       $last_name
+     * @param mixed       $avatar
+     * @param mixed       $birthdate
+     * @param mixed       $gender
+     * @param mixed       $information
      */
-    public function __construct(mixed $id, ?string $name, ?string $identity, ?string $email, ?string $mobile, mixed $status, mixed $time_created, mixed $first_name, mixed $last_name, mixed $avatar, mixed $birthdate, mixed $gender, mixed $information)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->identity = $identity;
-        $this->email = $email;
-        $this->mobile = $mobile;
-        $this->status = $status;
+    public function __construct(
+        mixed $id, ?string $name, ?string $identity, ?string $email, ?string $mobile, mixed $status, mixed $time_created, mixed $first_name, mixed $last_name,
+        mixed $avatar, mixed $birthdate, mixed $gender, mixed $information
+    ) {
+        $this->id           = $id;
+        $this->name         = $name;
+        $this->identity     = $identity;
+        $this->email        = $email;
+        $this->mobile       = $mobile;
+        $this->status       = $status;
         $this->time_created = $time_created;
-        $this->first_name = $first_name;
-        $this->last_name = $last_name;
-        $this->avatar = $avatar;
-        $this->birthdate = $birthdate;
-        $this->gender = $gender;
-        $this->information = $information;
+        $this->first_name   = $first_name;
+        $this->last_name    = $last_name;
+        $this->avatar       = $avatar;
+        $this->birthdate    = $birthdate;
+        $this->gender       = $gender;
+        $this->information  = $information;
     }
 
     public function getId(): mixed
@@ -179,7 +181,6 @@ class AccountProfile
     {
         $this->information = $information;
     }
-
 
 
 }

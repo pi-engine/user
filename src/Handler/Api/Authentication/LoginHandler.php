@@ -28,9 +28,9 @@ class LoginHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        TokenService $tokenService
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        TokenService             $tokenService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -41,7 +41,7 @@ class LoginHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $securityStream = $request->getAttribute('security_stream');
-        $requestBody = $request->getParsedBody();
+        $requestBody    = $request->getParsedBody();
 
         // Set identity
         if (isset($requestBody['email']) && !empty($requestBody['email'])) {
@@ -57,10 +57,10 @@ class LoginHandler implements RequestHandlerInterface
 
         // Set login params
         $params = [
-            'identity'       => $identity,
-            'identityColumn' => $identityColumn,
-            'credential'     => $requestBody['credential'],
-            'source'         => $requestBody['source'] ?? '',
+            'identity'        => $identity,
+            'identityColumn'  => $identityColumn,
+            'credential'      => $requestBody['credential'],
+            'source'          => $requestBody['source'] ?? '',
             'security_stream' => $securityStream,
         ];
 

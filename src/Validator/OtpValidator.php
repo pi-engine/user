@@ -39,8 +39,8 @@ class OtpValidator extends AbstractValidator
 
     public function __construct(
         AccountService $accountService,
-        CacheService $cacheService,
-        $options = []
+        CacheService   $cacheService,
+                       $options = []
     ) {
         $this->accountService = $accountService;
         $this->cacheService   = $cacheService;

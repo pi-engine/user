@@ -35,7 +35,7 @@ class Page
         $this->package     = $package;
         $this->handler     = $handler;
         $this->resource    = $resource;
-        $this->key        = $key;
+        $this->key         = $key;
         $this->cache_type  = $cache_type;
         $this->cache_ttl   = $cache_ttl;
         $this->cache_level = $cache_level;

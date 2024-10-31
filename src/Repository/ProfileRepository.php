@@ -31,9 +31,9 @@ class ProfileRepository implements AccountRoleRepositoryInterface
     private Profile $profilePrototype;
 
     public function __construct(
-        AdapterInterface $db,
+        AdapterInterface  $db,
         HydratorInterface $hydrator,
-        Profile $profilePrototype
+        Profile           $profilePrototype
     ) {
         $this->db               = $db;
         $this->hydrator         = $hydrator;

@@ -32,10 +32,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        RoleService $roleService,
-        PermissionService $permissionService,
-        ErrorHandler $errorHandler
+        StreamFactoryInterface   $streamFactory,
+        RoleService              $roleService,
+        PermissionService        $permissionService,
+        ErrorHandler             $errorHandler
     ) {
         $this->responseFactory   = $responseFactory;
         $this->streamFactory     = $streamFactory;

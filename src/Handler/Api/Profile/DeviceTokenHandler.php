@@ -28,9 +28,9 @@ class DeviceTokenHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        AccountService $accountService,
-        TokenService $tokenService
+        StreamFactoryInterface   $streamFactory,
+        AccountService           $accountService,
+        TokenService             $tokenService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

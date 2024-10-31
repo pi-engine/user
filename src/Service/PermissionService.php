@@ -21,7 +21,7 @@ class PermissionService implements ServiceInterface
      */
     public function __construct(
         PermissionRepositoryInterface $permissionRepository,
-        CacheService $cacheService
+        CacheService                  $cacheService
     ) {
         $this->permissionRepository = $permissionRepository;
         $this->cacheService         = $cacheService;
@@ -124,7 +124,7 @@ class PermissionService implements ServiceInterface
             'title'   => $params['title'] ?? $params['key'],
             'section' => $params['section'],
             'module'  => $params['module'],
-            'key'    => $params['key'],
+            'key'     => $params['key'],
             'type'    => $params['type'] ?? 'system',
         ];
 
@@ -142,7 +142,7 @@ class PermissionService implements ServiceInterface
             'package'  => $params['package'],
             'handler'  => $params['handler'],
             'resource' => $params['resource'],
-            'key'     => $params['key'],
+            'key'      => $params['key'],
         ];
 
         $page = $this->permissionRepository->addPermissionPage($values);
@@ -157,7 +157,7 @@ class PermissionService implements ServiceInterface
             'section'  => $params['section'],
             'module'   => $params['module'],
             'role'     => $params['role'],
-            'key'     => $params['key'],
+            'key'      => $params['key'],
         ];
 
         $role = $this->permissionRepository->addPermissionRole($values);
@@ -178,8 +178,8 @@ class PermissionService implements ServiceInterface
 
     public function getResourceList($params): array
     {
-        $limit = $params['limit'] ?? 100;
-        $page  = $params['page'] ?? 1;
+        $limit  = $params['limit'] ?? 100;
+        $page   = $params['page'] ?? 1;
         $order  = $params['order'] ?? ['id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
@@ -229,8 +229,8 @@ class PermissionService implements ServiceInterface
 
     public function getPageList($params): array
     {
-        $limit = $params['limit'] ?? 100;
-        $page  = $params['page'] ?? 1;
+        $limit  = $params['limit'] ?? 100;
+        $page   = $params['page'] ?? 1;
         $order  = $params['order'] ?? ['id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
@@ -286,8 +286,8 @@ class PermissionService implements ServiceInterface
 
     public function getRoleList($params): array
     {
-        $limit = $params['limit'] ?? 100;
-        $page  = $params['page'] ?? 1;
+        $limit  = $params['limit'] ?? 100;
+        $page   = $params['page'] ?? 1;
         $order  = $params['order'] ?? ['id DESC'];
         $offset = ((int)$page - 1) * (int)$limit;
 
@@ -350,7 +350,7 @@ class PermissionService implements ServiceInterface
                 'package'     => $page->getPackage(),
                 'handler'     => $page->getHandler(),
                 'resource'    => $page->getResource(),
-                'key'        => $page->getKey(),
+                'key'         => $page->getKey(),
                 'cache_type'  => $page->getCacheType(),
                 'cache_ttl'   => $page->getCacheTtl(),
                 'cache_level' => $page->getCacheLevel(),
@@ -372,7 +372,7 @@ class PermissionService implements ServiceInterface
                 'title'   => $resource->getTitle(),
                 'section' => $resource->getSection(),
                 'module'  => $resource->getModule(),
-                'key'    => $resource->getKey(),
+                'key'     => $resource->getKey(),
                 'type'    => $resource->getType(),
             ];
         }
@@ -393,7 +393,7 @@ class PermissionService implements ServiceInterface
                 'section'  => $role->getSection(),
                 'module'   => $role->getModule(),
                 'role'     => $role->getRole(),
-                'key'     => $role->getKey(),
+                'key'      => $role->getKey(),
             ];
         }
 
