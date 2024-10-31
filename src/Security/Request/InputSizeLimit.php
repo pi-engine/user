@@ -1,17 +1,17 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Request;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class Method implements SecurityInterface
+class InputSizeLimit implements RequestSecurityInterface
 {
     /* @var array */
     protected array $config;
 
     /* @var string */
-    protected string $name = 'method';
+    protected string $name = 'inputSizeLimit';
 
     public function __construct($config)
     {
@@ -26,9 +26,7 @@ class Method implements SecurityInterface
      */
     public function check(ServerRequestInterface $request, array $securityStream = []): array
     {
-        // Get request method
-        $method = $request->getMethod();
-        if (!in_array($method, $this->config['method']['allow_method'] ?? ['POST'])) {
+        if ($this->isLargeInput($request)) {
             return [
                 'result' => false,
                 'name'   => $this->name,
@@ -46,11 +44,25 @@ class Method implements SecurityInterface
     }
 
     /**
+     * Checks if the request input exceeds the maximum allowed size.
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return bool
+     */
+    private function isLargeInput(ServerRequestInterface $request): bool
+    {
+        $body = $request->getBody();
+        $size = $body->getSize();
+        return $size > $this->config['inputSizeLimit']['max_input_size'];
+    }
+
+    /**
      * @return string
      */
     public function getErrorMessage(): string
     {
-        return 'Access denied: Request method not allowed !';
+        return 'Access denied: Input data is too large';
     }
 
     /**

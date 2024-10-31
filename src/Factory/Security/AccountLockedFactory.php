@@ -6,7 +6,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Security\AccountLocked;
+use User\Security\Account\AccountLocked;
 use User\Service\CacheService;
 
 class AccountLockedFactory implements FactoryInterface

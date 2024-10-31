@@ -1,34 +1,21 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Request;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 
-class Xss implements SecurityInterface
+class Xss implements RequestSecurityInterface
 {
-    /** @var ResponseFactoryInterface */
-    protected ResponseFactoryInterface $responseFactory;
-
-    /** @var StreamFactoryInterface */
-    protected StreamFactoryInterface $streamFactory;
-
     /* @var array */
     protected array $config;
 
     /* @var string */
     protected string $name = 'xss';
 
-    public function __construct(
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory,
-                                 $config
-    ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->config          = $config;
+    public function __construct($config)
+    {
+        $this->config = $config;
     }
 
     /**
@@ -124,7 +111,7 @@ class Xss implements SecurityInterface
             '/outerHTML\s*=\s*["\'].*<script.*["\']/i', // outerHTML with script
             '/textContent\s*=\s*["\'].*<script.*["\']/i', // textContent with script
             '/document\.write\s*\(\s*["\'].*<script.*["\']\s*\)/i', // document.write with script
-            '/document\.createElement\s*\(\s*["\']script["\']\s*\)/i' // document.createElement for script
+            '/document\.createElement\s*\(\s*["\']script["\']\s*\)/i', // document.createElement for script
         ];
 
         // If input is an array, recursively check each item

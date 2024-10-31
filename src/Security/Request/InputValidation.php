@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Request;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Filter\HtmlEntities;
@@ -20,7 +20,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
-class InputValidation implements SecurityInterface
+class InputValidation implements RequestSecurityInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -39,15 +39,10 @@ class InputValidation implements SecurityInterface
 
     protected string $message = 'Access denied: Input data not valid, ';
 
-    public function __construct(
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory,
-                                 $config
-    ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->config          = $config;
-        $this->inputFilter     = new InputFilter();
+    public function __construct($config)
+    {
+        $this->config      = $config;
+        $this->inputFilter = new InputFilter();
     }
 
     public function check(ServerRequestInterface $request, array $securityStream = []): array

@@ -2,8 +2,6 @@
 
 namespace User\Middleware;
 
-use Laminas\Diactoros\Stream;
-use Laminas\Escaper\Escaper;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,13 +9,15 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
-use User\Security\Injection as SecurityInjection;
-use User\Security\InputSizeLimit as SecurityInputSizeLimit;
-use User\Security\InputValidation as SecurityInputValidation;
-use User\Security\Ip as SecurityIp;
-use User\Security\Method as SecurityMethod;
-use User\Security\RequestLimit as SecurityRequestLimit;
-use User\Security\Xss as SecurityXss;
+use User\Security\Request\Injection as RequestSecurityInjection;
+use User\Security\Request\InputSizeLimit as RequestSecurityInputSizeLimit;
+use User\Security\Request\InputValidation as RequestSecurityInputValidation;
+use User\Security\Request\Ip as RequestSecurityIp;
+use User\Security\Request\Method as RequestSecurityMethod;
+use User\Security\Request\RequestLimit as RequestSecurityRequestLimit;
+use User\Security\Request\Xss as RequestSecurityXss;
+use User\Security\Response\Escape as ResponseEscape;
+use User\Security\Response\Headers as ResponseHeaders;
 use User\Service\CacheService;
 use User\Service\UtilityService;
 
@@ -61,8 +61,10 @@ class SecurityMiddleware implements MiddlewareInterface
     {
         // Start security checks in request
         $securityStream = [];
-        foreach ($this->securityList() as $key => $security) {
+        foreach ($this->securityRequestList() as $key => $security) {
             $securityStream[$key] = $security->check($request, $securityStream);
+
+            // Set error
             if (!$securityStream[$key]['result']) {
                 $request = $request->withAttribute('status', $security->getStatusCode());
                 $request = $request->withAttribute(
@@ -82,130 +84,48 @@ class SecurityMiddleware implements MiddlewareInterface
         // Call the next middleware or handler
         $response = $handler->handle($request);
 
-        // Set and check security actions in response
-        //$response = $this->escapeResponse($response);
-        $response = $this->setSecurityHeader($response);
+        // Start security checks in response
+        foreach ($this->securityResponseList() as $security) {
+            $response = $security->process($response);
+        }
 
         // Set response
         return $response;
-
     }
 
-    protected function securityList(): array
+    protected function securityRequestList(): array
     {
         $list = [];
         if (isset($this->config['ip']['is_active']) && $this->config['ip']['is_active']) {
-            $list['ip'] = new SecurityIp($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
+            $list['ip'] = new RequestSecurityIp($this->cacheService, $this->config);
         }
         if (isset($this->config['method']['is_active']) && $this->config['method']['is_active']) {
-            $list['method'] = new SecurityMethod($this->config);
+            $list['method'] = new RequestSecurityMethod($this->config);
         }
         if (isset($this->config['inputSizeLimit']['is_active']) && $this->config['inputSizeLimit']['is_active']) {
-            $list['inputSizeLimit'] = new SecurityInputSizeLimit($this->responseFactory, $this->streamFactory, $this->config);
+            $list['inputSizeLimit'] = new RequestSecurityInputSizeLimit($this->config);
         }
         if (isset($this->config['requestLimit']['is_active']) && $this->config['requestLimit']['is_active']) {
-            $list['requestLimit'] = new SecurityRequestLimit($this->responseFactory, $this->streamFactory, $this->cacheService, $this->config);
+            $list['requestLimit'] = new RequestSecurityRequestLimit($this->cacheService, $this->config);
         }
         if (isset($this->config['xss']['is_active']) && $this->config['xss']['is_active']) {
-            $list['xss'] = new SecurityXss($this->responseFactory, $this->streamFactory, $this->config);
+            $list['xss'] = new RequestSecurityXss($this->config);
         }
         if (isset($this->config['injection']['is_active']) && $this->config['injection']['is_active']) {
-            $list['injection'] = new SecurityInjection($this->responseFactory, $this->streamFactory, $this->config);
+            $list['injection'] = new RequestSecurityInjection($this->config);
         }
         if (isset($this->config['inputValidation']['is_active']) && $this->config['inputValidation']['is_active']) {
-            $list['inputValidation'] = new SecurityInputValidation($this->responseFactory, $this->streamFactory, $this->config);
+            $list['inputValidation'] = new RequestSecurityInputValidation($this->config);
         }
 
         return $list;
     }
 
-    protected function setSecurityHeader(ResponseInterface $response): ResponseInterface
+    protected function securityResponseList(): array
     {
-        return $response
-            // Content Security Policy (CSP)
-            ->withHeader(
-                'Content-Security-Policy',
-                "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
-            )
-
-            // Strict-Transport-Security (HSTS)
-            ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
-
-            // X-Content-Type-Options
-            ->withHeader('X-Content-Type-Options', 'nosniff')
-
-            // X-Frame-Options
-            ->withHeader('X-Frame-Options', 'DENY')
-
-            // Referrer-Policy
-            ->withHeader('Referrer-Policy', 'no-referrer')
-
-            // Permissions-Policy
-            ->withHeader('Permissions-Policy', "geolocation=(), microphone=(), camera=(), fullscreen=(), payment=(), usb=(), vibrate=(), sync-xhr=()")
-
-            // X-XSS-Protection
-            ->withHeader('X-XSS-Protection', '1; mode=block')
-
-            // X-Permitted-Cross-Domain-Policies
-            ->withHeader('X-Permitted-Cross-Domain-Policies', 'none')
-
-            // Cross-Origin Resource Sharing (CORS)
-            ->withHeader('Access-Control-Allow-Origin', '*')
-            ->withHeader('Access-Control-Allow-Methods', $this->config['method']['allow_method'])
-            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token')
-            ->withHeader('Access-Control-Max-Age', '3600')
-
-            // Expect-CT
-            ->withHeader('Expect-CT', 'max-age=86400, enforce')
-
-            // Cache-Control
-            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-
-            // X-Download-Options
-            ->withHeader('X-Download-Options', 'noopen')
-
-            // X-Powered-By
-            ->withoutHeader('X-Powered-By');
-    }
-
-    protected function escapeResponse(ResponseInterface $response): ResponseInterface
-    {
-        $escaper = new Escaper('utf-8');
-
-        // Decode the JSON body into an array
-        $bodyContent = (string)$response->getBody();
-        $bodyArray   = json_decode($bodyContent, true);
-
-        // Check if decoding was successful and that we have an array to work with
-        if (json_last_error() !== JSON_ERROR_NONE || !is_array($bodyArray)) {
-            // Return the response unchanged if JSON decoding failed
-            return $response;
-        }
-
-        // Escape all strings in the array recursively
-        array_walk_recursive($bodyArray, function (&$value) use ($escaper) {
-            if (is_string($value)) {
-                $value = $escaper->escapeHtml($value);
-            }
-        });
-
-        // Re-encode the modified array back to JSON
-        $escapedBody = json_encode(
-            $bodyArray,
-            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
-        );
-
-        // Handle JSON encoding errors
-        if ($escapedBody === false) {
-            // Return the response unchanged if JSON encoding failed
-            return $response;
-        }
-
-        // Write the escaped JSON back to a new stream and attach it to the response
-        $stream = new Stream('php://temp', 'wb+');
-        $stream->write($escapedBody);
-        $stream->rewind();
-
-        return $response->withBody($stream);
+        return [
+            'header' => new ResponseHeaders($this->config),
+            'escape' => new ResponseEscape($this->config),
+        ];
     }
 }

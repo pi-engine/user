@@ -1,21 +1,13 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Request;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 use User\Service\CacheService;
 
-class Ip implements SecurityInterface
+class Ip implements RequestSecurityInterface
 {
-    /** @var ResponseFactoryInterface */
-    protected ResponseFactoryInterface $responseFactory;
-
-    /** @var StreamFactoryInterface */
-    protected StreamFactoryInterface $streamFactory;
-
     /* @var CacheService */
     protected CacheService $cacheService;
 
@@ -26,13 +18,9 @@ class Ip implements SecurityInterface
     protected string $name = 'ip';
 
     public function __construct(
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
         CacheService $cacheService,
         $config
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
         $this->cacheService    = $cacheService;
         $this->config          = $config;
     }

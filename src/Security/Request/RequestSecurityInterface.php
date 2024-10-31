@@ -1,10 +1,10 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Request;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-interface SecurityInterface
+interface RequestSecurityInterface
 {
     /**
      * @param ServerRequestInterface $request

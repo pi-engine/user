@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Account;
 
 interface AccountSecurityInterface
 {

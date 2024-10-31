@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Account;
 
 use Fig\Http\Message\StatusCodeInterface;
 use User\Service\CacheService;

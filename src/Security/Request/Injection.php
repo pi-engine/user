@@ -1,34 +1,21 @@
 <?php
 
-namespace User\Security;
+namespace User\Security\Request;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 
-class Injection implements SecurityInterface
+class Injection implements RequestSecurityInterface
 {
-    /** @var ResponseFactoryInterface */
-    protected ResponseFactoryInterface $responseFactory;
-
-    /** @var StreamFactoryInterface */
-    protected StreamFactoryInterface $streamFactory;
-
     /* @var array */
     protected array $config;
 
     /* @var string */
     protected string $name = 'injection';
 
-    public function __construct(
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory,
-                                 $config
-    ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->config          = $config;
+    public function __construct($config)
+    {
+        $this->config = $config;
     }
 
     /**

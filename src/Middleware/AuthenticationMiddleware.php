@@ -10,7 +10,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
-use User\Security\AccountLocked;
+use User\Security\Account\AccountLocked;
 use User\Service\AccountService;
 use User\Service\CacheService;
 use User\Service\TokenService;
