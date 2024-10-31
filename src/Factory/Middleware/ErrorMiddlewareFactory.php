@@ -9,28 +9,24 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
-use User\Middleware\InstallerMiddleware;
-use User\Service\PermissionService;
-use User\Service\RoleService;
+use User\Middleware\ErrorMiddleware;
 
-class InstallerMiddlewareFactory implements FactoryInterface
+class ErrorMiddlewareFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string             $requestedName
      * @param null|array         $options
      *
-     * @return InstallerMiddleware
+     * @return ErrorMiddleware
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): InstallerMiddleware
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ErrorMiddleware
     {
-        return new InstallerMiddleware(
+        return new ErrorMiddleware(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(RoleService::class),
-            $container->get(PermissionService::class),
             $container->get(ErrorHandler::class)
         );
     }
