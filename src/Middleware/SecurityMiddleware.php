@@ -124,10 +124,17 @@ class SecurityMiddleware implements MiddlewareInterface
 
     protected function securityResponseList(): array
     {
-        return [
-            'header' => new ResponseHeaders($this->config),
-            'escape' => new ResponseEscape($this->config),
-            'compress' => new ResponseCompress($this->config),
-        ];
+        $list = [];
+        if (isset($this->config['header']['is_active']) && $this->config['header']['is_active']) {
+            $list['header'] = new ResponseHeaders($this->config);
+        }
+        if (isset($this->config['escape']['is_active']) && $this->config['escape']['is_active']) {
+            $list['escape'] = new ResponseEscape($this->config);
+        }
+        if (isset($this->config['compress']['is_active']) && $this->config['compress']['is_active']) {
+            $list['compress'] = new ResponseCompress($this->config);
+        }
+
+        return $list;
     }
 }

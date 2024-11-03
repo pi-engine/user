@@ -139,6 +139,7 @@ return [
         'date_pattern'  => 'dd/MM/yyyy',
     ],
     'security'     => [
+        // Request
         'ip'             => [
             'is_active' => true,
             'whitelist' => [
@@ -178,12 +179,20 @@ return [
             'max_requests'     => 100,
             'rate_limit'       => 60, // Time window in seconds
         ],
-        'account'        => [
-            'attempts' => 5,
-            'ttl'      => 3600,
+        // Response
+        'header'          => [
+            'is_active' => true,
+        ],
+        'escape'          => [
+            'is_active' => true,
         ],
         'compress'        => [
             'is_active' => true,
+        ],
+        // Account
+        'account'        => [
+            'attempts' => 5,
+            'ttl'      => 3600,
         ],
     ],
 ];
