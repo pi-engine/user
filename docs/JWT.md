@@ -11,4 +11,8 @@ openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:204
 openssl rsa -pubout -in private_key.pem -out public_key.pem
 ```
 
-3- Update config file
+3- Upload files to ture path on service and update global config file, example: 
+```
+'public_key'  => $basePath . '/data/keys/public_key.pem',
+'private_key' => $basePath . '/data/keys/private_key.pem',
+```
