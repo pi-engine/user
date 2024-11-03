@@ -4,8 +4,8 @@ Api base authentication and user management via laminas and pi engine
 
 ## 1. Important note
 
-This is the first development version of the user module, please don't install it on production projects now, we will
-work on finishing and testing this module in the next weeks and ready the production version ASAP
+This is the first stable version of the user module, you can install it on production projects now, we will
+work on improvement and testing this module in the next weeks
 
 ## 2. Installation
 
@@ -57,13 +57,12 @@ Open `data/schema.sql` and create tablas in your database
 ## 3. List of TODO tasks for this module
 
 * [X] Rbac Authorization
-* [ ] Admin handler: profile section (add, edit, list, password, view)
-* [ ] Admin handler: Role section (add, edit, list)
-* [ ] Admin handler: Permission section (add, edit, list)
-* [ ] Handler (as web service) for check email, mobile, identity and password validation in registration
-* [ ] Handler (as web service) for check strong password
+* [X] Admin handler: profile section (add, edit, list, password, view)
+* [X] Admin handler: Role section (add, edit, list)
+* [X] Admin handler: Permission section (add, edit, list)
+* [X] Handler (as web service) for check email, mobile, identity and password validation in registration
+* [X] Handler (as web service) for check strong password
 * [ ] DTO
-* [ ] Profile model, repository, service and ...
 * [ ] Write test cases and make test
 * [ ] Write documents, (in-file, extra)
-* [ ] Move Role and Permission sections from user module to system module
+* [ ] Move Role and Permission sections from user module to core module
