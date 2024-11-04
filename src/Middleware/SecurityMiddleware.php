@@ -2,6 +2,16 @@
 
 namespace User\Middleware;
 
+use Core\Security\Request\Injection as RequestSecurityInjection;
+use Core\Security\Request\InputSizeLimit as RequestSecurityInputSizeLimit;
+use Core\Security\Request\InputValidation as RequestSecurityInputValidation;
+use Core\Security\Request\Ip as RequestSecurityIp;
+use Core\Security\Request\Method as RequestSecurityMethod;
+use Core\Security\Request\RequestLimit as RequestSecurityRequestLimit;
+use Core\Security\Request\Xss as RequestSecurityXss;
+use Core\Security\Response\Compress as ResponseCompress;
+use Core\Security\Response\Escape as ResponseEscape;
+use Core\Security\Response\Headers as ResponseHeaders;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -9,16 +19,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
-use User\Security\Request\Injection as RequestSecurityInjection;
-use User\Security\Request\InputSizeLimit as RequestSecurityInputSizeLimit;
-use User\Security\Request\InputValidation as RequestSecurityInputValidation;
-use User\Security\Request\Ip as RequestSecurityIp;
-use User\Security\Request\Method as RequestSecurityMethod;
-use User\Security\Request\RequestLimit as RequestSecurityRequestLimit;
-use User\Security\Request\Xss as RequestSecurityXss;
-use User\Security\Response\Compress as ResponseCompress;
-use User\Security\Response\Escape as ResponseEscape;
-use User\Security\Response\Headers as ResponseHeaders;
 use User\Service\CacheService;
 use User\Service\UtilityService;
 

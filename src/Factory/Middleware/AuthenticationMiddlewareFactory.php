@@ -2,6 +2,7 @@
 
 namespace User\Factory\Middleware;
 
+use Core\Security\Account\AccountLocked;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -10,7 +11,6 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
 use User\Middleware\AuthenticationMiddleware;
-use User\Security\Account\AccountLocked;
 use User\Service\AccountService;
 use User\Service\CacheService;
 use User\Service\TokenService;

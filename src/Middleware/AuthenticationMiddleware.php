@@ -2,6 +2,7 @@
 
 namespace User\Middleware;
 
+use Core\Security\Account\AccountLocked;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -10,7 +11,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use User\Handler\ErrorHandler;
-use User\Security\Account\AccountLocked;
 use User\Service\AccountService;
 use User\Service\CacheService;
 use User\Service\TokenService;

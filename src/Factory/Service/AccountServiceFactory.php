@@ -2,14 +2,14 @@
 
 namespace User\Factory\Service;
 
+use Core\Security\Account\AccountLocked;
+use Core\Security\Account\AccountLoginAttempts;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Notification\Service\NotificationService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\AccountRepositoryInterface;
-use User\Security\Account\AccountLocked;
-use User\Security\Account\AccountLoginAttempts;
 use User\Service\AccountService;
 use User\Service\AvatarService;
 use User\Service\CacheService;

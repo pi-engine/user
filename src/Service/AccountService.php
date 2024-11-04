@@ -2,6 +2,8 @@
 
 namespace User\Service;
 
+use Core\Security\Account\AccountLocked;
+use Core\Security\Account\AccountLoginAttempts;
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
@@ -10,8 +12,6 @@ use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\TwoFactorAuthException;
 use User\Repository\AccountRepositoryInterface;
-use User\Security\Account\AccountLocked;
-use User\Security\Account\AccountLoginAttempts;
 use function array_merge;
 use function in_array;
 use function is_object;

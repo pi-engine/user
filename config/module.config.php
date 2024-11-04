@@ -47,8 +47,6 @@ return [
             Service\ExportService::class                 => Factory\Service\ExportServiceFactory::class,
             Service\TranslatorService::class             => Factory\Service\TranslatorServiceFactory::class,
             Service\InstallerService::class              => Factory\Service\InstallerServiceFactory::class,
-            Security\Account\AccountLoginAttempts::class => Factory\Security\AccountLoginAttemptsFactory::class,
-            Security\Account\AccountLocked::class        => Factory\Security\AccountLockedFactory::class,
             Handler\Admin\Profile\AddHandler::class      => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
             Handler\Admin\Profile\EditHandler::class     => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
             Handler\Admin\Profile\ListHandler::class     => Factory\Handler\Admin\Profile\ListHandlerFactory::class,
