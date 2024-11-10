@@ -2,8 +2,8 @@
 
 namespace User\Factory\Middleware;
 
-use Core\Security\Account\AccountLocked;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Security\Account\AccountLocked;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;

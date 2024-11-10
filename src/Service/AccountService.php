@@ -2,11 +2,11 @@
 
 namespace User\Service;
 
-use Core\Security\Account\AccountLocked;
-use Core\Security\Account\AccountLoginAttempts;
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Math\Rand;
 use Notification\Service\NotificationService;
+use Pi\Core\Security\Account\AccountLocked;
+use Pi\Core\Security\Account\AccountLoginAttempts;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;

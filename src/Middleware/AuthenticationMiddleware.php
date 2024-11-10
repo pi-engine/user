@@ -2,8 +2,8 @@
 
 namespace User\Middleware;
 
-use Core\Security\Account\AccountLocked;
 use Fig\Http\Message\StatusCodeInterface;
+use Pi\Core\Security\Account\AccountLocked;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

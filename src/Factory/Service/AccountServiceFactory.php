@@ -2,10 +2,10 @@
 
 namespace User\Factory\Service;
 
-use Core\Security\Account\AccountLocked;
-use Core\Security\Account\AccountLoginAttempts;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Notification\Service\NotificationService;
+use Pi\Core\Security\Account\AccountLocked;
+use Pi\Core\Security\Account\AccountLoginAttempts;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;

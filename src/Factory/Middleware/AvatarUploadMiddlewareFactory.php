@@ -3,6 +3,7 @@
 namespace User\Factory\Middleware;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Middleware\SecurityMiddleware;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -10,7 +11,6 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use User\Handler\ErrorHandler;
 use User\Middleware\AvatarUploadMiddleware;
-use User\Middleware\SecurityMiddleware;
 use User\Service\AccountService;
 use User\Service\AvatarService;
 
