@@ -3,11 +3,11 @@
 namespace User\Factory\Validator;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Service\UtilityService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Service\AccountService;
-use User\Service\UtilityService;
 use User\Validator\PasswordValidator;
 
 class PasswordValidatorFactory implements FactoryInterface

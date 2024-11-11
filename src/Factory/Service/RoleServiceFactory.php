@@ -3,11 +3,11 @@
 namespace User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Service\CacheService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\RoleRepositoryInterface;
-use User\Service\CacheService;
 use User\Service\HistoryService;
 use User\Service\RoleService;
 

@@ -3,8 +3,8 @@
 namespace User\Validator;
 
 use Laminas\Validator\AbstractValidator;
+use Pi\Core\Service\CacheService;
 use User\Service\AccountService;
-use User\Service\CacheService;
 use function array_merge;
 
 class OtpValidator extends AbstractValidator

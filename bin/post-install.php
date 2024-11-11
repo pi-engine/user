@@ -1,7 +1,7 @@
 <?php
 
-use User\Installer\Install;
-use User\Service\InstallerService;
+use Pi\Core\Installer\Install;
+use Pi\Core\Service\InstallerService;
 
 // Composer autoload
 include realpath(__DIR__ . '/../../../vendor/autoload.php');

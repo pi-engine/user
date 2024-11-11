@@ -3,16 +3,16 @@
 namespace User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Security\Account\AccountLocked;
+use Pi\Core\Service\CacheService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Handler\ErrorHandler;
 use User\Service\AccountService;
-use User\Service\CacheService;
 use User\Service\TokenService;
 
 class AuthenticationMiddleware implements MiddlewareInterface

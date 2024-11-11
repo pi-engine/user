@@ -3,8 +3,8 @@
 namespace User\Validator;
 
 use Laminas\Validator\AbstractValidator;
+use Pi\Core\Service\UtilityService;
 use User\Service\AccountService;
-use User\Service\UtilityService;
 use function sprintf;
 
 class PasswordValidator extends AbstractValidator

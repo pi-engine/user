@@ -6,6 +6,7 @@ use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Laminas\Math\Rand;
+use Pi\Core\Service\CacheService;
 
 class TokenService implements ServiceInterface
 {

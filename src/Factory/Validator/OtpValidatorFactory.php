@@ -3,11 +3,11 @@
 namespace User\Factory\Validator;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Service\CacheService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Service\AccountService;
-use User\Service\CacheService;
 use User\Validator\OtpValidator;
 
 class OtpValidatorFactory implements FactoryInterface

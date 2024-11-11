@@ -2,7 +2,7 @@
 
 use Laminas\Config\Config;
 use Laminas\Db\Adapter\Adapter;
-use User\Installer\Remove;
+use Pi\Core\Installer\Remove;
 use User\Service\PermissionService;
 use User\Service\RoleService;
 

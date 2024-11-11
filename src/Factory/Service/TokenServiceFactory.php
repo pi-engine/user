@@ -3,8 +3,8 @@
 namespace User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Service\CacheService;
 use Psr\Container\ContainerInterface;
-use User\Service\CacheService;
 use User\Service\TokenService;
 
 class TokenServiceFactory implements FactoryInterface

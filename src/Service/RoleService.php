@@ -2,6 +2,7 @@
 
 namespace User\Service;
 
+use Pi\Core\Service\CacheService;
 use User\Repository\RoleRepositoryInterface;
 use function in_array;
 

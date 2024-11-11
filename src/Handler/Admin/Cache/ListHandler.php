@@ -3,12 +3,12 @@
 namespace User\Handler\Admin\Cache;
 
 use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Service\CacheService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\CacheService;
 
 class ListHandler implements RequestHandlerInterface
 {

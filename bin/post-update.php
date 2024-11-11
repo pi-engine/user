@@ -2,7 +2,7 @@
 
 use Laminas\Config\Config;
 use Laminas\Db\Adapter\Adapter;
-use User\Installer\Update;
+use Pi\Core\Installer\Update;
 use User\Service\PermissionService;
 use User\Service\RoleService;
 

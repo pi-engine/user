@@ -4,6 +4,7 @@ namespace User\Service;
 
 use Laminas\Permissions\Rbac\Rbac;
 use Laminas\Permissions\Rbac\Role;
+use Pi\Core\Service\CacheService;
 use User\Model\Permission\AssertRolesMatches;
 use User\Repository\PermissionRepositoryInterface;
 

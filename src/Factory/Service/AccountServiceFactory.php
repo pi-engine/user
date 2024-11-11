@@ -6,19 +6,19 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Notification\Service\NotificationService;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
+use Pi\Core\Service\CacheService;
+use Pi\Core\Service\TranslatorService;
+use Pi\Core\Service\UtilityService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use User\Repository\AccountRepositoryInterface;
 use User\Service\AccountService;
 use User\Service\AvatarService;
-use User\Service\CacheService;
 use User\Service\HistoryService;
 use User\Service\PermissionService;
 use User\Service\RoleService;
 use User\Service\TokenService;
-use User\Service\TranslatorService;
-use User\Service\UtilityService;
 
 class AccountServiceFactory implements FactoryInterface
 {
