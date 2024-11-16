@@ -68,6 +68,7 @@
     "laminas/laminas-server": "*",
     "laminas/laminas-diagnostics": "*",
     "laminas/laminas-uri": "*",
+    "laminas/laminas-escaper": "*",
     "lm-commons/lmc-cors": "*",
     "firebase/php-jwt": "*",
     "phpmailer/phpmailer": "*",
@@ -90,7 +91,7 @@
   },
   "autoload": {
     "psr-4": {
-      "User\\": "vendor/pi/user/src/"
+      "Pi\\User\\": "vendor/pi/user/src/"
     }
   },
   "scripts": {
