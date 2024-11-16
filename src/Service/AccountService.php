@@ -4,12 +4,12 @@ namespace Pi\User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Math\Rand;
-use Notification\Service\NotificationService;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
+use Pi\Notification\Service\NotificationService;
 use Pi\User\Repository\AccountRepositoryInterface;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;

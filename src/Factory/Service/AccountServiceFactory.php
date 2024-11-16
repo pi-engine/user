@@ -3,12 +3,12 @@
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Notification\Service\NotificationService;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
+use Pi\Notification\Service\NotificationService;
 use Pi\User\Repository\AccountRepositoryInterface;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\AvatarService;
