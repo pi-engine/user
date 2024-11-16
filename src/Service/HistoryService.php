@@ -2,7 +2,7 @@
 
 namespace Pi\User\Service;
 
-use Logger\Service\LoggerService;
+use Pi\Logger\Service\LoggerService;
 
 class HistoryService implements ServiceInterface
 {

@@ -4,7 +4,7 @@ namespace Pi\User;
 
 use Laminas\Mvc\Middleware\PipeSpec;
 use Laminas\Router\Http\Literal;
-use Logger\Middleware\LoggerRequestResponseMiddleware;
+use Pi\Logger\Middleware\LoggerRequestResponseMiddleware;
 use Pi\Core\Middleware\ErrorMiddleware;
 use Pi\Core\Middleware\RequestPreparationMiddleware;
 use Pi\Core\Middleware\SecurityMiddleware;

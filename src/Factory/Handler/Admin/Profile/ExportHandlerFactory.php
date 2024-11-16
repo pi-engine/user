@@ -3,7 +3,7 @@
 namespace Pi\User\Factory\Handler\Admin\Profile;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Media\Service\MediaService;
+use Pi\Media\Service\MediaService;
 use Pi\User\Handler\Admin\Profile\ExportHandler;
 use Pi\User\Handler\Admin\Profile\ListHandler;
 use Pi\User\Service\AccountService;

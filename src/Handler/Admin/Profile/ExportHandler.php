@@ -4,7 +4,7 @@ namespace Pi\User\Handler\Admin\Profile;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
-use Media\Service\MediaService;
+use Pi\Media\Service\MediaService;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\ExportService;
 use Psr\Http\Message\ResponseFactoryInterface;

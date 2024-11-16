@@ -3,7 +3,7 @@
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Logger\Service\LoggerService;
+use Pi\Logger\Service\LoggerService;
 use Pi\User\Service\HistoryService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
