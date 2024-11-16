@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api\Password;
+namespace Pi\User\Factory\Handler\Api\Password;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -8,9 +8,9 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Password\UpdateHandler;
-use User\Service\AccountService;
-use User\Service\TokenService;
+use Pi\User\Handler\Api\Password\UpdateHandler;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\TokenService;
 
 class UpdateHandlerFactory implements FactoryInterface
 {

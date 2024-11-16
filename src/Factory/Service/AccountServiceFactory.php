@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Service;
+namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Notification\Service\NotificationService;
@@ -9,16 +9,16 @@ use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
+use Pi\User\Repository\AccountRepositoryInterface;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\AvatarService;
+use Pi\User\Service\HistoryService;
+use Pi\User\Service\PermissionService;
+use Pi\User\Service\RoleService;
+use Pi\User\Service\TokenService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Repository\AccountRepositoryInterface;
-use User\Service\AccountService;
-use User\Service\AvatarService;
-use User\Service\HistoryService;
-use User\Service\PermissionService;
-use User\Service\RoleService;
-use User\Service\TokenService;
 
 class AccountServiceFactory implements FactoryInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Repository;
+namespace Pi\User\Factory\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
@@ -8,8 +8,8 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Profile\Profile;
-use User\Repository\ProfileRepository;
+use Pi\User\Model\Profile\Profile;
+use Pi\User\Repository\ProfileRepository;
 
 class ProfileRepositoryFactory implements FactoryInterface
 {

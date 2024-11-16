@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Middleware;
+namespace Pi\User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\InputFilter\Input;
@@ -14,13 +14,13 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
-use User\Validator\EmailValidator;
-use User\Validator\IdentityValidator;
-use User\Validator\MobileValidator;
-use User\Validator\NameValidator;
-use User\Validator\OtpValidator;
-use User\Validator\PasswordValidator;
+use Pi\User\Service\AccountService;
+use Pi\User\Validator\EmailValidator;
+use Pi\User\Validator\IdentityValidator;
+use Pi\User\Validator\MobileValidator;
+use Pi\User\Validator\NameValidator;
+use Pi\User\Validator\OtpValidator;
+use Pi\User\Validator\PasswordValidator;
 use function sprintf;
 
 class ValidationMiddleware implements MiddlewareInterface

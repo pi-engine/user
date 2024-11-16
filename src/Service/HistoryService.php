@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Service;
+namespace Pi\User\Service;
 
 use Logger\Service\LoggerService;
 

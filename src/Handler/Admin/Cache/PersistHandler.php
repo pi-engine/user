@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Admin\Cache;
+namespace Pi\User\Handler\Admin\Cache;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Pi\Core\Service\CacheService;

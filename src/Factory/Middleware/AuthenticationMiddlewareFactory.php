@@ -1,19 +1,19 @@
 <?php
 
-namespace User\Factory\Middleware;
+namespace Pi\User\Factory\Middleware;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Service\CacheService;
+use Pi\User\Middleware\AuthenticationMiddleware;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\TokenService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Middleware\AuthenticationMiddleware;
-use User\Service\AccountService;
-use User\Service\TokenService;
 
 class AuthenticationMiddlewareFactory implements FactoryInterface
 {

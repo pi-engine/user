@@ -1,16 +1,16 @@
 <?php
 
-namespace User\Factory\Handler\Api\Profile;
+namespace Pi\User\Factory\Handler\Api\Profile;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Handler\Api\Profile\HistoryHandler;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\HistoryService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Profile\HistoryHandler;
-use User\Service\AccountService;
-use User\Service\HistoryService;
 
 class HistoryHandlerFactory implements FactoryInterface
 {

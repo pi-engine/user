@@ -1,10 +1,10 @@
 <?php
 
-namespace User\Repository;
+namespace Pi\User\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\HydratorInterface;
-use User\Model\Profile\Profile;
+use Pi\User\Model\Profile\Profile;
 
 class ProfileRepository implements AccountRoleRepositoryInterface
 {

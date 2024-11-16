@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api\Authentication\Oauth;
+namespace Pi\User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -9,8 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Authentication\Oauth\Oauth2;
-use User\Service\AccountService;
+use Pi\User\Authentication\Oauth\Oauth2;
+use Pi\User\Service\AccountService;
 
 class Oauth2Handler implements RequestHandlerInterface
 {

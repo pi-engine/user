@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Authentication\Oauth;
+namespace Pi\User\Authentication\Oauth;
 
 interface OauthInterface
 {

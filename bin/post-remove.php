@@ -3,8 +3,8 @@
 use Laminas\Config\Config;
 use Laminas\Db\Adapter\Adapter;
 use Pi\Core\Installer\Remove;
-use User\Service\PermissionService;
-use User\Service\RoleService;
+use Pi\User\Service\PermissionService;
+use Pi\User\Service\RoleService;
 
 // Composer autoloading
 include realpath(__DIR__ . '/../../../vendor/autoload.php');

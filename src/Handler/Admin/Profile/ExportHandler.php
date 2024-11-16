@@ -1,17 +1,17 @@
 <?php
 
-namespace User\Handler\Admin\Profile;
+namespace Pi\User\Handler\Admin\Profile;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Media\Service\MediaService;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\ExportService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
-use User\Service\ExportService;
 
 class ExportHandler implements RequestHandlerInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Middleware;
+namespace Pi\User\Factory\Middleware;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Handler\ErrorHandler;
@@ -11,8 +11,8 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Middleware\ValidationMiddleware;
-use User\Service\AccountService;
+use Pi\User\Middleware\ValidationMiddleware;
+use Pi\User\Service\AccountService;
 
 class ValidationMiddlewareFactory implements FactoryInterface
 {

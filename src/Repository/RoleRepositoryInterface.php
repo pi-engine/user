@@ -1,9 +1,9 @@
 <?php
 
-namespace User\Repository;
+namespace Pi\User\Repository;
 
 use Laminas\Db\ResultSet\HydratingResultSet;
-use User\Model\Role\Resource;
+use Pi\User\Model\Role\Resource;
 
 interface RoleRepositoryInterface
 {

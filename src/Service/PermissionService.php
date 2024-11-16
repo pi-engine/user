@@ -1,12 +1,12 @@
 <?php
 
-namespace User\Service;
+namespace Pi\User\Service;
 
 use Laminas\Permissions\Rbac\Rbac;
 use Laminas\Permissions\Rbac\Role;
 use Pi\Core\Service\CacheService;
-use User\Model\Permission\AssertRolesMatches;
-use User\Repository\PermissionRepositoryInterface;
+use Pi\User\Model\Permission\AssertRolesMatches;
+use Pi\User\Repository\PermissionRepositoryInterface;
 
 class PermissionService implements ServiceInterface
 {

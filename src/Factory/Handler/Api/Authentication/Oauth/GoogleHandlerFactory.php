@@ -1,15 +1,15 @@
 <?php
 
-namespace User\Factory\Handler\Api\Authentication\Oauth;
+namespace Pi\User\Factory\Handler\Api\Authentication\Oauth;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Handler\Api\Authentication\Oauth\GoogleHandler;
+use Pi\User\Service\AccountService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Authentication\Oauth\GoogleHandler;
-use User\Service\AccountService;
 
 class GoogleHandlerFactory implements FactoryInterface
 {

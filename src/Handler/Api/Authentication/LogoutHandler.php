@@ -1,16 +1,16 @@
 <?php
 
-namespace User\Handler\Api\Authentication;
+namespace Pi\User\Handler\Api\Authentication;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\TokenService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
-use User\Service\TokenService;
 
 class LogoutHandler implements RequestHandlerInterface
 {

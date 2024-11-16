@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler;
+namespace Pi\User\Handler;
 
 use Laminas\Diactoros\Response\JsonResponse;
 use Pi\Core\Service\InstallerService;

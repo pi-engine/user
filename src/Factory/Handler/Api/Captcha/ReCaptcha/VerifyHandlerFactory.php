@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api\Captcha\ReCaptcha;
+namespace Pi\User\Factory\Handler\Api\Captcha\ReCaptcha;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -8,7 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Captcha\ReCaptcha\VerifyHandler;
+use Pi\User\Handler\Api\Captcha\ReCaptcha\VerifyHandler;
 
 class VerifyHandlerFactory implements FactoryInterface
 {

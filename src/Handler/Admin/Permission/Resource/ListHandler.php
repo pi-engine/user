@@ -1,15 +1,15 @@
 <?php
 
-namespace User\Handler\Admin\Permission\Resource;
+namespace Pi\User\Handler\Admin\Permission\Resource;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
+use Pi\User\Service\PermissionService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\PermissionService;
 
 class ListHandler implements RequestHandlerInterface
 {

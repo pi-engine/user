@@ -1,10 +1,10 @@
 <?php
 
-namespace User\Validator;
+namespace Pi\User\Validator;
 
 use Laminas\Validator\AbstractValidator;
 use Pi\Core\Service\CacheService;
-use User\Service\AccountService;
+use Pi\User\Service\AccountService;
 use function array_merge;
 
 class OtpValidator extends AbstractValidator

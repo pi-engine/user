@@ -1,9 +1,9 @@
 <?php
 
-namespace User\Service;
+namespace Pi\User\Service;
 
 use Pi\Core\Service\CacheService;
-use User\Repository\RoleRepositoryInterface;
+use Pi\User\Repository\RoleRepositoryInterface;
 use function in_array;
 
 class RoleService implements ServiceInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Service;
+namespace Pi\User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Math\Rand;
@@ -10,11 +10,11 @@ use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
+use Pi\User\Repository\AccountRepositoryInterface;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\TwoFactorAuthException;
-use User\Repository\AccountRepositoryInterface;
 use function array_merge;
 use function in_array;
 use function is_object;

@@ -1,5 +1,5 @@
 <?php
 
-namespace User\Repository;
+namespace Pi\User\Repository;
 
 interface ProfileRepositoryInterface {}

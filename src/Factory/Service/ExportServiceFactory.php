@@ -1,12 +1,12 @@
 <?php
 
-namespace User\Factory\Service;
+namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Service\ExportService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Service\ExportService;
 
 class ExportServiceFactory implements FactoryInterface
 {

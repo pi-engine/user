@@ -1,10 +1,10 @@
 <?php
 
-namespace User\Validator;
+namespace Pi\User\Validator;
 
 use Laminas\Validator\EmailAddress;
 use Laminas\Validator\Hostname;
-use User\Service\AccountService;
+use Pi\User\Service\AccountService;
 
 class EmailValidator extends EmailAddress
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace User\Repository;
+namespace Pi\User\Repository;
 
 use Laminas\Authentication\AuthenticationService;
 use Laminas\Authentication\Result as AuthenticationResult;
 use Laminas\Db\ResultSet\HydratingResultSet;
-use User\Model\Account\Account;
+use Pi\User\Model\Account\Account;
 
 interface AccountRepositoryInterface
 {

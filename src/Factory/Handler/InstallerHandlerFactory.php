@@ -1,15 +1,15 @@
 <?php
 
-namespace User\Factory\Handler;
+namespace Pi\User\Factory\Handler;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\InstallerService;
+use Pi\User\Handler\InstallerHandler;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\InstallerHandler;
 
 class InstallerHandlerFactory implements FactoryInterface
 {

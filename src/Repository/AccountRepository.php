@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Repository;
+namespace Pi\User\Repository;
 
 use InvalidArgumentException;
 use Laminas\Authentication\Adapter\DbTable\CallbackCheckAdapter;
@@ -16,14 +16,14 @@ use Laminas\Db\Sql\Predicate\NotIn;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
+use Pi\User\Authentication\Adapter\OauthAdapter;
+use Pi\User\Model\Account\Account;
+use Pi\User\Model\Account\AccountProfile;
+use Pi\User\Model\Account\Credential;
+use Pi\User\Model\Account\MultiFactor;
+use Pi\User\Model\Account\Profile;
+use Pi\User\Model\Role\Account as AccountRole;
 use RuntimeException;
-use User\Authentication\Adapter\OauthAdapter;
-use User\Model\Account\Account;
-use User\Model\Account\AccountProfile;
-use User\Model\Account\Credential;
-use User\Model\Account\MultiFactor;
-use User\Model\Account\Profile;
-use User\Model\Role\Account as AccountRole;
 use function sprintf;
 
 class AccountRepository implements AccountRepositoryInterface

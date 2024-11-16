@@ -1,15 +1,15 @@
 <?php
 
-namespace User\Factory\Handler\Admin\Permission\Role;
+namespace Pi\User\Factory\Handler\Admin\Permission\Role;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Handler\Admin\Permission\Role\ListHandler;
+use Pi\User\Service\PermissionService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Admin\Permission\Role\ListHandler;
-use User\Service\PermissionService;
 
 class ListHandlerFactory implements FactoryInterface
 {

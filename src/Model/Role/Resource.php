@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Model\Role;
+namespace Pi\User\Model\Role;
 
 class Resource
 {

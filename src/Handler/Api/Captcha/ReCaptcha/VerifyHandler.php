@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api\Captcha\ReCaptcha;
+namespace Pi\User\Handler\Api\Captcha\ReCaptcha;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;

@@ -1,14 +1,14 @@
 <?php
 
-namespace User\Handler\Admin\Profile;
+namespace Pi\User\Handler\Admin\Profile;
 
 use Laminas\Diactoros\Response\JsonResponse;
+use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
 
 class ListHandler implements RequestHandlerInterface
 {

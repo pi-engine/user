@@ -1,20 +1,20 @@
 <?php
 
-namespace User\Factory\Repository;
+namespace Pi\User\Factory\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Model\Account\Account;
+use Pi\User\Model\Account\AccountProfile;
+use Pi\User\Model\Account\Credential;
+use Pi\User\Model\Account\MultiFactor;
+use Pi\User\Model\Account\Profile;
+use Pi\User\Model\Role\Account as AccountRole;
+use Pi\User\Repository\AccountRepository;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Account\Account;
-use User\Model\Account\AccountProfile;
-use User\Model\Account\Credential;
-use User\Model\Account\MultiFactor;
-use User\Model\Account\Profile;
-use User\Model\Role\Account as AccountRole;
-use User\Repository\AccountRepository;
 
 class AccountRepositoryFactory implements FactoryInterface
 {

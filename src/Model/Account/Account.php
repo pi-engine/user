@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Model\Account;
+namespace Pi\User\Model\Account;
 
 class Account
 {

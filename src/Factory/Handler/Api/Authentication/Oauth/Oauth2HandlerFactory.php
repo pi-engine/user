@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api\Authentication\Oauth;
+namespace Pi\User\Factory\Handler\Api\Authentication\Oauth;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -8,9 +8,9 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Authentication\Oauth\MicrosoftHandler;
-use User\Handler\Api\Authentication\Oauth\Oauth2Handler;
-use User\Service\AccountService;
+use Pi\User\Handler\Api\Authentication\Oauth\MicrosoftHandler;
+use Pi\User\Handler\Api\Authentication\Oauth\Oauth2Handler;
+use Pi\User\Service\AccountService;
 
 class Oauth2HandlerFactory implements FactoryInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api\Profile;
+namespace Pi\User\Handler\Api\Profile;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -9,8 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
-use User\Service\TokenService;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\TokenService;
 
 class UpdateHandler implements RequestHandlerInterface
 {

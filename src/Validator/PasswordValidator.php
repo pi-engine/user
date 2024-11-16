@@ -1,10 +1,10 @@
 <?php
 
-namespace User\Validator;
+namespace Pi\User\Validator;
 
 use Laminas\Validator\AbstractValidator;
 use Pi\Core\Service\UtilityService;
-use User\Service\AccountService;
+use Pi\User\Service\AccountService;
 use function sprintf;
 
 class PasswordValidator extends AbstractValidator

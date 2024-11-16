@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Handler\Api\Authentication\Mobile;
+namespace Pi\User\Handler\Api\Authentication\Mobile;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
+use Pi\User\Service\AccountService;
 
 class VerifyHandler implements RequestHandlerInterface
 {

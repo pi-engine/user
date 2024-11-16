@@ -1,5 +1,5 @@
 <?php
 
-namespace User\Service;
+namespace Pi\User\Service;
 
 interface ServiceInterface {}

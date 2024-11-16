@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Model\Permission;
+namespace Pi\User\Model\Permission;
 
 use Laminas\Permissions\Rbac\AssertionInterface;
 use Laminas\Permissions\Rbac\Rbac;

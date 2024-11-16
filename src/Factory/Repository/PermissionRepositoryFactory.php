@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Repository;
+namespace Pi\User\Factory\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
@@ -8,10 +8,10 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Permission\Page;
-use User\Model\Permission\Resource;
-use User\Model\Permission\Role;
-use User\Repository\PermissionRepository;
+use Pi\User\Model\Permission\Page;
+use Pi\User\Model\Permission\Resource;
+use Pi\User\Model\Permission\Role;
+use Pi\User\Repository\PermissionRepository;
 
 class PermissionRepositoryFactory implements FactoryInterface
 {

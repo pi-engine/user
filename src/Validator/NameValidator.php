@@ -1,9 +1,9 @@
 <?php
 
-namespace User\Validator;
+namespace Pi\User\Validator;
 
 use Laminas\Validator\AbstractValidator;
-use User\Service\AccountService;
+use Pi\User\Service\AccountService;
 
 class NameValidator extends AbstractValidator
 {

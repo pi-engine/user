@@ -1,13 +1,13 @@
 <?php
 
-namespace User\Factory\Validator;
+namespace Pi\User\Factory\Validator;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Service\AccountService;
-use User\Validator\NameValidator;
+use Pi\User\Service\AccountService;
+use Pi\User\Validator\NameValidator;
 
 class NameValidatorFactory implements FactoryInterface
 {

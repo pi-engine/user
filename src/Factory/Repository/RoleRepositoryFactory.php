@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Repository;
+namespace Pi\User\Factory\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
@@ -8,9 +8,9 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Model\Role\Account;
-use User\Model\Role\Resource;
-use User\Repository\RoleRepository;
+use Pi\User\Model\Role\Account;
+use Pi\User\Model\Role\Resource;
+use Pi\User\Repository\RoleRepository;
 
 class RoleRepositoryFactory implements FactoryInterface
 {

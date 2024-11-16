@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api\Authentication\Mfa;
+namespace Pi\User\Factory\Handler\Api\Authentication\Mfa;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -8,8 +8,8 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Authentication\Mfa\RequestHandler;
-use User\Service\AccountService;
+use Pi\User\Handler\Api\Authentication\Mfa\RequestHandler;
+use Pi\User\Service\AccountService;
 
 class RequestHandlerFactory implements FactoryInterface
 {

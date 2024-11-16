@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Authentication\Oauth;
+namespace Pi\User\Authentication\Oauth;
 
 use Hybridauth\Exception\UnexpectedApiResponseException;
 use Hybridauth\Provider\MicrosoftGraph as HybridauthMicrosoftGraph;

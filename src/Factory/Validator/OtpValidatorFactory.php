@@ -1,14 +1,14 @@
 <?php
 
-namespace User\Factory\Validator;
+namespace Pi\User\Factory\Validator;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Service\AccountService;
-use User\Validator\OtpValidator;
+use Pi\User\Service\AccountService;
+use Pi\User\Validator\OtpValidator;
 
 class OtpValidatorFactory implements FactoryInterface
 {

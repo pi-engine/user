@@ -1,11 +1,11 @@
 <?php
 
-namespace User\Repository;
+namespace Pi\User\Repository;
 
 use Laminas\Db\ResultSet\HydratingResultSet;
-use User\Model\Permission\Page;
-use User\Model\Permission\Resource;
-use User\Model\Permission\Role;
+use Pi\User\Model\Permission\Page;
+use Pi\User\Model\Permission\Resource;
+use Pi\User\Model\Permission\Role;
 
 interface PermissionRepositoryInterface
 {

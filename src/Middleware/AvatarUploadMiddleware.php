@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Middleware;
+namespace Pi\User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Validator\File\Extension;
@@ -8,14 +8,14 @@ use Laminas\Validator\File\MimeType;
 use Laminas\Validator\File\Size;
 use Laminas\Validator\File\UploadFile;
 use Pi\Core\Handler\ErrorHandler;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\AvatarService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use User\Service\AccountService;
-use User\Service\AvatarService;
 
 class AvatarUploadMiddleware implements MiddlewareInterface
 {

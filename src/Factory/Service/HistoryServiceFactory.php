@@ -1,13 +1,13 @@
 <?php
 
-namespace User\Factory\Service;
+namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Logger\Service\LoggerService;
+use Pi\User\Service\HistoryService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use User\Service\HistoryService;
 
 class HistoryServiceFactory implements FactoryInterface
 {

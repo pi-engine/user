@@ -1,6 +1,6 @@
 <?php
 
-namespace User;
+namespace Pi\User;
 
 use Laminas\Mvc\MvcEvent;
 

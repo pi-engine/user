@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Factory\Handler\Api\Avatar;
+namespace Pi\User\Factory\Handler\Api\Avatar;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -8,9 +8,9 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use User\Handler\Api\Avatar\UploadHandler;
-use User\Service\AccountService;
-use User\Service\AvatarService;
+use Pi\User\Handler\Api\Avatar\UploadHandler;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\AvatarService;
 
 class UploadHandlerFactory implements FactoryInterface
 {

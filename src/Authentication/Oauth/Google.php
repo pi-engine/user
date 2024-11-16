@@ -1,6 +1,6 @@
 <?php
 
-namespace User\Authentication\Oauth;
+namespace Pi\User\Authentication\Oauth;
 
 use Google\Auth\AccessToken;
 use Hybridauth\Exception\UnexpectedApiResponseException;
