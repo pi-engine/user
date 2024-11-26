@@ -21,8 +21,13 @@
       "email": "hossein@azizabadi.com"
     }
   ],
+  "extra": {
+    "laminas": {
+      "module": "Pi\\User"
+    }
+  },
   "require": {
-    "php": "^8.3",
+    "php": "~8.3.0 || ~8.4.0",
     "ext-redis": "*",
     "ext-ctype": "*",
     "ext-fileinfo": "*",
@@ -91,7 +96,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Pi\\User\\": "vendor/pi/user/src/"
+      "Pi\\User\\": "src/"
     }
   },
   "scripts": {
@@ -109,5 +114,11 @@
     "ext-apc": "for opcode cache and system persistent data",
     "ext-discount": "for Markdown text parsing",
     "ext-intl": "for i18n features"
+  },
+  "config": {
+    "allow-plugins": {
+      "laminas/laminas-component-installer": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   }
 }
