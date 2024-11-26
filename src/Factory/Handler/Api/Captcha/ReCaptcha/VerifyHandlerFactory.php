@@ -3,12 +3,12 @@
 namespace Pi\User\Factory\Handler\Api\Captcha\ReCaptcha;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Handler\Api\Captcha\ReCaptcha\VerifyHandler;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Pi\User\Handler\Api\Captcha\ReCaptcha\VerifyHandler;
 
 class VerifyHandlerFactory implements FactoryInterface
 {

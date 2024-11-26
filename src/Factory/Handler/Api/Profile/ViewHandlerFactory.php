@@ -3,14 +3,14 @@
 namespace Pi\User\Factory\Handler\Api\Profile;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Handler\Api\Profile\ViewHandler;
+use Pi\User\Service\AccountService;
+use Pi\User\Service\TokenService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Pi\User\Handler\Api\Profile\ViewHandler;
-use Pi\User\Service\AccountService;
-use Pi\User\Service\TokenService;
 
 class ViewHandlerFactory implements FactoryInterface
 {
