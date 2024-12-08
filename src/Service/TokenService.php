@@ -77,6 +77,7 @@ class TokenService implements ServiceInterface
                     'id'      => $decoded->id,
                     'user_id' => $decoded->uid,
                     'type'    => $decoded->type,
+                    'data'    => (array)$decoded,
                 ];
             } elseif (
                 !empty($decoded)
@@ -89,6 +90,7 @@ class TokenService implements ServiceInterface
                     'id'      => $decoded->id,
                     'user_id' => $decoded->uid,
                     'type'    => $decoded->type,
+                    'data'    => (array)$decoded,
                 ];
             } else {
                 return [

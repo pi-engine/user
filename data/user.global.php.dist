@@ -54,6 +54,17 @@ return [
         'private_key' => '', // PATH_TO_FILE
         'iss'         => $baseUrl,
         'aud'         => $baseUrl,
+        'additional'  => [
+            'company_id',
+            'company_title',
+            'identity',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'avatar',
+            'roles',
+        ],
     ],
     'account' => [
         'otp_email'    => [

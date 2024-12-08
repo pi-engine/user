@@ -307,6 +307,10 @@ class AccountService implements ServiceInterface
         $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
+        // Set company to account if exist
+        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
+        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
+
         // Generate access token
         $accessToken = $this->tokenService->encryptToken(
             [
@@ -1854,20 +1858,19 @@ class AccountService implements ServiceInterface
      *
      * @return array
      */
-    public function refreshToken($params): array
+    public function refreshToken($account, $tokenOldId): array
     {
+        // Generate new token
         $accessToken = $this->tokenService->encryptToken(
             [
-                'user_id' => $params['user_id'],
+                'account' => $account,
                 'type'    => 'access',
-                'roles'   => [
-                    'member',
-                ],
             ]
         );
 
         // Update cache
-        $this->cacheService->setUserItem($params['user_id'], 'access_keys', $accessToken['key']);
+        $this->cacheService->setUserItem($account['id'], 'access_keys', $accessToken['key']);
+        $this->cacheService->deleteUserItem($account['id'], 'access_keys', $tokenOldId);
 
         // Set result array
         return [
