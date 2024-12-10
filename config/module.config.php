@@ -4,10 +4,11 @@ namespace Pi\User;
 
 use Laminas\Mvc\Middleware\PipeSpec;
 use Laminas\Router\Http\Literal;
-use Pi\Logger\Middleware\LoggerRequestResponseMiddleware;
 use Pi\Core\Middleware\ErrorMiddleware;
+use Pi\Core\Middleware\InstallerMiddleware;
 use Pi\Core\Middleware\RequestPreparationMiddleware;
 use Pi\Core\Middleware\SecurityMiddleware;
+use Pi\Logger\Middleware\LoggerRequestResponseMiddleware;
 
 return [
     'service_manager' => [
