@@ -39,7 +39,8 @@ class AccountServiceFactory implements FactoryInterface
         $account = $config['account'] ?? [];
         $config  = array_merge($global, $account);
 
-        return new AccountService(
+        // Set account
+        $accountService = new AccountService(
             $container->get(AccountRepositoryInterface::class),
             $container->get(RoleService::class),
             $container->get(PermissionService::class),
@@ -54,5 +55,14 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(AccountLocked::class),
             $config
         );
+
+        // Set light company service
+        $modules = $container->get('ModuleManager')->getLoadedModules();
+        if (isset($modules['Pi\Company'])) {
+            $companyService = $container->get('Pi\Company\Service\CompanyLightService');
+            $accountService->setCompanyService($companyService);
+        }
+
+        return $accountService;
     }
 }

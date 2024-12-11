@@ -60,6 +60,8 @@ class AccountService implements ServiceInterface
     /** @var AccountLocked */
     protected AccountLocked $accountLocked;
 
+    protected ?\Pi\Company\Service\CompanyLightService $companyService = null;
+
     /* @var array */
     protected array $config;
 
@@ -179,6 +181,16 @@ class AccountService implements ServiceInterface
         $this->hashPattern          = $config['hash_pattern'] ?? 'argon2id';
     }
 
+    public function setCompanyService($companyService): void
+    {
+        $this->companyService = $companyService;
+    }
+
+    public function hasCompanyService(): bool
+    {
+        return $this->companyService !== null;
+    }
+
     /**
      * @param       $params
      *
@@ -291,6 +303,10 @@ class AccountService implements ServiceInterface
         // Get from cache if exist
         $user = $this->cacheService->getUser($account['id']);
 
+        // Set company to account if exist
+        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
+        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
+
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
         $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
@@ -306,10 +322,6 @@ class AccountService implements ServiceInterface
         // Get roles
         $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
-
-        // Set company to account if exist
-        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
-        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
 
         // Generate access token
         $accessToken = $this->tokenService->encryptToken(
@@ -346,6 +358,8 @@ class AccountService implements ServiceInterface
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
         $account['is_company_setup']    = false;
+        $account['company_id']          = 0;
+        $account['company_title']       = '';
         $account['permission']          = [];
         $account['token_payload']       = [
             'iat' => $accessToken['payload']['iat'],
@@ -362,10 +376,20 @@ class AccountService implements ServiceInterface
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
         }
 
+        // Get company details if company module loaded
+        if ($this->hasCompanyService()) {
+            $company = $this->companyService->getCompanyDetails((int)$account['id']);
+            if (!empty($company)) {
+                // Set company to account if exist
+                $account['company_id']       = $company['company_id'];
+                $account['company_title']    = $company['company_title'];
+                $account['is_company_setup'] = true;
+            }
+        }
+
         // Check company setup
         if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
             $isCompanySetup = false;
-
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
             } elseif (isset($user['account']['is_company_setup'])) {
@@ -422,7 +446,7 @@ class AccountService implements ServiceInterface
                 'multi_factor_global' => $account['multi_factor_global'],
                 'multi_factor_status' => $account['multi_factor_status'],
                 'multi_factor_verify' => $account['multi_factor_verify'],
-                'is_company_setup'    => $account['is_company_setup'] ?? 0,
+                'is_company_setup'    => $account['is_company_setup'],
             ],
             'roles'        => $account['roles'],
             'permission'   => $account['permission'],
@@ -1876,7 +1900,11 @@ class AccountService implements ServiceInterface
         return [
             'result' => true,
             'data'   => [
-                'access_token' => $accessToken['token'],
+                'access_token'  => $accessToken['token'],
+                'token_payload' => [
+                    'iat' => $accessToken['payload']['iat'],
+                    'exp' => $accessToken['payload']['exp'],
+                ],
             ],
             'error'  => [],
         ];
