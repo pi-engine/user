@@ -303,10 +303,6 @@ class AccountService implements ServiceInterface
         // Get from cache if exist
         $user = $this->cacheService->getUser($account['id']);
 
-        // Set company to account if exist
-        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
-        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
-
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
         $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
@@ -358,8 +354,8 @@ class AccountService implements ServiceInterface
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
         $account['is_company_setup']    = false;
-        $account['company_id']          = 0;
-        $account['company_title']       = '';
+        $account['company_id']          = $user['authorization']['company_id'] ?? 0;
+        $account['company_title']       = $user['authorization']['company']['title'] ?? '';
         $account['permission']          = [];
         $account['token_payload']       = [
             'iat' => $accessToken['payload']['iat'],
@@ -388,7 +384,7 @@ class AccountService implements ServiceInterface
         }
 
         // Check company setup
-        if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
             $isCompanySetup = false;
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
