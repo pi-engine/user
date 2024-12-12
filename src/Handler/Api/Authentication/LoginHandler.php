@@ -3,7 +3,7 @@
 namespace Pi\User\Handler\Api\Authentication;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\TokenService;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -67,6 +67,6 @@ class LoginHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->login($params);
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }
