@@ -68,22 +68,16 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $refreshToken   = $request->getHeaderLine('refresh-token');
         $token          = $request->getHeaderLine('token');
 
-        // Set refresh-token to token if its be on true module and handler
-        $type = 'access';
-        if (
-            !empty($refreshToken)
-            && isset($routeParams['module'])
-            && in_array($routeParams['module'], ['user', 'company'])
-            && isset($routeParams['handler'])
-            && $routeParams['handler'] == 'refresh'
-        ) {
-            $type = 'refresh';
-            $token      = $refreshToken;
-        }
-
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
         $routeParams = $routeMatch->getParams();
+
+        // Set refresh-token to token if its be on true module and handler
+        $type = 'access';
+        if ($this->isValidRefreshToken($routeParams, $refreshToken)) {
+            $type  = 'refresh';
+            $token = $refreshToken;
+        }
 
         // Check a token set
         if (empty($token)) {
@@ -102,25 +96,12 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $tokenParsed = $this->tokenService->decryptToken($token);
 
         // Check parsed token
-        if (!$tokenParsed['status']) {
+        if (!$tokenParsed['status'] || $tokenParsed['type'] !== $type) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute(
                 'error',
                 [
-                    'message' => $tokenParsed['message'],
-                    'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
-                ]
-            );
-            return $this->errorHandler->handle($request);
-        }
-
-        // Check a token type
-        if ($tokenParsed['type'] != $type) {
-            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
-            $request = $request->withAttribute(
-                'error',
-                [
-                    'message' => 'This token not allowed for authentication',
+                    'message' => $tokenParsed['message'] ?? 'Invalid token!',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );
@@ -144,7 +125,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $user = $this->cacheService->getUser($tokenParsed['user_id']);
 
         // Check user is found
-        if (empty($user['account'])) {
+        if (!$user || empty($user['account'])) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute(
                 'error',
@@ -157,33 +138,41 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Check multi factor
-        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
-        if ($multiFactorGlobal && $routeParams['package'] != 'authentication') {
-            if (
-                !isset($user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'])
-                || (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'] == 0
-            ) {
-                $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
-                $request = $request->withAttribute(
-                    'error',
-                    [
-                        'message'             => 'To complete your login, please enter the 6-digit code from your multi factor app.',
-                        'code'                => StatusCodeInterface::STATUS_FORBIDDEN,
-                        'multi_factor_global' => $multiFactorGlobal,
-                        'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],
-                        'multi_factor_verify' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'],
-                    ]
-                );
-                return $this->errorHandler->handle($request);
-            }
+        $multiFactorGlobal = (int)($this->config['multi_factor']['status'] ?? 0);
+        if ($multiFactorGlobal
+            && $routeParams['package'] !== 'authentication'
+            && (!$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'] ?? false)
+        ) {
+            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request = $request->withAttribute(
+                'error',
+                [
+                    'message'             => 'To complete your login, please enter the 6-digit code from your multi factor app.',
+                    'code'                => StatusCodeInterface::STATUS_FORBIDDEN,
+                    'multi_factor_global' => $multiFactorGlobal,
+                    'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],
+                    'multi_factor_verify' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'],
+                ]
+            );
+            return $this->errorHandler->handle($request);
         }
 
         // Set attribute
-        $request = $request->withAttribute('account', $user['account']);
-        $request = $request->withAttribute('roles', $user['roles']);
-        $request = $request->withAttribute('token_id', $tokenParsed['id']);
-        $request = $request->withAttribute('token_data', $tokenParsed['data']);
-        $request = $request->withAttribute('current_token', $token);
-        return $handler->handle($request);
+        return $handler->handle(
+            $request
+                ->withAttribute('account', $user['account'])
+                ->withAttribute('roles', $user['roles'])
+                ->withAttribute('token_id', $tokenParsed['id'])
+                ->withAttribute('token_data', $tokenParsed['data'])
+                ->withAttribute('current_token', $token)
+        );
+    }
+
+    private function isValidRefreshToken(array $routeParams, string $refreshToken): bool
+    {
+        return !empty($refreshToken)
+               && isset($routeParams['module'], $routeParams['handler'])
+               && in_array($routeParams['module'], ['user', 'company'], true)
+               && $routeParams['handler'] === 'refresh';
     }
 }
