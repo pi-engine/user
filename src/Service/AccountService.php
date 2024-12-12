@@ -319,6 +319,19 @@ class AccountService implements ServiceInterface
         $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
+        // Set company data and Get company details if company module loaded
+        $account['is_company_setup']    = false;
+        $account['company_id']          = $user['authorization']['company_id'] ?? 0;
+        $account['company_title']       = $user['authorization']['company']['title'] ?? '';
+        if ($this->hasCompanyService()) {
+            $company = $this->companyService->getCompanyDetails((int)$account['id']);
+            if (!empty($company)) {
+                $account['company_id']       = $company['company_id'];
+                $account['company_title']    = $company['company_title'];
+                $account['is_company_setup'] = true;
+            }
+        }
+
         // Generate access token
         $accessToken = $this->tokenService->encryptToken(
             [
@@ -353,9 +366,6 @@ class AccountService implements ServiceInterface
         $account['multi_factor_verify'] = $multiFactorVerify;
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
-        $account['is_company_setup']    = false;
-        $account['company_id']          = $user['authorization']['company_id'] ?? 0;
-        $account['company_title']       = $user['authorization']['company']['title'] ?? '';
         $account['permission']          = [];
         $account['token_payload']       = [
             'iat' => $accessToken['payload']['iat'],
@@ -370,17 +380,6 @@ class AccountService implements ServiceInterface
             ];
 
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
-        }
-
-        // Get company details if company module loaded
-        if ($this->hasCompanyService()) {
-            $company = $this->companyService->getCompanyDetails((int)$account['id']);
-            if (!empty($company)) {
-                // Set company to account if exist
-                $account['company_id']       = $company['company_id'];
-                $account['company_title']    = $company['company_title'];
-                $account['is_company_setup'] = true;
-            }
         }
 
         // Check company setup

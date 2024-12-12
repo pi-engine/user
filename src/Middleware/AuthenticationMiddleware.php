@@ -65,7 +65,21 @@ class AuthenticationMiddleware implements MiddlewareInterface
     {
         // Get token
         $securityStream = $request->getAttribute('security_stream');
+        $refreshToken   = $request->getHeaderLine('refresh-token');
         $token          = $request->getHeaderLine('token');
+
+        // Set refresh-token to token if its be on true module and handler
+        $type = 'access';
+        if (
+            !empty($refreshToken)
+            && isset($routeParams['module'])
+            && in_array($routeParams['module'], ['user', 'company'])
+            && isset($routeParams['handler'])
+            && $routeParams['handler'] == 'refresh'
+        ) {
+            $type = 'refresh';
+            $token      = $refreshToken;
+        }
 
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
@@ -98,17 +112,6 @@ class AuthenticationMiddleware implements MiddlewareInterface
                 ]
             );
             return $this->errorHandler->handle($request);
-        }
-
-        // Set token type
-        $type = 'access';
-        if (
-            isset($routeParams['module'])
-            && in_array($routeParams['module'], ['user', 'company'])
-            && isset($routeParams['handler'])
-            && $routeParams['handler'] == 'refresh'
-        ) {
-            $type = 'refresh';
         }
 
         // Check a token type
