@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler\Admin\Role;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\RoleService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -40,7 +40,7 @@ class DeleteHandler implements RequestHandlerInterface
         // Delete
         $this->roleService->deleteRoleResource($requestBody, $operator);
 
-        return new JsonResponse(
+        return new EscapingJsonResponse(
             [
                 'result' => true,
                 'data'   => new stdClass(),

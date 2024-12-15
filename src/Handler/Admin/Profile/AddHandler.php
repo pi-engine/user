@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler\Admin\Profile;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -39,10 +39,10 @@ class AddHandler implements RequestHandlerInterface
         if (isset($result['id']) && !empty($result)) {
             $this->accountService->addRoleAccountByAdmin($requestBody, $result, $operator);
         } else {
-            return new JsonResponse($result);
+            return new EscapingJsonResponse($result);
         }
 
-        return new JsonResponse(
+        return new EscapingJsonResponse(
             [
                 'result' => true,
                 'data'   => $result,

@@ -3,13 +3,13 @@
 namespace Pi\User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
+use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Pi\User\Service\AccountService;
 
 class SettingHandler implements RequestHandlerInterface
 {
@@ -58,6 +58,6 @@ class SettingHandler implements RequestHandlerInterface
             'error'  => [],
         ];
 
-        return new JsonResponse($result, StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, StatusCodeInterface::STATUS_OK);
     }
 }

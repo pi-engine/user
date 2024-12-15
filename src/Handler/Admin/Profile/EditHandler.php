@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler\Admin\Profile;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -47,7 +47,7 @@ class EditHandler implements RequestHandlerInterface
             $this->accountService->updateAccountRoles($requestBody['roles'], $updatedAccount, 'all', $operator);
         }
 
-        return new JsonResponse(
+        return new EscapingJsonResponse(
             [
                 'result' => true,
                 'data'   => $updatedAccount,

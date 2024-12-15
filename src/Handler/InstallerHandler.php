@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\Core\Service\InstallerService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -39,7 +39,7 @@ class InstallerHandler implements RequestHandlerInterface
         $this->installerService->installPermission('user', $permissionFile);
 
         // Set result
-        return new JsonResponse(
+        return new EscapingJsonResponse(
             [
                 'result' => true,
                 'data'   => new stdClass(),

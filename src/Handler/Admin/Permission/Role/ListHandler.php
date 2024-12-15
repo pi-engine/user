@@ -3,7 +3,7 @@
 namespace Pi\User\Handler\Admin\Permission\Role;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\PermissionService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -43,6 +43,6 @@ class ListHandler implements RequestHandlerInterface
             'error'  => new \stdClass(),
         ];
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

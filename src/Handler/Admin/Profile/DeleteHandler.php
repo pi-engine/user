@@ -3,7 +3,7 @@
 namespace Pi\User\Handler\Admin\Profile;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -38,6 +38,6 @@ class DeleteHandler implements RequestHandlerInterface
         $operator    = $request->getAttribute('account');
         $result      = $this->accountService->deleteUserByAdmin($requestBody, $operator);
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

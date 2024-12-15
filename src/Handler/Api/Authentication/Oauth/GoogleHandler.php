@@ -4,7 +4,7 @@ namespace Pi\User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Hybridauth\Exception\UnexpectedApiResponseException;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Authentication\Oauth\Google;
 use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -60,6 +60,6 @@ class GoogleHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->loginOauth($userData);
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

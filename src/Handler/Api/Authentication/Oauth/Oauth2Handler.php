@@ -3,14 +3,14 @@
 namespace Pi\User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
+use Pi\User\Authentication\Oauth\Oauth2;
+use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Pi\User\Authentication\Oauth\Oauth2;
-use Pi\User\Service\AccountService;
 
 class Oauth2Handler implements RequestHandlerInterface
 {
@@ -53,7 +53,7 @@ class Oauth2Handler implements RequestHandlerInterface
                     'message' => 'Invalid authentication data. please try again!',
                 ],
             ];
-            return new JsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
+            return new EscapingJsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);
         }
 
 
@@ -61,12 +61,12 @@ class Oauth2Handler implements RequestHandlerInterface
         $authService = new Oauth2($this->config);
         $result      = $authService->verifyToken($requestBody);
         if (!$result['result']) {
-            return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+            return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
         }
 
         // Do log in
         $result = $this->accountService->loginOauth2(array_merge($result['data'], ['security_stream' => $securityStream]));
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

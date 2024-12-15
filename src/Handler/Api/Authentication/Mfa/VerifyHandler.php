@@ -3,13 +3,13 @@
 namespace Pi\User\Handler\Api\Authentication\Mfa;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
+use Pi\User\Service\AccountService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Pi\User\Service\AccountService;
 
 class VerifyHandler implements RequestHandlerInterface
 {
@@ -40,6 +40,6 @@ class VerifyHandler implements RequestHandlerInterface
 
         $result = $this->accountService->verifyMfa($account, $requestBody, $tokenId);
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

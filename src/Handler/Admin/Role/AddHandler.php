@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler\Admin\Role;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\RoleService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -53,7 +53,7 @@ class AddHandler implements RequestHandlerInterface
         }
 
         if ($isDuplicate || !isset($requestBody['name']) || empty($requestBody['name'])) {
-            return new JsonResponse(
+            return new EscapingJsonResponse(
                 [
                     'result' => false,
                     'data'   => new stdClass(),
@@ -68,7 +68,7 @@ class AddHandler implements RequestHandlerInterface
         // Add role
         $result = $this->roleService->addRoleResource($requestBody, $operator);
 
-        return new JsonResponse(
+        return new EscapingJsonResponse(
             [
                 'result' => true,
                 'data'   => $result,

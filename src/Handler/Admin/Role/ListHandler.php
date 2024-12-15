@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler\Admin\Role;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\RoleService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -49,6 +49,6 @@ class ListHandler implements RequestHandlerInterface
             ],
             'error'  => new \stdClass(),
         ];
-        return new JsonResponse($result);
+        return new EscapingJsonResponse($result);
     }
 }

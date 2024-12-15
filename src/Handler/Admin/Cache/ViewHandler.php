@@ -2,7 +2,7 @@
 
 namespace Pi\User\Handler\Admin\Cache;
 
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\Core\Service\CacheService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -44,6 +44,6 @@ class ViewHandler implements RequestHandlerInterface
             'data'   => $item,
             'error'  => new \stdClass(),
         ];
-        return new JsonResponse($result);
+        return new EscapingJsonResponse($result);
     }
 }

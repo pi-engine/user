@@ -3,7 +3,7 @@
 namespace Pi\User\Handler\Admin\Profile;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\Media\Service\MediaService;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\ExportService;
@@ -51,6 +51,6 @@ class ExportHandler implements RequestHandlerInterface
         $account = $this->accountService->getAccountList($params);
         $export  = $this->exportService->exportData($account);
         $result  = $this->mediaService->streamFile($export);
-        return new JsonResponse($result, StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, StatusCodeInterface::STATUS_OK);
     }
 }

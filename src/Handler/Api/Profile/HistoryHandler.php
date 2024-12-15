@@ -3,7 +3,7 @@
 namespace Pi\User\Handler\Api\Profile;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Diactoros\Response\JsonResponse;
+use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\HistoryService;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -44,6 +44,6 @@ class HistoryHandler implements RequestHandlerInterface
         $account     = $request->getAttribute('account');
         $result      = $this->historyService->getUserLog($account, $requestBody);
 
-        return new JsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
 }

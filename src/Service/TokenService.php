@@ -70,7 +70,7 @@ class TokenService implements ServiceInterface
                 !empty($decoded)
                 && !empty($cacheUser)
                 && $decoded->type == 'access'
-                && in_array($decoded->id, $cacheUser['access_keys'])
+                && in_array($decoded->id, array_keys($cacheUser['access_keys']))
             ) {
                 return [
                     'status'  => true,
@@ -83,7 +83,7 @@ class TokenService implements ServiceInterface
                 !empty($decoded)
                 && !empty($cacheUser)
                 && $decoded->type == 'refresh'
-                && in_array($decoded->id, $cacheUser['refresh_keys'])
+                && in_array($decoded->id, array_keys($cacheUser['refresh_keys']))
             ) {
                 return [
                     'status'  => true,
