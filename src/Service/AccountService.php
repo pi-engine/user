@@ -320,9 +320,9 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup']    = false;
-        $account['company_id']          = $user['authorization']['company_id'] ?? 0;
-        $account['company_title']       = $user['authorization']['company']['title'] ?? '';
+        $account['is_company_setup'] = false;
+        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
+        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
@@ -330,6 +330,18 @@ class AccountService implements ServiceInterface
                 $account['company_title']    = $company['company_title'];
                 $account['is_company_setup'] = true;
             }
+        }
+
+        // Check company setup
+        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+            $isCompanySetup = false;
+            if (isset($user['authorization']['company']['is_company_setup'])) {
+                $isCompanySetup = $user['authorization']['company']['is_company_setup'];
+            } elseif (isset($user['account']['is_company_setup'])) {
+                $isCompanySetup = $user['account']['is_company_setup'];
+            }
+
+            $account['is_company_setup'] = $isCompanySetup;
         }
 
         // Generate access token
@@ -352,6 +364,7 @@ class AccountService implements ServiceInterface
         $multiFactor = [
             $accessToken['key'] => [
                 'key'                 => $accessToken['key'],
+                'expire'              => $accessToken['payload']['exp'],
                 'multi_factor_global' => $multiFactorGlobal,
                 'multi_factor_status' => $multiFactorStatus,
                 'multi_factor_verify' => $multiFactorVerify,
@@ -382,18 +395,6 @@ class AccountService implements ServiceInterface
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
         }
 
-        // Check company setup
-        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
-            $isCompanySetup = false;
-            if (isset($user['authorization']['company']['is_company_setup'])) {
-                $isCompanySetup = $user['authorization']['company']['is_company_setup'];
-            } elseif (isset($user['account']['is_company_setup'])) {
-                $isCompanySetup = $user['account']['is_company_setup'];
-            }
-
-            $account['is_company_setup'] = $isCompanySetup;
-        }
-
         // Check permission for company package
         if (isset($this->config['login']['permission_package']) && (int)$this->config['login']['permission_package'] === 1) {
             if (isset($user['authorization']['package_id']) && (int)$user['authorization']['package_id'] > 0) {
@@ -411,6 +412,9 @@ class AccountService implements ServiceInterface
             }
         }
 
+        // reset permission
+        $account['permission'] = array_values($account['permission']);
+
         // Set source roles params
         if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
             $this->roleService->addRoleAccount($account, $params['source']);
@@ -420,53 +424,8 @@ class AccountService implements ServiceInterface
             $account['roles']   = array_values($account['roles']);
         }
 
-        // reset permission
-        $account['permission'] = array_values($account['permission']);
-
-        // Set cache params
-        $cacheParams = [
-            'account'      => [
-                'id'                  => (int)$account['id'],
-                'name'                => $account['name'],
-                'email'               => $account['email'],
-                'identity'            => $account['identity'],
-                'mobile'              => $account['mobile'],
-                'first_name'          => $account['first_name'],
-                'last_name'           => $account['last_name'],
-                'avatar'              => $account['avatar'],
-                'time_created'        => $account['time_created'],
-                'last_login'          => $account['last_login'],
-                'status'              => (int)$account['status'],
-                'has_password'        => $account['has_password'],
-                'multi_factor_global' => $account['multi_factor_global'],
-                'multi_factor_status' => $account['multi_factor_status'],
-                'multi_factor_verify' => $account['multi_factor_verify'],
-                'is_company_setup'    => $account['is_company_setup'],
-            ],
-            'roles'        => $account['roles'],
-            'permission'   => $account['permission'],
-            'access_keys'  => (isset($user['access_keys']) && !empty($user['access_keys']))
-                ? array_unique(array_merge($user['access_keys'], [$accessToken['key']]))
-                : [$accessToken['key']],
-            'refresh_keys' => (isset($user['refresh_keys']) && !empty($user['refresh_keys']))
-                ? array_unique(array_merge($user['refresh_keys'], [$refreshToken['key']]))
-                : [$refreshToken['key']],
-            'multi_factor' => (isset($user['multi_factor']) && !empty($user['multi_factor']))
-                ? array_merge($user['multi_factor'], $multiFactor)
-                : $multiFactor,
-        ];
-
-        // Manage single session policy if set
-        if (isset($this->config['login']['session_policy']) && $this->config['login']['session_policy'] == 'single') {
-            $cacheParams['access_keys']  = [$accessToken['key']];
-            $cacheParams['refresh_keys'] = [$refreshToken['key']];
-
-            // Save log
-            $this->historyService->logger('logout_all', ['request' => [], 'account' => $account]);
-        }
-
-        // Set/Update user data to cache
-        $this->cacheService->setUser($account['id'], $cacheParams);
+        // Add or update user data to cache
+        $this->manageUserCache($account, $accessToken, $refreshToken, $multiFactor);
 
         // Save log
         $this->historyService->logger('login', ['request' => $params, 'account' => $account]);
@@ -851,25 +810,14 @@ class AccountService implements ServiceInterface
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
-        // Set user cache
-        $this->cacheService->setUser(
-            $account['id'],
-            [
-                'account' => [
-                    'id'           => (int)$account['id'],
-                    'name'         => $account['name'],
-                    'email'        => $account['email'],
-                    'identity'     => $account['identity'],
-                    'mobile'       => $account['mobile'],
-                    'time_created' => $account['time_created'],
-                    'last_login'   => $user['account']['last_login'] ?? time(),
-                ],
-                'otp'     => [
-                    'code'        => $otpCode,
-                    'time_expire' => $otpExpire,
-                ],
-            ]
-        );
+        // Set otp data
+        $otp = [
+            'code'        => $otpCode,
+            'time_expire' => $otpExpire,
+        ];
+
+        // Add or update user data to cache
+        $this->manageUserCache($account, [], [], [], $otp);
 
         // Set sms message
         $message = 'Code: %s
@@ -902,6 +850,79 @@ class AccountService implements ServiceInterface
                 'message'    => 'Verify code send to your mobile number !',
                 'name'       => $account['name'],
                 'mobile'     => $account['mobile'],
+                'is_new'     => $isNew,
+                'otp_expire' => $otpExpire,
+            ],
+            'error'  => [],
+        ];
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function preMailLogin($params): array
+    {
+        // Set new password as OTP
+        $otpCode   = Rand::getInteger(100000, 999999);
+        $otpExpire = (time() + 180);
+        $isNew     = 0;
+
+        // Check account exist
+        $account = $this->getAccount(['email' => $params['email']]);
+
+        // Create account if not exist
+        // Update OTP password if account exist
+        if (empty($account)) {
+            $account = $this->addAccount(
+                [
+                    'email'      => $params['email'],
+                    'source'     => $params['source'] ?? null,
+                    'first_name' => $params['first_name'] ?? null,
+                    'last_name'  => $params['last_name'] ?? null,
+                    'otp'        => $otpCode,
+                ]
+            );
+
+            // Set is new
+            $isNew = 1;
+        } else {
+            $otp = $this->generatePassword($otpCode);
+            $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
+        }
+
+        // Set otp data
+        $otp = [
+            'code'        => $otpCode,
+            'time_expire' => $otpExpire,
+        ];
+
+        // Add or update user data to cache
+        $this->manageUserCache($account, [], [], [], $otp);
+
+        // Set notification params
+        $notificationParams = [
+            'email' => [
+                'to'      => [
+                    'email' => $account['email'],
+                    'name'  => $account['name'],
+                ],
+                'subject' => $this->config['otp_email']['subject'],
+                'body'    => sprintf($this->config['otp_email']['body'], $otpCode),
+            ],
+        ];
+
+        // Send notification
+        $this->notificationService->send($notificationParams);
+
+        // Set result
+        return [
+            'result' => true,
+            'data'   => [
+                'message'    => 'Verify code send to your email !',
+                'name'       => $account['name'],
+                'email'      => $account['email'],
                 'is_new'     => $isNew,
                 'otp_expire' => $otpExpire,
             ],
@@ -999,10 +1020,25 @@ class AccountService implements ServiceInterface
         $profile = $this->getProfile(['user_id' => (int)$account['id']]);
         $account = array_merge($account, $profile);
 
-        // Check company setup
-        if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
-            $isCompanySetup = false;
+        // Get user from cache if exist
+        $user = $this->cacheService->getUser($account['id']);
 
+        // Set company data and Get company details if company module loaded
+        $account['is_company_setup'] = false;
+        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
+        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
+        if ($this->hasCompanyService()) {
+            $company = $this->companyService->getCompanyDetails((int)$account['id']);
+            if (!empty($company)) {
+                $account['company_id']       = $company['company_id'];
+                $account['company_title']    = $company['company_title'];
+                $account['is_company_setup'] = true;
+            }
+        }
+
+        // Check company setup
+        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+            $isCompanySetup = false;
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
             } elseif (isset($user['account']['is_company_setup'])) {
@@ -1012,122 +1048,13 @@ class AccountService implements ServiceInterface
             $account['is_company_setup'] = $isCompanySetup;
         }
 
-        // Get user from cache if exist
-        $user = $this->cacheService->getUser($account['id']);
-
-        // Set/Update user data to cache
-        $this->cacheService->setUser(
-            $account['id'],
-            [
-                'account' => [
-                    'id'                  => (int)$account['id'],
-                    'name'                => $account['name'],
-                    'email'               => $account['email'],
-                    'identity'            => $account['identity'],
-                    'mobile'              => $account['mobile'],
-                    'first_name'          => $account['first_name'],
-                    'last_name'           => $account['last_name'],
-                    'avatar'              => $account['avatar'],
-                    'time_created'        => $account['time_created'],
-                    'last_login'          => $user['account']['last_login'] ?? time(),
-                    'status'              => (int)$account['status'],
-                    'has_password'        => $user['account']['has_password'] ?? $this->hasPassword((int)$account['id']),
-                    'multi_factor_global' => (int)$this->config['multi_factor']['status'] ?? 0,
-                    'multi_factor_status' => $account['multi_factor_status'] ?? 0,
-                    'multi_factor_verify' => $user['account']['multi_factor_verify'] ?? 0,
-                    'is_company_setup'    => $account['is_company_setup'] ?? 0,
-                ],
-            ]
-        );
+        // Add or update user data to cache
+        $this->manageUserCache($account);
 
         // Save log
         $this->historyService->logger('update', ['request' => $params, 'account' => $account, 'operator' => $operator]);
 
         return $account;
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function preMailLogin($params): array
-    {
-        // Set new password as OTP
-        $otpCode   = Rand::getInteger(100000, 999999);
-        $otpExpire = (time() + 180);
-        $isNew     = 0;
-
-        // Check account exist
-        $account = $this->getAccount(['email' => $params['email']]);
-
-        // Create account if not exist
-        // Update OTP password if account exist
-        if (empty($account)) {
-            $account = $this->addAccount(
-                [
-                    'email'      => $params['email'],
-                    'source'     => $params['source'] ?? null,
-                    'first_name' => $params['first_name'] ?? null,
-                    'last_name'  => $params['last_name'] ?? null,
-                    'otp'        => $otpCode,
-                ]
-            );
-
-            // Set is new
-            $isNew = 1;
-        } else {
-            $otp = $this->generatePassword($otpCode);
-            $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
-        }
-
-        // Set user cache
-        $this->cacheService->setUser(
-            $account['id'],
-            [
-                'account' => [
-                    'id'           => (int)$account['id'],
-                    'name'         => $account['name'],
-                    'email'        => $account['email'],
-                    'identity'     => $account['identity'],
-                    'mobile'       => $account['mobile'],
-                    'time_created' => $account['time_created'],
-                    'last_login'   => $user['account']['last_login'] ?? time(),
-                ],
-                'otp'     => [
-                    'code'        => $otpCode,
-                    'time_expire' => $otpExpire,
-                ],
-            ]
-        );
-
-        // Set notification params
-        $notificationParams = [
-            'email' => [
-                'to'      => [
-                    'email' => $account['email'],
-                    'name'  => $account['name'],
-                ],
-                'subject' => $this->config['otp_email']['subject'],
-                'body'    => sprintf($this->config['otp_email']['body'], $otpCode),
-            ],
-        ];
-
-        // Send notification
-        $this->notificationService->send($notificationParams);
-
-        // Set result
-        return [
-            'result' => true,
-            'data'   => [
-                'message'    => 'Verify code send to your email !',
-                'name'       => $account['name'],
-                'email'      => $account['email'],
-                'is_new'     => $isNew,
-                'otp_expire' => $otpExpire,
-            ],
-            'error'  => [],
-        ];
     }
 
     /**
@@ -1369,10 +1296,22 @@ class AccountService implements ServiceInterface
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
         }
 
-        // Check company setup
-        if (isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
-            $isCompanySetup = false;
+        // Set company data and Get company details if company module loaded
+        $account['is_company_setup'] = false;
+        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
+        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
+        if ($this->hasCompanyService()) {
+            $company = $this->companyService->getCompanyDetails((int)$account['id']);
+            if (!empty($company)) {
+                $account['company_id']       = $company['company_id'];
+                $account['company_title']    = $company['company_title'];
+                $account['is_company_setup'] = true;
+            }
+        }
 
+        // Check company setup
+        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+            $isCompanySetup = false;
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
             } elseif (isset($user['account']['is_company_setup'])) {
@@ -1402,32 +1341,8 @@ class AccountService implements ServiceInterface
         // reset permission
         $account['permission'] = array_values($account['permission']);
 
-        // Set cache params
-        $cacheParams = [
-            'account'    => [
-                'id'                  => (int)$account['id'],
-                'name'                => $account['name'],
-                'email'               => $account['email'],
-                'identity'            => $account['identity'],
-                'mobile'              => $account['mobile'],
-                'first_name'          => $account['first_name'],
-                'last_name'           => $account['last_name'],
-                'avatar'              => $account['avatar'],
-                'time_created'        => $account['time_created'],
-                'last_login'          => $account['last_login'],
-                'status'              => (int)$account['status'],
-                'has_password'        => $account['has_password'],
-                'multi_factor_global' => $account['multi_factor_global'],
-                'multi_factor_status' => $account['multi_factor_status'],
-                'multi_factor_verify' => $account['multi_factor_verify'],
-                'is_company_setup'    => $account['is_company_setup'] ?? 0,
-            ],
-            'roles'      => $account['roles'],
-            'permission' => $account['permission'],
-        ];
-
-        // Set/Update user data to cache
-        $this->cacheService->setUser($account['id'], $cacheParams);
+        // Add or update user data to cache
+        $this->manageUserCache($account);
 
         return $account;
     }
@@ -2398,12 +2313,12 @@ class AccountService implements ServiceInterface
         // Get from cache
         $user = $this->cacheService->getUser($account['id']);
 
-        // update multi factor
+        // update multi factor items
         $user['multi_factor'][$tokenId]['multi_factor_status'] = 1;
         $user['multi_factor'][$tokenId]['multi_factor_verify'] = 1;
 
-        // Update cache
-        $this->cacheService->setUser($account['id'], ['multi_factor' => $user['multi_factor']]);
+        // Add or update user data to cache
+        $this->manageUserCache($account, [], [], $user['multi_factor']);
 
         // Check update profile
         if ((int)$mfa['multi_factor_status'] === 0) {
@@ -2427,5 +2342,124 @@ class AccountService implements ServiceInterface
             ],
             'error'  => [],
         ];
+    }
+
+
+    /**
+     * Manage the user data cache by setting or updating it.
+     *
+     * @param array $account      The account data for the user
+     * @param array $accessToken  Access token
+     * @param array $refreshToken Refresh token
+     * @param array $multiFactor  Multifactor data containing keys and other necessary values.
+     * @param array $opt          For one time login
+     *
+     * @return array               The updated cache parameters.
+     */
+    public function manageUserCache(array $account, array $accessToken = [], array $refreshToken = [], array $multiFactor = [], array $otp = []): array
+    {
+        // Fetch existing cache if available
+        $user        = $this->cacheService->getUser($account['id']) ?: [];
+        $currentTime = time();
+
+        // Helper function to update and clean tokens
+        $mergeTokens = function (array $existingTokens, array $newToken) use ($currentTime) {
+            // Remove expired tokens
+            $existingTokens = array_filter($existingTokens, function ($token) use ($currentTime) {
+                return isset($token['expire']) && $token['expire'] > $currentTime;
+            });
+
+            // Add or update token with the key as array key
+            if (isset($newToken['key'], $newToken['payload']['iat'], $newToken['payload']['exp'])) {
+                // Remove any existing token with the same key
+                unset($existingTokens[$newToken['key']]);
+
+                // Add the new token with its key as the array key
+                $existingTokens[$newToken['key']] = [
+                    'key'    => $newToken['key'],
+                    'create' => $newToken['payload']['iat'],
+                    'expire' => $newToken['payload']['exp'],
+                ];
+            }
+
+            return $existingTokens; // Return the updated tokens array
+        };
+
+        // Helper function to update and clean multiFactor
+        $mergeMultiFactor = function (array $existingMultiFactor, array $newMultiFactor) use ($currentTime) {
+            // Remove expired multi-factor data
+            $existingMultiFactor = array_filter($existingMultiFactor, function ($mfData) use ($currentTime) {
+                return isset($mfData['expire']) && $mfData['expire'] > $currentTime;
+            });
+
+            // Add or update multi-factor data with the key as the array key
+            foreach ($newMultiFactor as $mfKey => $mfData) {
+                if (isset($mfData['key'], $mfData['expire'])) {
+                    // Remove any existing multi-factor data with the same key
+                    unset($existingMultiFactor[$mfKey]);
+
+                    // Add or update multi-factor data with its key as the array key
+                    $existingMultiFactor[$mfKey] = [
+                        'key'                 => $mfData['key'],
+                        'multi_factor_global' => $mfData['multi_factor_global'] ?? null,
+                        'multi_factor_status' => $mfData['multi_factor_status'] ?? null,
+                        'multi_factor_verify' => $mfData['multi_factor_verify'] ?? null,
+                        'expire'              => $mfData['expire'],
+                    ];
+                }
+            }
+
+            return $existingMultiFactor; // Return the updated multi-factor data
+        };
+
+        // Template for default cache structure
+        $cacheParams = [
+            'account'       => [
+                'id'                  => $account['id'] ?? ($user['account']['id'] ?? null),
+                'name'                => $user['account']['name'] ?? $account['name'] ?? null,
+                'email'               => $user['account']['email'] ?? $account['email'] ?? null,
+                'identity'            => $user['account']['identity'] ?? $account['identity'] ?? null,
+                'mobile'              => $user['account']['mobile'] ?? $account['mobile'] ?? null,
+                'first_name'          => $user['account']['first_name'] ?? $account['first_name'] ?? null,
+                'last_name'           => $user['account']['last_name'] ?? $account['last_name'] ?? null,
+                'avatar'              => $user['account']['avatar'] ?? $account['avatar'] ?? null,
+                'time_created'        => $user['account']['time_created'] ?? $account['time_created'] ?? null,
+                'last_login'          => $user['account']['last_login'] ?? $account['last_login'] ?? null,
+                'status'              => $user['account']['status'] ?? $account['status'] ?? null,
+                'has_password'        => $user['account']['has_password'] ?? $account['has_password'] ?? $this->hasPassword((int)$account['id']),
+                'multi_factor_global' => $user['account']['multi_factor_global'] ?? $account['multi_factor_global'] ?? null,
+                'multi_factor_status' => $user['account']['multi_factor_status'] ?? $account['multi_factor_status'] ?? null,
+                'multi_factor_verify' => $user['account']['multi_factor_verify'] ?? $account['multi_factor_verify'] ?? null,
+                'is_company_setup'    => $user['account']['is_company_setup'] ?? $account['is_company_setup'] ?? null,
+                'company_id'          => $user['account']['company_id'] ?? $account['company_id'] ?? null,
+                'company_title'       => $user['account']['company_title'] ?? $account['company_title'] ?? null,
+            ],
+            'roles'         => $user['roles'] ?? $account['roles'] ?? [],
+            'permission'    => $user['permission'] ?? $account['permission'] ?? null,
+            'access_keys'   => $mergeTokens($user['access_keys'] ?? [], $accessToken),
+            'refresh_keys'  => $mergeTokens($user['refresh_keys'] ?? [], $refreshToken),
+            'otp'           => $otp ?? $user['otp'] ?? [],
+            'device_tokens' => $user['device_tokens'] ?? $account['device_tokens'] ?? [],
+            'multi_factor'  => $mergeMultiFactor($user['multi_factor'] ?? [], $multiFactor),
+            'authorization' => $user['authorization'] ?? $account['authorization'] ?? [],
+        ];
+
+        // Manage single session policy if set
+        if (isset($this->config['login']['session_policy']) && $this->config['login']['session_policy'] === 'single') {
+            // Only keep the current access and refresh tokens
+            $cacheParams['access_keys']  = isset($accessToken['key']) ? [$accessToken['key']] : [];
+            $cacheParams['refresh_keys'] = isset($refreshToken['key']) ? [$refreshToken['key']] : [];
+
+            // Save log for session policy enforcement
+            $this->historyService->logger('logout_all', [
+                'request' => [],
+                'account' => $account,
+            ]);
+        }
+
+        // Save the updated cache
+        $this->cacheService->setUser($account['id'], $cacheParams);
+
+        return $cacheParams;
     }
 }
