@@ -1102,6 +1102,7 @@ class AccountService implements ServiceInterface
                 $message = 'You are logout successfully from all of your sessions !';
             } else {
                 $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
+                $this->cacheService->deleteUserItem($params['user_id'], 'multi_factor', $params['token_id']);
             }
         }
 
@@ -1803,8 +1804,9 @@ class AccountService implements ServiceInterface
         );
 
         // Update cache
-        $this->cacheService->setUserItem($account['id'], 'access_keys', $accessToken['key']);
+        $this->cacheService->setUserItem($account['id'], 'access_keys', $accessToken);
         $this->cacheService->deleteUserItem($account['id'], 'access_keys', $tokenOldId);
+        $this->cacheService->deleteUserItem($account['id'], 'multi_factor', $tokenOldId);
 
         // Set result array
         return [
@@ -2347,23 +2349,15 @@ class AccountService implements ServiceInterface
 
     /**
      * Manage the user data cache by setting or updating it.
-     *
-     * @param array $account      The account data for the user
-     * @param array $accessToken  Access token
-     * @param array $refreshToken Refresh token
-     * @param array $multiFactor  Multifactor data containing keys and other necessary values.
-     * @param array $opt          For one time login
-     *
-     * @return array               The updated cache parameters.
      */
     public function manageUserCache(array $account, array $accessToken = [], array $refreshToken = [], array $multiFactor = [], array $otp = []): array
     {
         // Fetch existing cache if available
-        $user        = $this->cacheService->getUser($account['id']) ?: [];
+        $user = $this->cacheService->getUser($account['id'] ?? null) ?: [];
         $currentTime = time();
 
         // Helper function to update and clean tokens
-        $mergeTokens = function (array $existingTokens, array $newToken) use ($currentTime) {
+        $mergeTokens = function (array $account, array $existingTokens, array $newToken, string $tokenType) use ($currentTime) {
             // Remove expired tokens
             $existingTokens = array_filter($existingTokens, function ($token) use ($currentTime) {
                 return isset($token['expire']) && $token['expire'] > $currentTime;
@@ -2371,10 +2365,7 @@ class AccountService implements ServiceInterface
 
             // Add or update token with the key as array key
             if (isset($newToken['key'], $newToken['payload']['iat'], $newToken['payload']['exp'])) {
-                // Remove any existing token with the same key
-                unset($existingTokens[$newToken['key']]);
-
-                // Add the new token with its key as the array key
+                unset($existingTokens[$newToken['key']]); // Remove existing token with the same key
                 $existingTokens[$newToken['key']] = [
                     'key'    => $newToken['key'],
                     'create' => $newToken['payload']['iat'],
@@ -2382,23 +2373,30 @@ class AccountService implements ServiceInterface
                 ];
             }
 
-            return $existingTokens; // Return the updated tokens array
+            // Enforce single session policy if enabled
+            if (isset($this->config['login']['session_policy']) && $this->config['login']['session_policy'] === 'single') {
+                $existingTokens = isset($newToken['key']) ? [$newToken['key'] => $existingTokens[$newToken['key']]] : [];
+
+                // Log session policy enforcement for access tokens
+                if ($tokenType === 'access_keys') {
+                    $this->historyService->logger('logout_all', [
+                        'request' => [],
+                        'account' => $account,
+                    ]);
+                }
+            }
+
+            return $existingTokens;
         };
 
-        // Helper function to update and clean multiFactor
+        // Helper function to update and clean multi-factor data
         $mergeMultiFactor = function (array $existingMultiFactor, array $newMultiFactor) use ($currentTime) {
-            // Remove expired multi-factor data
             $existingMultiFactor = array_filter($existingMultiFactor, function ($mfData) use ($currentTime) {
                 return isset($mfData['expire']) && $mfData['expire'] > $currentTime;
             });
 
-            // Add or update multi-factor data with the key as the array key
             foreach ($newMultiFactor as $mfKey => $mfData) {
                 if (isset($mfData['key'], $mfData['expire'])) {
-                    // Remove any existing multi-factor data with the same key
-                    unset($existingMultiFactor[$mfKey]);
-
-                    // Add or update multi-factor data with its key as the array key
                     $existingMultiFactor[$mfKey] = [
                         'key'                 => $mfData['key'],
                         'multi_factor_global' => $mfData['multi_factor_global'] ?? null,
@@ -2409,57 +2407,45 @@ class AccountService implements ServiceInterface
                 }
             }
 
-            return $existingMultiFactor; // Return the updated multi-factor data
+            return $existingMultiFactor;
         };
 
-        // Template for default cache structure
+        // Build cache structure with input priority and defaults
         $cacheParams = [
-            'account'       => [
-                'id'                  => $account['id'] ?? ($user['account']['id'] ?? null),
-                'name'                => $user['account']['name'] ?? $account['name'] ?? null,
-                'email'               => $user['account']['email'] ?? $account['email'] ?? null,
-                'identity'            => $user['account']['identity'] ?? $account['identity'] ?? null,
-                'mobile'              => $user['account']['mobile'] ?? $account['mobile'] ?? null,
-                'first_name'          => $user['account']['first_name'] ?? $account['first_name'] ?? null,
-                'last_name'           => $user['account']['last_name'] ?? $account['last_name'] ?? null,
-                'avatar'              => $user['account']['avatar'] ?? $account['avatar'] ?? null,
-                'time_created'        => $user['account']['time_created'] ?? $account['time_created'] ?? null,
-                'last_login'          => $user['account']['last_login'] ?? $account['last_login'] ?? null,
-                'status'              => $user['account']['status'] ?? $account['status'] ?? null,
-                'has_password'        => $user['account']['has_password'] ?? $account['has_password'] ?? $this->hasPassword((int)$account['id']),
-                'multi_factor_global' => $user['account']['multi_factor_global'] ?? $account['multi_factor_global'] ?? null,
-                'multi_factor_status' => $user['account']['multi_factor_status'] ?? $account['multi_factor_status'] ?? null,
-                'multi_factor_verify' => $user['account']['multi_factor_verify'] ?? $account['multi_factor_verify'] ?? null,
-                'is_company_setup'    => $user['account']['is_company_setup'] ?? $account['is_company_setup'] ?? null,
-                'company_id'          => $user['account']['company_id'] ?? $account['company_id'] ?? null,
-                'company_title'       => $user['account']['company_title'] ?? $account['company_title'] ?? null,
+            'account' => [
+                'id'                  => $account['id'] ?? $user['account']['id'] ?? null,
+                'name'                => $account['name'] ?? $user['account']['name'] ?? 'Guest',
+                'email'               => $account['email'] ?? $user['account']['email'] ?? 'guest@example.com',
+                'identity'            => $account['identity'] ?? $user['account']['identity'] ?? null,
+                'mobile'              => $account['mobile'] ?? $user['account']['mobile'] ?? null,
+                'first_name'          => $account['first_name'] ?? $user['account']['first_name'] ?? 'FirstName',
+                'last_name'           => $account['last_name'] ?? $user['account']['last_name'] ?? 'LastName',
+                'avatar'              => $account['avatar'] ?? $user['account']['avatar'] ?? 'default.png',
+                'time_created'        => $account['time_created'] ?? $user['account']['time_created'] ?? $currentTime,
+                'last_login'          => $account['last_login'] ?? $user['account']['last_login'] ?? null,
+                'status'              => $account['status'] ?? $user['account']['status'] ?? 'active',
+                'has_password'        => $account['has_password'] ?? $user['account']['has_password'] ?? $this->hasPassword((int)($account['id'] ?? 0)),
+                'multi_factor_global' => $account['multi_factor_global'] ?? $user['account']['multi_factor_global'] ?? null,
+                'multi_factor_status' => $account['multi_factor_status'] ?? $user['account']['multi_factor_status'] ?? null,
+                'multi_factor_verify' => $account['multi_factor_verify'] ?? $user['account']['multi_factor_verify'] ?? null,
+                'is_company_setup'    => $account['is_company_setup'] ?? $user['account']['is_company_setup'] ?? false,
+                'company_id'          => $account['company_id'] ?? $user['account']['company_id'] ?? 0,
+                'company_title'       => $account['company_title'] ?? $user['account']['company_title'] ?? 'N/A',
             ],
-            'roles'         => $user['roles'] ?? $account['roles'] ?? [],
-            'permission'    => $user['permission'] ?? $account['permission'] ?? null,
-            'access_keys'   => $mergeTokens($user['access_keys'] ?? [], $accessToken),
-            'refresh_keys'  => $mergeTokens($user['refresh_keys'] ?? [], $refreshToken),
-            'otp'           => $otp ?? $user['otp'] ?? [],
-            'device_tokens' => $user['device_tokens'] ?? $account['device_tokens'] ?? [],
+            'roles'         => $account['roles'] ?? $user['roles'] ?? [],
+            'permission'    => $account['permission'] ?? $user['permission'] ?? null,
+            'access_keys'   => $mergeTokens($account, $user['access_keys'] ?? [], $accessToken, 'access_keys'),
+            'refresh_keys'  => $mergeTokens($account, $user['refresh_keys'] ?? [], $refreshToken, 'refresh_keys'),
             'multi_factor'  => $mergeMultiFactor($user['multi_factor'] ?? [], $multiFactor),
-            'authorization' => $user['authorization'] ?? $account['authorization'] ?? [],
+            'otp'           => $otp ?? $user['otp'] ?? [],
+            'device_tokens' => $account['device_tokens'] ?? $user['device_tokens'] ?? [],
+            'authorization' => $account['authorization'] ?? $user['authorization'] ?? [],
         ];
-
-        // Manage single session policy if set
-        if (isset($this->config['login']['session_policy']) && $this->config['login']['session_policy'] === 'single') {
-            // Only keep the current access and refresh tokens
-            $cacheParams['access_keys']  = isset($accessToken['key']) ? [$accessToken['key']] : [];
-            $cacheParams['refresh_keys'] = isset($refreshToken['key']) ? [$refreshToken['key']] : [];
-
-            // Save log for session policy enforcement
-            $this->historyService->logger('logout_all', [
-                'request' => [],
-                'account' => $account,
-            ]);
-        }
 
         // Save the updated cache
         $this->cacheService->setUser($account['id'], $cacheParams);
 
         return $cacheParams;
     }
+
 }
