@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;

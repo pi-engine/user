@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
+use Pi\User\Repository\PermissionRepositoryInterface;
+use Pi\User\Service\PermissionService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Pi\User\Repository\PermissionRepositoryInterface;
-use Pi\User\Service\PermissionService;
 
 class PermissionServiceFactory implements FactoryInterface
 {

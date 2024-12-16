@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Handler\Api\Authentication\Mobile;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\User\Handler\Api\Authentication\Mobile\VerifyHandler;
+use Pi\User\Service\AccountService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Pi\User\Handler\Api\Authentication\Mobile\VerifyHandler;
-use Pi\User\Service\AccountService;
 
 class VerifyHandlerFactory implements FactoryInterface
 {

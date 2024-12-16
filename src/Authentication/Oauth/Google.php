@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Authentication\Oauth;
 
 use Google\Auth\AccessToken;

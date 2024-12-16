@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
@@ -8,12 +10,6 @@ use Laminas\InputFilter\InputFilter;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\UtilityService;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Pi\User\Service\AccountService;
 use Pi\User\Validator\EmailValidator;
 use Pi\User\Validator\IdentityValidator;
@@ -21,6 +17,12 @@ use Pi\User\Validator\MobileValidator;
 use Pi\User\Validator\NameValidator;
 use Pi\User\Validator\OtpValidator;
 use Pi\User\Validator\PasswordValidator;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use function sprintf;
 
 class ValidationMiddleware implements MiddlewareInterface

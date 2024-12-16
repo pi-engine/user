@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
-use Psr\Container\ContainerInterface;
 use Pi\User\Service\TokenService;
+use Psr\Container\ContainerInterface;
 
 class TokenServiceFactory implements FactoryInterface
 {

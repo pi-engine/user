@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Handler\Api\Profile;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;

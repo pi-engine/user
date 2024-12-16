@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
@@ -33,7 +35,7 @@ class AccountRepositoryFactory implements FactoryInterface
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
             new Account('', '', '', '', 0, 0, 0),
-            new AccountProfile(0, 0, '', '', '', '', 0, 0, '', '', '', '', ''),
+            new AccountProfile('', '', '', '', 0, 0, '', '', '', '', '', '', 0),
             new Profile(0, '', '', '', '', '', '', 0),
             new AccountRole(0, '', '', 0),
             new Credential('', 0),

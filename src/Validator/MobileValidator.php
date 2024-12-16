@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Validator;
 
 use Laminas\I18n\Validator\PhoneNumber;

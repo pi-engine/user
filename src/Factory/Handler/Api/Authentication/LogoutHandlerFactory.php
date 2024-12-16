@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Handler\Api\Authentication;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Repository;
 
 use InvalidArgumentException;
@@ -11,9 +13,9 @@ use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
-use RuntimeException;
 use Pi\User\Model\Role\Account;
 use Pi\User\Model\Role\Resource;
+use RuntimeException;
 
 class RoleRepository implements RoleRepositoryInterface
 {

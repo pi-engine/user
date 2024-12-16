@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Handler\Api\Authentication\Email;
 
 use Fig\Http\Message\StatusCodeInterface;

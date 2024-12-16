@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Service;
 
 use Laminas\Permissions\Rbac\Rbac;

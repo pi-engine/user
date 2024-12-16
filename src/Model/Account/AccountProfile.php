@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Model\Account;
 
 class AccountProfile
@@ -13,178 +15,139 @@ class AccountProfile
     private mixed   $time_created;
     private mixed   $first_name;
     private mixed   $last_name;
-    private mixed   $avatar;
     private mixed   $birthdate;
     private mixed   $gender;
+    private mixed   $avatar;
     private mixed   $information;
 
-    /**
-     * @param mixed       $id
-     * @param string|null $name
-     * @param string|null $identity
-     * @param string|null $email
-     * @param string|null $mobile
-     * @param mixed       $status
-     * @param mixed       $time_created
-     * @param mixed       $first_name
-     * @param mixed       $last_name
-     * @param mixed       $avatar
-     * @param mixed       $birthdate
-     * @param mixed       $gender
-     * @param mixed       $information
-     */
     public function __construct(
-        mixed $id, ?string $name, ?string $identity, ?string $email, ?string $mobile, mixed $status, mixed $time_created, mixed $first_name, mixed $last_name,
-        mixed $avatar, mixed $birthdate, mixed $gender, mixed $information
+        $name,
+        $identity,
+        $email,
+        $mobile,
+        $status,
+        $time_created,
+        $first_name,
+        $last_name,
+        $birthdate,
+        $gender,
+        $avatar,
+        $information,
+        $id = null
     ) {
-        $this->id           = $id;
-        $this->name         = $name;
-        $this->identity     = $identity;
-        $this->email        = $email;
-        $this->mobile       = $mobile;
-        $this->status       = $status;
-        $this->time_created = $time_created;
-        $this->first_name   = $first_name;
-        $this->last_name    = $last_name;
-        $this->avatar       = $avatar;
-        $this->birthdate    = $birthdate;
-        $this->gender       = $gender;
-        $this->information  = $information;
+        $this->name                = $name;
+        $this->identity            = $identity;
+        $this->email               = $email;
+        $this->mobile              = $mobile;
+        $this->status              = $status;
+        $this->time_created        = $time_created;
+        $this->first_name = $first_name;
+        $this->last_name  = $last_name;
+        $this->birthdate  = $birthdate;
+        $this->gender     = $gender;
+        $this->avatar     = $avatar;
+        $this->information = $information;
+        $this->id                  = $id;
     }
 
-    public function getId(): mixed
+    /**
+     * @return int|null
+     */
+    public function getId(): int|null
     {
         return $this->id;
     }
 
-    public function setId(mixed $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function getName(): ?string
+    /**
+     * @return string|null
+     */
+    public function getName(): string|null
     {
         return $this->name;
     }
 
-    public function setName(?string $name): void
-    {
-        $this->name = $name;
-    }
-
-    public function getIdentity(): ?string
+    /**
+     * @return string|null
+     */
+    public function getIdentity(): string|null
     {
         return $this->identity;
     }
 
-    public function setIdentity(?string $identity): void
-    {
-        $this->identity = $identity;
-    }
-
-    public function getEmail(): ?string
+    /**
+     * @return string|null
+     */
+    public function getEmail(): string|null
     {
         return $this->email;
     }
 
-    public function setEmail(?string $email): void
-    {
-        $this->email = $email;
-    }
-
-    public function getMobile(): ?string
+    /**
+     * @return string|null
+     */
+    public function getMobile(): string|null
     {
         return $this->mobile;
     }
 
-    public function setMobile(?string $mobile): void
-    {
-        $this->mobile = $mobile;
-    }
-
-    public function getStatus(): mixed
+    /**
+     * @return int|null
+     */
+    public function getStatus(): int|null
     {
         return $this->status;
     }
 
-    public function setStatus(mixed $status): void
-    {
-        $this->status = $status;
-    }
-
-    public function getTimeCreated(): mixed
+    /**
+     * @return int|null
+     */
+    public function getTimeCreated(): int|null
     {
         return $this->time_created;
     }
 
-    public function setTimeCreated(mixed $time_created): void
-    {
-        $this->time_created = $time_created;
-    }
-
-    public function getFirstName(): mixed
+    /**
+     * @return string
+     */
+    public function getFirstName(): ?string
     {
         return $this->first_name;
     }
 
-    public function setFirstName(mixed $first_name): void
-    {
-        $this->first_name = $first_name;
-    }
-
-    public function getLastName(): mixed
+    /**
+     * @return string
+     */
+    public function getLastName(): ?string
     {
         return $this->last_name;
     }
 
-    public function setLastName(mixed $last_name): void
-    {
-        $this->last_name = $last_name;
-    }
-
-    public function getAvatar(): mixed
-    {
-        return $this->avatar;
-    }
-
-    public function setAvatar(mixed $avatar): void
-    {
-        $this->avatar = $avatar;
-    }
-
-    public function getBirthdate(): mixed
+    /**
+     * @return string|null
+     */
+    public function getBirthdate(): ?string
     {
         return $this->birthdate;
     }
 
-    public function setBirthdate(mixed $birthdate): void
-    {
-        $this->birthdate = $birthdate;
-    }
-
-    public function getGender(): mixed
+    /**
+     * @return string|null
+     */
+    public function getGender(): ?string
     {
         return $this->gender;
     }
 
-    public function setGender(mixed $gender): void
+    /**
+     * @return string|null
+     */
+    public function getAvatar(): ?string
     {
-        $this->gender = $gender;
+        return $this->avatar;
     }
 
-    public function getInformation(): mixed
+    public function getInformation(): ?string
     {
         return $this->information;
     }
-
-    public function setInformation(mixed $information): void
-    {
-        $this->information = $information;
-    }
-
-
 }
-
-
-
-

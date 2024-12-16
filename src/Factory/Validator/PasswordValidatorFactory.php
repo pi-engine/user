@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Validator;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\UtilityService;
+use Pi\User\Service\AccountService;
+use Pi\User\Validator\PasswordValidator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Pi\User\Service\AccountService;
-use Pi\User\Validator\PasswordValidator;
 
 class PasswordValidatorFactory implements FactoryInterface
 {

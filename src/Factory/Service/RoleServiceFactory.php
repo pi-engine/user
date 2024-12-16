@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Pi\User\Repository\RoleRepositoryInterface;
 use Pi\User\Service\HistoryService;
 use Pi\User\Service\RoleService;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class RoleServiceFactory implements FactoryInterface
 {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Handler\Api\Captcha\ReCaptcha;
 
 use Fig\Http\Message\StatusCodeInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User\Factory\Handler\Admin\Permission\Resource;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pi\User;
 
 use Laminas\Mvc\MvcEvent;
