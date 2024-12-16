@@ -2355,7 +2355,7 @@ class AccountService implements ServiceInterface
     public function manageUserCache(array $account, array $accessToken = [], array $refreshToken = [], array $multiFactor = [], array $otp = []): array
     {
         // Fetch existing cache if available
-        $user = $this->cacheService->getUser($account['id'] ?? null) ?: [];
+        $user        = $this->cacheService->getUser($account['id'] ?? null) ?: [];
         $currentTime = time();
 
         // Helper function to update and clean tokens
@@ -2414,7 +2414,7 @@ class AccountService implements ServiceInterface
 
         // Build cache structure with input priority and defaults
         $cacheParams = [
-            'account' => [
+            'account'       => [
                 'id'                  => $account['id'] ?? $user['account']['id'] ?? null,
                 'name'                => $account['name'] ?? $user['account']['name'] ?? 'Guest',
                 'email'               => $account['email'] ?? $user['account']['email'] ?? 'guest@example.com',

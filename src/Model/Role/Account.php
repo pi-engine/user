@@ -6,8 +6,8 @@ namespace Pi\User\Model\Role;
 
 class Account
 {
-    private mixed $id;
-    private ?int  $user_id;
+    private mixed  $id;
+    private ?int   $user_id;
     private string $role;
     private string $section;
 

@@ -25,12 +25,12 @@ class Profile
         $information,
         $id = null
     ) {
-        $this->user_id    = $user_id;
-        $this->first_name = $first_name;
-        $this->last_name  = $last_name;
-        $this->birthdate  = $birthdate;
-        $this->gender     = $gender;
-        $this->avatar     = $avatar;
+        $this->user_id     = $user_id;
+        $this->first_name  = $first_name;
+        $this->last_name   = $last_name;
+        $this->birthdate   = $birthdate;
+        $this->gender      = $gender;
+        $this->avatar      = $avatar;
         $this->information = $information;
         $this->id          = $id;
     }

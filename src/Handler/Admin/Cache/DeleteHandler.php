@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pi\User\Handler\Admin\Cache;
 
 use Pi\Core\Response\EscapingJsonResponse;
-use Pi\Core\Response\EscapingJsonResponse;
 use Pi\Core\Service\CacheService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;

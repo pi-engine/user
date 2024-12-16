@@ -69,10 +69,10 @@ class TokenService implements ServiceInterface
 
             // Validate token structure
             if (
-                empty($decodedToken) ||
-                !is_int($decodedToken->uid ?? null) ||
-                !in_array($decodedToken->type ?? '', ['access', 'refresh'], true) ||
-                !is_string($decodedToken->id ?? null)
+                empty($decodedToken)
+                || !is_int($decodedToken->uid ?? null)
+                || !in_array($decodedToken->type ?? '', ['access', 'refresh'], true)
+                || !is_string($decodedToken->id ?? null)
             ) {
                 return [
                     'status'  => false,
@@ -115,14 +115,14 @@ class TokenService implements ServiceInterface
 
             // Determine token type and validate access
             $isValidAccessToken = (
-                $decodedToken->type === 'access' &&
-                isset($user['access_keys'][$decodedToken->id])
+                $decodedToken->type === 'access'
+                && isset($user['access_keys'][$decodedToken->id])
             );
 
             // Determine token type and validate access
             $isValidRefreshToken = (
-                $decodedToken->type === 'refresh' &&
-                isset($user['refresh_keys'][$decodedToken->id])
+                $decodedToken->type === 'refresh'
+                && isset($user['refresh_keys'][$decodedToken->id])
             );
 
             // Check token is valid or not
@@ -150,7 +150,7 @@ class TokenService implements ServiceInterface
 
     private function setUniqId($params): string
     {
-        $typePrefix = $params['type'] === 'refresh' ? 'r' : 'a';
+        $typePrefix   = $params['type'] === 'refresh' ? 'r' : 'a';
         $randomString = Rand::getString(16, 'abcdefghijklmnopqrstuvwxyz0123456789');
 
         return hash(
@@ -183,8 +183,8 @@ class TokenService implements ServiceInterface
     private function getKey(string $keyType): string
     {
         if (
-            ($this->config['type'] ?? '') === 'keys' &&
-            !empty($this->config[$keyType] ?? null)
+            ($this->config['type'] ?? '') === 'keys'
+            && !empty($this->config[$keyType] ?? null)
         ) {
             return file_get_contents($this->config[$keyType]);
         }

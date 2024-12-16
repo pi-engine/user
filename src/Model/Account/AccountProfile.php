@@ -35,19 +35,19 @@ class AccountProfile
         $information,
         $id = null
     ) {
-        $this->name                = $name;
-        $this->identity            = $identity;
-        $this->email               = $email;
-        $this->mobile              = $mobile;
-        $this->status              = $status;
-        $this->time_created        = $time_created;
-        $this->first_name = $first_name;
-        $this->last_name  = $last_name;
-        $this->birthdate  = $birthdate;
-        $this->gender     = $gender;
-        $this->avatar     = $avatar;
-        $this->information = $information;
-        $this->id                  = $id;
+        $this->name         = $name;
+        $this->identity     = $identity;
+        $this->email        = $email;
+        $this->mobile       = $mobile;
+        $this->status       = $status;
+        $this->time_created = $time_created;
+        $this->first_name   = $first_name;
+        $this->last_name    = $last_name;
+        $this->birthdate    = $birthdate;
+        $this->gender       = $gender;
+        $this->avatar       = $avatar;
+        $this->information  = $information;
+        $this->id           = $id;
     }
 
     /**
