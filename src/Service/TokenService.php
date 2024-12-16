@@ -7,8 +7,8 @@ namespace Pi\User\Service;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Laminas\Math\Rand;
 use Pi\Core\Service\CacheService;
+use Random\RandomException;
 
 class TokenService implements ServiceInterface
 {
@@ -148,14 +148,16 @@ class TokenService implements ServiceInterface
         }
     }
 
+    /**
+     * @throws RandomException
+     */
     private function setUniqId($params): string
     {
         $typePrefix   = $params['type'] === 'refresh' ? 'r' : 'a';
-        $randomString = Rand::getString(16, 'abcdefghijklmnopqrstuvwxyz0123456789');
 
         return hash(
             'sha256',
-            sprintf('%s-%s-%s', $typePrefix, $params['account']['id'], $randomString)
+            sprintf('%s-%s-%s', $typePrefix, $params['account']['id'], bin2hex(random_bytes(8)))
         );
     }
 

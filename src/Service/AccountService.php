@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pi\User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Laminas\Math\Rand;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
@@ -13,6 +12,7 @@ use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
 use Pi\Notification\Service\NotificationService;
 use Pi\User\Repository\AccountRepositoryInterface;
+use Random\RandomException;
 use RobThree\Auth\Algorithm;
 use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
@@ -511,11 +511,12 @@ class AccountService implements ServiceInterface
      * @param       $params
      *
      * @return array
+     * @throws RandomException
      */
     public function perMobileLogin($params): array
     {
         // Set new password as OTP
-        $otpCode   = Rand::getInteger(100000, 999999);
+        $otpCode   = random_int(100000, 999999);
         $otpExpire = (time() + 120);
         $isNew     = 0;
 
@@ -592,11 +593,12 @@ class AccountService implements ServiceInterface
      * @param       $params
      *
      * @return array
+     * @throws RandomException
      */
     public function preMailLogin($params): array
     {
         // Set new password as OTP
-        $otpCode   = Rand::getInteger(100000, 999999);
+        $otpCode   = random_int(100000, 999999);
         $otpExpire = (time() + 180);
         $isNew     = 0;
 
