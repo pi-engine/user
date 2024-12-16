@@ -6,7 +6,7 @@ namespace Pi\User\Model\Permission;
 
 class Resource
 {
-    private        $id;
+    private mixed  $id;
     private string $title;
     private string $section;
     private string $module;

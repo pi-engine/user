@@ -115,7 +115,7 @@ class AccountProfile
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getLastName(): ?string
     {
@@ -146,6 +146,9 @@ class AccountProfile
         return $this->avatar;
     }
 
+    /**
+     * @return string|null
+     */
     public function getInformation(): ?string
     {
         return $this->information;

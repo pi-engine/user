@@ -6,7 +6,7 @@ namespace Pi\User\Model\Permission;
 
 class Role
 {
-    private        $id;
+    private mixed  $id;
     private string $resource;
     private string $section;
     private string $module;

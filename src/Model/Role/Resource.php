@@ -6,11 +6,11 @@ namespace Pi\User\Model\Role;
 
 class Resource
 {
-    private        $id;
+    private mixed  $id;
     private string $name;
     private string $title;
     private string $section;
-    private        $status;
+    private mixed  $status;
 
     public function __construct(
         $name,

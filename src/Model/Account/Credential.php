@@ -26,7 +26,7 @@ class Credential
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getCredential(): string|null
     {

@@ -91,6 +91,9 @@ class Account
         return $this->time_created;
     }
 
+    /**
+     * @return int
+     */
     public function getMultiFactorStatus(): int
     {
         return $this->multi_factor_status;
