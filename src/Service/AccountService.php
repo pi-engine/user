@@ -99,19 +99,6 @@ class AccountService implements ServiceInterface
     /* @var array */
     protected array $informationFields
         = [
-            //'user_id',
-            //'name',
-            //'email',
-            //'identity',
-            //'mobile',
-            //'status',
-            //'multi_factor_status',
-            //'multi_factor_secret',
-            //'first_name',
-            //'last_name',
-            //'birthdate',
-            //'gender',
-            //'avatar',
             'avatar_params',
             'ip_register',
             'register_source',
@@ -239,47 +226,73 @@ class AccountService implements ServiceInterface
     }
 
     /**
-     * @param $account
+     * @param       $params
      *
      * @return array
      */
-    public function canonizeAccount($account): array
+    public function loginOauth($params): array
     {
-        if (empty($account)) {
-            return [];
-        }
+        // Set login column
+        $this->identityColumn = 'email';
 
-        if (is_object($account)) {
-            $account = [
-                'id'                  => (int)$account->getId(),
-                'name'                => $account->getName(),
-                'identity'            => $account->getIdentity(),
-                'email'               => $account->getEmail(),
-                'mobile'              => $account->getMobile(),
-                'status'              => (int)$account->getStatus(),
-                'time_created'        => $account->getTimeCreated(),
-                'multi_factor_status' => (int)$account->getMultiFactorStatus(),
-            ];
+        // Do log in
+        $authAdapter = $this->accountRepository->authenticationOauth($params);
+
+        // Check login
+        if ($authAdapter->isValid()) {
+            // Get a user account
+            $account = $authAdapter->getIdentity();
+
+            // Canonize account
+            $account = $this->canonizeAccount($account);
+
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
         } else {
-            $account = [
-                'id'                  => (int)$account['id'],
-                'name'                => $account['name'] ?? '',
-                'email'               => $account['email'] ?? '',
-                'identity'            => $account['identity'] ?? '',
-                'mobile'              => $account['mobile'] ?? '',
-                'status'              => (int)$account['status'],
-                'time_created'        => $account['time_created'] ?? '',
-                'multi_factor_status' => (int)$account['multi_factor_status'],
-            ];
+            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
+                $this->addAccount($params);
+                $result = $this->loginOauth($params);
+            } else {
+                $result = $this->postLoginError($params);
+            }
         }
 
-        // Set time
-        $account['time_created_view'] = ' - ';
-        if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
-            $account['time_created_view'] = $this->utilityService->date($account['time_created']);
+        return $result;
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function loginOauth2($params): array
+    {
+        // Set login column
+        $this->identityColumn = 'identity';
+
+        // Do log in
+        $authAdapter = $this->accountRepository->authenticationOauth2($params);
+
+        // Check login
+        if ($authAdapter->isValid()) {
+            // Get a user account
+            $account = $authAdapter->getIdentity();
+
+            // Canonize account
+            $account = $this->canonizeAccount($account);
+
+            // Complete login
+            $result = $this->postLoginSuccess($account, $params);
+        } else {
+            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
+                $this->addAccount($params);
+                $result = $this->loginOauth2($params);
+            } else {
+                $result = $this->postLoginError($params);
+            }
         }
 
-        return $account;
+        return $result;
     }
 
     /**
@@ -444,75 +457,6 @@ class AccountService implements ServiceInterface
      *
      * @return array
      */
-    public function getProfile($params): array
-    {
-        $profile = $this->accountRepository->getProfile($params);
-        return $this->canonizeProfile($profile);
-    }
-
-    /**
-     * @param $profile
-     *
-     * @return array
-     */
-    public function canonizeProfile($profile): array
-    {
-        if (empty($profile)) {
-            return [];
-        }
-
-        if (is_object($profile)) {
-            $profile = [
-                'user_id'     => (int)$profile->getUserId(),
-                'first_name'  => $profile->getFirstName(),
-                'last_name'   => $profile->getLastName(),
-                'birthdate'   => $profile->getBirthdate(),
-                'gender'      => $profile->getGender(),
-                'avatar'      => $profile->getAvatar(),
-                'information' => $profile->getInformation(),
-            ];
-        } else {
-            $profile = [
-                'user_id'     => (int)$profile['user_id'],
-                'first_name'  => $profile['first_name'],
-                'last_name'   => $profile['last_name'],
-                'birthdate'   => $profile['birthdate'],
-                'gender'      => $profile['gender'],
-                'avatar'      => $profile['avatar'],
-                'information' => $profile['information'],
-            ];
-        }
-
-        // Set information
-        $profile['information'] = !empty($profile['information']) ? json_decode($profile['information'], true) : [];
-
-        // Set avatar
-        $profile = $this->avatarService->createUri($profile);
-
-        return $profile;
-    }
-
-    /**
-     * @param $userId
-     *
-     * @return bool
-     */
-    public function hasPassword($userId): bool
-    {
-        $hash = $this->accountRepository->getAccountPassword((int)$userId);
-
-        if (empty($hash)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
     public function postLoginError($params): array
     {
         // Get a user account
@@ -561,220 +505,6 @@ class AccountService implements ServiceInterface
             ],
             'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
         ];
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function getAccount($params): array
-    {
-        $account = $this->accountRepository->getAccount($params);
-        return $this->canonizeAccount($account);
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function loginOauth($params): array
-    {
-        // Set login column
-        $this->identityColumn = 'email';
-
-        // Do log in
-        $authAdapter = $this->accountRepository->authenticationOauth($params);
-
-        // Check login
-        if ($authAdapter->isValid()) {
-            // Get a user account
-            $account = $authAdapter->getIdentity();
-
-            // Canonize account
-            $account = $this->canonizeAccount($account);
-
-            // Complete login
-            $result = $this->postLoginSuccess($account, $params);
-        } else {
-            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
-                $this->addAccount($params);
-                $result = $this->loginOauth($params);
-            } else {
-                $result = $this->postLoginError($params);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param       $params
-     * @param array $operator
-     *
-     * @return array
-     */
-    public function addAccount($params, array $operator = []): array
-    {
-        // Set name
-        if (
-            isset($params['first_name'])
-            && !empty($params['first_name'])
-            && isset($params['last_name'])
-            && !empty($params['last_name'])
-        ) {
-            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
-        }
-
-        $otp        = null;
-        $credential = null;
-        if (isset($params['credential']) && !empty($params['credential'])) {
-            $credential = $this->generatePassword($params['credential']);
-        }
-        if (isset($params['otp']) && !empty($params['otp'])) {
-            $otp = $this->generatePassword($params['otp']);
-        }
-
-        $paramsAccount = [
-            'name'         => $params['name'] ?? null,
-            'email'        => $params['email'] ?? null,
-            'identity'     => $params['identity'] ?? null,
-            'mobile'       => $params['mobile'] ?? null,
-            'credential'   => $credential,
-            'otp'          => $otp,
-            'status'       => $this->userRegisterStatus(),
-            'time_created' => time(),
-        ];
-
-        $account = $this->accountRepository->addAccount($paramsAccount);
-        $account = $this->canonizeAccount($account);
-
-        // Save log
-        $this->historyService->logger('register', ['request' => $params, 'account' => $account, 'operator' => $operator]);
-
-
-        // Clean up
-        $profileParams     = [
-            'user_id' => (int)$account['id'],
-        ];
-        $informationParams = [];
-        foreach ($params as $key => $value) {
-            if (in_array($key, $this->profileFields)) {
-                if (empty($value)) {
-                    $profileParams[$key] = null;
-                } else {
-                    $profileParams[$key] = $value;
-                }
-            }
-
-            if (in_array($key, $this->informationFields)) {
-                if (empty($value)) {
-                    $informationParams[$key] = null;
-                } else {
-                    $informationParams[$key] = $value;
-                }
-            }
-        }
-
-        $profileParams['information'] = json_encode(
-            $informationParams,
-            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
-        );
-
-        $profile = $this->accountRepository->addProfile($profileParams);
-        $profile = $this->canonizeProfile($profile);
-
-        $account = array_merge($account, $profile);
-
-        // Set user roles
-        $this->roleService->addDefaultRoles($account, $operator);
-
-        // Get roles
-        $roles = $this->roleService->getRoleAccount((int)$account['id']);
-
-        // Set source roles params
-        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
-            $this->roleService->addRoleAccount($account, $params['source']);
-        }
-
-        return $account;
-    }
-
-    /**
-     * @param mixed $password
-     *
-     * @return string
-     */
-    protected function generatePassword(mixed $password): string
-    {
-        switch ($this->hashPattern) {
-            default:
-            case'bcrypt':
-                $hash = password_hash($password, PASSWORD_BCRYPT);
-                break;
-
-            case'argon2id':
-                // Set option for a High-Security ARGON2ID
-                $options = [
-                    'memory_cost' => 1 << 17, // 131072 KB (128 MB)
-                    'time_cost'   => 4,         // 4 iterations (same as default)
-                    'threads'     => 2,            // 2 parallel threads
-                ];
-
-                // Make a High-Security hash password
-                $hash = password_hash($password, PASSWORD_ARGON2ID /*, $options*/);
-                break;
-
-            case'sha512':
-                $hash = hash('sha512', $password);
-                break;
-        }
-
-        return $hash;
-    }
-
-    /**
-     * @return int
-     */
-    public function userRegisterStatus(): int
-    {
-        return $this->config['register']['status'] ?? 1;
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function loginOauth2($params): array
-    {
-        // Set login column
-        $this->identityColumn = 'identity';
-
-        // Do log in
-        $authAdapter = $this->accountRepository->authenticationOauth2($params);
-
-        // Check login
-        if ($authAdapter->isValid()) {
-            // Get a user account
-            $account = $authAdapter->getIdentity();
-
-            // Canonize account
-            $account = $this->canonizeAccount($account);
-
-            // Complete login
-            $result = $this->postLoginSuccess($account, $params);
-        } else {
-            if (isset($this->config['oauth']['oauth_register']) && (int)$this->config['oauth']['oauth_register'] === 1) {
-                $this->addAccount($params);
-                $result = $this->loginOauth2($params);
-            } else {
-                $result = $this->postLoginError($params);
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -833,17 +563,16 @@ class AccountService implements ServiceInterface
             $message = $this->config['otp_sms'][$params['source']];
         }
 
-        // Set notification params
-        $notificationParams = [
-            'sms' => [
-                'message' => sprintf($message, $otpCode),
-                'mobile'  => $account['mobile'],
-                'source'  => $params['source'] ?? '',
-            ],
-        ];
-
         // Send notification
-        $this->notificationService->send($notificationParams);
+        $this->notificationService->send(
+            [
+                'sms' => [
+                    'message' => sprintf($message, $otpCode),
+                    'mobile'  => $account['mobile'],
+                    'source'  => $params['source'] ?? '',
+                ],
+            ]
+        );
 
         // Set result
         return [
@@ -903,20 +632,19 @@ class AccountService implements ServiceInterface
         // Add or update user data to cache
         $this->manageUserCache($account, [], [], [], $otp);
 
-        // Set notification params
-        $notificationParams = [
-            'email' => [
-                'to'      => [
-                    'email' => $account['email'],
-                    'name'  => $account['name'],
-                ],
-                'subject' => $this->config['otp_email']['subject'],
-                'body'    => sprintf($this->config['otp_email']['body'], $otpCode),
-            ],
-        ];
-
         // Send notification
-        $this->notificationService->send($notificationParams);
+        $this->notificationService->send(
+            [
+                'email' => [
+                    'to'      => [
+                        'email' => $account['email'],
+                        'name'  => $account['name'],
+                    ],
+                    'subject' => $this->config['otp_email']['subject'],
+                    'body'    => sprintf($this->config['otp_email']['body'], $otpCode),
+                ],
+            ]
+        );
 
         // Set result
         return [
@@ -934,6 +662,405 @@ class AccountService implements ServiceInterface
 
     /**
      * @param       $params
+     *
+     * @return array
+     */
+    public function logout($params): array
+    {
+        // Set message
+        $message = 'You are logout successfully from this session !';
+
+        // Get and check user
+        $user = $this->cacheService->getUser($params['user_id']);
+        if (!empty($user)) {
+            // Save log
+            $this->historyService->logger('logout', ['request' => $params, 'account' => $user['account']]);
+
+            // Check and clean user cache for logout
+            if (isset($params['all_session']) && (int)$params['all_session'] === 1) {
+                $this->cacheService->deleteUserItem($params['user_id'], 'all_keys', '');
+                $message = 'You are logout successfully from all of your sessions !';
+            } else {
+                $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
+                $this->cacheService->deleteUserItem($params['user_id'], 'multi_factor', $params['token_id']);
+            }
+        }
+
+        return [
+            'result' => true,
+            'data'   => [
+                'message' => $message,
+            ],
+            'error'  => [],
+        ];
+    }
+
+    /**
+     * @param       $params
+     * @param array $operator
+     *
+     * @return array
+     */
+    public function addAccount($params, array $operator = []): array
+    {
+        // Set account name
+        $params['name'] = $this->setAccountName($params);
+
+        // Set credential
+        $credential = null;
+        if (isset($params['credential']) && !empty($params['credential'])) {
+            $credential = $this->generatePassword($params['credential']);
+        }
+
+        // Set otp
+        $otp = null;
+        if (isset($params['otp']) && !empty($params['otp'])) {
+            $otp = $this->generatePassword($params['otp']);
+        }
+
+        // Set add account params
+        $paramsAccount = [
+            'name'         => $params['name'] ?? null,
+            'email'        => $params['email'] ?? null,
+            'identity'     => $params['identity'] ?? null,
+            'mobile'       => $params['mobile'] ?? null,
+            'credential'   => $credential,
+            'otp'          => $otp,
+            'status'       => $this->userRegisterStatus(),
+            'time_created' => time(),
+        ];
+
+        // add account
+        $account = $this->accountRepository->addAccount($paramsAccount);
+        $account = $this->canonizeAccount($account);
+
+        // Clean up information data
+        $profileParams     = ['user_id' => (int)$account['id']];
+        $informationParams = [];
+        foreach ($params as $key => $value) {
+            if (in_array($key, $this->profileFields)) {
+                if (empty($value)) {
+                    $profileParams[$key] = null;
+                } else {
+                    $profileParams[$key] = $value;
+                }
+            }
+
+            if (in_array($key, $this->informationFields)) {
+                if (empty($value)) {
+                    $informationParams[$key] = null;
+                } else {
+                    $informationParams[$key] = $value;
+                }
+            }
+        }
+
+        // Set information
+        $profileParams['information'] = json_encode(
+            $informationParams,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+        );
+
+        // add profile
+        $profile = $this->accountRepository->addProfile($profileParams);
+        $profile = $this->canonizeProfile($profile);
+
+        // merge account and profile data
+        $account = array_merge($account, $profile);
+
+        // Save log
+        $this->historyService->logger('register', ['request' => $params, 'account' => $account, 'operator' => $operator]);
+
+        // Send notification
+        $this->notificationService->send(
+            [
+                'information' => [
+                    'sender_id'   => (int)$operator['id'],
+                    'receiver_id' => (int)$params['user_id'],
+                    'type'        => 'info',
+                    'title'       => $this->translatorService->translate('add-account'),
+                    'body'        => $this->translatorService->translate('add-account-message'),
+                    'source'      => [
+                        'module'  => 'user',
+                        'section' => 'account',
+                        'item'    => (int)$params['user_id'],
+                    ],
+                ],
+            ]
+        );
+
+        // Set user roles
+        $this->roleService->addDefaultRoles($account, $operator);
+
+        // Get roles
+        $roles = $this->roleService->getRoleAccount((int)$account['id']);
+
+        // Set source roles params
+        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $roles)) {
+            $this->roleService->addRoleAccount($account, $params['source']);
+        }
+
+        return $account;
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function getAccount($params): array
+    {
+        $account = $this->accountRepository->getAccount($params);
+        return $this->canonizeAccount($account);
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function getProfile($params): array
+    {
+        $profile = $this->accountRepository->getProfile($params);
+        return $this->canonizeProfile($profile);
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function getAccountProfile($params): array
+    {
+        return $this->canonizeAccountProfile($this->accountRepository->getAccountProfile($params));
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function getAccountList($params): array
+    {
+        $limit  = $params['limit'] ?? 10;
+        $page   = $params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        $listParams = [
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        if (isset($params['name']) && !empty($params['name'])) {
+            $listParams['name'] = $params['name'];
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $listParams['identity'] = $params['identity'];
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $listParams['email'] = $params['email'];
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
+            $listParams['mobiles'] = $params['mobiles'];
+        }
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['status'])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
+            $listParams['data_from'] = strtotime(
+                ($params['data_from']) != null
+                    ? sprintf('%s 00:00:00', $params['data_from'])
+                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
+            );
+        }
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
+            $listParams['data_to'] = strtotime(
+                ($params['data_to']) != null
+                    ? sprintf('%s 00:00:00', $params['data_to'])
+                    : sprintf('%s 23:59:59', date('Y-m-d'))
+            );
+        }
+
+        $filters = $this->prepareFilter($params);
+        if (!empty($filters)) {
+            foreach ($filters as $filter) {
+                $itemIdList = [];
+                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $itemIdList[] = $this->canonizeAccountId($row);
+                }
+                $listParams['id'] = $itemIdList;
+            }
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->accountRepository->getAccountList($listParams);
+        foreach ($rowSet as $row) {
+            $list[$row->getId()] = $this->canonizeAccount($row);
+        }
+
+        // Get count
+        $count = $this->accountRepository->getAccountCount($listParams);
+
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
+        foreach ($list as $id => $user) {
+            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
+        }
+
+        return [
+            'list'      => array_values($list),
+            'roles'     => $roleList,
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function getAccountProfileList($params): array
+    {
+        $limit  = $params['limit'] ?? 10;
+        $page   = $params['page'] ?? 1;
+        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
+        $offset = ((int)$page - 1) * (int)$limit;
+
+        // Set params
+        $listParams = [
+            'page'   => (int)$page,
+            'limit'  => (int)$limit,
+            'order'  => $order,
+            'offset' => $offset,
+        ];
+
+        if (isset($params['name']) && !empty($params['name'])) {
+            $listParams['name'] = $params['name'];
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $listParams['identity'] = $params['identity'];
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $listParams['email'] = $params['email'];
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
+            $listParams['mobiles'] = $params['mobiles'];
+        }
+        if (isset($params['id']) && !empty($params['id'])) {
+            $listParams['id'] = $params['id'];
+        }
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['data_from']) && !empty($params['data_from'])) {
+            $listParams['data_from'] = strtotime(
+                ($params['data_from']) != null
+                    ? sprintf('%s 00:00:00', $params['data_from'])
+                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
+            );
+        }
+        if (isset($params['data_to']) && !empty($params['data_to'])) {
+            $listParams['data_to'] = strtotime(
+                ($params['data_to']) != null
+                    ? sprintf('%s 00:00:00', $params['data_to'])
+                    : sprintf('%s 23:59:59', date('Y-m-d'))
+            );
+        }
+
+        $filters = $this->prepareFilter($params);
+        if (!empty($filters)) {
+            foreach ($filters as $filter) {
+                $itemIdList = [];
+                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
+                foreach ($rowSet as $row) {
+                    $itemIdList[] = $this->canonizeAccountId($row);
+                }
+                $listParams['id'] = $itemIdList;
+            }
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->accountRepository->getAccountProfileList($listParams);
+        foreach ($rowSet as $row) {
+            $list[$row->getId()] = $this->canonizeAccountProfile($row);
+        }
+
+        // Get count
+        $count = $this->accountRepository->getAccountCount($listParams);
+
+        // Get roles
+        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
+        foreach ($list as $id => $user) {
+            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
+        }
+
+        return [
+            'list'      => array_values($list),
+            'paginator' => [
+                'count' => $count,
+                'limit' => $limit,
+                'page'  => $page,
+            ],
+        ];
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array
+     */
+    public function getUserFromCache($id): array
+    {
+        $user = $this->cacheService->getUser($id);
+
+        return [
+            'account' => $user['account'],
+            'roles'   => $user['roles'],
+        ];
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array
+     */
+    public function getUserFromCacheFull($id): array
+    {
+        return $this->cacheService->getUser($id);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return int
+     */
+    public function getAccountCount(array $params = []): int
+    {
+        return $this->accountRepository->getAccountCount($params);
+    }
+
+    /**
+     * @param       $params
      * @param       $account
      * @param array $operator
      *
@@ -941,17 +1068,10 @@ class AccountService implements ServiceInterface
      */
     public function updateAccount($params, $account, array $operator = []): array
     {
-        // Set name
-        if (
-            isset($params['first_name'])
-            && !empty($params['first_name'])
-            && isset($params['last_name'])
-            && !empty($params['last_name'])
-        ) {
-            $params['name'] = sprintf('%s %s', $params['first_name'], $params['last_name']);
-        }
+        // Set account name
+        $params['name'] = $this->setAccountName($params);
 
-        // Clean up
+        // Clean up information data
         $accountParams     = [];
         $profileParams     = [];
         $informationParams = [];
@@ -979,13 +1099,7 @@ class AccountService implements ServiceInterface
             }
         }
 
-        //if (isset($params['device_type'])) {
-        //    $informationParams['device_type'] = $params['device_type'];
-        //}
-        //if (isset($params['device_token'])) {
-        //    $informationParams['device_token'] = $params['device_token'];
-        //}
-
+        // Check information and set data
         if (!empty($informationParams)) {
             $profile = $this->getProfile(['user_id' => (int)$account['id']]);
             foreach ($profile['information'] as $key => $value) {
@@ -996,23 +1110,19 @@ class AccountService implements ServiceInterface
                 }
             }
 
-            //if (isset($params['device_type'])) {
-            //    $informationParams['device_type'] = $params['device_type'];
-            //}
-            //if (isset($params['device_token'])) {
-            //    $informationParams['device_token'] = $params['device_token'];
-            //}
-
+            // Set information
             $profileParams['information'] = json_encode(
                 $informationParams,
                 JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
             );
         }
 
+        // Update account if data set
         if (!empty($accountParams)) {
             $this->accountRepository->updateAccount((int)$account['id'], $accountParams);
         }
 
+        // Update profile if data set
         if (!empty($profileParams)) {
             $this->accountRepository->updateProfile((int)$account['id'], $profileParams);
         }
@@ -1056,65 +1166,25 @@ class AccountService implements ServiceInterface
         // Save log
         $this->historyService->logger('update', ['request' => $params, 'account' => $account, 'operator' => $operator]);
 
+        // Send notification
+        $this->notificationService->send(
+            [
+                'information' => [
+                    'sender_id'   => (int)$operator['id'],
+                    'receiver_id' => (int)$params['user_id'],
+                    'type'        => 'info',
+                    'title'       => $this->translatorService->translate('update-account'),
+                    'body'        => $this->translatorService->translate('update-account-message'),
+                    'source'      => [
+                        'module'  => 'user',
+                        'section' => 'account',
+                        'item'    => (int)$params['user_id'],
+                    ],
+                ],
+            ]
+        );
+
         return $account;
-    }
-
-    /**
-     * @param       $params
-     * @param       $account
-     * @param array $operator
-     *
-     * @return array
-     */
-    public function addRoleAccountByAdmin($params, $account, array $operator = []): void
-    {
-        // Set user roles that receive from service
-        if (isset($params['roles'])) {
-            //$roles = explode(',', $params['roles']);
-            foreach ($params['roles'] as $role) {
-                if ($role != 'member') {
-                    $this->roleService->addRoleAccount($account, $role, $role == 'admin' ? 'admin' : 'api', $operator);
-                }
-            }
-
-            // Make user logout after edit role
-            $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
-        }
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function logout($params): array
-    {
-        // Set message
-        $message = 'You are logout successfully from this session !';
-
-        // Get and check user
-        $user = $this->cacheService->getUser($params['user_id']);
-        if (!empty($user)) {
-            // Save log
-            $this->historyService->logger('logout', ['request' => $params, 'account' => $user['account']]);
-
-            // Check and clean user cache for logout
-            if (isset($params['all_session']) && (int)$params['all_session'] === 1) {
-                $this->cacheService->deleteUserItem($params['user_id'], 'all_keys', '');
-                $message = 'You are logout successfully from all of your sessions !';
-            } else {
-                $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
-                $this->cacheService->deleteUserItem($params['user_id'], 'multi_factor', $params['token_id']);
-            }
-        }
-
-        return [
-            'result' => true,
-            'data'   => [
-                'message' => $message,
-            ],
-            'error'  => [],
-        ];
     }
 
     /**
@@ -1242,31 +1312,6 @@ class AccountService implements ServiceInterface
     }
 
     /**
-     * @param $id
-     *
-     * @return array
-     */
-    public function getUserFromCache($id): array
-    {
-        $user = $this->cacheService->getUser($id);
-
-        return [
-            'account' => $user['account'],
-            'roles'   => $user['roles'],
-        ];
-    }
-
-    /**
-     * @param $id
-     *
-     * @return array
-     */
-    public function getUserFromCacheFull($id): array
-    {
-        return $this->cacheService->getUser($id);
-    }
-
-    /**
      * @param       $account
      *
      * @return array
@@ -1351,6 +1396,105 @@ class AccountService implements ServiceInterface
     }
 
     /**
+     * @param $userId
+     *
+     * @return bool
+     */
+    public function hasPassword($userId): bool
+    {
+        $hash = $this->accountRepository->getAccountPassword((int)$userId);
+
+        if (empty($hash)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param mixed $password
+     *
+     * @return string
+     */
+    private function generatePassword(mixed $password): string
+    {
+        switch ($this->hashPattern) {
+            default:
+            case'bcrypt':
+                $hash = password_hash($password, PASSWORD_BCRYPT);
+                break;
+
+            case'argon2id':
+                // ToDo: Fix it by minimum php 8.3
+                // Set option for a High-Security ARGON2ID
+                $options = [
+                    'memory_cost' => 1 << 17, // 131072 KB (128 MB)
+                    'time_cost'   => 4,         // 4 iterations (same as default)
+                    'threads'     => 2,            // 2 parallel threads
+                ];
+
+                // Make a High-Security hash password
+                $hash = password_hash($password, PASSWORD_ARGON2ID /*, $options*/);
+                break;
+
+            case'sha512':
+                $hash = hash('sha512', $password);
+                break;
+        }
+
+        return $hash;
+    }
+
+    /**
+     * @return int
+     */
+    public function userRegisterStatus(): int
+    {
+        return $this->config['register']['status'] ?? 1;
+    }
+
+    /**
+     * @param       $params
+     * @param       $account
+     * @param array $operator
+     *
+     * @return void
+     */
+    public function addRoleAccountByAdmin($params, $account, array $operator = []): void
+    {
+        // Set user roles that receive from service
+        if (isset($params['roles'])) {
+            //$roles = explode(',', $params['roles']);
+            foreach ($params['roles'] as $role) {
+                if ($role != 'member') {
+                    $this->roleService->addRoleAccount($account, $role, $role == 'admin' ? 'admin' : 'api', $operator);
+                }
+            }
+
+            // Make user logout after edit role
+            $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
+
+            // Send notification
+            $this->notificationService->send(
+                [
+                    'information' => [
+                        'sender_id'   => (int)$operator['id'],
+                        'receiver_id' => (int)$params['user_id'],
+                        'type'        => 'info',
+                        'title'       => $this->translatorService->translate('update-roles'),
+                        'body'        => $this->translatorService->translate('update-roles-message'),
+                        'source'      => [
+                            'module'  => 'user',
+                            'section' => 'account',
+                            'item'    => (int)$params['user_id'],
+                        ],
+                    ],
+                ]
+            );
+        }
+    }
+
+    /**
      * @param        $roles
      * @param        $account
      * @param string $section
@@ -1386,100 +1530,6 @@ class AccountService implements ServiceInterface
      *
      * @return array
      */
-    public function getAccountProfileList($params): array
-    {
-        $limit  = $params['limit'] ?? 10;
-        $page   = $params['page'] ?? 1;
-        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
-        $offset = ((int)$page - 1) * (int)$limit;
-
-        // Set params
-        $listParams = [
-            'page'   => (int)$page,
-            'limit'  => (int)$limit,
-            'order'  => $order,
-            'offset' => $offset,
-        ];
-
-        if (isset($params['name']) && !empty($params['name'])) {
-            $listParams['name'] = $params['name'];
-        }
-        if (isset($params['identity']) && !empty($params['identity'])) {
-            $listParams['identity'] = $params['identity'];
-        }
-        if (isset($params['email']) && !empty($params['email'])) {
-            $listParams['email'] = $params['email'];
-        }
-        if (isset($params['mobile']) && !empty($params['mobile'])) {
-            $listParams['mobile'] = $params['mobile'];
-        }
-        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
-            $listParams['mobiles'] = $params['mobiles'];
-        }
-        if (isset($params['id']) && !empty($params['id'])) {
-            $listParams['id'] = $params['id'];
-        }
-        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
-            $listParams['status'] = $params['status'];
-        }
-        if (isset($params['data_from']) && !empty($params['data_from'])) {
-            $listParams['data_from'] = strtotime(
-                ($params['data_from']) != null
-                    ? sprintf('%s 00:00:00', $params['data_from'])
-                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
-            );
-        }
-        if (isset($params['data_to']) && !empty($params['data_to'])) {
-            $listParams['data_to'] = strtotime(
-                ($params['data_to']) != null
-                    ? sprintf('%s 00:00:00', $params['data_to'])
-                    : sprintf('%s 23:59:59', date('Y-m-d'))
-            );
-        }
-
-        $filters = $this->prepareFilter($params);
-        if (!empty($filters)) {
-            foreach ($filters as $filter) {
-                $itemIdList = [];
-                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
-                foreach ($rowSet as $row) {
-                    $itemIdList[] = $this->canonizeAccountId($row);
-                }
-                $listParams['id'] = $itemIdList;
-            }
-        }
-
-        // Get list
-        $list   = [];
-        $rowSet = $this->accountRepository->getAccountProfileList($listParams);
-        foreach ($rowSet as $row) {
-            $list[$row->getId()] = $this->canonizeAccountProfile($row);
-        }
-
-        // Get count
-        $count = $this->accountRepository->getAccountCount($listParams);
-
-        // Get roles
-        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
-        foreach ($list as $id => $user) {
-            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
-        }
-
-        return [
-            'list'      => array_values($list),
-            'paginator' => [
-                'count' => $count,
-                'limit' => $limit,
-                'page'  => $page,
-            ],
-        ];
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
     public function prepareFilter($params): array
     {
         // Set filter list
@@ -1496,106 +1546,6 @@ class AccountService implements ServiceInterface
             }
         }
         return $filters;
-    }
-
-    /**
-     * @param object|array $roleAccountList
-     *
-     * @return int|null
-     */
-    public function canonizeAccountId(object|array $roleAccountList): int|null
-    {
-        if (empty($roleAccountList)) {
-            return 0;
-        }
-
-        if (is_object($roleAccountList)) {
-            $accountId = $roleAccountList->getUserId();
-        } else {
-            $accountId = $roleAccountList['user_id'];
-        }
-
-        return $accountId;
-    }
-
-    /**
-     * @param $account
-     *
-     * @return array
-     */
-    public function canonizeAccountProfile($account): array
-    {
-        if (empty($account)) {
-            return [];
-        }
-
-        if (is_object($account)) {
-            $account = [
-                'id'           => (int)$account->getId(),
-                'name'         => $account->getName(),
-                'identity'     => $account->getIdentity(),
-                'email'        => $account->getEmail(),
-                'mobile'       => $account->getMobile(),
-                'status'       => (int)$account->getStatus(),
-                'time_created' => $account->getTimeCreated(),
-                'first_name'   => $account->getFirstName(),
-                'last_name'    => $account->getLastName(),
-                'birthdate'    => $account->getBirthdate(),
-                'gender'       => $account->getGender(),
-                'avatar'       => $account->getAvatar(),
-                'information'  => $account->getInformation(),
-            ];
-        } else {
-            $account = [
-                'id'           => (int)$account['id'],
-                'name'         => $account['name'] ?? '',
-                'email'        => $account['email'] ?? '',
-                'identity'     => $account['identity'] ?? '',
-                'mobile'       => $account['mobile'] ?? '',
-                'status'       => (int)$account['status'],
-                'time_created' => $account['time_created'] ?? '',
-                'first_name'   => $account['first_name'] ?? '',
-                'last_name'    => $account['last_name'] ?? '',
-                'birthdate'    => $account['birthdate'] ?? '',
-                'gender'       => $account['gender'] ?? '',
-                'avatar'       => $account['avatar'] ?? '',
-                'information'  => $account['information'] ?? '',
-            ];
-        }
-
-        // Set information
-        $account['information'] = !empty($account['information']) ? json_decode($account['information'], true) : [];
-
-        // Set time
-        $account['time_created_view'] = ' - ';
-        if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
-            $account['time_created_view'] = $this->utilityService->date($account['time_created']);
-        }
-
-        // Set avatar
-        $account = $this->avatarService->createUri($account);
-
-        return $account;
-    }
-
-    /**
-     * @param array $params
-     *
-     * @return int
-     */
-    public function getAccountCount(array $params = []): int
-    {
-        return $this->accountRepository->getAccountCount($params);
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function getAccountProfile($params): array
-    {
-        return $this->canonizeAccountProfile($this->accountRepository->getAccountProfile($params));
     }
 
     /**
@@ -1675,7 +1625,7 @@ class AccountService implements ServiceInterface
      *
      * @return boolean
      */
-    protected function passwordEqualityCheck(mixed $credential, mixed $hash): bool
+    private function passwordEqualityCheck(mixed $credential, mixed $hash): bool
     {
         switch ($this->hashPattern) {
             default:
@@ -1710,6 +1660,24 @@ class AccountService implements ServiceInterface
         $this->historyService->logger(
             'updatePasswordByAdmin',
             ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+        );
+
+        // Send notification
+        $this->notificationService->send(
+            [
+                'information' => [
+                    'sender_id'   => (int)$operator['id'],
+                    'receiver_id' => (int)$params['user_id'],
+                    'type'        => 'info',
+                    'title'       => $this->translatorService->translate('update-password'),
+                    'body'        => $this->translatorService->translate('update-password-message'),
+                    'source'      => [
+                        'module'  => 'user',
+                        'section' => 'account',
+                        'item'    => (int)$params['user_id'],
+                    ],
+                ],
+            ]
         );
 
         return [
@@ -1752,6 +1720,24 @@ class AccountService implements ServiceInterface
             ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
         );
 
+        // Send notification
+        $this->notificationService->send(
+            [
+                'information' => [
+                    'sender_id'   => (int)$operator['id'],
+                    'receiver_id' => (int)$params['user_id'],
+                    'type'        => 'info',
+                    'title'       => $this->translatorService->translate('update-status'),
+                    'body'        => $this->translatorService->translate('update-status-message'),
+                    'source'      => [
+                        'module'  => 'user',
+                        'section' => 'account',
+                        'item'    => (int)$params['user_id'],
+                    ],
+                ],
+            ]
+        );
+
         return [
             'result' => true,
             'data'   => [
@@ -1779,6 +1765,24 @@ class AccountService implements ServiceInterface
         $this->historyService->logger(
             'deleteUserByAdmin',
             ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+        );
+
+        // Send notification
+        $this->notificationService->send(
+            [
+                'information' => [
+                    'sender_id'   => (int)$operator['id'],
+                    'receiver_id' => (int)$params['user_id'],
+                    'type'        => 'info',
+                    'title'       => $this->translatorService->translate('delete-account'),
+                    'body'        => $this->translatorService->translate('delete-account-message'),
+                    'source'      => [
+                        'module'  => 'user',
+                        'section' => 'account',
+                        'item'    => (int)$params['user_id'],
+                    ],
+                ],
+            ]
         );
 
         return [
@@ -1840,6 +1844,81 @@ class AccountService implements ServiceInterface
                 'id'    => $id,
             ]
         );
+    }
+
+    /**
+     * @param       $params
+     * @param array $operator
+     *
+     * @return void
+     */
+    public function resetAccount($params, array $operator = []): void
+    {
+        switch ($params['type']) {
+            case 'password':
+                // Update account
+                $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => null]);
+
+                // Save log
+                $this->historyService->logger(
+                    'resetPasswordByOperator',
+                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                );
+                break;
+
+            case 'mfa':
+                // Update account
+                $this->accountRepository->updateAccount((int)$params['user_id'], ['multi_factor_status' => 0, 'multi_factor_secret' => null]);
+
+                // Save log
+                $this->historyService->logger(
+                    'resetMfaByOperator',
+                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                );
+                break;
+
+            case 'avatar':
+                // Set avatar params
+                $avatar = [
+                    'avatar'        => '',
+                    'avatar_params' => [],
+                ];
+
+                // Set account
+                $account = ['id' => (int)$params['user_id']];
+
+                // Update profile
+                $this->updateAccount($avatar, $account, $operator);
+
+                // Save log
+                $this->historyService->logger(
+                    'resetAvatarByOperator',
+                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                );
+                break;
+        }
+
+        // Make user logout after edit role
+        $this->logout(['user_id' => (int)$params['user_id'], 'all_session' => 1]);
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return string|null
+     */
+    public function setAccountName($params): string|null
+    {
+        if (
+            isset($params['first_name'])
+            && !empty($params['first_name'])
+            && isset($params['last_name'])
+            && !empty($params['last_name'])
+        ) {
+            return sprintf('%s %s', $params['first_name'], $params['last_name']);
+        }
+
+        return $params['name'] ?? null;
     }
 
     /**
@@ -1916,101 +1995,6 @@ class AccountService implements ServiceInterface
                     $notAllowItemIdList[] = $this->canonizeAccountId($row);
                 }
                 $listParams['not_allowed_id'] = $notAllowItemIdList;
-            }
-        }
-
-        // Get list
-        $list   = [];
-        $rowSet = $this->accountRepository->getAccountList($listParams);
-        foreach ($rowSet as $row) {
-            $list[$row->getId()] = $this->canonizeAccount($row);
-        }
-
-        // Get count
-        $count = $this->accountRepository->getAccountCount($listParams);
-
-        // Get roles
-        $roleList = $this->roleService->getRoleAccountList(array_keys($list));
-        foreach ($list as $id => $user) {
-            $list[$id]['roles'] = isset($roleList[$user['id']]) ? $roleList[$user['id']] : $this->emptyRoles;
-        }
-
-        return [
-            'list'      => array_values($list),
-            'roles'     => $roleList,
-            'paginator' => [
-                'count' => $count,
-                'limit' => $limit,
-                'page'  => $page,
-            ],
-        ];
-    }
-
-    /**
-     * @param       $params
-     *
-     * @return array
-     */
-    public function getAccountList($params): array
-    {
-        $limit  = $params['limit'] ?? 10;
-        $page   = $params['page'] ?? 1;
-        $order  = $params['order'] ?? ['time_created DESC', 'id DESC'];
-        $offset = ((int)$page - 1) * (int)$limit;
-
-        // Set params
-        $listParams = [
-            'page'   => (int)$page,
-            'limit'  => (int)$limit,
-            'order'  => $order,
-            'offset' => $offset,
-        ];
-
-        if (isset($params['name']) && !empty($params['name'])) {
-            $listParams['name'] = $params['name'];
-        }
-        if (isset($params['identity']) && !empty($params['identity'])) {
-            $listParams['identity'] = $params['identity'];
-        }
-        if (isset($params['email']) && !empty($params['email'])) {
-            $listParams['email'] = $params['email'];
-        }
-        if (isset($params['mobile']) && !empty($params['mobile'])) {
-            $listParams['mobile'] = $params['mobile'];
-        }
-        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
-            $listParams['mobiles'] = $params['mobiles'];
-        }
-        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
-            $listParams['status'] = $params['status'];
-        }
-        if (isset($params['status'])) {
-            $listParams['status'] = $params['status'];
-        }
-        if (isset($params['data_from']) && !empty($params['data_from'])) {
-            $listParams['data_from'] = strtotime(
-                ($params['data_from']) != null
-                    ? sprintf('%s 00:00:00', $params['data_from'])
-                    : sprintf('%s 00:00:00', date('Y-m-d', strtotime('-1 month')))
-            );
-        }
-        if (isset($params['data_to']) && !empty($params['data_to'])) {
-            $listParams['data_to'] = strtotime(
-                ($params['data_to']) != null
-                    ? sprintf('%s 00:00:00', $params['data_to'])
-                    : sprintf('%s 23:59:59', date('Y-m-d'))
-            );
-        }
-
-        $filters = $this->prepareFilter($params);
-        if (!empty($filters)) {
-            foreach ($filters as $filter) {
-                $itemIdList = [];
-                $rowSet     = $this->accountRepository->getIdFromFilter($filter);
-                foreach ($rowSet as $row) {
-                    $itemIdList[] = $this->canonizeAccountId($row);
-                }
-                $listParams['id'] = $itemIdList;
             }
         }
 
@@ -2180,62 +2164,6 @@ class AccountService implements ServiceInterface
     }
 
     /**
-     * @param       $params
-     * @param array $operator
-     *
-     * @return void
-     */
-    public function resetAccount($params, array $operator = []): void
-    {
-        switch ($params['type']) {
-            case 'password':
-                // Update account
-                $this->accountRepository->updateAccount((int)$params['user_id'], ['credential' => null]);
-
-                // Save log
-                $this->historyService->logger(
-                    'resetPasswordByOperator',
-                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
-                );
-                break;
-
-            case 'mfa':
-                // Update account
-                $this->accountRepository->updateAccount((int)$params['user_id'], ['multi_factor_status' => 0, 'multi_factor_secret' => null]);
-
-                // Save log
-                $this->historyService->logger(
-                    'resetMfaByOperator',
-                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
-                );
-                break;
-
-            case 'avatar':
-                // Set avatar params
-                $avatar = [
-                    'avatar'        => '',
-                    'avatar_params' => [],
-                ];
-
-                // Set account
-                $account = ['id' => (int)$params['user_id']];
-
-                // Update profile
-                $this->updateAccount($avatar, $account, $operator);
-
-                // Save log
-                $this->historyService->logger(
-                    'resetAvatarByOperator',
-                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
-                );
-                break;
-        }
-
-        // Make user logout after edit role
-        $this->logout(['user_id' => (int)$params['user_id'], 'all_session' => 1]);
-    }
-
-    /**
      * @param $account
      *
      * @return array
@@ -2250,7 +2178,7 @@ class AccountService implements ServiceInterface
         $mfa = $this->accountRepository->getMultiFactor((int)$account['id']);
 
         // Call MultiFactorAuth
-        $multiFactorAuth = new TwoFactorAuth($this->config['sitename'], 6, 30, Algorithm::Sha1, new EndroidQrCodeProvider());
+        $multiFactorAuth = new TwoFactorAuth($this->config['sitename'], '', 6, 30, Algorithm::Sha1, new EndroidQrCodeProvider());
 
         // Set data
         $secret = null;
@@ -2282,11 +2210,11 @@ class AccountService implements ServiceInterface
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
 
-        // Get multifactor information
+        // Get multifactorial information
         $mfa = $this->accountRepository->getMultiFactor((int)$account['id']);
 
         // Call MultiFactorAuth
-        $multiFactorAuth = new TwoFactorAuth($this->config['sitename'], 6, 30, Algorithm::Sha1, new EndroidQrCodeProvider());
+        $multiFactorAuth = new TwoFactorAuth($this->config['sitename'], '', 6, 30, Algorithm::Sha1, new EndroidQrCodeProvider());
 
         // check secret code and verify code
         $result = false;
@@ -2348,9 +2276,16 @@ class AccountService implements ServiceInterface
         ];
     }
 
-
     /**
      * Manage the user data cache by setting or updating it.
+     *
+     * @param array $account
+     * @param array $accessToken
+     * @param array $refreshToken
+     * @param array $multiFactor
+     * @param array $otp
+     *
+     * @return array
      */
     public function manageUserCache(array $account, array $accessToken = [], array $refreshToken = [], array $multiFactor = [], array $otp = []): array
     {
@@ -2450,4 +2385,169 @@ class AccountService implements ServiceInterface
         return $cacheParams;
     }
 
+    /**
+     * @param $account
+     *
+     * @return array
+     */
+    public function canonizeAccount($account): array
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'                  => (int)$account->getId(),
+                'name'                => $account->getName(),
+                'identity'            => $account->getIdentity(),
+                'email'               => $account->getEmail(),
+                'mobile'              => $account->getMobile(),
+                'status'              => (int)$account->getStatus(),
+                'time_created'        => $account->getTimeCreated(),
+                'multi_factor_status' => (int)$account->getMultiFactorStatus(),
+            ];
+        } else {
+            $account = [
+                'id'                  => (int)$account['id'],
+                'name'                => $account['name'] ?? '',
+                'email'               => $account['email'] ?? '',
+                'identity'            => $account['identity'] ?? '',
+                'mobile'              => $account['mobile'] ?? '',
+                'status'              => (int)$account['status'],
+                'time_created'        => $account['time_created'] ?? '',
+                'multi_factor_status' => (int)$account['multi_factor_status'],
+            ];
+        }
+
+        // Set time
+        $account['time_created_view'] = ' - ';
+        if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
+            $account['time_created_view'] = $this->utilityService->date($account['time_created']);
+        }
+
+        return $account;
+    }
+
+    /**
+     * @param $profile
+     *
+     * @return array
+     */
+    public function canonizeProfile($profile): array
+    {
+        if (empty($profile)) {
+            return [];
+        }
+
+        if (is_object($profile)) {
+            $profile = [
+                'user_id'     => (int)$profile->getUserId(),
+                'first_name'  => $profile->getFirstName(),
+                'last_name'   => $profile->getLastName(),
+                'birthdate'   => $profile->getBirthdate(),
+                'gender'      => $profile->getGender(),
+                'avatar'      => $profile->getAvatar(),
+                'information' => $profile->getInformation(),
+            ];
+        } else {
+            $profile = [
+                'user_id'     => (int)$profile['user_id'],
+                'first_name'  => $profile['first_name'],
+                'last_name'   => $profile['last_name'],
+                'birthdate'   => $profile['birthdate'],
+                'gender'      => $profile['gender'],
+                'avatar'      => $profile['avatar'],
+                'information' => $profile['information'],
+            ];
+        }
+
+        // Set information
+        $profile['information'] = !empty($profile['information']) ? json_decode($profile['information'], true) : [];
+
+        // Set avatar
+        $profile = $this->avatarService->createUri($profile);
+
+        return $profile;
+    }
+
+    /**
+     * @param object|array $roleAccountList
+     *
+     * @return int|null
+     */
+    public function canonizeAccountId(object|array $roleAccountList): int|null
+    {
+        if (empty($roleAccountList)) {
+            return 0;
+        }
+
+        if (is_object($roleAccountList)) {
+            $accountId = $roleAccountList->getUserId();
+        } else {
+            $accountId = $roleAccountList['user_id'];
+        }
+
+        return $accountId;
+    }
+
+    /**
+     * @param $account
+     *
+     * @return array
+     */
+    public function canonizeAccountProfile($account): array
+    {
+        if (empty($account)) {
+            return [];
+        }
+
+        if (is_object($account)) {
+            $account = [
+                'id'           => (int)$account->getId(),
+                'name'         => $account->getName(),
+                'identity'     => $account->getIdentity(),
+                'email'        => $account->getEmail(),
+                'mobile'       => $account->getMobile(),
+                'status'       => (int)$account->getStatus(),
+                'time_created' => $account->getTimeCreated(),
+                'first_name'   => $account->getFirstName(),
+                'last_name'    => $account->getLastName(),
+                'birthdate'    => $account->getBirthdate(),
+                'gender'       => $account->getGender(),
+                'avatar'       => $account->getAvatar(),
+                'information'  => $account->getInformation(),
+            ];
+        } else {
+            $account = [
+                'id'           => (int)$account['id'],
+                'name'         => $account['name'] ?? '',
+                'email'        => $account['email'] ?? '',
+                'identity'     => $account['identity'] ?? '',
+                'mobile'       => $account['mobile'] ?? '',
+                'status'       => (int)$account['status'],
+                'time_created' => $account['time_created'] ?? '',
+                'first_name'   => $account['first_name'] ?? '',
+                'last_name'    => $account['last_name'] ?? '',
+                'birthdate'    => $account['birthdate'] ?? '',
+                'gender'       => $account['gender'] ?? '',
+                'avatar'       => $account['avatar'] ?? '',
+                'information'  => $account['information'] ?? '',
+            ];
+        }
+
+        // Set information
+        $account['information'] = !empty($account['information']) ? json_decode($account['information'], true) : [];
+
+        // Set time
+        $account['time_created_view'] = ' - ';
+        if (!empty($account['time_created']) && is_numeric($account['time_created'])) {
+            $account['time_created_view'] = $this->utilityService->date($account['time_created']);
+        }
+
+        // Set avatar
+        $account = $this->avatarService->createUri($account);
+
+        return $account;
+    }
 }
