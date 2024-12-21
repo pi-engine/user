@@ -519,31 +519,30 @@ class AccountRepository implements AccountRepositoryInterface
 
     public function authentication($identityColumn = 'identity', $credentialColumn = 'credential', $hashPattern = 'argon2id'): AuthenticationService
     {
-        // Call authAdapter
+        // Initialize authentication adapter
         $authAdapter = new CallbackCheckAdapter(
             $this->db,
             $this->tableAccount,
             $identityColumn,
             $credentialColumn,
-            function ($hash, $password) use ($hashPattern) {
-                $result = false;
-                switch ($hashPattern) {
-                    case'argon2id':
-                    case'bcrypt':
-                        $result = password_verify($password, $hash);
-                        break;
-
-                    case'sha512':
-                        $result = hash_equals($hash, hash('sha512', $password));
-                        break;
-                }
-                return $result;
+            function (string $hash, string $password) use ($hashPattern): bool {
+                // Match hash and password based on the specified pattern
+                return match ($hashPattern) {
+                    'argon2id', 'bcrypt' => password_verify($password, $hash),
+                    'sha512'             => hash_equals($hash, hash('sha512', $password)),
+                    default              => throw new InvalidArgumentException('Unsupported hash pattern.'),
+                };
             }
         );
 
-        // Set condition
+        // Set conditions for active and valid accounts
         $select = $authAdapter->getDbSelect();
-        $select->where(['status' => 1, new IsNotNull($credentialColumn)]);
+        $select->where(
+            [
+                'status' => 1,
+                new IsNotNull($credentialColumn),
+            ]
+        );
 
         return new AuthenticationService(null, $authAdapter);
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pi\User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Laminas\Authentication\Adapter\DbTable\CallbackCheckAdapter;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
@@ -170,11 +171,19 @@ class AccountService implements ServiceInterface
         $this->hashPattern          = $config['hash_pattern'] ?? 'argon2id';
     }
 
+    /**
+     * @param $companyService
+     *
+     * @return void
+     */
     public function setCompanyService($companyService): void
     {
         $this->companyService = $companyService;
     }
 
+    /**
+     * @return bool
+     */
     public function hasCompanyService(): bool
     {
         return $this->companyService !== null;
@@ -191,9 +200,12 @@ class AccountService implements ServiceInterface
         $this->identityColumn   = $params['identityColumn'] ?? $this->identityColumn;
         $this->credentialColumn = $params['credentialColumn'] ?? $this->credentialColumn;
 
-        // Do log in
+        // Perform authentication
         $authentication = $this->accountRepository->authentication($this->identityColumn, $this->credentialColumn, $this->hashPattern);
-        $adapter        = $authentication->getAdapter();
+
+        // Set authentication adapter
+        /** @var CallbackCheckAdapter $adapter */
+        $adapter = $authentication->getAdapter();
         $adapter->setIdentity($params['identity'])->setCredential($params['credential']);
 
         // Check login
@@ -637,7 +649,7 @@ class AccountService implements ServiceInterface
         // Send notification
         $this->notificationService->send(
             [
-                'email' => [
+                'mail' => [
                     'to'      => [
                         'email' => $account['email'],
                         'name'  => $account['name'],
@@ -1797,7 +1809,8 @@ class AccountService implements ServiceInterface
     }
 
     /**
-     * @param $params
+     * @param $account
+     * @param $tokenOldId
      *
      * @return array
      */
@@ -1811,8 +1824,17 @@ class AccountService implements ServiceInterface
             ]
         );
 
+        // Set cache token
+        $cacheToken = [
+            $accessToken['payload']['id'] => [
+                'key'    => $accessToken['payload']['id'],
+                'create' => $accessToken['payload']['iat'],
+                'expire' => $accessToken['payload']['exp'],
+            ]
+        ];
+
         // Update cache
-        $this->cacheService->setUserItem($account['id'], 'access_keys', $accessToken);
+        $this->cacheService->setUserItem($account['id'], 'access_keys', $cacheToken);
         $this->cacheService->deleteUserItem($account['id'], 'access_keys', $tokenOldId);
         $this->cacheService->deleteUserItem($account['id'], 'multi_factor', $tokenOldId);
 

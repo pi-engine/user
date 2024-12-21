@@ -36,10 +36,11 @@ class AccountServiceFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): AccountService
     {
         // Get config
-        $config  = $container->get('config');
-        $global  = $config['global'] ?? [];
-        $account = $config['account'] ?? [];
-        $config  = array_merge($global, $account);
+        $config = $container->get('config');
+        $config = array_merge(
+            $config['global'] ?? [],
+            $config['account'] ?? []
+        );
 
         // Set account
         $accountService = new AccountService(
