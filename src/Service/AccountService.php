@@ -553,7 +553,7 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-            $otp = $this->generatePassword($otpCode);
+            $otp = $this->generatePassword((string)$otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -635,7 +635,7 @@ class AccountService implements ServiceInterface
             // Set is new
             $isNew = 1;
         } else {
-            $otp = $this->generatePassword($otpCode);
+            $otp = $this->generatePassword((string)$otpCode);
             $this->accountRepository->updateAccount((int)$account['id'], ['otp' => $otp]);
         }
 
@@ -731,7 +731,7 @@ class AccountService implements ServiceInterface
         // Set otp
         $otp = null;
         if (isset($params['otp']) && !empty($params['otp'])) {
-            $otp = $this->generatePassword($params['otp']);
+            $otp = $this->generatePassword((string)$params['otp']);
         }
 
         // Set add account params
@@ -791,15 +791,15 @@ class AccountService implements ServiceInterface
         $this->notificationService->send(
             [
                 'information' => [
-                    'sender_id'   => (int)$operator['id'],
-                    'receiver_id' => (int)$params['user_id'],
+                    'sender_id'   => (int)$operator['id'] ?? 0,
+                    'receiver_id' => (int)$account['id'],
                     'type'        => 'info',
                     'title'       => $this->translatorService->translate('add-account'),
                     'body'        => $this->translatorService->translate('add-account-message'),
                     'source'      => [
                         'module'  => 'user',
                         'section' => 'account',
-                        'item'    => (int)$params['user_id'],
+                        'item'    => (int)$account['id'],
                     ],
                 ],
             ]
