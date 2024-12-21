@@ -384,13 +384,15 @@ class AccountService implements ServiceInterface
             [
                 'account' => $account,
                 'type'    => 'refresh',
+                'id'      => $accessToken['id'],
             ]
         );
 
         // Set multi factor
         $multiFactor = [
-            $accessToken['key'] => [
-                'key'                 => $accessToken['key'],
+            $accessToken['id'] => [
+                'id'                  => $accessToken['id'],
+                'create'              => $accessToken['payload']['iat'],
                 'expire'              => $accessToken['payload']['exp'],
                 'multi_factor_global' => $multiFactorGlobal,
                 'multi_factor_status' => $multiFactorStatus,
@@ -1810,33 +1812,40 @@ class AccountService implements ServiceInterface
 
     /**
      * @param $account
-     * @param $tokenOldId
+     * @param $tokenId
      *
      * @return array
+     * @throws RandomException
      */
-    public function refreshToken($account, $tokenOldId): array
+    public function refreshToken($account, $tokenId): array
     {
+        // Get user
+        $user = $this->cacheService->getUser($account['id']);
+
         // Generate new token
         $accessToken = $this->tokenService->encryptToken(
             [
                 'account' => $account,
                 'type'    => 'access',
+                'id'      => $tokenId,
             ]
         );
 
-        // Set cache token
-        $cacheToken = [
-            $accessToken['payload']['id'] => [
-                'key'    => $accessToken['payload']['id'],
-                'create' => $accessToken['payload']['iat'],
-                'expire' => $accessToken['payload']['exp'],
-            ]
-        ];
+        // Set access token in cache
+        if (isset($user['access_keys'][$tokenId]) && !empty($user['access_keys'][$tokenId])) {
+            $user['access_keys'][$tokenId]['create'] = $accessToken['payload']['iat'];
+            $user['access_keys'][$tokenId]['expire'] = $accessToken['payload']['exp'];
+        }
+
+        // Set multi factor in cache
+        if (isset($user['multi_factor'][$tokenId]) && !empty($user['multi_factor'][$tokenId])) {
+            $user['multi_factor'][$tokenId]['create'] = $accessToken['payload']['iat'];
+            $user['multi_factor'][$tokenId]['expire'] = $accessToken['payload']['exp'];
+        }
 
         // Update cache
-        $this->cacheService->setUserItem($account['id'], 'access_keys', $cacheToken);
-        $this->cacheService->deleteUserItem($account['id'], 'access_keys', $tokenOldId);
-        $this->cacheService->deleteUserItem($account['id'], 'multi_factor', $tokenOldId);
+        $this->cacheService->setUserItem($account['id'], 'access_keys', $user['access_keys']);
+        $this->cacheService->setUserItem($account['id'], 'multi_factor', $user['multi_factor']);
 
         // Set result array
         return [
@@ -2325,10 +2334,10 @@ class AccountService implements ServiceInterface
             });
 
             // Add or update token with the key as array key
-            if (isset($newToken['key'], $newToken['payload']['iat'], $newToken['payload']['exp'])) {
-                unset($existingTokens[$newToken['key']]); // Remove existing token with the same key
-                $existingTokens[$newToken['key']] = [
-                    'key'    => $newToken['key'],
+            if (isset($newToken['id'], $newToken['payload']['iat'], $newToken['payload']['exp'])) {
+                unset($existingTokens[$newToken['id']]); // Remove existing token with the same key
+                $existingTokens[$newToken['id']] = [
+                    'id'     => $newToken['id'],
                     'create' => $newToken['payload']['iat'],
                     'expire' => $newToken['payload']['exp'],
                 ];
@@ -2336,7 +2345,7 @@ class AccountService implements ServiceInterface
 
             // Enforce single session policy if enabled
             if (isset($this->config['login']['session_policy']) && $this->config['login']['session_policy'] === 'single') {
-                $existingTokens = isset($newToken['key']) ? [$newToken['key'] => $existingTokens[$newToken['key']]] : [];
+                $existingTokens = isset($newToken['id']) ? [$newToken['id'] => $existingTokens[$newToken['id']]] : [];
 
                 // Log session policy enforcement for access tokens
                 if ($tokenType === 'access_keys') {
@@ -2357,12 +2366,13 @@ class AccountService implements ServiceInterface
             });
 
             foreach ($newMultiFactor as $mfKey => $mfData) {
-                if (isset($mfData['key'], $mfData['expire'])) {
+                if (isset($mfData['id'], $mfData['expire'])) {
                     $existingMultiFactor[$mfKey] = [
-                        'key'                 => $mfData['key'],
+                        'id'                  => $mfData['id'],
                         'multi_factor_global' => $mfData['multi_factor_global'] ?? null,
                         'multi_factor_status' => $mfData['multi_factor_status'] ?? null,
                         'multi_factor_verify' => $mfData['multi_factor_verify'] ?? null,
+                        'create'              => $mfData['create'],
                         'expire'              => $mfData['expire'],
                     ];
                 }
@@ -2381,7 +2391,7 @@ class AccountService implements ServiceInterface
                 'mobile'              => $account['mobile'] ?? $user['account']['mobile'] ?? null,
                 'first_name'          => $account['first_name'] ?? $user['account']['first_name'] ?? 'FirstName',
                 'last_name'           => $account['last_name'] ?? $user['account']['last_name'] ?? 'LastName',
-                'avatar'              => $account['avatar'] ?? $user['account']['avatar'] ?? 'default.png',
+                'avatar'              => $account['avatar'] ?? $user['account']['avatar'] ?? null,
                 'time_created'        => $account['time_created'] ?? $user['account']['time_created'] ?? $currentTime,
                 'last_login'          => $account['last_login'] ?? $user['account']['last_login'] ?? null,
                 'status'              => $account['status'] ?? $user['account']['status'] ?? 'active',
@@ -2391,7 +2401,7 @@ class AccountService implements ServiceInterface
                 'multi_factor_verify' => $account['multi_factor_verify'] ?? $user['account']['multi_factor_verify'] ?? null,
                 'is_company_setup'    => $account['is_company_setup'] ?? $user['account']['is_company_setup'] ?? false,
                 'company_id'          => $account['company_id'] ?? $user['account']['company_id'] ?? 0,
-                'company_title'       => $account['company_title'] ?? $user['account']['company_title'] ?? 'N/A',
+                'company_title'       => $account['company_title'] ?? $user['account']['company_title'] ?? null,
             ],
             'roles'         => $account['roles'] ?? $user['roles'] ?? [],
             'permission'    => $account['permission'] ?? $user['permission'] ?? null,

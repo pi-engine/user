@@ -26,14 +26,17 @@ class TokenService implements ServiceInterface
         $this->config       = $config;
     }
 
+    /**
+     * @throws RandomException
+     */
     public function encryptToken($params): array
     {
         // Generate a unique ID
-        $uniqId = $this->setUniqId($params);
+        $tokenId = $params['id'] ?? $this->setTokenKey($params);
 
         // Build the payload
         $payload = [
-            'id'   => $uniqId,
+            'id'   => $tokenId,
             'uid'  => $params['account']['id'],
             'iat'  => time(),
             'exp'  => $params['exp'] ?? time() + $this->setTtl($params),
@@ -53,7 +56,7 @@ class TokenService implements ServiceInterface
         // Generate and return the token
         return [
             'token'   => JWT::encode($payload, $this->setEncryptKey(), $this->setAlgorithm()),
-            'key'     => $uniqId,
+            'id'     => $tokenId,
             'payload' => $payload,
         ];
     }
@@ -151,7 +154,7 @@ class TokenService implements ServiceInterface
     /**
      * @throws RandomException
      */
-    private function setUniqId($params): string
+    private function setTokenKey($params): string
     {
         $typePrefix   = $params['type'] === 'refresh' ? 'r' : 'a';
 
