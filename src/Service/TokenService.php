@@ -56,7 +56,7 @@ class TokenService implements ServiceInterface
         // Generate and return the token
         return [
             'token'   => JWT::encode($payload, $this->setEncryptKey(), $this->setAlgorithm()),
-            'id'     => $tokenId,
+            'id'      => $tokenId,
             'payload' => $payload,
         ];
     }
@@ -156,7 +156,7 @@ class TokenService implements ServiceInterface
      */
     private function setTokenKey($params): string
     {
-        $typePrefix   = $params['type'] === 'refresh' ? 'r' : 'a';
+        $typePrefix = $params['type'] === 'refresh' ? 'r' : 'a';
 
         return hash(
             'sha256',
