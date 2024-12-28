@@ -342,6 +342,9 @@ class AccountService implements ServiceInterface
         // Sync profile and account
         $account = array_merge($account, $profile);
 
+        // Set baseurl
+        $account['baseurl'] = $this->config['baseurl'] ?? '';
+
         // Get roles
         $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
