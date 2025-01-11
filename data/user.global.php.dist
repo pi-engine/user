@@ -109,10 +109,11 @@ return [
             'status' => 1,
         ],
         'login'        => [
-            'session_policy'     => 'multi', // multi,single
-            'permission'         => 1,
-            'get_company'        => 1,
-            'permission_package' => 1,
+            'session_policy'       => 'multi', // multi,single
+            'permission'           => 1,
+            'get_company'          => 1,
+            'permission_package'   => 1,
+            'permission_blacklist' => [],
         ],
     ],
     'captcha' => [

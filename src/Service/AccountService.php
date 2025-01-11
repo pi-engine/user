@@ -350,7 +350,7 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = false;
+        //$account['is_company_setup'] = false;
         $account['company_id']       = $user['authorization']['company_id'] ?? 0;
         $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
@@ -358,12 +358,12 @@ class AccountService implements ServiceInterface
             if (!empty($company)) {
                 $account['company_id']       = $company['company_id'];
                 $account['company_title']    = $company['company_title'];
-                $account['is_company_setup'] = true;
+                //$account['is_company_setup'] = true;
             }
         }
 
         // Check company setup
-        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+        /* if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
             $isCompanySetup = false;
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
@@ -372,7 +372,7 @@ class AccountService implements ServiceInterface
             }
 
             $account['is_company_setup'] = $isCompanySetup;
-        }
+        } */
 
         // Generate access token
         $accessToken = $this->tokenService->encryptToken(
@@ -419,12 +419,22 @@ class AccountService implements ServiceInterface
 
         // Set permission
         if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
+            // Set permission params
             $permissionParams = [
                 'section' => 'api',
                 'role'    => $account['roles'],
             ];
 
+            // Get permission list
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+
+            // Check and cleanup permission list
+            if (
+                isset($this->config['login']['permission_blacklist'])
+                && !empty($this->config['login']['permission_blacklist'])
+            ) {
+                $account['permission'] = array_values(array_diff($account['permission'], $this->config['login']['permission_blacklist']));
+            }
         }
 
         // Check permission for company package
@@ -1155,7 +1165,7 @@ class AccountService implements ServiceInterface
         $user = $this->cacheService->getUser($account['id']);
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = false;
+        //$account['is_company_setup'] = false;
         $account['company_id']       = $user['authorization']['company_id'] ?? 0;
         $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
@@ -1163,12 +1173,12 @@ class AccountService implements ServiceInterface
             if (!empty($company)) {
                 $account['company_id']       = $company['company_id'];
                 $account['company_title']    = $company['company_title'];
-                $account['is_company_setup'] = true;
+                //$account['is_company_setup'] = true;
             }
         }
 
         // Check company setup
-        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+        /* if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
             $isCompanySetup = false;
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
@@ -1177,7 +1187,7 @@ class AccountService implements ServiceInterface
             }
 
             $account['is_company_setup'] = $isCompanySetup;
-        }
+        } */
 
         // Add or update user data to cache
         $this->manageUserCache($account);
@@ -1355,16 +1365,26 @@ class AccountService implements ServiceInterface
 
         // Set permission
         if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
+            // Set permission params
             $permissionParams = [
                 'section' => 'api',
                 'role'    => $account['roles'],
             ];
 
+            // Get permission list
             $account['permission'] = $this->permissionService->getPermissionRole($permissionParams);
+
+            // Check and cleanup permission list
+            if (
+                isset($this->config['login']['permission_blacklist'])
+                && !empty($this->config['login']['permission_blacklist'])
+            ) {
+                $account['permission'] = array_values(array_diff($account['permission'], $this->config['login']['permission_blacklist']));
+            }
         }
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = false;
+        //$account['is_company_setup'] = false;
         $account['company_id']       = $user['authorization']['company_id'] ?? 0;
         $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
@@ -1372,12 +1392,12 @@ class AccountService implements ServiceInterface
             if (!empty($company)) {
                 $account['company_id']       = $company['company_id'];
                 $account['company_title']    = $company['company_title'];
-                $account['is_company_setup'] = true;
+                //$account['is_company_setup'] = true;
             }
         }
 
         // Check company setup
-        if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
+        /* if (!$account['is_company_setup'] && isset($this->config['login']['get_company']) && (int)$this->config['login']['get_company'] === 1) {
             $isCompanySetup = false;
             if (isset($user['authorization']['company']['is_company_setup'])) {
                 $isCompanySetup = $user['authorization']['company']['is_company_setup'];
@@ -1386,7 +1406,7 @@ class AccountService implements ServiceInterface
             }
 
             $account['is_company_setup'] = $isCompanySetup;
-        }
+        } */
 
         // Check permission for company package
         if (isset($this->config['login']['permission_package']) && (int)$this->config['login']['permission_package'] === 1) {
@@ -2402,7 +2422,7 @@ class AccountService implements ServiceInterface
                 'multi_factor_global' => $account['multi_factor_global'] ?? $user['account']['multi_factor_global'] ?? null,
                 'multi_factor_status' => $account['multi_factor_status'] ?? $user['account']['multi_factor_status'] ?? null,
                 'multi_factor_verify' => $account['multi_factor_verify'] ?? $user['account']['multi_factor_verify'] ?? null,
-                'is_company_setup'    => $account['is_company_setup'] ?? $user['account']['is_company_setup'] ?? false,
+                //'is_company_setup'    => $account['is_company_setup'] ?? $user['account']['is_company_setup'] ?? false,
                 'company_id'          => $account['company_id'] ?? $user['account']['company_id'] ?? 0,
                 'company_title'       => $account['company_title'] ?? $user['account']['company_title'] ?? null,
             ],
