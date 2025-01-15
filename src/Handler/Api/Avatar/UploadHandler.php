@@ -6,7 +6,6 @@ namespace Pi\User\Handler\Api\Avatar;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Pi\Core\Response\EscapingJsonResponse;
-use Pi\User\Service\AccountService;
 use Pi\User\Service\AvatarService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -22,21 +21,16 @@ class UploadHandler implements RequestHandlerInterface
     /** @var StreamFactoryInterface */
     protected StreamFactoryInterface $streamFactory;
 
-    /** @var AccountService */
-    protected AccountService $accountService;
-
     /** @var AvatarService */
     protected AvatarService $avatarService;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        AccountService           $accountService,
         AvatarService            $avatarService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->accountService  = $accountService;
         $this->avatarService   = $avatarService;
     }
 
@@ -44,15 +38,7 @@ class UploadHandler implements RequestHandlerInterface
     {
         $uploadFiles = $request->getUploadedFiles();
         $account     = $request->getAttribute('account');
-        $avatar      = $this->avatarService->uploadAvatar(array_shift($uploadFiles), $account);
-        $profile     = $this->accountService->updateAccount($avatar, $account);
-
-        // Set result array
-        $result = [
-            'result' => true,
-            'data'   => $profile,
-            'error'  => [],
-        ];
+        $result      = $this->avatarService->uploadAvatar(array_shift($uploadFiles), $account);
 
         return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }

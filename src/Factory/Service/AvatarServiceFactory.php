@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Media\Service\S3Service;
+use Pi\Media\Storage\LocalStorage;
+use Pi\User\Service\AccountService;
 use Pi\User\Service\AvatarService;
 use Pi\User\Service\HistoryService;
 use Psr\Container\ContainerExceptionInterface;
@@ -26,10 +29,20 @@ class AvatarServiceFactory implements FactoryInterface
     {
         // Get config
         $config = $container->get('config');
-        $config = $config['avatar'] ?? [];
+        $config = array_merge(
+            $config['global'] ?? [],
+            $config['avatar'] ?? [],
+            [
+                'storage' => $config['media']['storage'] ?? 'local',
+                's3'      => $config['media']['s3'] ?? [],
+            ]
+        );
 
         return new AvatarService(
+            $container->get(AccountService::class),
             $container->get(HistoryService::class),
+            $container->get(LocalStorage::class),
+            $container->get(S3Service::class),
             $config
         );
     }

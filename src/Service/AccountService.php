@@ -45,9 +45,6 @@ class AccountService implements ServiceInterface
     /** @var UtilityService */
     protected UtilityService $utilityService;
 
-    /** @var AvatarService */
-    protected AvatarService $avatarService;
-
     /** @var NotificationService */
     protected NotificationService $notificationService;
 
@@ -132,7 +129,6 @@ class AccountService implements ServiceInterface
      * @param TokenService               $tokenService
      * @param CacheService               $cacheService
      * @param UtilityService             $utilityService
-     * @param AvatarService              $avatarService
      * @param NotificationService        $notificationService
      * @param HistoryService             $historyService
      * @param TranslatorService          $translatorService
@@ -147,7 +143,6 @@ class AccountService implements ServiceInterface
         TokenService               $tokenService,
         CacheService               $cacheService,
         UtilityService             $utilityService,
-        AvatarService              $avatarService,
         NotificationService        $notificationService,
         HistoryService             $historyService,
         TranslatorService          $translatorService,
@@ -160,7 +155,6 @@ class AccountService implements ServiceInterface
         $this->permissionService    = $permissionService;
         $this->tokenService         = $tokenService;
         $this->cacheService         = $cacheService;
-        $this->avatarService        = $avatarService;
         $this->utilityService       = $utilityService;
         $this->notificationService  = $notificationService;
         $this->historyService       = $historyService;
@@ -2523,7 +2517,7 @@ class AccountService implements ServiceInterface
         $profile['information'] = !empty($profile['information']) ? json_decode($profile['information'], true) : [];
 
         // Set avatar
-        $profile = $this->avatarService->createUri($profile);
+        //$profile = $this->avatarService->createUri($profile);
 
         return $profile;
     }
@@ -2603,7 +2597,7 @@ class AccountService implements ServiceInterface
         }
 
         // Set avatar
-        $account = $this->avatarService->createUri($account);
+        //$account = $this->avatarService->createUri($account);
 
         return $account;
     }

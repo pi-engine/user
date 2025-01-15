@@ -13,7 +13,6 @@ use Pi\Core\Service\UtilityService;
 use Pi\Notification\Service\NotificationService;
 use Pi\User\Repository\AccountRepositoryInterface;
 use Pi\User\Service\AccountService;
-use Pi\User\Service\AvatarService;
 use Pi\User\Service\HistoryService;
 use Pi\User\Service\PermissionService;
 use Pi\User\Service\RoleService;
@@ -50,7 +49,6 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(TokenService::class),
             $container->get(CacheService::class),
             $container->get(UtilityService::class),
-            $container->get(AvatarService::class),
             $container->get(NotificationService::class),
             $container->get(HistoryService::class),
             $container->get(TranslatorService::class),

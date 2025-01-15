@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Pi\User\Middleware;
 
+use Exception;
 use Fig\Http\Message\StatusCodeInterface;
+use Imagine\Gd\Imagine;
 use Laminas\Validator\File\Extension;
 use Laminas\Validator\File\MimeType;
 use Laminas\Validator\File\Size;
@@ -80,6 +82,52 @@ class AvatarUploadMiddleware implements MiddlewareInterface
                 ]
             );
             return $this->errorHandler->handle($request);
+        }
+
+        // Create an Imagine instance
+        $imagine = new Imagine();
+        foreach ($uploadFiles as $uploadFile) {
+            try {
+                // Open the uploaded file with Imagine
+                $image = $imagine->open($uploadFile->getStream()->getMetadata('uri'));
+
+                // Check if the image is square
+                $size = $image->getSize();
+                if ($size->getWidth() !== $size->getHeight()) {
+                    $request = $request->withAttribute('status', 422);
+                    $request = $request->withAttribute(
+                        'error',
+                        [
+                            'message' => "Image must be square. The size is : {$size->getWidth()}*{$size->getHeight()}",
+                            'code'    => 422,
+                        ]
+                    );
+                    return $this->errorHandler->handle($request);
+                }
+
+                // Check if the image size is greater than 512x512
+                if ($size->getWidth() < 512 || $size->getHeight() < 512) {
+                    $request = $request->withAttribute('status', 422);
+                    $request = $request->withAttribute(
+                        'error',
+                        [
+                            'message' => "Image size must be at least 512x512 pixels.. The size is : {$size->getWidth()}*{$size->getHeight()}",
+                            'code'    => 422,
+                        ]
+                    );
+                    return $this->errorHandler->handle($request);
+                }
+            } catch (Exception $e) {
+                $request = $request->withAttribute('status', 422);
+                $request = $request->withAttribute(
+                    'error',
+                    [
+                        'message' => 'Invalid image.' . $e->getMessage(),
+                        'code'    => 422,
+                    ]
+                );
+                return $this->errorHandler->handle($request);
+            }
         }
 
         return $handler->handle($request);
