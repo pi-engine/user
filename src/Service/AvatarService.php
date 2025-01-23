@@ -64,9 +64,11 @@ class AvatarService implements ServiceInterface
         $imageUris = [];
         if (isset($this->config['storage']) && $this->config['storage'] === 's3') {
             // Delete old path and files if exist
-            $bucket = $this->s3Service->deleteBucket($profile['information']['avatar_params']['path']);
-            if (!$bucket['result']) {
-                return $bucket;
+            if (isset($profile['information']['avatar_params']['path']) && !empty($profile['information']['avatar_params']['path'])) {
+                $bucket = $this->s3Service->deleteBucket($profile['information']['avatar_params']['path']);
+                if (!$bucket['result']) {
+                    return $bucket;
+                }
             }
 
             // Set bucket name
