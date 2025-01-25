@@ -46,7 +46,7 @@ class EditHandler implements RequestHandlerInterface
 
         // Update account role
         if (isset($requestBody['roles']) && !empty($requestBody['roles'])) {
-            $this->accountService->updateAccountRoles($requestBody['roles'], $updatedAccount, 'all', $operator);
+            $this->accountService->updateAccountRolesByAdmin($requestBody['roles'], $updatedAccount, $operator);
         }
 
         return new EscapingJsonResponse(

@@ -49,6 +49,25 @@ class RoleService implements ServiceInterface
         $this->config         = $config;
     }
 
+    public function getRoleList($section = 'api'): array
+    {
+        switch ($section) {
+            case 'api':
+                return $this->getApiRoleList();
+                break;
+
+            case 'admin':
+                return $this->getAdminRoleList();
+                break;
+
+            default:
+            case 'all':
+            case '':
+                return $this->getAllRoleList();
+                break;
+        }
+    }
+
     public function getApiRoleList(): array
     {
         $roles = $this->cacheService->getItem('roles-api');
@@ -112,25 +131,6 @@ class RoleService implements ServiceInterface
         }
 
         return $roles;
-    }
-
-    public function getRoleList($section = 'api'): array
-    {
-        switch ($section) {
-            case 'api':
-                return $this->getApiRoleList();
-                break;
-
-            case 'admin':
-                return $this->getAdminRoleList();
-                break;
-
-            default:
-            case 'all':
-            case '':
-                return $this->getAllRoleList();
-                break;
-        }
     }
 
     public function getRoleResourceListByAdmin(): array
@@ -280,6 +280,37 @@ class RoleService implements ServiceInterface
         foreach ($userRoles as $roleName) {
             if (in_array($roleName, $roleList)) {
                 $this->roleRepository->addRoleAccount((int)$account['id'], $roleName, $section);
+            }
+        }
+
+        // Save log
+        $this->historyService->logger('updateRoleAccount', ['request' => ['role' => $roles], 'account' => $account, 'operator' => $operator]);
+    }
+
+    public function updateAccountRolesByAdmin($roles, $account, $operator = []): void
+    {
+        // Get role list
+        $apiRoleList    = $this->getApiRoleList();
+        $adminRoleList    = $this->getAdminRoleList();
+
+        // Set user role list
+        $defaultList = $this->getDefaultRolesLight();
+        $userRoles   = array_unique(array_merge($roles, $defaultList));
+
+        // Delete all roles and add defaults
+        $this->deleteAllRoleAccount($account, 'all', $operator);
+
+        // Check and add new api roles
+        foreach ($userRoles as $roleName) {
+            if (in_array($roleName, $apiRoleList)) {
+                $this->roleRepository->addRoleAccount((int)$account['id'], $roleName, 'api');
+            }
+        }
+
+        // Check and add new admin roles
+        foreach ($userRoles as $roleName) {
+            if (in_array($roleName, $adminRoleList)) {
+                $this->roleRepository->addRoleAccount((int)$account['id'], $roleName, 'admin');
             }
         }
 

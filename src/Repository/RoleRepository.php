@@ -266,10 +266,10 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function deleteAllRoleAccount(int $userId, string $section = 'api'): void
     {
-        $where = [
-            'user_id' => $userId,
-            'section' => $section,
-        ];
+        $where = ['user_id' => $userId];
+        if (in_array($section, ['api', 'admin'])) {
+            $where['section'] = $section;
+        }
 
         $delete = new Delete($this->tableRoleAccount);
         $delete->where($where);

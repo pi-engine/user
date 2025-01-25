@@ -1505,6 +1505,21 @@ class AccountService implements ServiceInterface
     }
 
     /**
+     * @param        $roles
+     * @param        $account
+     * @param array  $operator
+     *
+     * @return void
+     */
+    public function updateAccountRolesByAdmin($roles, $account, array $operator = []): void
+    {
+        $this->roleService->updateAccountRolesByAdmin($roles, $account, $operator);
+
+        // Make user logout after edit role
+        $this->logout(['user_id' => (int)$account['id'], 'all_session' => 1]);
+    }
+
+    /**
      * @param       $params
      * @param       $account
      *
