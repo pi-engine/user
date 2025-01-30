@@ -104,4 +104,4 @@ CREATE TABLE IF NOT EXISTS `permission_role`
 
 INSERT INTO `role_resource` (`id`, `name`, `title`, `status`, `section`)
 VALUES (NULL, 'member', 'Member', '1', 'api'),
-       (NULL, 'admin', 'Admin', '1', 'admin');
+       (NULL, 'admin', 'Full Admin', '1', 'admin');
