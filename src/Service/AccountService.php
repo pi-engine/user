@@ -1198,6 +1198,8 @@ class AccountService implements ServiceInterface
             $account = $this->getAccount(['mobile' => $params['mobile']]);
         } elseif (isset($params['identity']) && !empty($params['identity'])) {
             $account = $this->getAccount(['identity' => $params['identity']]);
+        } elseif (isset($params['user_id']) && !empty($params['user_id'])) {
+            $account = $this->getAccount(['id' => $params['user_id']]);
         }
 
         if (empty($account)) {
