@@ -6,6 +6,7 @@ namespace Pi\User\Handler\Api\Captcha\ReCaptcha;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Pi\Core\Response\EscapingJsonResponse;
+use Pi\Core\Service\UtilityService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,16 +22,21 @@ class VerifyHandler implements RequestHandlerInterface
     /** @var StreamFactoryInterface */
     protected StreamFactoryInterface $streamFactory;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /* @var array */
     protected array $config;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
+        UtilityService           $utilityService,
                                  $config
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
+        $this->utilityService  = $utilityService;
         $this->config          = $config;
     }
 
@@ -50,7 +56,7 @@ class VerifyHandler implements RequestHandlerInterface
 
         // Call ReCaptcha
         $recaptcha = new ReCaptcha($this->config['recaptcha']['secret']);
-        $response  = $recaptcha->setExpectedAction('submit')->verify($requestBody['token'], $_SERVER['REMOTE_ADDR']);
+        $response  = $recaptcha->setExpectedAction('submit')->verify($requestBody['token'], $this->utilityService->getClientIp());
 
         // Check result
         if ($response->isSuccess() && $response->getScore() > 0.5) {

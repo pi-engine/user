@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Service\UtilityService;
 use Pi\Logger\Service\LoggerService;
 use Pi\User\Service\HistoryService;
 use Psr\Container\ContainerExceptionInterface;
@@ -29,6 +30,7 @@ class HistoryServiceFactory implements FactoryInterface
 
         return new HistoryService(
             $container->get(LoggerService::class),
+            $container->get(UtilityService::class),
             $config['utility']
         );
     }

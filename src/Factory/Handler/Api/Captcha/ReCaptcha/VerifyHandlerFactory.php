@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pi\User\Factory\Handler\Api\Captcha\ReCaptcha;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Service\UtilityService;
 use Pi\User\Handler\Api\Captcha\ReCaptcha\VerifyHandler;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -31,6 +32,7 @@ class VerifyHandlerFactory implements FactoryInterface
         return new VerifyHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
+            $container->get(UtilityService::class),
             $config['captcha']
         );
     }

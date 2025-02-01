@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Pi\User\Service;
 
+use Pi\Core\Service\UtilityService;
 use Pi\Logger\Service\LoggerService;
 
 class HistoryService implements ServiceInterface
 {
     /* @var LoggerService */
     protected LoggerService $loggerService;
+
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
 
     /* @var array */
     protected array $config;
@@ -36,17 +40,19 @@ class HistoryService implements ServiceInterface
         ];
 
     public function __construct(
-        LoggerService $loggerService,
-                      $config
+        LoggerService  $loggerService,
+        UtilityService $utilityService,
+                       $config
     ) {
-        $this->loggerService = $loggerService;
-        $this->config        = $config;
+        $this->loggerService  = $loggerService;
+        $this->utilityService = $utilityService;
+        $this->config         = $config;
     }
 
     public function logger(string $state, array $params): void
     {
         // Set user ip
-        $params['ip']     = $_SERVER['REMOTE_ADDR'];
+        $params['ip']     = $this->utilityService->getClientIp();
         $params['method'] = $_SERVER['REQUEST_METHOD'];
 
         // Clean up
