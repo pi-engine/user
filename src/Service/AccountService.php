@@ -350,8 +350,8 @@ class AccountService implements ServiceInterface
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
-                $account['company_id']       = $company['company_id'];
-                $account['company_title']    = $company['company_title'];
+                $account['company_id']    = $company['company_id'];
+                $account['company_title'] = $company['company_title'];
             }
         }
 
@@ -386,6 +386,7 @@ class AccountService implements ServiceInterface
 
         // Set extra info
         $account['last_login']          = time();
+        $account['last_login_view']     = $this->utilityService->date($account['last_login']);
         $account['has_password']        = $this->hasPassword($account['id']);
         $account['multi_factor_global'] = $multiFactorGlobal;
         $account['multi_factor_status'] = $multiFactorStatus;
@@ -1152,8 +1153,8 @@ class AccountService implements ServiceInterface
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
-                $account['company_id']       = $company['company_id'];
-                $account['company_title']    = $company['company_title'];
+                $account['company_id']    = $company['company_id'];
+                $account['company_title'] = $company['company_title'];
             }
         }
 
@@ -1251,6 +1252,8 @@ class AccountService implements ServiceInterface
             $account = $this->getAccount(['mobile' => $params['mobile']]);
         } elseif (isset($params['identity']) && !empty($params['identity'])) {
             $account = $this->getAccount(['identity' => $params['identity']]);
+        } elseif (isset($params['user_id']) && !empty($params['user_id'])) {
+            $account = $this->getAccount(['id' => $params['user_id']]);
         }
 
         if (empty($account)) {
@@ -1360,8 +1363,8 @@ class AccountService implements ServiceInterface
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
-                $account['company_id']       = $company['company_id'];
-                $account['company_title']    = $company['company_title'];
+                $account['company_id']    = $company['company_id'];
+                $account['company_title'] = $company['company_title'];
             }
         }
 
