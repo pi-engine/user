@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pi\User\Middleware;
 
+use Exception;
 use Fig\Http\Message\StatusCodeInterface;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\User\Service\PermissionService;
@@ -97,7 +98,6 @@ class AuthorizationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
-
         // Set page key
         $pageKey = sprintf(
             '%s-%s-%s-%s',
@@ -108,18 +108,31 @@ class AuthorizationMiddleware implements MiddlewareInterface
         );
 
         // Get and check access
-        $access = $this->permissionService->checkPermissionBefore($pageKey, $userRoles);
-        if (!$access) {
+        try {
+            $access = $this->permissionService->checkPermissionBefore($pageKey, $userRoles);
+            if (!$access) {
+                $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+                $request = $request->withAttribute(
+                    'error',
+                    [
+                        'message' => 'You dont have access to this area ! 2',
+                        'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
+                    ]
+                );
+                return $this->errorHandler->handle($request);
+            }
+        } catch (Exception $e) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute(
                 'error',
                 [
-                    'message' => 'You dont have access to this area ! 2',
+                    'message' => $e->getMessage(),
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ]
             );
             return $this->errorHandler->handle($request);
         }
+
 
         // Set attribute
         $request = $request->withAttribute('roles', array_values($userRoles));
