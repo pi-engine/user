@@ -37,7 +37,7 @@ class PersistHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
 
-        // Get cche item
+        // Get cache item
         $this->cacheService->setPersist((string)$requestBody['key']);
 
         $result
