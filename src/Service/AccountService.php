@@ -387,6 +387,7 @@ class AccountService implements ServiceInterface
         // Set extra info
         $account['last_login']          = time();
         $account['last_login_view']     = $this->utilityService->date($account['last_login']);
+        $account['access_ip']           = $this->utilityService->getClientIp();
         $account['has_password']        = $this->hasPassword($account['id']);
         $account['multi_factor_global'] = $multiFactorGlobal;
         $account['multi_factor_status'] = $multiFactorStatus;
@@ -715,7 +716,8 @@ class AccountService implements ServiceInterface
     public function addAccount($params, array $operator = []): array
     {
         // Set account name
-        $params['name'] = $this->setAccountName($params);
+        $params['name']        = $this->setAccountName($params);
+        $params['ip_register'] = $this->utilityService->getClientIp();
 
         // Set credential
         $credential = null;

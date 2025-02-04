@@ -8,6 +8,7 @@ use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\UtilityService;
 use Random\RandomException;
 
 class TokenService implements ServiceInterface
@@ -15,15 +16,20 @@ class TokenService implements ServiceInterface
     /* @var CacheService */
     protected CacheService $cacheService;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /* @var array */
     protected array $config;
 
     public function __construct(
-        CacheService $cacheService,
-                     $config
+        CacheService   $cacheService,
+        UtilityService $utilityService,
+                       $config
     ) {
-        $this->cacheService = $cacheService;
-        $this->config       = $config;
+        $this->cacheService   = $cacheService;
+        $this->utilityService = $utilityService;
+        $this->config         = $config;
     }
 
     /**
@@ -51,6 +57,11 @@ class TokenService implements ServiceInterface
             foreach ($this->config['additional'] as $key) {
                 $payload[$key] = $params['account'][$key] ?? '';
             }
+        }
+
+        // Add additional user IP
+        if (isset($this->config['check_ip']) && !empty($this->config['check_ip']) && $params['type'] == 'access') {
+            $payload['ip'] = $this->utilityService->getClientIp();
         }
 
         // Generate and return the token
@@ -105,6 +116,16 @@ class TokenService implements ServiceInterface
                     'status'  => false,
                     'message' => 'Invalid issuer or audience',
                 ];
+            }
+
+            // Validate IP
+            if (isset($decodedToken->ip) && !empty($decodedToken->ip) && $decodedToken->type == 'access') {
+                if ($decodedToken->ip !== $this->utilityService->getClientIp()) {
+                    return [
+                        'status'  => false,
+                        'message' => 'Invalid IP address',
+                    ];
+                }
             }
 
             // Get and check user data from cache

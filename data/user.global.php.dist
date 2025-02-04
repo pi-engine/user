@@ -54,6 +54,7 @@ return [
         'private_key' => '', // PATH_TO_FILE
         'iss'         => $baseUrl,
         'aud'         => $baseUrl,
+        'check_ip'    => 1,
         'additional'  => [
             'company_id',
             'company_title',
