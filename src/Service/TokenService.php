@@ -118,6 +118,29 @@ class TokenService implements ServiceInterface
                 ];
             }
 
+            // Check if the IP is valid or in the allowed list
+            if (
+                isset($this->config['check_ip'])
+                && !empty($this->config['check_ip'])
+                && isset($decodedToken->ip)
+                && !empty($decodedToken->ip)
+                && $decodedToken->type == 'access'
+            ) {
+                // Get current user IP
+                $currentIp = $this->utilityService->getClientIp();
+
+                // Check user ip
+                if (
+                    $decodedToken->ip !== $currentIp
+                    && !$this->utilityService->isIpAllowed($currentIp, $this->config['allowed_ips'])
+                ) {
+                    return [
+                        'status'  => false,
+                        'message' => 'Invalid IP address',
+                    ];
+                }
+            }
+
             // Validate IP
             if (isset($decodedToken->ip) && !empty($decodedToken->ip) && $decodedToken->type == 'access') {
                 if ($decodedToken->ip !== $this->utilityService->getClientIp()) {
