@@ -18,6 +18,7 @@ use Laminas\Db\Sql\Predicate\NotIn;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
+use Pi\Core\Repository\SignatureRepository;
 use Pi\User\Model\Account\Account;
 use Pi\User\Model\Account\AccountProfile;
 use Pi\User\Model\Account\Credential;
@@ -56,6 +57,11 @@ class AccountRepository implements AccountRepositoryInterface
     private AdapterInterface $db;
 
     /**
+     * @var SignatureRepository
+     */
+    protected SignatureRepository $signatureRepository;
+
+    /**
      * @var HydratorInterface
      */
     private HydratorInterface $hydrator;
@@ -90,16 +96,18 @@ class AccountRepository implements AccountRepositoryInterface
     private MultiFactor $multiFactorPrototype;
 
     public function __construct(
-        AdapterInterface  $db,
-        HydratorInterface $hydrator,
-        Account           $accountPrototype,
-        AccountProfile    $accountProfilePrototype,
-        Profile           $profilePrototype,
-        AccountRole       $accountRolePrototype,
-        Credential        $credentialPrototype,
-        MultiFactor       $multiFactorPrototype
+        AdapterInterface    $db,
+        SignatureRepository $signatureRepository,
+        HydratorInterface   $hydrator,
+        Account             $accountPrototype,
+        AccountProfile      $accountProfilePrototype,
+        Profile             $profilePrototype,
+        AccountRole         $accountRolePrototype,
+        Credential          $credentialPrototype,
+        MultiFactor         $multiFactorPrototype
     ) {
         $this->db                      = $db;
+        $this->signatureRepository     = $signatureRepository;
         $this->hydrator                = $hydrator;
         $this->accountPrototype        = $accountPrototype;
         $this->accountProfilePrototype = $accountProfilePrototype;
@@ -295,8 +303,13 @@ class AccountRepository implements AccountRepositoryInterface
             );
         }
 
+        // Get row id
         $id = $result->getGeneratedValue();
 
+        // Generate and update new signature for the account
+        $this->signatureRepository->updateSignature($this->tableAccount, $id, ['name', 'identity', 'email', 'mobile', 'credential', 'status']);
+
+        // Get account and set it as result
         return $this->getAccount(['id' => $id]);
     }
 
@@ -315,6 +328,9 @@ class AccountRepository implements AccountRepositoryInterface
                 'Database error occurred during update operation'
             );
         }
+
+        // Generate and update new signature for the account
+        $this->signatureRepository->updateSignature($this->tableAccount, $userId, ['name', 'identity', 'email', 'mobile', 'credential', 'status']);
     }
 
     public function duplicatedAccount(array $params = []): int

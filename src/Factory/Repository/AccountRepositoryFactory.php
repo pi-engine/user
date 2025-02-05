@@ -7,6 +7,7 @@ namespace Pi\User\Factory\Repository;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Repository\SignatureRepository;
 use Pi\User\Model\Account\Account;
 use Pi\User\Model\Account\AccountProfile;
 use Pi\User\Model\Account\Credential;
@@ -33,6 +34,7 @@ class AccountRepositoryFactory implements FactoryInterface
     {
         return new AccountRepository(
             $container->get(AdapterInterface::class),
+            $container->get(SignatureRepository::class),
             new ReflectionHydrator(),
             new Account('', '', '', '', 0, 0, 0),
             new AccountProfile('', '', '', '', 0, 0, '', '', '', '', '', '', 0),
