@@ -51,10 +51,11 @@ CREATE TABLE IF NOT EXISTS `role_resource`
 
 CREATE TABLE IF NOT EXISTS `role_account`
 (
-	`id`      INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
-	`user_id` INT(10) UNSIGNED      NOT NULL DEFAULT 0,
-	`role`    VARCHAR(64)           NOT NULL DEFAULT '',
-	`section` ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
+	`id`        INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
+	`user_id`   INT(10) UNSIGNED      NOT NULL DEFAULT 0,
+	`role`      VARCHAR(64)           NOT NULL DEFAULT '',
+	`section`   ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
+	`signature` TEXT                           DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `section_user` (`section`, `user_id`, `role`)
 );
@@ -92,12 +93,13 @@ CREATE TABLE IF NOT EXISTS `permission_page`
 
 CREATE TABLE IF NOT EXISTS `permission_role`
 (
-	`id`       INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
-	`key`      VARCHAR(255)          NULL     DEFAULT NULL,
-	`resource` VARCHAR(255)          NOT NULL DEFAULT '',
-	`section`  ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
-	`module`   VARCHAR(64)           NOT NULL DEFAULT '',
-	`role`     VARCHAR(64)           NOT NULL DEFAULT '',
+	`id`        INT(10) UNSIGNED      NOT NULL AUTO_INCREMENT,
+	`key`       VARCHAR(255)          NULL     DEFAULT NULL,
+	`resource`  VARCHAR(255)          NOT NULL DEFAULT '',
+	`section`   ENUM ('api', 'admin') NOT NULL DEFAULT 'api',
+	`module`    VARCHAR(64)           NOT NULL DEFAULT '',
+	`role`      VARCHAR(64)           NOT NULL DEFAULT '',
+	`signature` TEXT                           DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `key` (`key`),
 	UNIQUE KEY `keys` (`key`, `resource`, `section`, `module`, `role`)
