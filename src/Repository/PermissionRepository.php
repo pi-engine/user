@@ -13,6 +13,7 @@ use Laminas\Db\Sql\Predicate\Expression;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
+use Pi\Core\Repository\SignatureRepository;
 use Pi\User\Model\Permission\Page;
 use Pi\User\Model\Permission\Resource;
 use Pi\User\Model\Permission\Role;
@@ -47,6 +48,11 @@ class PermissionRepository implements PermissionRepositoryInterface
     private AdapterInterface $db;
 
     /**
+     * @var SignatureRepository
+     */
+    protected SignatureRepository $signatureRepository;
+
+    /**
      * @var HydratorInterface
      */
     private HydratorInterface $hydrator;
@@ -68,12 +74,14 @@ class PermissionRepository implements PermissionRepositoryInterface
 
     public function __construct(
         AdapterInterface  $db,
+        SignatureRepository $signatureRepository,
         HydratorInterface $hydrator,
         Resource          $resourcePrototype,
         Role              $rolePrototype,
         Page              $pagePrototype
     ) {
         $this->db                = $db;
+        $this->signatureRepository     = $signatureRepository;
         $this->hydrator          = $hydrator;
         $this->resourcePrototype = $resourcePrototype;
         $this->rolePrototype     = $rolePrototype;
@@ -328,6 +336,9 @@ class PermissionRepository implements PermissionRepositoryInterface
 
         $id = $result->getGeneratedValue();
 
+        // Generate and update new signature for the account
+        $this->signatureRepository->updateSignature($this->tablePermissionRole, $id);
+
         return $this->getPermissionRole(['id' => $id]);
     }
 
@@ -395,6 +406,9 @@ class PermissionRepository implements PermissionRepositoryInterface
                 'Database error occurred during update operation'
             );
         }
+
+        // Generate and update new signature for the account
+        //$this->signatureRepository->updateSignature($this->tablePermissionRole, $id);
     }
 
     /**

@@ -7,7 +7,7 @@ namespace Pi\User\Factory\Repository;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Pi\User\Model\Profile\Profile;
+use Pi\User\Model\Account\Profile;
 use Pi\User\Repository\ProfileRepository;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -29,7 +29,7 @@ class ProfileRepositoryFactory implements FactoryInterface
         return new ProfileRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new Profile()
+            new Profile(0, '','','','', '', '', 0)
         );
     }
 }

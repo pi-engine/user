@@ -13,6 +13,7 @@ use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
+use Pi\Core\Repository\SignatureRepository;
 use Pi\User\Model\Role\Account;
 use Pi\User\Model\Role\Resource;
 use RuntimeException;
@@ -39,6 +40,11 @@ class RoleRepository implements RoleRepositoryInterface
     private AdapterInterface $db;
 
     /**
+     * @var SignatureRepository
+     */
+    protected SignatureRepository $signatureRepository;
+
+    /**
      * @var HydratorInterface
      */
     private HydratorInterface $hydrator;
@@ -55,11 +61,13 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function __construct(
         AdapterInterface  $db,
+        SignatureRepository $signatureRepository,
         HydratorInterface $hydrator,
         Resource          $rolePrototype,
         Account           $accountPrototype
     ) {
         $this->db               = $db;
+        $this->signatureRepository     = $signatureRepository;
         $this->hydrator         = $hydrator;
         $this->rolePrototype    = $rolePrototype;
         $this->accountPrototype = $accountPrototype;
@@ -246,6 +254,11 @@ class RoleRepository implements RoleRepositoryInterface
                 'Database error occurred during blog post insert operation'
             );
         }
+
+        $id = $result->getGeneratedValue();
+
+        // Generate and update new signature for the account
+        $this->signatureRepository->updateSignature($this->tableRoleAccount, $id);
     }
 
     public function deleteRoleAccount(int $userId, string $roleName): void

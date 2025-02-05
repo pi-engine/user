@@ -7,6 +7,7 @@ namespace Pi\User\Factory\Repository;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Pi\Core\Repository\SignatureRepository;
 use Pi\User\Model\Permission\Page;
 use Pi\User\Model\Permission\Resource;
 use Pi\User\Model\Permission\Role;
@@ -30,6 +31,7 @@ class PermissionRepositoryFactory implements FactoryInterface
     {
         return new PermissionRepository(
             $container->get(AdapterInterface::class),
+            $container->get(SignatureRepository::class),
             new ReflectionHydrator(),
             new Resource('', '', '', '', ''),
             new Role('', '', '', '', ''),

@@ -6,7 +6,7 @@ namespace Pi\User\Repository;
 
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Hydrator\HydratorInterface;
-use Pi\User\Model\Profile\Profile;
+use Pi\User\Model\Account\Profile;
 
 class ProfileRepository implements AccountRoleRepositoryInterface
 {
