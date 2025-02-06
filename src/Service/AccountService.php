@@ -2410,8 +2410,8 @@ class AccountService implements ServiceInterface
             return [
                 'result' => true,
                 'data'   => [
-                    'params' => $params,
-                    'message'    => 'User session terminated !',
+                    'params'  => $params,
+                    'message' => 'User session terminated !',
                 ],
                 'error'  => [],
             ];
@@ -2421,7 +2421,7 @@ class AccountService implements ServiceInterface
             'result' => false,
             'data'   => [],
             'error'  => [
-                'message'    => 'User not found by requested data !',
+                'message' => 'User not found by requested data !',
             ],
         ];
     }
@@ -2461,8 +2461,8 @@ class AccountService implements ServiceInterface
                 unset($userList[$userId]);
             } else {
                 // Set session to user list
-                $userList[$userId]['sessions_count'] = empty($sessions[$userId]) ? 0 : count($sessions[$userId]);
-                $userList[$userId]['sessions'] = empty($sessions[$userId]) ? [] : array_values($sessions[$userId]);
+                $userList[$userId]['sessions_count'] = count($sessions[$userId]);
+                $userList[$userId]['sessions']       = array_values($sessions[$userId]);
             }
         }
 
