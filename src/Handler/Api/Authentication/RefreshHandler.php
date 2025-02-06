@@ -13,6 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Random\RandomException;
 
 class RefreshHandler implements RequestHandlerInterface
 {
@@ -40,23 +41,28 @@ class RefreshHandler implements RequestHandlerInterface
         $this->tokenService    = $tokenService;
     }
 
+    /**
+     * @throws RandomException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account = $request->getAttribute('account');
+        $account   = $request->getAttribute('account');
+        $roles     = $request->getAttribute('roles');
+        $tokenId   = $request->getAttribute('token_id');
+        $tokenData = $request->getAttribute('token_data');
 
-        $params = [
-            'user_id' => $account['id'],
-        ];
+        // Set account
+        $account = array_merge(
+            $account,
+            [
+                'company_id'    => $tokenData['company_id'] ?? 0,
+                'company_title' => $tokenData['company_title'] ?? '',
+                'roles'         => $roles,
+            ]
+        );
 
-        //$result = $this->accountService->refreshToken($params);
-        $result = [
-            'result' => false,
-            'data'   => [],
-            'error'  => [
-                'message' => 'Refresh user token is forbidden !',
-            ],
-            'status' => StatusCodeInterface::STATUS_FORBIDDEN,
-        ];
+        // Do refresh
+        $result = $this->accountService->refreshToken($account, $tokenId);
 
         // Set result
         return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);

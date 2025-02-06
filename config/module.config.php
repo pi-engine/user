@@ -374,6 +374,28 @@ return [
                                     ],
                                 ],
                             ],
+                            'refresh' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/refresh-token',
+                                    'defaults' => [
+                                        'module'     => 'user',
+                                        'section'    => 'api',
+                                        'package'    => 'authentication',
+                                        'handler'    => 'refresh',
+                                        'validator'  => 'add',
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            RequestPreparationMiddleware::class,
+                                            SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
+                                            ErrorMiddleware::class,
+                                            Handler\Api\Authentication\RefreshHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
                             'email'    => [
                                 'type'         => Literal::class,
                                 'options'      => [
