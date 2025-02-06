@@ -203,6 +203,28 @@ return [
                 'admin',
             ],
         ],
+        [
+            'title'       => 'Admin user online list',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'online',
+            'handler'     => 'list',
+            'permissions' => 'admin-user-online-list',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'title'       => 'Admin user online delete',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'online',
+            'handler'     => 'delete',
+            'permissions' => 'admin-user-online-delete',
+            'role'        => [
+                'admin',
+            ],
+        ],
     ],
     'api'   => [
         [

@@ -119,6 +119,10 @@ class AccountService implements ServiceInterface
 
     protected array $emptyRoles = ['api' => [], 'admin' => []];
 
+    protected string $onlineSessionsKey = 'onlineSessions';
+
+    protected int $onlineTimeout = 900; // 15 minutes (900 seconds)
+
     /* @var string */
     protected string $hashPattern;
 
@@ -306,6 +310,7 @@ class AccountService implements ServiceInterface
      * @param       $params
      *
      * @return array
+     * @throws RandomException
      */
     public function postLoginSuccess($account, $params): array
     {
@@ -904,6 +909,7 @@ class AccountService implements ServiceInterface
             );
         }
 
+        // Set filters
         $filters = $this->prepareFilter($params);
         if (!empty($filters)) {
             foreach ($filters as $filter) {
@@ -913,6 +919,15 @@ class AccountService implements ServiceInterface
                     $itemIdList[] = $this->canonizeAccountId($row);
                 }
                 $listParams['id'] = $itemIdList;
+            }
+        }
+
+        // Merge user id if set
+        if (isset($params['id']) && !empty($params['id'])) {
+            if (isset($listParams['id'])) {
+                $listParams['id'] = array_intersect($listParams['id'], $params['id']);;
+            } else {
+                $listParams['id'] = $params['id'];
             }
         }
 
@@ -941,6 +956,47 @@ class AccountService implements ServiceInterface
                 'page'  => $page,
             ],
         ];
+    }
+
+    /**
+     * @param       $params
+     *
+     * @return array
+     */
+    public function getAccountListLight($params): array
+    {
+        // Set params
+        $listParams = [];
+        if (isset($params['name']) && !empty($params['name'])) {
+            $listParams['name'] = $params['name'];
+        }
+        if (isset($params['identity']) && !empty($params['identity'])) {
+            $listParams['identity'] = $params['identity'];
+        }
+        if (isset($params['email']) && !empty($params['email'])) {
+            $listParams['email'] = $params['email'];
+        }
+        if (isset($params['mobile']) && !empty($params['mobile'])) {
+            $listParams['mobile'] = $params['mobile'];
+        }
+        if (isset($params['mobiles']) && !empty($params['mobiles'])) {
+            $listParams['mobiles'] = $params['mobiles'];
+        }
+        if (isset($params['status']) && in_array($params['status'], [0, 1])) {
+            $listParams['status'] = $params['status'];
+        }
+        if (isset($params['id']) && !empty($params['id'])) {
+            $listParams['id'] = $params['id'];
+        }
+
+        // Get list
+        $list   = [];
+        $rowSet = $this->accountRepository->getAccountList($listParams);
+        foreach ($rowSet as $row) {
+            $list[$row->getId()] = $this->canonizeAccount($row);
+        }
+
+        return $list;
     }
 
     /**
@@ -2307,6 +2363,113 @@ class AccountService implements ServiceInterface
             ],
             'error'  => [],
         ];
+    }
+
+    /**
+     * @param int    $userId
+     * @param string $tokenId
+     * @param string $ip
+     *
+     * @return void
+     */
+    public function updateUserOnline(int $userId, string $tokenId, string $ip): void
+    {
+        // Fetch current sessions
+        $sessions = $this->cacheService->getItem($this->onlineSessionsKey);
+
+        // Update session data for the token
+        $sessions[$userId][$tokenId] = [
+            'id'               => $userId,
+            'ip'               => $ip,
+            'token_id'         => $tokenId,
+            'last_active'      => time(),
+            'last_active_view' => $this->utilityService->date(time()),
+        ];
+
+        // Save back to cache
+        $this->cacheService->setItem($this->onlineSessionsKey, $sessions);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return array
+     */
+    public function deleteUserOnline(array $params, array $operator): array
+    {
+        // Get and check user
+        $user = $this->cacheService->getUser($params['user_id']);
+        if (!empty($user)) {
+            $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
+            $this->cacheService->deleteUserItem($params['user_id'], 'multi_factor', $params['token_id']);
+
+            // Save log
+            $this->historyService->logger('terminal_session', ['request' => $params, 'account' => $user['account'], 'operator' => $operator]);
+
+            // Set result
+            return [
+                'result' => true,
+                'data'   => [
+                    'params' => $params,
+                    'message'    => 'User session terminated !',
+                ],
+                'error'  => [],
+            ];
+        }
+
+        return [
+            'result' => false,
+            'data'   => [],
+            'error'  => [
+                'message'    => 'User not found by requested data !',
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserOnlineList(): array
+    {
+        // Set cutoff time
+        $cutoffTime = time() - $this->onlineTimeout;
+
+        // Get all online session
+        $sessions = $this->cacheService->getItem($this->onlineSessionsKey);
+
+        // Set user list params
+        $listParams = [
+            'limit' => 1000,
+            'page'  => 1,
+            'id'    => array_keys($sessions),
+        ];
+
+        // Get user list
+        $userList = $this->getAccountListLight($listParams);
+
+        // Remove expired sessions
+        foreach ($sessions as $userId => $tokens) {
+            foreach ($tokens as $tokenId => $data) {
+                if ($data['last_active'] < $cutoffTime) {
+                    unset($sessions[$userId][$tokenId]);
+                }
+            }
+
+            // If no active tokens remain for a user, remove the user entry
+            if (empty($sessions[$userId])) {
+                unset($sessions[$userId]);
+                unset($userList[$userId]);
+            } else {
+                // Set session to user list
+                $userList[$userId]['sessions_count'] = empty($sessions[$userId]) ? 0 : count($sessions[$userId]);
+                $userList[$userId]['sessions'] = empty($sessions[$userId]) ? [] : array_values($sessions[$userId]);
+            }
+        }
+
+        // Update cache after cleanup
+        $this->cacheService->setItem($this->onlineSessionsKey, $sessions);
+
+        return array_values($userList);
     }
 
     /**

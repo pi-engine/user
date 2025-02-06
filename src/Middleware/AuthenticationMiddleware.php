@@ -8,6 +8,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\UtilityService;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\TokenService;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -37,6 +38,9 @@ class AuthenticationMiddleware implements MiddlewareInterface
     /** @var AccountLocked */
     protected AccountLocked $accountLocked;
 
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -50,6 +54,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         TokenService             $tokenService,
         CacheService             $cacheService,
         AccountLocked            $accountLocked,
+        UtilityService           $utilityService,
         ErrorHandler             $errorHandler,
                                  $config
     ) {
@@ -59,6 +64,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $this->tokenService    = $tokenService;
         $this->cacheService    = $cacheService;
         $this->accountLocked   = $accountLocked;
+        $this->utilityService  = $utilityService;
         $this->errorHandler    = $errorHandler;
         $this->config          = $config;
     }
@@ -69,6 +75,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $securityStream = $request->getAttribute('security_stream');
         $refreshToken   = $request->getHeaderLine('refresh-token');
         $token          = $request->getHeaderLine('token');
+        $clientIp       = $this->utilityService->getClientIp();
 
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
@@ -158,6 +165,9 @@ class AuthenticationMiddleware implements MiddlewareInterface
             );
             return $this->errorHandler->handle($request);
         }
+
+        // Update user online list
+        $this->accountService->updateUserOnline($user['account']['id'], $tokenParsed['id'], $clientIp);
 
         // Set attribute
         return $handler->handle(

@@ -8,6 +8,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\UtilityService;
 use Pi\User\Middleware\AuthenticationMiddleware;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\TokenService;
@@ -41,6 +42,7 @@ class AuthenticationMiddlewareFactory implements FactoryInterface
             $container->get(TokenService::class),
             $container->get(CacheService::class),
             $container->get(AccountLocked::class),
+            $container->get(UtilityService::class),
             $container->get(ErrorHandler::class),
             $config
         );

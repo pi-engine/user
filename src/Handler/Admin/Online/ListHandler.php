@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pi\User\Handler\Admin\Profile;
+namespace Pi\User\Handler\Admin\Online;
 
 use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class AddHandler implements RequestHandlerInterface
+class ListHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -35,15 +35,7 @@ class AddHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody = $request->getParsedBody();
-        $operator    = $request->getAttribute('account');
-        $result      = $this->accountService->addAccount($requestBody, $operator);
-
-        if (isset($result['id']) && !empty($result)) {
-            $this->accountService->addRoleAccountByAdmin($requestBody, $result, $operator);
-        } else {
-            return new EscapingJsonResponse($result);
-        }
+        $result = $this->accountService->getUserOnlineList();
 
         return new EscapingJsonResponse(
             [
