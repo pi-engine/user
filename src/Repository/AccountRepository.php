@@ -316,7 +316,7 @@ class AccountRepository implements AccountRepositoryInterface
         $id = $result->getGeneratedValue();
 
         // Generate and update new signature for the account
-        $this->signatureRepository->updateSignature($this->tableAccount, $id);
+        $this->signatureRepository->updateSignature($this->tableAccount, ['id' => $id]);
 
         // Get account and set it as result
         return $this->getAccount(['id' => $id]);
@@ -339,7 +339,7 @@ class AccountRepository implements AccountRepositoryInterface
         }
 
         // Generate and update new signature for the account
-        $this->signatureRepository->updateSignature($this->tableAccount, $userId);
+        $this->signatureRepository->updateSignature($this->tableAccount, ['id' => $userId]);
     }
 
     public function duplicatedAccount(array $params = []): int

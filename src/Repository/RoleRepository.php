@@ -258,7 +258,7 @@ class RoleRepository implements RoleRepositoryInterface
         $id = $result->getGeneratedValue();
 
         // Generate and update new signature for the account
-        $this->signatureRepository->updateSignature($this->tableRoleAccount, $id);
+        $this->signatureRepository->updateSignature($this->tableRoleAccount, ['id' => $id]);
     }
 
     public function deleteRoleAccount(int $userId, string $roleName): void

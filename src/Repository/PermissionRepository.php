@@ -337,7 +337,7 @@ class PermissionRepository implements PermissionRepositoryInterface
         $id = $result->getGeneratedValue();
 
         // Generate and update new signature for the account
-        //$this->signatureRepository->updateSignature($this->tablePermissionRole, $id);
+        $this->signatureRepository->updateSignature($this->tablePermissionRole, ['id' => $id]);
 
         return $this->getPermissionRole(['id' => $id]);
     }
@@ -408,7 +408,7 @@ class PermissionRepository implements PermissionRepositoryInterface
         }
 
         // Generate and update new signature for the account
-        //$this->signatureRepository->updateSignature($this->tablePermissionRole, $id);
+        $this->signatureRepository->updateSignature($this->tablePermissionRole, ['key' => $roleKey]);
     }
 
     /**
