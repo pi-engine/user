@@ -47,6 +47,7 @@ return [
         ],
         'multi_factor' => [
             'status' => 0,
+            'method' => ['sms', 'app']
         ],
         'oauth'        => [
             'oauth_login'    => 1,

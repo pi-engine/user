@@ -39,6 +39,7 @@ return [
             Service\RoleService::class                               => Factory\Service\RoleServiceFactory::class,
             Service\PermissionService::class                         => Factory\Service\PermissionServiceFactory::class,
             Service\HistoryService::class                            => Factory\Service\HistoryServiceFactory::class,
+            Service\MultiFactorService::class                        => Factory\Service\MultiFactorServiceFactory::class,
             Service\ExportService::class                             => Factory\Service\ExportServiceFactory::class,
             Handler\Admin\Profile\AddHandler::class                  => Factory\Handler\Admin\Profile\AddHandlerFactory::class,
             Handler\Admin\Profile\EditHandler::class                 => Factory\Handler\Admin\Profile\EditHandlerFactory::class,
