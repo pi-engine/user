@@ -651,6 +651,7 @@ class AccountRepository implements AccountRepositoryInterface
         return [
             'id'                  => $account->getId(),
             'multi_factor_status' => $account->getMultiFactorStatus(),
+            'multi_factor_method' => $account->getMultiFactorMethod(),
             'multi_factor_secret' => $account->getMultiFactorSecret(),
         ];
     }

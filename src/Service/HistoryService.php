@@ -33,6 +33,7 @@ class HistoryService implements ServiceInterface
             'has_password',
             'multi_factor_global',
             'multi_factor_status',
+            'multi_factor_method',
             'multi_factor_verify',
             'is_company_setup',
             'token_payload',

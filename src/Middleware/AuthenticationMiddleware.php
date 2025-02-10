@@ -160,6 +160,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
                     'code'                => StatusCodeInterface::STATUS_FORBIDDEN,
                     'multi_factor_global' => $multiFactorGlobal,
                     'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],
+                    'multi_factor_method' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_method'],
                     'multi_factor_verify' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'],
                 ]
             );

@@ -80,6 +80,7 @@ class AccountService implements ServiceInterface
             //'mobile',
             //'status',
             'multi_factor_status',
+            'multi_factor_method',
             'multi_factor_secret',
         ];
 
@@ -191,6 +192,7 @@ class AccountService implements ServiceInterface
      * @param       $params
      *
      * @return array
+     * @throws RandomException
      */
     public function login($params): array
     {
@@ -219,6 +221,7 @@ class AccountService implements ServiceInterface
                     'status',
                     'time_created',
                     'multi_factor_status',
+                    'multi_factor_method',
                     'multi_factor_secret',
                 ]
             );
@@ -239,6 +242,7 @@ class AccountService implements ServiceInterface
      * @param       $params
      *
      * @return array
+     * @throws RandomException
      */
     public function loginOauth($params): array
     {
@@ -332,8 +336,10 @@ class AccountService implements ServiceInterface
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
         $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
+        $multiFactorMethod = $account['multi_factor_method'] ?? null;
         $multiFactorVerify = 0;
-        unset($account['multi_factor_status']);
+        unset($account['multi_factor_status']); // ToDo: check it needed to unset
+        unset($account['multi_factor_method']); // ToDo: check it needed to unset
 
         // Get profile
         $profile = $this->getProfile(['user_id' => (int)$account['id']]);
@@ -385,6 +391,7 @@ class AccountService implements ServiceInterface
                 'expire'              => $accessToken['payload']['exp'],
                 'multi_factor_global' => $multiFactorGlobal,
                 'multi_factor_status' => $multiFactorStatus,
+                'multi_factor_method' => $multiFactorMethod,
                 'multi_factor_verify' => $multiFactorVerify,
             ],
         ];
@@ -396,6 +403,7 @@ class AccountService implements ServiceInterface
         $account['has_password']        = $this->hasPassword($account['id']);
         $account['multi_factor_global'] = $multiFactorGlobal;
         $account['multi_factor_status'] = $multiFactorStatus;
+        $account['multi_factor_method'] = $multiFactorMethod;
         $account['multi_factor_verify'] = $multiFactorVerify;
         $account['access_token']        = $accessToken['token'];
         $account['refresh_token']       = $refreshToken['token'];
@@ -1943,6 +1951,8 @@ class AccountService implements ServiceInterface
      */
     public function resetAccount($params, array $operator = []): void
     {
+        $account =  $this->getAccount(['id' => (int)$params['user_id']]);
+
         switch ($params['type']) {
             case 'password':
                 // Update account
@@ -1951,18 +1961,33 @@ class AccountService implements ServiceInterface
                 // Save log
                 $this->historyService->logger(
                     'resetPasswordByOperator',
-                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                    [
+                        'request' => $params,
+                        'account' => $account,
+                        'operator' => $operator
+                    ]
                 );
                 break;
 
             case 'mfa':
                 // Update account
-                $this->accountRepository->updateAccount((int)$params['user_id'], ['multi_factor_status' => 0, 'multi_factor_secret' => null]);
+                $this->accountRepository->updateAccount(
+                    (int)$params['user_id'],
+                    [
+                        'multi_factor_status' => 0,
+                        'multi_factor_method' => null,
+                        'multi_factor_secret' => null,
+                    ]
+                );
 
                 // Save log
                 $this->historyService->logger(
                     'resetMfaByOperator',
-                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                    [
+                        'request' => $params,
+                        'account' => $account,
+                        'operator' => $operator
+                    ]
                 );
                 break;
 
@@ -1982,7 +2007,11 @@ class AccountService implements ServiceInterface
                 // Save log
                 $this->historyService->logger(
                     'resetAvatarByOperator',
-                    ['request' => $params, 'account' => $this->getAccount(['id' => (int)$params['user_id']]), 'operator' => $operator]
+                    [
+                        'request' => $params,
+                        'account' => $account,
+                        'operator' => $operator
+                    ]
                 );
                 break;
         }
@@ -2392,6 +2421,7 @@ class AccountService implements ServiceInterface
 
     /**
      * @param array $params
+     * @param array $operator
      *
      * @return array
      */
@@ -2534,6 +2564,7 @@ class AccountService implements ServiceInterface
                         'id'                  => $mfData['id'],
                         'multi_factor_global' => $mfData['multi_factor_global'] ?? null,
                         'multi_factor_status' => $mfData['multi_factor_status'] ?? null,
+                        'multi_factor_method' => $mfData['multi_factor_method'] ?? null,
                         'multi_factor_verify' => $mfData['multi_factor_verify'] ?? null,
                         'create'              => $mfData['create'],
                         'expire'              => $mfData['expire'],
@@ -2561,6 +2592,7 @@ class AccountService implements ServiceInterface
                 'has_password'        => $account['has_password'] ?? $user['account']['has_password'] ?? $this->hasPassword((int)($account['id'] ?? 0)),
                 'multi_factor_global' => $account['multi_factor_global'] ?? $user['account']['multi_factor_global'] ?? null,
                 'multi_factor_status' => $account['multi_factor_status'] ?? $user['account']['multi_factor_status'] ?? null,
+                'multi_factor_method' => $account['multi_factor_method'] ?? $user['account']['multi_factor_method'] ?? null,
                 'multi_factor_verify' => $account['multi_factor_verify'] ?? $user['account']['multi_factor_verify'] ?? null,
                 'is_company_setup'    => true, // ToDo: remove it
                 'company_id'          => $account['company_id'] ?? $user['account']['company_id'] ?? 0,
@@ -2603,6 +2635,7 @@ class AccountService implements ServiceInterface
                 'status'              => (int)$account->getStatus(),
                 'time_created'        => $account->getTimeCreated(),
                 'multi_factor_status' => (int)$account->getMultiFactorStatus(),
+                'multi_factor_method' => $account->getMultiFactorMethod(),
             ];
         } else {
             $account = [
@@ -2614,6 +2647,7 @@ class AccountService implements ServiceInterface
                 'status'              => (int)$account['status'],
                 'time_created'        => $account['time_created'] ?? '',
                 'multi_factor_status' => (int)$account['multi_factor_status'],
+                'multi_factor_method' => $account['multi_factor_method'],
             ];
         }
 

@@ -14,6 +14,7 @@ class Account
     private mixed   $status;
     private mixed   $time_created;
     private int     $multi_factor_status;
+    private ?string $multi_factor_method;
 
     public function __construct(
         $name,
@@ -23,6 +24,7 @@ class Account
         $status = null,
         $time_created = null,
         $multi_factor_status = 0,
+        $multi_factor_method = null,
         $id = null
     ) {
         $this->name                = $name;
@@ -32,6 +34,7 @@ class Account
         $this->status              = $status;
         $this->time_created        = $time_created;
         $this->multi_factor_status = $multi_factor_status;
+        $this->multi_factor_method = $multi_factor_method;
         $this->id                  = $id;
     }
 
@@ -97,5 +100,10 @@ class Account
     public function getMultiFactorStatus(): int
     {
         return $this->multi_factor_status;
+    }
+
+    public function getMultiFactorMethod(): string|null
+    {
+        return $this->multi_factor_method;
     }
 }
