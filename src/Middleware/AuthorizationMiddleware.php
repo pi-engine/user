@@ -133,7 +133,6 @@ class AuthorizationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
-
         // Set attribute
         $request = $request->withAttribute('roles', array_values($userRoles));
         return $handler->handle($request);
