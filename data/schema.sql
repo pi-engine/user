@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `user_account`
 	`time_disabled`       INT(10) UNSIGNED    NOT NULL DEFAULT '0',
 	`time_deleted`        INT(10) UNSIGNED    NOT NULL DEFAULT '0',
 	`multi_factor_status` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
-	`multi_factor_method` VARCHAR(255)                 DEFAULT NULL,
+	`multi_factor_method` VARCHAR(32)                  DEFAULT NULL,
 	`multi_factor_secret` VARCHAR(255)                 DEFAULT NULL,
 	`signature`           TEXT                         DEFAULT NULL,
 	PRIMARY KEY (`id`),
