@@ -147,16 +147,35 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Check multi factor
-        $multiFactorGlobal = (int)($this->config['multi_factor']['status'] ?? 0);
+        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
         if ($multiFactorGlobal
             && $routeParams['package'] !== 'authentication'
-            && (!$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'] ?? false)
+            && (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'] !== 1
         ) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
             $request = $request->withAttribute(
                 'error',
                 [
                     'message'             => 'To complete your login, please enter the 6-digit code from your multi factor app.',
+                    'code'                => StatusCodeInterface::STATUS_FORBIDDEN,
+                    'multi_factor_global' => $multiFactorGlobal,
+                    'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],
+                    'multi_factor_method' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_method'],
+                    'multi_factor_verify' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'],
+                ]
+            );
+            return $this->errorHandler->handle($request);
+        } elseif (
+            isset($user['account']['multi_factor_status'])
+            && (int)$user['account']['multi_factor_status'] === 1
+            && (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_verify'] !== 1
+            && $routeParams['package'] !== 'authentication'
+        ) {
+            $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
+            $request = $request->withAttribute(
+                'error',
+                [
+                    'message'             => 'To complete your login, please enter the 6-digit code from your multi factor app. 2',
                     'code'                => StatusCodeInterface::STATUS_FORBIDDEN,
                     'multi_factor_global' => $multiFactorGlobal,
                     'multi_factor_status' => (int)$user['multi_factor'][$tokenParsed['id']]['multi_factor_status'],

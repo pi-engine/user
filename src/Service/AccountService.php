@@ -14,10 +14,6 @@ use Pi\Core\Service\UtilityService;
 use Pi\Notification\Service\NotificationService;
 use Pi\User\Repository\AccountRepositoryInterface;
 use Random\RandomException;
-use RobThree\Auth\Algorithm;
-use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
-use RobThree\Auth\TwoFactorAuth;
-use RobThree\Auth\TwoFactorAuthException;
 use function array_merge;
 use function in_array;
 use function is_object;
@@ -570,19 +566,20 @@ class AccountService implements ServiceInterface
         $otp = [
             'code'        => $otpCode,
             'time_expire' => $otpExpire,
+            'method'      => 'sms',
+            'type'        => 'login',
         ];
 
         // Add or update user data to cache
         $this->manageUserCache($account, [], [], [], $otp);
 
         // Set sms message
-        $message = 'Code: %s
-        لغو11';
+        $message = $this->config['otp_sms']['message'] ?? 'Code: %s';
         if (
             isset($params['source'])
             && !empty($params['source'])
-            && isset($this->config['otp_sms'])
-            && in_array($params['source'], array_keys($this->config['otp_sms']))
+            && isset($this->config['otp_sms']['source'])
+            && in_array($params['source'], array_keys($this->config['otp_sms']['source']))
         ) {
             $message = $this->config['otp_sms'][$params['source']];
         }
@@ -652,6 +649,8 @@ class AccountService implements ServiceInterface
         $otp = [
             'code'        => $otpCode,
             'time_expire' => $otpExpire,
+            'method'      => 'email',
+            'type'        => 'login',
         ];
 
         // Add or update user data to cache
@@ -1481,7 +1480,7 @@ class AccountService implements ServiceInterface
      *
      * @return string
      */
-    private function generatePassword(mixed $password): string
+    public function generatePassword(mixed $password): string
     {
         switch ($this->hashPattern) {
             default:
@@ -1508,6 +1507,29 @@ class AccountService implements ServiceInterface
         }
 
         return $hash;
+    }
+
+    /**
+     * @param mixed $credential
+     * @param mixed $hash
+     *
+     * @return boolean
+     */
+    public function passwordEqualityCheck(mixed $credential, mixed $hash): bool
+    {
+        switch ($this->hashPattern) {
+            default:
+            case'argon2id':
+            case'bcrypt':
+                $result = password_verify($credential, $hash);
+                break;
+
+            case'sha512':
+                $result = hash_equals($hash, hash('sha512', $credential));
+                break;
+        }
+
+        return $result;
     }
 
     /**
@@ -1694,29 +1716,6 @@ class AccountService implements ServiceInterface
                 ],
                 'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ];
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param mixed $credential
-     * @param mixed $hash
-     *
-     * @return boolean
-     */
-    private function passwordEqualityCheck(mixed $credential, mixed $hash): bool
-    {
-        switch ($this->hashPattern) {
-            default:
-            case'argon2id':
-            case'bcrypt':
-                $result = password_verify($credential, $hash);
-                break;
-
-            case'sha512':
-                $result = hash_equals($hash, hash('sha512', $credential));
-                break;
         }
 
         return $result;
@@ -1951,7 +1950,7 @@ class AccountService implements ServiceInterface
      */
     public function resetAccount($params, array $operator = []): void
     {
-        $account =  $this->getAccount(['id' => (int)$params['user_id']]);
+        $account = $this->getAccount(['id' => (int)$params['user_id']]);
 
         switch ($params['type']) {
             case 'password':
@@ -1962,9 +1961,9 @@ class AccountService implements ServiceInterface
                 $this->historyService->logger(
                     'resetPasswordByOperator',
                     [
-                        'request' => $params,
-                        'account' => $account,
-                        'operator' => $operator
+                        'request'  => $params,
+                        'account'  => $account,
+                        'operator' => $operator,
                     ]
                 );
                 break;
@@ -1984,9 +1983,9 @@ class AccountService implements ServiceInterface
                 $this->historyService->logger(
                     'resetMfaByOperator',
                     [
-                        'request' => $params,
-                        'account' => $account,
-                        'operator' => $operator
+                        'request'  => $params,
+                        'account'  => $account,
+                        'operator' => $operator,
                     ]
                 );
                 break;
@@ -2008,9 +2007,9 @@ class AccountService implements ServiceInterface
                 $this->historyService->logger(
                     'resetAvatarByOperator',
                     [
-                        'request' => $params,
-                        'account' => $account,
-                        'operator' => $operator
+                        'request'  => $params,
+                        'account'  => $account,
+                        'operator' => $operator,
                     ]
                 );
                 break;
@@ -2282,119 +2281,6 @@ class AccountService implements ServiceInterface
     }
 
     /**
-     * @param $account
-     *
-     * @return array
-     * @throws TwoFactorAuthException
-     */
-    public function requestMfa($account): array
-    {
-        // Set multi factor
-        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
-
-        // Get mfa information
-        $mfa = $this->accountRepository->getMultiFactor((int)$account['id']);
-
-        // Call MultiFactorAuth
-        $multiFactorAuth = new TwoFactorAuth($this->config['sitename'], '', 6, 30, Algorithm::Sha1, new EndroidQrCodeProvider());
-
-        // Set data
-        $secret = null;
-        $image  = null;
-        if (!isset($mfa['multi_factor_secret']) || empty($mfa['multi_factor_secret'])) {
-            $secret = $multiFactorAuth->createSecret(160);
-            $image  = $multiFactorAuth->getQRCodeImageAsDataUri($account['email'], $secret);
-        }
-
-        return [
-            'multi_factor_status' => $mfa['multi_factor_status'],
-            'multi_factor_secret' => $secret,
-            'multi_factor_image'  => $image,
-            'multi_factor_global' => $multiFactorGlobal,
-            'multi_factor_verify' => 0,
-        ];
-    }
-
-    /**
-     * @param $account
-     * @param $params
-     * @param $tokenId
-     *
-     * @return array
-     * @throws TwoFactorAuthException
-     */
-    public function verifyMfa($account, $params, $tokenId): array
-    {
-        // Set multi factor
-        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
-
-        // Get multifactorial information
-        $mfa = $this->accountRepository->getMultiFactor((int)$account['id']);
-
-        // Call MultiFactorAuth
-        $multiFactorAuth = new TwoFactorAuth($this->config['sitename'], '', 6, 30, Algorithm::Sha1, new EndroidQrCodeProvider());
-
-        // check secret code and verify code
-        $result = false;
-        if (
-            isset($mfa['multi_factor_status'])
-            && (int)$mfa['multi_factor_status'] === 1
-            && isset($mfa['multi_factor_secret'])
-            && !empty($mfa['multi_factor_secret'])
-        ) {
-            $result = $multiFactorAuth->verifyCode($mfa['multi_factor_secret'], $params['verification']);
-        } elseif (isset($params['multi_factor_secret']) && !empty($params['multi_factor_secret'])) {
-            $result = $multiFactorAuth->verifyCode($params['multi_factor_secret'], $params['verification']);
-        }
-
-        // Check a result
-        if (!$result) {
-            return [
-                'result' => false,
-                'data'   => [],
-                'error'  => [
-                    'message' => 'Error to verify code !',
-                    'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
-                ],
-                'status' => StatusCodeInterface::STATUS_FORBIDDEN,
-            ];
-        }
-
-        // Get from cache
-        $user = $this->cacheService->getUser($account['id']);
-
-        // update multi factor items
-        $user['multi_factor'][$tokenId]['multi_factor_status'] = 1;
-        $user['multi_factor'][$tokenId]['multi_factor_verify'] = 1;
-
-        // Add or update user data to cache
-        $this->manageUserCache($account, [], [], $user['multi_factor']);
-
-        // Check update profile
-        if ((int)$mfa['multi_factor_status'] === 0) {
-            // Set login params
-            $updateParams = [
-                'multi_factor_status' => 1,
-                'multi_factor_secret' => $params['multi_factor_secret'],
-            ];
-
-            // Update account
-            $this->updateAccount($updateParams, $account);
-        }
-
-        return [
-            'result' => true,
-            'data'   => [
-                'message'             => 'Congratulations! Your multi-factor authentication (MFA) has been successfully verified. Your account is now secure.',
-                'multi_factor_global' => $multiFactorGlobal,
-                'multi_factor_status' => 1,
-                'multi_factor_verify' => 1,
-            ],
-            'error'  => [],
-        ];
-    }
-
-    /**
      * @param int    $userId
      * @param string $tokenId
      * @param string $ip
@@ -2554,22 +2440,23 @@ class AccountService implements ServiceInterface
 
         // Helper function to update and clean multi-factor data
         $mergeMultiFactor = function (array $existingMultiFactor, array $newMultiFactor) use ($currentTime) {
+            // Remove expired tokens
             $existingMultiFactor = array_filter($existingMultiFactor, function ($mfData) use ($currentTime) {
                 return isset($mfData['expire']) && $mfData['expire'] > $currentTime;
             });
 
-            foreach ($newMultiFactor as $mfKey => $mfData) {
-                if (isset($mfData['id'], $mfData['expire'])) {
-                    $existingMultiFactor[$mfKey] = [
-                        'id'                  => $mfData['id'],
-                        'multi_factor_global' => $mfData['multi_factor_global'] ?? null,
-                        'multi_factor_status' => $mfData['multi_factor_status'] ?? null,
-                        'multi_factor_method' => $mfData['multi_factor_method'] ?? null,
-                        'multi_factor_verify' => $mfData['multi_factor_verify'] ?? null,
-                        'create'              => $mfData['create'],
-                        'expire'              => $mfData['expire'],
-                    ];
-                }
+            // Add or update token with the key as array key
+            if (isset($newMultiFactor['id'], $newMultiFactor['expire'])) {
+                $existingMultiFactor[$newMultiFactor['id']] = [
+                    'id'                  => $newMultiFactor['id'],
+                    'multi_factor_global' => $newMultiFactor['multi_factor_global'] ?? null,
+                    'multi_factor_status' => $newMultiFactor['multi_factor_status'] ?? null,
+                    'multi_factor_method' => $newMultiFactor['multi_factor_method'] ?? null,
+                    'multi_factor_verify' => $newMultiFactor['multi_factor_verify'] ?? null,
+                    'secret'                => $newMultiFactor['secret'] ?? null,
+                    'create'              => $newMultiFactor['create'],
+                    'expire'              => $newMultiFactor['expire'],
+                ];
             }
 
             return $existingMultiFactor;

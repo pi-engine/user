@@ -6,7 +6,7 @@ namespace Pi\User\Factory\Handler\Api\Authentication\Mfa;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\User\Handler\Api\Authentication\Mfa\VerifyHandler;
-use Pi\User\Service\AccountService;
+use Pi\User\Service\MultiFactorService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -29,7 +29,7 @@ class VerifyHandlerFactory implements FactoryInterface
         return new VerifyHandler(
             $container->get(ResponseFactoryInterface::class),
             $container->get(StreamFactoryInterface::class),
-            $container->get(AccountService::class)
+            $container->get(MultiFactorService::class)
         );
     }
 }

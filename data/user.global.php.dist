@@ -41,13 +41,25 @@ return [
         ],
     ],
     'account' => [
+        'otp_sms'      => [
+            'message' => '',
+            'source'  => [],
+        ],
         'otp_email'    => [
             'subject' => 'Login by one-time token',
             'body'    => 'Your one-time token is <strong>%s</strong> and it is valid just for 2 minutes.',
         ],
         'multi_factor' => [
-            'status' => 0,
-            'method' => ['sms', 'app']
+            'status'         => 0,
+            'default_method' => 'app',
+            'allowed_method' => ['sms', 'email', 'app'],
+            'sms'            => [
+                'message' => 'Your verification code is: %s',
+            ],
+            'email'          => [
+                'subject' => 'Verify Your Code - Secure Login',
+                'body'    => 'Your verification code is <strong>%s</strong>. It is valid for only 2 minutes. Please do not share this code with anyone.',
+            ],
         ],
         'oauth'        => [
             'oauth_login'    => 1,

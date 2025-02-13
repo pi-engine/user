@@ -6,12 +6,13 @@ namespace Pi\User\Handler\Api\Authentication\Mfa;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Pi\Core\Response\EscapingJsonResponse;
-use Pi\User\Service\AccountService;
+use Pi\User\Service\MultiFactorService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RobThree\Auth\TwoFactorAuthException;
 
 class VerifyHandler implements RequestHandlerInterface
 {
@@ -21,26 +22,29 @@ class VerifyHandler implements RequestHandlerInterface
     /** @var StreamFactoryInterface */
     protected StreamFactoryInterface $streamFactory;
 
-    /** @var AccountService */
-    protected AccountService $accountService;
+    /** @var MultiFactorService */
+    protected MultiFactorService $multiFactorService;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        AccountService           $accountService
+        MultiFactorService       $multiFactorService
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->accountService  = $accountService;
+        $this->responseFactory    = $responseFactory;
+        $this->streamFactory      = $streamFactory;
+        $this->multiFactorService = $multiFactorService;
     }
 
+    /**
+     * @throws TwoFactorAuthException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $account     = $request->getAttribute('account');
-        $tokenId     = $request->getAttribute('token_id');
+        $tokenData   = $request->getAttribute('token_data');
         $requestBody = $request->getParsedBody();
 
-        $result = $this->accountService->verifyMfa($account, $requestBody, $tokenId);
+        $result = $this->multiFactorService->verifyMfa($account, $requestBody, $tokenData);
 
         return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
