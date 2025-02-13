@@ -55,8 +55,17 @@ return [
             Handler\Admin\Role\ListHandler::class                    => Factory\Handler\Admin\Role\ListHandlerFactory::class,
             Handler\Admin\Role\DeleteHandler::class                  => Factory\Handler\Admin\Role\DeleteHandlerFactory::class,
             Handler\Admin\Permission\Page\ListHandler::class         => Factory\Handler\Admin\Permission\Page\ListHandlerFactory::class,
+            Handler\Admin\Permission\Page\AddHandler::class          => Factory\Handler\Admin\Permission\Page\AddHandlerFactory::class,
+            Handler\Admin\Permission\Page\EditHandler::class         => Factory\Handler\Admin\Permission\Page\EditHandlerFactory::class,
+            Handler\Admin\Permission\Page\DeleteHandler::class       => Factory\Handler\Admin\Permission\Page\DeleteHandlerFactory::class,
             Handler\Admin\Permission\Resource\ListHandler::class     => Factory\Handler\Admin\Permission\Resource\ListHandlerFactory::class,
+            Handler\Admin\Permission\Resource\AddHandler::class      => Factory\Handler\Admin\Permission\Resource\AddHandlerFactory::class,
+            Handler\Admin\Permission\Resource\EditHandler::class     => Factory\Handler\Admin\Permission\Resource\EditHandlerFactory::class,
+            Handler\Admin\Permission\Resource\DeleteHandler::class   => Factory\Handler\Admin\Permission\Resource\DeleteHandlerFactory::class,
             Handler\Admin\Permission\Role\ListHandler::class         => Factory\Handler\Admin\Permission\Role\ListHandlerFactory::class,
+            Handler\Admin\Permission\Role\AddHandler::class          => Factory\Handler\Admin\Permission\Role\AddHandlerFactory::class,
+            Handler\Admin\Permission\Role\EditHandler::class         => Factory\Handler\Admin\Permission\Role\EditHandlerFactory::class,
+            Handler\Admin\Permission\Role\DeleteHandler::class       => Factory\Handler\Admin\Permission\Role\DeleteHandlerFactory::class,
             Handler\Admin\Cache\ListHandler::class                   => Factory\Handler\Admin\Cache\ListHandlerFactory::class,
             Handler\Admin\Cache\ViewHandler::class                   => Factory\Handler\Admin\Cache\ViewHandlerFactory::class,
             Handler\Admin\Cache\PersistHandler::class                => Factory\Handler\Admin\Cache\PersistHandlerFactory::class,
@@ -1029,11 +1038,12 @@ return [
                                     'defaults' => [],
                                 ],
                                 'child_routes' => [
-                                    'list' => [
+                                    'list'   => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/list',
                                             'defaults' => [
+                                                'title'       => 'Admin user permission resource list',
                                                 'module'      => 'user',
                                                 'section'     => 'admin',
                                                 'package'     => 'permission-resource',
@@ -1052,6 +1062,78 @@ return [
                                             ],
                                         ],
                                     ],
+                                    'add'    => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/add',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission resource add',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-resource',
+                                                'handler'     => 'add',
+                                                'permissions' => 'user-permission-resource-add',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Resource\AddHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'edit'   => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/edit',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission resource edit',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-resource',
+                                                'handler'     => 'edit',
+                                                'permissions' => 'user-permission-resource-edit',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Resource\EditHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'delete' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/delete',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission resource delete',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-resource',
+                                                'handler'     => 'delete',
+                                                'permissions' => 'user-permission-resource-delete',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Resource\DeleteHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
                                 ],
                             ],
                             'page'     => [
@@ -1061,11 +1143,12 @@ return [
                                     'defaults' => [],
                                 ],
                                 'child_routes' => [
-                                    'list' => [
+                                    'list'   => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/list',
                                             'defaults' => [
+                                                'title'       => 'Admin user permission page list',
                                                 'module'      => 'user',
                                                 'section'     => 'admin',
                                                 'package'     => 'permission-page',
@@ -1084,6 +1167,78 @@ return [
                                             ],
                                         ],
                                     ],
+                                    'add'    => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/add',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission page add',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-page',
+                                                'handler'     => 'add',
+                                                'permissions' => 'user-permission-page-add',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Page\AddHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'edit'   => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/edit',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission page edit',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-page',
+                                                'handler'     => 'edit',
+                                                'permissions' => 'user-permission-page-edit',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Page\EditHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'delete' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/delete',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission page delete',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-page',
+                                                'handler'     => 'delete',
+                                                'permissions' => 'user-permission-page-delete',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Page\DeleteHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
                                 ],
                             ],
                             'role'     => [
@@ -1093,11 +1248,12 @@ return [
                                     'defaults' => [],
                                 ],
                                 'child_routes' => [
-                                    'list' => [
+                                    'list'   => [
                                         'type'    => Literal::class,
                                         'options' => [
                                             'route'    => '/list',
                                             'defaults' => [
+                                                'title'       => 'Admin user permission role list',
                                                 'module'      => 'user',
                                                 'section'     => 'admin',
                                                 'package'     => 'permission-role',
@@ -1112,6 +1268,78 @@ return [
                                                     LoggerRequestResponseMiddleware::class,
                                                     ErrorMiddleware::class,
                                                     Handler\Admin\Permission\Role\ListHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'add'    => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/add',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission role add',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-role',
+                                                'handler'     => 'add',
+                                                'permissions' => 'user-permission-role-add',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Role\AddHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'edit'   => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/edit',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission role edit',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-role',
+                                                'handler'     => 'edit',
+                                                'permissions' => 'user-permission-role-edit',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Role\EditHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'delete' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/delete',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission role delete',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-role',
+                                                'handler'     => 'delete',
+                                                'permissions' => 'user-permission-role-delete',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Role\DeleteHandler::class
                                                 ),
                                             ],
                                         ],

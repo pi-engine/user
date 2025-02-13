@@ -30,6 +30,12 @@ class PermissionService implements ServiceInterface
         $this->cacheService         = $cacheService;
     }
 
+    /**
+     * @param $pageKey
+     * @param $userRoles
+     *
+     * @return bool
+     */
     public function checkPermissionBefore($pageKey, $userRoles): bool
     {
         $permission = $this->getPermission($pageKey);
@@ -46,6 +52,13 @@ class PermissionService implements ServiceInterface
         return false;
     }
 
+    /**
+     * @param array $current
+     * @param array $validate
+     * @param array $items
+     *
+     * @return bool
+     */
     public function checkPermissionAfter(array $current = [], array $validate = [], array $items = []): bool
     {
         foreach ($items as $item) {
@@ -73,26 +86,11 @@ class PermissionService implements ServiceInterface
         return true;
     }
 
-    public function getPermission($pageKey): array
-    {
-        $page = $this->permissionRepository->getPermissionPage(['key' => $pageKey]);
-        $page = $this->canonizePage($page);
-
-        $resource = $this->permissionRepository->getPermissionResource(['key' => $page['resource']]);
-        $resource = $this->canonizeResource($resource);
-
-        $roles       = $this->permissionRepository->getPermissionRoleList(['resource' => $page['resource']]);
-        $systemRoles = [];
-        foreach ($roles as $role) {
-            $systemRoles[] = $this->canonizeRole($role);
-        }
-
-        return [
-            'resource'    => $resource,
-            'systemRoles' => $systemRoles,
-        ];
-    }
-
+    /**
+     * @param $params
+     *
+     * @return array
+     */
     public function getInstallerList($params): array
     {
         $result = [
@@ -121,65 +119,14 @@ class PermissionService implements ServiceInterface
         return $result;
     }
 
-    public function addPermissionResource($params)
-    {
-        $values = [
-            'title'   => $params['title'] ?? $params['key'],
-            'section' => $params['section'],
-            'module'  => $params['module'],
-            'key'     => $params['key'],
-            'type'    => $params['type'] ?? 'system',
-        ];
-
-        $resource = $this->permissionRepository->addPermissionResource($values);
-
-        return $this->canonizeResource($resource);
-    }
-
-    public function addPermissionPage($params)
-    {
-        $values = [
-            'title'    => $params['title'] ?? $params['key'],
-            'section'  => $params['section'],
-            'module'   => $params['module'],
-            'package'  => $params['package'],
-            'handler'  => $params['handler'],
-            'resource' => $params['resource'],
-            'key'      => $params['key'],
-        ];
-
-        $page = $this->permissionRepository->addPermissionPage($values);
-
-        return $this->canonizePage($page);
-    }
-
-    public function addPermissionRole($params)
-    {
-        $values = [
-            'resource' => $params['resource'],
-            'section'  => $params['section'],
-            'module'   => $params['module'],
-            'role'     => $params['role'],
-            'key'      => $params['key'],
-        ];
-
-        $role = $this->permissionRepository->addPermissionRole($values);
-
-        return $this->canonizeRole($role);
-    }
-
-    public function getPermissionRole($params): array
-    {
-        $roles    = $this->permissionRepository->getPermissionRoleList($params);
-        $roleList = [];
-        foreach ($roles as $role) {
-            $roleList[$role->getResource()] = $role->getResource();
-        }
-
-        return array_values($roleList);
-    }
-
-    public function getResourceList($params): array
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function getPermissionResourceList($params): array
     {
         $limit  = $params['limit'] ?? 100;
         $page   = $params['page'] ?? 1;
@@ -230,7 +177,66 @@ class PermissionService implements ServiceInterface
         ];
     }
 
-    public function getPageList($params): array
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function addPermissionResource($params): array
+    {
+        $values = [
+            'title'   => $params['title'] ?? $params['key'],
+            'section' => $params['section'],
+            'module'  => $params['module'],
+            'key'     => $params['key'],
+            'type'    => $params['type'] ?? 'system',
+        ];
+
+        $resource = $this->permissionRepository->addPermissionResource($values);
+
+        return $this->canonizeResource($resource);
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function editPermissionResource($params): array
+    {
+        return [
+            'message' => 'editPermissionResource',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function deletePermissionResource($params): array
+    {
+        return [
+            'message' => 'deletePermissionResource',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function getPermissionPageList($params): array
     {
         $limit  = $params['limit'] ?? 100;
         $page   = $params['page'] ?? 1;
@@ -287,7 +293,68 @@ class PermissionService implements ServiceInterface
         ];
     }
 
-    public function getRoleList($params): array
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function addPermissionPage($params): array
+    {
+        $values = [
+            'title'    => $params['title'] ?? $params['key'],
+            'section'  => $params['section'],
+            'module'   => $params['module'],
+            'package'  => $params['package'],
+            'handler'  => $params['handler'],
+            'resource' => $params['resource'],
+            'key'      => $params['key'],
+        ];
+
+        $page = $this->permissionRepository->addPermissionPage($values);
+
+        return $this->canonizePage($page);
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function editPermissionPage($params): array
+    {
+        return [
+            'message' => 'editPermissionPage',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function deletePermissionPage($params): array
+    {
+        return [
+            'message' => 'deletePermissionPage',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function getPermissionRoleList($params): array
     {
         $limit  = $params['limit'] ?? 100;
         $page   = $params['page'] ?? 1;
@@ -338,7 +405,134 @@ class PermissionService implements ServiceInterface
         ];
     }
 
-    public function canonizePage($page)
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function addPermissionRole($params): array
+    {
+        $values = [
+            'resource' => $params['resource'],
+            'section'  => $params['section'],
+            'module'   => $params['module'],
+            'role'     => $params['role'],
+            'key'      => $params['key'],
+        ];
+
+        $role = $this->permissionRepository->addPermissionRole($values);
+
+        return $this->canonizeRole($role);
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function editPermissionRole($params): array
+    {
+        return [
+            'message' => 'editPermissionRole',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function deletePermissionRole($params): array
+    {
+        return [
+            'message' => 'deletePermissionRole',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function getPermissionRole($params): array
+    {
+        $roles    = $this->permissionRepository->getPermissionRoleList($params);
+        $roleList = [];
+        foreach ($roles as $role) {
+            $roleList[$role->getResource()] = $role->getResource();
+        }
+
+        return array_values($roleList);
+    }
+
+    /**
+     * Get resource and role data of permission by page, for check access
+     *
+     * @param $pageKey
+     *
+     * @return array
+     */
+    protected function getPermission($pageKey): array
+    {
+        $page = $this->permissionRepository->getPermissionPage(['key' => $pageKey]);
+        $page = $this->canonizePage($page);
+
+        $resource = $this->permissionRepository->getPermissionResource(['key' => $page['resource']]);
+        $resource = $this->canonizeResource($resource);
+
+        $roles       = $this->permissionRepository->getPermissionRoleList(['resource' => $page['resource']]);
+        $systemRoles = [];
+        foreach ($roles as $role) {
+            $systemRoles[] = $this->canonizeRole($role);
+        }
+
+        return [
+            'resource'    => $resource,
+            'systemRoles' => $systemRoles,
+        ];
+    }
+
+    /**
+     * @param $resource
+     *
+     * @return array
+     */
+    public function canonizeResource($resource): array
+    {
+        if (empty($resource)) {
+            return [];
+        }
+
+        if (is_object($resource)) {
+            $resource = [
+                'id'      => $resource->getId(),
+                'title'   => $resource->getTitle(),
+                'section' => $resource->getSection(),
+                'module'  => $resource->getModule(),
+                'key'     => $resource->getKey(),
+                'type'    => $resource->getType(),
+            ];
+        }
+
+        return $resource;
+    }
+
+    /**
+     * @param $page
+     *
+     * @return array
+     */
+    public function canonizePage($page): array
     {
         if (empty($page)) {
             return [];
@@ -363,27 +557,12 @@ class PermissionService implements ServiceInterface
         return $page;
     }
 
-    public function canonizeResource($resource)
-    {
-        if (empty($resource)) {
-            return [];
-        }
-
-        if (is_object($resource)) {
-            $resource = [
-                'id'      => $resource->getId(),
-                'title'   => $resource->getTitle(),
-                'section' => $resource->getSection(),
-                'module'  => $resource->getModule(),
-                'key'     => $resource->getKey(),
-                'type'    => $resource->getType(),
-            ];
-        }
-
-        return $resource;
-    }
-
-    public function canonizeRole($role)
+    /**
+     * @param $role
+     *
+     * @return array
+     */
+    public function canonizeRole($role): array
     {
         if (empty($role)) {
             return [];

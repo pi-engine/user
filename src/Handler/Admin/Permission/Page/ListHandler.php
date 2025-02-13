@@ -12,6 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use stdClass;
 
 class ListHandler implements RequestHandlerInterface
 {
@@ -37,12 +38,12 @@ class ListHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->permissionService->getPageList($requestBody);
+        $result      = $this->permissionService->getPermissionPageList($requestBody);
 
         $result = [
             'result' => true,
             'data'   => $result,
-            'error'  => new \stdClass(),
+            'error'  => new stdClass(),
         ];
 
         return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);

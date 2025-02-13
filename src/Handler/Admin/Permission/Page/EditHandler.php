@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pi\User\Handler\Admin\Permission\Role;
+namespace Pi\User\Handler\Admin\Permission\Page;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Pi\Core\Response\EscapingJsonResponse;
@@ -14,7 +14,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use stdClass;
 
-class ListHandler implements RequestHandlerInterface
+class EditHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -38,7 +38,7 @@ class ListHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->permissionService->getPermissionRoleList($requestBody);
+        $result      = $this->permissionService->editPermissionPage($requestBody);
 
         $result = [
             'result' => true,

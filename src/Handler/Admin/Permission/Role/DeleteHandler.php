@@ -14,7 +14,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use stdClass;
 
-class ListHandler implements RequestHandlerInterface
+class DeleteHandler implements RequestHandlerInterface
 {
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -38,7 +38,7 @@ class ListHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
-        $result      = $this->permissionService->getPermissionRoleList($requestBody);
+        $result      = $this->permissionService->deletePermissionRole($requestBody);
 
         $result = [
             'result' => true,
