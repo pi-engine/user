@@ -7,9 +7,12 @@ namespace Pi\User\Service;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use phpseclib3\Crypt\RSA;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\UtilityService;
 use Random\RandomException;
+use RuntimeException;
+use Throwable;
 
 class TokenService implements ServiceInterface
 {
@@ -30,6 +33,17 @@ class TokenService implements ServiceInterface
         $this->cacheService   = $cacheService;
         $this->utilityService = $utilityService;
         $this->config         = $config;
+
+        // Validate config keys
+        if (empty($this->config['private_key']) || empty($this->config['public_key'])) {
+            throw new RuntimeException('JWT private key and public key paths must be provided in config.');
+        }
+
+        // If either key is missing, regenerate both
+        if (!file_exists($this->config['private_key']) || !file_exists($this->config['public_key'])) {
+            //throw new RuntimeException('JWT private key and public key files not exist.');
+            $this->createKeys();
+        }
     }
 
     /**
@@ -218,7 +232,7 @@ class TokenService implements ServiceInterface
 
     private function setAlgorithm(): string
     {
-        return ($this->config['type'] ?? '') === 'keys' ? 'RS256' : 'HS256';
+        return 'RS256';
     }
 
     private function setEncryptKey(): string
@@ -233,14 +247,28 @@ class TokenService implements ServiceInterface
 
     private function getKey(string $keyType): string
     {
-        if (
-            ($this->config['type'] ?? '') === 'keys'
-            && !empty($this->config[$keyType] ?? null)
-        ) {
-            return file_get_contents($this->config[$keyType]);
-        }
-
-        return $this->config['secret'];
+        return file_get_contents($this->config[$keyType]);
     }
 
+    private function createKeys(): void
+    {
+        try {
+            // Generate a 4096-bit RSA private key
+            $privateKey = RSA::createKey(4096);
+            $publicKey  = $privateKey->getPublicKey();
+
+            // Save PEM-formatted keys
+            if (!file_put_contents($this->config['private_key'], $privateKey->toString('PKCS8'))) {
+                throw new RuntimeException("Failed to save private key to {$this->config['private_key']}");
+            }
+
+            if (!file_put_contents($this->config['public_key'], $publicKey->toString('PKCS8'))) {
+                throw new RuntimeException("Failed to save public key to {$this->config['public_key']}");
+            }
+        } catch (Throwable $e) {
+            // Log the error
+            error_log("[ERROR] RSA Key Generation: " . $e->getMessage());
+            throw new RuntimeException("Error generating RSA keys. Please check logs.");
+        }
+    }
 }

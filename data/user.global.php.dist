@@ -14,12 +14,10 @@ return [
         ],
     ],
     'jwt'     => [
-        'type'        => 'secret', // secret,keys
-        'secret'      => 'XXX',
         'exp_access'  => 1209600, // 14 days, for development, for production set new value
         'exp_refresh' => 7776000, // 90 days
-        'public_key'  => '', // PATH_TO_FILE
-        'private_key' => '', // PATH_TO_FILE
+        'public_key'  => $basePath . '/data/keys/public_key.pem',
+        'private_key' => $basePath . '/data/keys/private_key.pem',
         'iss'         => $baseUrl,
         'aud'         => $baseUrl,
         'check_ip'    => 1,
