@@ -73,19 +73,19 @@ class PermissionRepository implements PermissionRepositoryInterface
     private Page $pagePrototype;
 
     public function __construct(
-        AdapterInterface  $db,
+        AdapterInterface    $db,
         SignatureRepository $signatureRepository,
-        HydratorInterface $hydrator,
-        Resource          $resourcePrototype,
-        Role              $rolePrototype,
-        Page              $pagePrototype
+        HydratorInterface   $hydrator,
+        Resource            $resourcePrototype,
+        Role                $rolePrototype,
+        Page                $pagePrototype
     ) {
-        $this->db                = $db;
-        $this->signatureRepository     = $signatureRepository;
-        $this->hydrator          = $hydrator;
-        $this->resourcePrototype = $resourcePrototype;
-        $this->rolePrototype     = $rolePrototype;
-        $this->pagePrototype     = $pagePrototype;
+        $this->db                  = $db;
+        $this->signatureRepository = $signatureRepository;
+        $this->hydrator            = $hydrator;
+        $this->resourcePrototype   = $resourcePrototype;
+        $this->rolePrototype       = $rolePrototype;
+        $this->pagePrototype       = $pagePrototype;
     }
 
     /**
@@ -337,7 +337,7 @@ class PermissionRepository implements PermissionRepositoryInterface
         $id = $result->getGeneratedValue();
 
         // Generate and update new signature for the account
-        $this->signatureRepository->updateSignature($this->tablePermissionRole, ['id' => $id]);
+        //$this->signatureRepository->updateSignature($this->tablePermissionRole, ['id' => $id]);
 
         return $this->getPermissionRole(['id' => $id]);
     }
