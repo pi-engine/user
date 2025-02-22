@@ -39,13 +39,14 @@ class TokenService implements ServiceInterface
     {
         // Generate a unique ID
         $tokenId = $params['id'] ?? $this->setTokenKey($params);
+        $ttl     = $this->setTtl($params);
 
         // Build the payload
         $payload = [
             'id'   => $tokenId,
             'uid'  => $params['account']['id'],
             'iat'  => time(),
-            'exp'  => $params['exp'] ?? time() + $this->setTtl($params),
+            'exp'  => $params['exp'] ?? time() + $ttl,
             'type' => $params['type'],
             'iss'  => $this->config['iss'] ?? '',
             'aud'  => $this->config['aud'] ?? '',
@@ -69,6 +70,7 @@ class TokenService implements ServiceInterface
             'token'   => JWT::encode($payload, $this->setEncryptKey(), $this->setAlgorithm()),
             'id'      => $tokenId,
             'payload' => $payload,
+            'ttl'     => $ttl,
         ];
     }
 

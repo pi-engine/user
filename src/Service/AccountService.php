@@ -407,6 +407,7 @@ class AccountService implements ServiceInterface
         $account['token_payload']       = [
             'iat' => $accessToken['payload']['iat'],
             'exp' => $accessToken['payload']['exp'],
+            'ttl' => $accessToken['ttl'],
         ];
 
         // Set permission
