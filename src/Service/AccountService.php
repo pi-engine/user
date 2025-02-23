@@ -327,7 +327,7 @@ class AccountService implements ServiceInterface
         }
 
         // Get from cache if exist
-        $user = $this->cacheService->getUser($account['id']);
+        $user = $this->cacheService->getUser((int)$account['id']);
 
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
@@ -1386,21 +1386,62 @@ class AccountService implements ServiceInterface
      */
     public function viewAccount($account): array
     {
+        // Canonize account
+        $account = $this->canonizeAccount($account);
+
         // Get user from cache
         $user = $this->cacheService->getUser((int)$account['id']);
 
-        // Check user has password or not
-        $account['has_password'] = $this->hasPassword((int)$account['id']);
+        // Set multi factor
+        $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
+        $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
+        $multiFactorMethod = $account['multi_factor_method'] ?? $this->config['multi_factor']['default_method'] ?? null;
+        $multiFactorVerify = 0;
+        unset($account['multi_factor_status']); // ToDo: check it needed to unset
+        unset($account['multi_factor_method']); // ToDo: check it needed to unset
 
-        // Set profile params
+        // Get profile
         $profile = $this->getProfile(['user_id' => (int)$account['id']]);
 
         // Sync profile and account
         $account = array_merge($account, $profile);
 
+        // Set baseurl
+        $account['baseurl'] = $this->config['baseurl'] ?? '';
+
         // Get roles
         $account['roles']      = $this->roleService->getRoleAccount((int)$account['id']);
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
+
+        // Set company data and Get company details if company module loaded
+        $account['is_company_setup'] = true;
+        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
+        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
+        if ($this->hasCompanyService()) {
+            $company = $this->companyService->getCompanyDetails((int)$account['id']);
+            if (!empty($company)) {
+                $account['company_id']    = $company['company_id'];
+                $account['company_title'] = $company['company_title'];
+            }
+        }
+
+        // Set extra info
+        $account['last_login']          = time();
+        $account['last_login_view']     = $this->utilityService->date($account['last_login']);
+        $account['access_ip']           = $this->utilityService->getClientIp();
+        $account['has_password']        = $this->hasPassword($account['id']);
+        $account['multi_factor_global'] = $multiFactorGlobal;
+        $account['multi_factor_status'] = $multiFactorStatus;
+        $account['multi_factor_method'] = $multiFactorMethod;
+        $account['multi_factor_verify'] = $multiFactorVerify;
+        $account['access_token']        = '';
+        $account['refresh_token']       = '';
+        $account['permission']          = [];
+        $account['token_payload']       = [
+            'iat' => '',
+            'exp' => '',
+            'ttl' => '',
+        ];
 
         // Set permission
         if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
@@ -1419,18 +1460,6 @@ class AccountService implements ServiceInterface
                 && !empty($this->config['login']['permission_blacklist'])
             ) {
                 $account['permission'] = array_values(array_diff($account['permission'], $this->config['login']['permission_blacklist']));
-            }
-        }
-
-        // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = true;
-        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
-        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
-        if ($this->hasCompanyService()) {
-            $company = $this->companyService->getCompanyDetails((int)$account['id']);
-            if (!empty($company)) {
-                $account['company_id']    = $company['company_id'];
-                $account['company_title'] = $company['company_title'];
             }
         }
 
