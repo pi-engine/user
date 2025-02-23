@@ -332,7 +332,7 @@ class AccountService implements ServiceInterface
         // Set multi factor
         $multiFactorGlobal = (int)$this->config['multi_factor']['status'] ?? 0;
         $multiFactorStatus = (int)$account['multi_factor_status'] ?? 0;
-        $multiFactorMethod = $account['multi_factor_method'] ?? null;
+        $multiFactorMethod = $account['multi_factor_method'] ?? $this->config['multi_factor']['default_method'] ?? null;
         $multiFactorVerify = 0;
         unset($account['multi_factor_status']); // ToDo: check it needed to unset
         unset($account['multi_factor_method']); // ToDo: check it needed to unset
@@ -1919,6 +1919,7 @@ class AccountService implements ServiceInterface
                 'token_payload' => [
                     'iat' => $accessToken['payload']['iat'],
                     'exp' => $accessToken['payload']['exp'],
+                    'ttl' => $accessToken['ttl'],
                 ],
             ],
             'error'  => [],
