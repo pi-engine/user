@@ -12,16 +12,13 @@ use function preg_match;
 class MobileValidator extends AbstractValidator
 {
     /** @var string */
-    const INVALID = 'mobileInvalid';
+    const string INVALID = 'mobileInvalid';
 
     /** @var string */
-    const RESERVED = 'mobileReserved';
+    const string RESERVED = 'mobileReserved';
 
     /** @var string */
-    const TAKEN = 'mobileTaken';
-
-    /** @var string */
-    protected string $formatHint;
+    const string TAKEN = 'mobileTaken';
 
     /** @var array */
     protected array $messageTemplates = [];
