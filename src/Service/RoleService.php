@@ -70,7 +70,7 @@ class RoleService implements ServiceInterface
 
     public function getApiRoleList(): array
     {
-        $roles = $this->cacheService->getItem('roles-api');
+        $roles = $this->cacheService->getItem('roles_api');
         if (empty($roles)) {
             $listParams = [
                 'section' => 'api',
@@ -84,7 +84,7 @@ class RoleService implements ServiceInterface
                 $list[] = $row->getName();
             }
 
-            $roles = $this->cacheService->setItem('roles-api', $list);
+            $roles = $this->cacheService->setItem('roles_api', $list);
         }
 
         return $roles;
@@ -92,7 +92,7 @@ class RoleService implements ServiceInterface
 
     public function getAdminRoleList(): array
     {
-        $roles = $this->cacheService->getItem('roles-admin');
+        $roles = $this->cacheService->getItem('roles_admin');
         if (empty($roles)) {
             $listParams = [
                 'section' => 'admin',
@@ -106,7 +106,7 @@ class RoleService implements ServiceInterface
                 $list[] = $row->getName();
             }
 
-            $roles = $this->cacheService->setItem('roles-admin', $list);
+            $roles = $this->cacheService->setItem('roles_admin', $list);
         }
 
         return $roles;
@@ -114,7 +114,7 @@ class RoleService implements ServiceInterface
 
     public function getAllRoleList(): array
     {
-        $roles = $this->cacheService->getItem('roles-light');
+        $roles = $this->cacheService->getItem('roles_light');
         if (empty($roles)) {
             $listParams = [
                 'status' => 1,
@@ -127,7 +127,7 @@ class RoleService implements ServiceInterface
                 $list[] = $row->getName();
             }
 
-            $roles = $this->cacheService->setItem('roles-light', $list);
+            $roles = $this->cacheService->setItem('roles_light', $list);
         }
 
         return $roles;
@@ -145,7 +145,7 @@ class RoleService implements ServiceInterface
 
     public function getRoleResourceList($section = ''): array
     {
-        $roles = $this->cacheService->getItem('roleList');
+        $roles = $this->cacheService->getItem('role_list');
         if (empty($roles)) {
             $listParams = [
                 'section' => $section,
@@ -159,7 +159,7 @@ class RoleService implements ServiceInterface
                 $list[] = $this->canonizeRole($row);
             }
 
-            $roles = $this->cacheService->setItem('roleList', $list);
+            $roles = $this->cacheService->setItem('role_list', $list);
         }
 
         return $roles;
@@ -329,10 +329,10 @@ class RoleService implements ServiceInterface
     public function resetRoleListInCache(): void
     {
         $this->cacheService->deleteItems([
-            'roles-admin',
-            'roles-api',
-            'roles-light',
-            'roleList',
+            'roles_admin',
+            'roles_api',
+            'roles_light',
+            'role_list',
         ]);
     }
 

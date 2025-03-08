@@ -116,7 +116,7 @@ class AccountService implements ServiceInterface
 
     protected array $emptyRoles = ['api' => [], 'admin' => []];
 
-    protected string $onlineSessionsKey = 'onlineSessions';
+    protected string $onlineSessionsKey = 'online_sessions';
 
     protected int $onlineTimeout = 900; // 15 minutes (900 seconds)
 
