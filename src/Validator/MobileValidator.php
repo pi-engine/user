@@ -72,6 +72,7 @@ class MobileValidator extends AbstractValidator
                 return false;
             }
         } else {
+            // ToDo: Update validator after update laminas project on this section
             $validator = new PhoneNumber();
             $validator->allowedTypes(['mobile']);
             if (isset($this->options['country'])) {
