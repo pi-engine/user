@@ -75,11 +75,20 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $securityStream = $request->getAttribute('security_stream');
         $refreshToken   = $request->getHeaderLine('refresh-token');
         $token          = $request->getHeaderLine('token');
+        $authorization  = $request->getHeaderLine('Authorization');
         $clientIp       = $this->utilityService->getClientIp();
 
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
         $routeParams = $routeMatch->getParams();
+
+        // Get access token by Authorization Bearer
+        if (!empty($authorization)) {
+            preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches);
+            if (!empty($matches[1])) {
+                $token = $matches[1];
+            }
+        }
 
         // Set refresh-token to token if its be on true module and handler
         $type = 'access';
