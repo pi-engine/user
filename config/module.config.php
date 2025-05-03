@@ -94,6 +94,7 @@ return [
             Handler\Api\Authentication\Oauth\SettingHandler::class   => Factory\Handler\Api\Authentication\Oauth\SettingHandlerFactory::class,
             Handler\Api\Captcha\ReCaptcha\VerifyHandler::class       => Factory\Handler\Api\Captcha\ReCaptcha\VerifyHandlerFactory::class,
             Handler\Api\Avatar\UploadHandler::class                  => Factory\Handler\Api\Avatar\UploadHandlerFactory::class,
+            Handler\Api\Security\CsrfHandler::class                  => Factory\Handler\Api\Security\CsrfHandlerFactory::class,
             Handler\InstallerHandler::class                          => Factory\Handler\InstallerHandlerFactory::class,
         ],
     ],
@@ -680,6 +681,36 @@ return [
                                                 ),
                                             ],
                                         ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    // Api security section
+                    'security'       => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/security',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'view' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/csrf-token',
+                                    'defaults' => [
+                                        'title'      => 'Csrf Token',
+                                        'module'     => 'user',
+                                        'section'    => 'api',
+                                        'package'    => 'security',
+                                        'handler'    => 'csrf',
+                                        'controller' => PipeSpec::class,
+                                        'middleware' => new PipeSpec(
+                                            RequestPreparationMiddleware::class,
+                                            SecurityMiddleware::class,
+                                            ErrorMiddleware::class,
+                                            Handler\Api\Security\CsrfHandler::class
+                                        ),
                                     ],
                                 ],
                             ],
