@@ -37,9 +37,11 @@ class AddHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // Get params
         $requestBody = $request->getParsedBody();
-        $result      = $this->permissionService->addPermissionResource($requestBody);
 
+        // Manage permission
+        $result = $this->permissionService->managePermissionByResource($requestBody);
         $result = [
             'result' => true,
             'data'   => $result,

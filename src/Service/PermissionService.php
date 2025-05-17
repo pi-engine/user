@@ -108,12 +108,69 @@ class PermissionService implements ServiceInterface
                 'section'  => $resource['section'],
                 'module'   => $resource['module'],
                 'role'     => $roleName,
-                'key'      => sprintf('%s-%s', $roleName,  $resource['key']),
+                'key'      => sprintf('%s-%s', $roleName, $resource['key']),
             ];
 
             // Add a new role
             $this->permissionRepository->addPermissionRole($roleParams);
         }
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return array
+     */
+    public function managePermissionByResource(array $params): array
+    {
+        // Set resource params
+        $resourceParams = [
+            'title'   => $params['title'] ?? $params['key'],
+            'section' => $params['section'] ?? 'api',
+            'module'  => $params['module'] ?? 'custom',
+            'key'     => $params['key'],
+            'type'    => $params['type'] ?? 'custom',
+        ];
+
+        // Add resource
+        $resource = $this->permissionRepository->addPermissionResource($resourceParams);
+        $resource = $this->canonizeResource($resource);
+
+        // Set page params
+        $pageParams = [
+            'title'    => $params['title'] ?? $params['key'],
+            'section'  => $params['section'] ?? 'api',
+            'module'   => $params['module'] ?? 'custom',
+            'package'  => $params['package'] ?? null,
+            'handler'  => $params['handler'] ?? null,
+            'resource' => $resource['key'],
+            'key'      => $params['key'],
+        ];
+
+        // Add page
+        $this->permissionRepository->addPermissionPage($pageParams);
+
+        // Add all roles to resource and page
+        $roles = array_values(array_unique($params['roles']));
+        foreach ($roles as $role) {
+            // Set role params
+            $roleParams = [
+                'resource' => $resource['key'],
+                'section'  => $params['section'] ?? 'api',
+                'module'   => $params['module'] ?? 'custom',
+                'role'     => $role,
+                'key'      => sprintf('%s-%s', $role, $resource['key']),
+            ];
+
+            // Add role
+            $this->permissionRepository->addPermissionRole($roleParams);
+        }
+
+        // Set result
+        return [
+            'message' => 'New resource and all related roles added successfully'
+
+        ];
     }
 
     /**
@@ -147,6 +204,20 @@ class PermissionService implements ServiceInterface
         }
 
         return $result;
+    }
+
+
+    /**
+     * For admin aria
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function getPermissionResource($params): array
+    {
+        $resource = $this->permissionRepository->getPermissionResource($params);
+        return $this->canonizeResource($resource);
     }
 
     /**
