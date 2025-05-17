@@ -8,6 +8,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
 use Pi\User\Repository\RoleRepositoryInterface;
 use Pi\User\Service\HistoryService;
+use Pi\User\Service\PermissionService;
 use Pi\User\Service\RoleService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -32,6 +33,7 @@ class RoleServiceFactory implements FactoryInterface
 
         return new RoleService(
             $container->get(RoleRepositoryInterface::class),
+            $container->get(PermissionService::class),
             $container->get(CacheService::class),
             $container->get(HistoryService::class),
             $config

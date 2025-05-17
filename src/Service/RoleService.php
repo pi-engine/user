@@ -13,6 +13,9 @@ class RoleService implements ServiceInterface
     /* @var RoleRepositoryInterface */
     protected RoleRepositoryInterface $roleRepository;
 
+    /** @var PermissionService */
+    protected PermissionService $permissionService;
+
     /* @var CacheService */
     protected CacheService $cacheService;
 
@@ -39,14 +42,16 @@ class RoleService implements ServiceInterface
      */
     public function __construct(
         RoleRepositoryInterface $roleRepository,
+        PermissionService       $permissionService,
         CacheService            $cacheService,
         HistoryService          $historyService,
                                 $config
     ) {
-        $this->roleRepository = $roleRepository;
-        $this->cacheService   = $cacheService;
-        $this->historyService = $historyService;
-        $this->config         = $config;
+        $this->roleRepository    = $roleRepository;
+        $this->permissionService = $permissionService;
+        $this->cacheService      = $cacheService;
+        $this->historyService    = $historyService;
+        $this->config            = $config;
     }
 
     public function getRoleList($section = 'api'): array
@@ -290,8 +295,8 @@ class RoleService implements ServiceInterface
     public function updateAccountRolesByAdmin($roles, $account, $operator = []): void
     {
         // Get role list
-        $apiRoleList    = $this->getApiRoleList();
-        $adminRoleList    = $this->getAdminRoleList();
+        $apiRoleList   = $this->getApiRoleList();
+        $adminRoleList = $this->getAdminRoleList();
 
         // Set user role list
         $defaultList = $this->getDefaultRolesLight();
@@ -320,10 +325,19 @@ class RoleService implements ServiceInterface
 
     public function addRoleResource(object|array|null $params, mixed $operator)
     {
-        $result = $this->roleRepository->addRoleResource($params);
-        $result = $this->canonizeRole($result);
+        // Add a role
+        $role = $this->roleRepository->addRoleResource($params);
+        $role = $this->canonizeRole($role);
+
+        // Clean cache
         $this->resetRoleListInCache();
-        return $result;
+
+        // Sync permissions
+        if (isset($params['permissions']) && !empty($params['permissions'])) {
+            $this->permissionService->managePermissionByRole($role['name'], $params['permissions']);
+        }
+
+        return $role;
     }
 
     public function resetRoleListInCache(): void
@@ -346,6 +360,7 @@ class RoleService implements ServiceInterface
 
     public function updateRoleResource($params): void
     {
+        // Set update params
         $updateParams = [];
         if (isset($params['title']) && !empty($params['title'])) {
             $updateParams['title'] = $params['title'];
@@ -353,10 +368,23 @@ class RoleService implements ServiceInterface
         if (isset($params['status']) && !empty($params['status'])) {
             $updateParams['status'] = $params['status'];
         }
+
+        // Do update if needed
         if (!empty($updateParams) && isset($params['name']) && !empty($params['name'])) {
             $this->roleRepository->updateRoleResource($params['name'], $updateParams);
         }
+
+        // Clean cache
         $this->resetRoleListInCache();
+
+        // Sync permissions
+        if (isset($params['permissions'])
+            && !empty($params['permissions'])
+            && isset($params['name'])
+            && !empty($params['name'])
+        ) {
+            $this->permissionService->managePermissionByRole($params['name'], $params['permissions']);
+        }
     }
 
     public function canonizeRole($role)

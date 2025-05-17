@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
+use Laminas\Db\Sql\Delete;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Predicate\Expression;
 use Laminas\Db\Sql\Sql;
@@ -416,7 +417,19 @@ class PermissionRepository implements PermissionRepositoryInterface
      */
     public function deletePermissionRole(array $params = []): void
     {
-        // TODO: Implement deletePermissionRole() method.
+        // Delete from role table
+        $delete = new Delete($this->tablePermissionRole);
+        $delete->where($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
     }
 
     public function getPermissionRoleCount($params = []): int

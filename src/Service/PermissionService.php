@@ -87,6 +87,36 @@ class PermissionService implements ServiceInterface
     }
 
     /**
+     * @param string $roleName
+     * @param array  $permissions
+     *
+     * @return void
+     */
+    public function managePermissionByRole(string $roleName, array $permissions): void
+    {
+        // Delete old permissions
+        $this->permissionRepository->deletePermissionRole(['role' => $roleName]);
+
+        // Get all permission resources
+        $resourceList = $this->permissionRepository->getPermissionResourceList(['key' => $permissions]);
+        foreach ($resourceList as $resource) {
+            $resource = $this->canonizeResource($resource);
+
+            // Set role params
+            $roleParams = [
+                'resource' => $resource['key'],
+                'section'  => $resource['section'],
+                'module'   => $resource['module'],
+                'role'     => $roleName,
+                'key'      => sprintf('%s-%s', $roleName,  $resource['key']),
+            ];
+
+            // Add a new role
+            $this->permissionRepository->addPermissionRole($roleParams);
+        }
+    }
+
+    /**
      * @param $params
      *
      * @return array
