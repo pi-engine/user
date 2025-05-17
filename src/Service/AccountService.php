@@ -1095,8 +1095,8 @@ class AccountService implements ServiceInterface
             'list'      => array_values($list),
             'paginator' => [
                 'count' => $count,
-                'limit' => $limit,
-                'page'  => $page,
+                'limit' => (int)$limit,
+                'page'  => (int)$page,
             ],
         ];
     }
