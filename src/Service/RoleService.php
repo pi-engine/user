@@ -325,8 +325,16 @@ class RoleService implements ServiceInterface
 
     public function addRoleResource(object|array|null $params, mixed $operator)
     {
+        // Set role params
+        $addParams = [
+            'name'    => $params['name'],
+            'title'   => $params['title'],
+            'section' => $params['section'] ?? 'api',
+            'status'  => $params['status'] ?? 1,
+        ];
+
         // Add a role
-        $role = $this->roleRepository->addRoleResource($params);
+        $role = $this->roleRepository->addRoleResource($addParams);
         $role = $this->canonizeRole($role);
 
         // Clean cache
