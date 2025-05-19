@@ -414,7 +414,7 @@ class AccountService implements ServiceInterface
         if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
             // Set permission params
             $permissionParams = [
-                'section' => 'api',
+                'section' => $this->config['login']['permission_role'] ?? 'api',
                 'role'    => $account['roles'],
             ];
 
@@ -1447,7 +1447,7 @@ class AccountService implements ServiceInterface
         if (isset($this->config['login']['permission']) && (int)$this->config['login']['permission'] === 1) {
             // Set permission params
             $permissionParams = [
-                'section' => 'api',
+                'section' => $this->config['login']['permission_role'] ?? 'api',
                 'role'    => $account['roles'],
             ];
 
