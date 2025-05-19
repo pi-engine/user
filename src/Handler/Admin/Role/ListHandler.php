@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use stdClass;
 
 class ListHandler implements RequestHandlerInterface
 {
@@ -40,8 +41,8 @@ class ListHandler implements RequestHandlerInterface
         // Reset cache
         $this->roleService->resetRoleListInCache();
 
-        // Get role list
-        $list = $this->roleService->getRoleResourceList($requestBody);
+        // Get a role list
+        $list = $this->roleService->getRoleResourceList($requestBody['section'] ?? '');
 
         $result
             = [
@@ -49,7 +50,7 @@ class ListHandler implements RequestHandlerInterface
             'data'   => [
                 'list' => $list,
             ],
-            'error'  => new \stdClass(),
+            'error'  => new stdClass(),
         ];
         return new EscapingJsonResponse($result);
     }
