@@ -62,6 +62,7 @@ return [
             Handler\Admin\Permission\Resource\AddHandler::class      => Factory\Handler\Admin\Permission\Resource\AddHandlerFactory::class,
             Handler\Admin\Permission\Resource\EditHandler::class     => Factory\Handler\Admin\Permission\Resource\EditHandlerFactory::class,
             Handler\Admin\Permission\Resource\DeleteHandler::class   => Factory\Handler\Admin\Permission\Resource\DeleteHandlerFactory::class,
+            Handler\Admin\Permission\Resource\ManageHandler::class   => Factory\Handler\Admin\Permission\Resource\ManageHandlerFactory::class,
             Handler\Admin\Permission\Role\ListHandler::class         => Factory\Handler\Admin\Permission\Role\ListHandlerFactory::class,
             Handler\Admin\Permission\Role\AddHandler::class          => Factory\Handler\Admin\Permission\Role\AddHandlerFactory::class,
             Handler\Admin\Permission\Role\EditHandler::class         => Factory\Handler\Admin\Permission\Role\EditHandlerFactory::class,
@@ -1161,6 +1162,30 @@ return [
                                                     LoggerRequestResponseMiddleware::class,
                                                     ErrorMiddleware::class,
                                                     Handler\Admin\Permission\Resource\DeleteHandler::class
+                                                ),
+                                            ],
+                                        ],
+                                    ],
+                                    'manage' => [
+                                        'type'    => Literal::class,
+                                        'options' => [
+                                            'route'    => '/manage',
+                                            'defaults' => [
+                                                'title'       => 'Admin user permission resource manage',
+                                                'module'      => 'user',
+                                                'section'     => 'admin',
+                                                'package'     => 'permission-resource',
+                                                'handler'     => 'manage',
+                                                'permissions' => 'user-permission-resource-manage',
+                                                'controller'  => PipeSpec::class,
+                                                'middleware'  => new PipeSpec(
+                                                    RequestPreparationMiddleware::class,
+                                                    SecurityMiddleware::class,
+                                                    Middleware\AuthenticationMiddleware::class,
+                                                    Middleware\AuthorizationMiddleware::class,
+                                                    LoggerRequestResponseMiddleware::class,
+                                                    ErrorMiddleware::class,
+                                                    Handler\Admin\Permission\Resource\ManageHandler::class
                                                 ),
                                             ],
                                         ],

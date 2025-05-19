@@ -168,7 +168,7 @@ class PermissionService implements ServiceInterface
 
         // Set result
         return [
-            'message' => 'New resource and all related roles added successfully'
+            'message' => 'New resource and all related roles added successfully',
 
         ];
     }
@@ -311,6 +311,65 @@ class PermissionService implements ServiceInterface
     {
         return [
             'message' => 'editPermissionResource',
+            'params'  => $params,
+        ];
+    }
+
+    /**
+     * For account actions
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function managePermissionResource($params): array
+    {
+        switch ($params['action']) {
+            case 'grant':
+                // Set delete params
+                $deleteParams = [
+                    'role'     => $params['role'],
+                    'resource' => $params['resource'],
+                ];
+
+                // Delete role permission
+                $this->permissionRepository->deletePermissionRole($deleteParams);
+
+                // Set resource params
+                $resourceParams = [
+                    'key' => $params['resource'],
+                ];
+
+                // Get resource
+                $resource = $this->getPermissionResource($resourceParams);
+
+                // Set role params
+                $roleParams = [
+                    'role'     => $params['role'],
+                    'resource' => $resource['key'],
+                    'section'  => $resource['section'],
+                    'module'   => $resource['module'],
+                    'key'      => $resource['key'],
+                ];
+
+                // Add role
+                $this->permissionRepository->addPermissionRole($roleParams);
+                break;
+
+            case 'revoke':
+                // Set delete params
+                $deleteParams = [
+                    'role'     => $params['role'],
+                    'resource' => $params['resource'],
+                ];
+
+                // Delete role permission
+                $this->permissionRepository->deletePermissionRole($deleteParams);
+                break;
+        }
+
+        return [
+            'message' => 'Selected permission managed successfully !',
             'params'  => $params,
         ];
     }

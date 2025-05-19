@@ -171,6 +171,17 @@ return [
             ],
         ],
         [
+            'title'       => 'Admin user permission resource manage',
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'permission-resource',
+            'handler'     => 'manage',
+            'permissions' => 'user-permission-resource-manage',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
             'title'       => 'Admin user permission page list',
             'module'      => 'user',
             'section'     => 'admin',
