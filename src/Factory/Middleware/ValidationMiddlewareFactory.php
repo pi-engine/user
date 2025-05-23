@@ -7,6 +7,7 @@ namespace Pi\User\Factory\Middleware;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\ConfigService;
 use Pi\Core\Service\UtilityService;
 use Pi\User\Middleware\ValidationMiddleware;
 use Pi\User\Service\AccountService;
@@ -39,6 +40,7 @@ class ValidationMiddlewareFactory implements FactoryInterface
             $container->get(AccountService::class),
             $container->get(UtilityService::class),
             $container->get(CacheService::class),
+            $container->get(ConfigService::class),
             $container->get(ErrorHandler::class),
             $config
         );

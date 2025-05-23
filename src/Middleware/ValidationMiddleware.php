@@ -9,6 +9,7 @@ use Laminas\InputFilter\Input;
 use Laminas\InputFilter\InputFilter;
 use Pi\Core\Handler\ErrorHandler;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\ConfigService;
 use Pi\Core\Service\UtilityService;
 use Pi\User\Service\AccountService;
 use Pi\User\Validator\EmailValidator;
@@ -48,6 +49,9 @@ class ValidationMiddleware implements MiddlewareInterface
     /* @var CacheService */
     protected CacheService $cacheService;
 
+    /** @var ConfigService */
+    protected ConfigService $configService;
+
     /** @var ErrorHandler */
     protected ErrorHandler $errorHandler;
 
@@ -60,6 +64,7 @@ class ValidationMiddleware implements MiddlewareInterface
         AccountService           $accountService,
         UtilityService           $utilityService,
         CacheService             $cacheService,
+        ConfigService            $configService,
         ErrorHandler             $errorHandler,
                                  $config
     ) {
@@ -68,6 +73,7 @@ class ValidationMiddleware implements MiddlewareInterface
         $this->accountService  = $accountService;
         $this->utilityService  = $utilityService;
         $this->cacheService    = $cacheService;
+        $this->configService   = $configService;
         $this->errorHandler    = $errorHandler;
         $this->config          = $config;
     }
@@ -212,7 +218,7 @@ class ValidationMiddleware implements MiddlewareInterface
 
         // Check credential
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService));
         $inputFilter->add($credential);
 
         // Set data and check
@@ -260,7 +266,7 @@ class ValidationMiddleware implements MiddlewareInterface
         // Check identity
         if (isset($params['credential']) && !empty($params['credential'])) {
             $credential = new Input('credential');
-            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
+            $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService));
             $inputFilter->add($credential);
         }
 
@@ -351,7 +357,7 @@ class ValidationMiddleware implements MiddlewareInterface
         ];
 
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $option));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService, $option));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($credential);
@@ -369,10 +375,10 @@ class ValidationMiddleware implements MiddlewareInterface
         ];
 
         $currentCredential = new Input('current_credential');
-        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $option));
+        $currentCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService, $option));
 
         $newCredential = new Input('new_credential');
-        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
+        $newCredential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($currentCredential);
@@ -387,7 +393,7 @@ class ValidationMiddleware implements MiddlewareInterface
     protected function passwordAdminIsValid($params)
     {
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService));
+        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService));
 
         $inputFilter = new InputFilter();
         $inputFilter->add($credential);
