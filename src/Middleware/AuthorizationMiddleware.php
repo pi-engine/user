@@ -56,7 +56,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         // Check and get system role list
         switch ($routeParams['section']) {
             case 'api':
-                $roleList = $this->roleService->getApiRoleList();
+                $roleList = array_unique(array_merge($this->roleService->getApiRoleList(), $this->roleService->getAdminRoleList()));
                 break;
 
             case 'admin':
