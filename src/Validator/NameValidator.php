@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Pi\User\Validator;
 
+use AllowDynamicProperties;
 use Laminas\Validator\AbstractValidator;
 use Pi\User\Service\AccountService;
 
-class NameValidator extends AbstractValidator
+#[AllowDynamicProperties] class NameValidator extends AbstractValidator
 {
     /** @var string */
-    const INVALID = 'nameInvalid';
+    const string INVALID = 'nameInvalid';
 
     /** @var string */
-    const RESERVED = 'nameReserved';
+    const string RESERVED = 'nameReserved';
 
     /** @var string */
-    const TAKEN = 'nameTaken';
+    const string TAKEN = 'nameTaken';
 
     /** @var array */
     protected array $formatMessage = [];
@@ -65,7 +66,7 @@ class NameValidator extends AbstractValidator
         $this->options        = array_merge($this->options, $options);
 
         $this->messageTemplates = [
-            self::INVALID  => 'Invalid name: %formatHint%',
+            self::INVALID  => 'Invalid name: %s',
             self::RESERVED => 'Name is reserved',
             self::TAKEN    => 'Name is already taken',
         ];

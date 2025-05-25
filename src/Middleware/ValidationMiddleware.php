@@ -132,6 +132,10 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->mobileVerifyIsValid($parsedBody);
                 break;
 
+            case 'name-format':
+                $this->nameFormat($parsedBody);
+                break;
+
             default:
                 $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
                 $request = $request->withAttribute(
@@ -161,21 +165,21 @@ class ValidationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    protected function setErrorHandler($inputFilter): array
+    private function setErrorHandler($inputFilter): void
     {
         $message = [];
         foreach ($inputFilter->getInvalidInput() as $error) {
             $message[$error->getName()] = $error->getName() . ': ' . implode(', ', $error->getMessages());
         }
 
-        return $this->validationResult = [
+        $this->validationResult = [
             'status'  => false,
             'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
             'message' => implode(', ', $message),
         ];
     }
 
-    protected function loginIsValid($params)
+    private function loginIsValid($params): void
     {
         $inputFilter = new InputFilter();
 
@@ -209,11 +213,12 @@ class ValidationMiddleware implements MiddlewareInterface
             // Set check params
             $checkParams = ['mobile' => $params['mobile']];
         } else {
-            return $this->validationResult = [
+            $this->validationResult = [
                 'status'  => false,
                 'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 'message' => 'Login fields not set !',
             ];
+            return;
         }
 
         // Check credential
@@ -224,11 +229,11 @@ class ValidationMiddleware implements MiddlewareInterface
         // Set data and check
         $inputFilter->setData($params);
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function registerIsValid($params)
+    private function registerIsValid($params): void
     {
         // Set name
         if (
@@ -288,11 +293,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function editIsValid($params, $account)
+    private function editIsValid($params, $account): void
     {
         // Set name
         if (
@@ -333,14 +338,14 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function deviceTokenIsValid($params, $account)
+    private function deviceTokenIsValid($params, $account): void
     {
         if (!isset($params['device_token']) || empty($params['device_token']) || !is_string($params['device_token'])) {
-            return $this->validationResult = [
+            $this->validationResult = [
                 'status'  => false,
                 'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 'message' => 'Device token was not set or its wrong !',
@@ -348,7 +353,7 @@ class ValidationMiddleware implements MiddlewareInterface
         }
     }
 
-    protected function passwordAddIsValid($params, $account)
+    private function passwordAddIsValid($params, $account): void
     {
         // Set option
         $option = [
@@ -364,11 +369,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function passwordEditIsValid($params)
+    private function passwordEditIsValid($params): void
     {
         $option = [
             'check_strong' => 0,
@@ -386,11 +391,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function passwordAdminIsValid($params)
+    private function passwordAdminIsValid($params): void
     {
         $credential = new Input('credential');
         $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService));
@@ -400,11 +405,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function emailRequestIsValid($params)
+    private function emailRequestIsValid($params): void
     {
         $option = [
             'check_duplication' => false,
@@ -418,11 +423,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function emailVerifyIsValid($params)
+    private function emailVerifyIsValid($params): void
     {
         $option = [
             'check_duplication' => false,
@@ -446,11 +451,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function mobileRequestIsValid($params)
+    private function mobileRequestIsValid($params): void
     {
         $option = [
             'check_duplication' => false,
@@ -468,11 +473,11 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
         }
     }
 
-    protected function mobileVerifyIsValid($params)
+    private function mobileVerifyIsValid($params): void
     {
         $inputFilter = new InputFilter();
 
@@ -500,7 +505,20 @@ class ValidationMiddleware implements MiddlewareInterface
         $inputFilter->setData($params);
 
         if (!$inputFilter->isValid()) {
-            return $this->setErrorHandler($inputFilter);
+            $this->setErrorHandler($inputFilter);
+        }
+    }
+
+    private function nameFormat($params): void
+    {
+        $name = new Input('name');
+        $name->getValidatorChain()->attach(new NameValidator($this->accountService, ['format' => 'strict']));
+
+        $inputFilter = new InputFilter();
+        $inputFilter->add($name);
+        $inputFilter->setData($params);
+        if (!$inputFilter->isValid()) {
+            $this->setErrorHandler($inputFilter);
         }
     }
 }

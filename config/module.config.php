@@ -994,12 +994,14 @@ return [
                                         'package'     => 'role',
                                         'handler'     => 'add',
                                         'permissions' => 'user-role-add',
+                                        'validator'   => 'name-format',
                                         'controller'  => PipeSpec::class,
                                         'middleware'  => new PipeSpec(
                                             RequestPreparationMiddleware::class,
                                             SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
+                                            Middleware\ValidationMiddleware::class,
                                             LoggerRequestResponseMiddleware::class,
                                             ErrorMiddleware::class,
                                             Handler\Admin\Role\AddHandler::class
