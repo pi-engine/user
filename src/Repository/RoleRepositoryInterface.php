@@ -11,7 +11,7 @@ interface RoleRepositoryInterface
 {
     public function getRoleResourceList($params = []): HydratingResultSet;
 
-    public function getRoleResource(array $params = []): Resource;
+    public function getRoleResource(array $params = []): array|Resource;
 
     public function addRoleResource(array $params = []): Resource;
 
@@ -26,4 +26,6 @@ interface RoleRepositoryInterface
     public function deleteRoleAccount(int $userId, string $roleName): void;
 
     public function deleteAllRoleAccount(int $userId, string $section = 'api'): void;
+
+    public function duplicatedRole(array $params = []): int;
 }

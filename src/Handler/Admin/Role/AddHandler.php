@@ -11,7 +11,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use stdClass;
 
 class AddHandler implements RequestHandlerInterface
 {
@@ -41,31 +40,6 @@ class AddHandler implements RequestHandlerInterface
 
         // Reset cache
         $this->roleService->resetRoleListInCache();
-
-        // Get role list
-        $list = $this->roleService->getRoleResourceListByAdmin();
-
-        // Check duplicate
-        $isDuplicate = false;
-        foreach ($list as $item) {
-            if ($item["name"] === $requestBody['name'] ?? '') {
-                $isDuplicate = true;
-                break; // Exit the loop once a match is found
-            }
-        }
-
-        if ($isDuplicate || !isset($requestBody['name']) || empty($requestBody['name'])) {
-            return new EscapingJsonResponse(
-                [
-                    'result' => false,
-                    'data'   => new stdClass(),
-                    'error'  => [
-                        'message' => 'This role added before!',
-                        'code'    => 403,
-                    ],
-                ]
-            );
-        }
 
         // Add role
         $result = $this->roleService->addRoleResource($requestBody, $operator);

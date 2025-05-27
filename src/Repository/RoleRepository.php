@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Pi\User\Repository;
 
-use InvalidArgumentException;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Driver\ResultInterface;
 use Laminas\Db\ResultSet\HydratingResultSet;
 use Laminas\Db\Sql\Delete;
 use Laminas\Db\Sql\Insert;
+use Laminas\Db\Sql\Predicate\Expression;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Update;
 use Laminas\Hydrator\HydratorInterface;
@@ -60,17 +60,17 @@ class RoleRepository implements RoleRepositoryInterface
     private Account $accountPrototype;
 
     public function __construct(
-        AdapterInterface  $db,
+        AdapterInterface    $db,
         SignatureRepository $signatureRepository,
-        HydratorInterface $hydrator,
-        Resource          $rolePrototype,
-        Account           $accountPrototype
+        HydratorInterface   $hydrator,
+        Resource            $rolePrototype,
+        Account             $accountPrototype
     ) {
-        $this->db               = $db;
-        $this->signatureRepository     = $signatureRepository;
-        $this->hydrator         = $hydrator;
-        $this->rolePrototype    = $rolePrototype;
-        $this->accountPrototype = $accountPrototype;
+        $this->db                  = $db;
+        $this->signatureRepository = $signatureRepository;
+        $this->hydrator            = $hydrator;
+        $this->rolePrototype       = $rolePrototype;
+        $this->accountPrototype    = $accountPrototype;
     }
 
     public function getRoleResourceList($params = []): HydratingResultSet
@@ -118,7 +118,7 @@ class RoleRepository implements RoleRepositoryInterface
         return $this->getRoleResource(['id' => $id]);
     }
 
-    public function getRoleResource(array $params = []): Resource
+    public function getRoleResource(array $params = []): array|Resource
     {
         // Set
         $where = [];
@@ -126,6 +126,8 @@ class RoleRepository implements RoleRepositoryInterface
             $where['id'] = (int)$params['id'];
         } elseif (isset($params['name']) && !empty($params['name'])) {
             $where['name'] = $params['name'];
+        } else {
+            return [];
         }
 
         $sql       = new Sql($this->db);
@@ -135,10 +137,7 @@ class RoleRepository implements RoleRepositoryInterface
 
         if (!$result instanceof ResultInterface || !$result->isQueryResult()) {
             throw new RuntimeException(
-                sprintf(
-                    'Failed retrieving blog post with identifier "%s"; unknown database error.',
-                    $params
-                )
+                'Failed retrieving row with identifier; unknown database error.',
             );
         }
 
@@ -147,12 +146,7 @@ class RoleRepository implements RoleRepositoryInterface
         $role = $resultSet->current();
 
         if (!$role) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Role with identifier "%s" not found.',
-                    $params
-                )
-            );
+            return [];
         }
 
         return $role;
@@ -296,5 +290,22 @@ class RoleRepository implements RoleRepositoryInterface
                 'Database error occurred during update operation'
             );
         }
+    }
+
+    public function duplicatedRole(array $params = []): int
+    {
+        // Set where
+        $columns = ['count' => new Expression('count(*)')];
+        $where   = [$params['field'] => $params['value']];
+        if (isset($params['id']) && (int)$params['id'] > 0) {
+            $where['id <> ?'] = $params['id'];
+        }
+
+        $sql       = new Sql($this->db);
+        $select    = $sql->select($this->tableRoleResource)->columns($columns)->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $row       = $statement->execute()->current();
+
+        return (int)$row['count'];
     }
 }

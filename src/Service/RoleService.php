@@ -49,14 +49,14 @@ class RoleService implements ServiceInterface
         PermissionService       $permissionService,
         CacheService            $cacheService,
         HistoryService          $historyService,
-        UtilityService             $utilityService,
+        UtilityService          $utilityService,
                                 $config
     ) {
         $this->roleRepository    = $roleRepository;
         $this->permissionService = $permissionService;
         $this->cacheService      = $cacheService;
         $this->historyService    = $historyService;
-        $this->utilityService       = $utilityService;
+        $this->utilityService    = $utilityService;
         $this->config            = $config;
     }
 
@@ -185,6 +185,37 @@ class RoleService implements ServiceInterface
         }
 
         return array_values($defaultRoleList);
+    }
+
+    public function getRoleResource(array $params): array
+    {
+        $role = $this->roleRepository->getRoleResource($params);
+        return $this->canonizeRole($role);
+    }
+
+    public function addRoleResource(object|array|null $params, mixed $operator)
+    {
+        // Set role params
+        $addParams = [
+            'name'    => $this->utilityService->slug($params['name']),
+            'title'   => $params['title'],
+            'section' => $params['section'] ?? 'api',
+            'status'  => $params['status'] ?? 1,
+        ];
+
+        // Add a role
+        $role = $this->roleRepository->addRoleResource($addParams);
+        $role = $this->canonizeRole($role);
+
+        // Clean cache
+        $this->resetRoleListInCache();
+
+        // Sync permissions
+        if (isset($params['permissions']) && !empty($params['permissions'])) {
+            $this->permissionService->managePermissionByRole($role['name'], $params['permissions']);
+        }
+
+        return $role;
     }
 
     public function addDefaultRoles($account, $operator = []): void
@@ -329,31 +360,6 @@ class RoleService implements ServiceInterface
         $this->historyService->logger('updateRoleAccount', ['request' => ['role' => $roles], 'account' => $account, 'operator' => $operator]);
     }
 
-    public function addRoleResource(object|array|null $params, mixed $operator)
-    {
-        // Set role params
-        $addParams = [
-            'name'    => $this->utilityService->slug($params['name']),
-            'title'   => $params['title'],
-            'section' => $params['section'] ?? 'api',
-            'status'  => $params['status'] ?? 1,
-        ];
-
-        // Add a role
-        $role = $this->roleRepository->addRoleResource($addParams);
-        $role = $this->canonizeRole($role);
-
-        // Clean cache
-        $this->resetRoleListInCache();
-
-        // Sync permissions
-        if (isset($params['permissions']) && !empty($params['permissions'])) {
-            $this->permissionService->managePermissionByRole($role['name'], $params['permissions']);
-        }
-
-        return $role;
-    }
-
     public function resetRoleListInCache(): void
     {
         $this->cacheService->deleteItems([
@@ -372,7 +378,7 @@ class RoleService implements ServiceInterface
         $this->resetRoleListInCache();
     }
 
-    public function updateRoleResource($params): void
+    public function updateRoleResource($role, $params, $operator): void
     {
         // Set update params
         $updateParams = [];
@@ -384,8 +390,8 @@ class RoleService implements ServiceInterface
         }
 
         // Do update if needed
-        if (!empty($updateParams) && isset($params['name']) && !empty($params['name'])) {
-            $this->roleRepository->updateRoleResource($params['name'], $updateParams);
+        if (!empty($updateParams)) {
+            $this->roleRepository->updateRoleResource($role['name'], $updateParams);
         }
 
         // Clean cache
@@ -394,11 +400,20 @@ class RoleService implements ServiceInterface
         // Sync permissions
         if (isset($params['permissions'])
             && !empty($params['permissions'])
-            && isset($params['name'])
-            && !empty($params['name'])
         ) {
-            $this->permissionService->managePermissionByRole($params['name'], $params['permissions']);
+            $this->permissionService->managePermissionByRole($role['name'], $params['permissions']);
         }
+    }
+
+    public function isDuplicated($field, $value, $id = 0): bool
+    {
+        return (bool)$this->roleRepository->duplicatedRole(
+            [
+                'field' => $field,
+                'value' => $value,
+                'id'    => $id,
+            ]
+        );
     }
 
     public function canonizeRole($role)

@@ -37,10 +37,11 @@ class EditHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
+        $role        = $request->getAttribute('role_item');
         $operator    = $request->getAttribute('account');
 
         // Update
-        $this->roleService->updateRoleResource($requestBody, $operator);
+        $this->roleService->updateRoleResource($role, $requestBody, $operator);
 
         return new EscapingJsonResponse(
             [

@@ -132,10 +132,6 @@ class ValidationMiddleware implements MiddlewareInterface
                 $this->mobileVerifyIsValid($parsedBody);
                 break;
 
-            case 'name-format':
-                $this->nameFormat($parsedBody);
-                break;
-
             default:
                 $request = $request->withAttribute('status', StatusCodeInterface::STATUS_FORBIDDEN);
                 $request = $request->withAttribute(
@@ -504,19 +500,6 @@ class ValidationMiddleware implements MiddlewareInterface
 
         $inputFilter->setData($params);
 
-        if (!$inputFilter->isValid()) {
-            $this->setErrorHandler($inputFilter);
-        }
-    }
-
-    private function nameFormat($params): void
-    {
-        $name = new Input('name');
-        $name->getValidatorChain()->attach(new NameValidator($this->accountService, ['format' => 'strict']));
-
-        $inputFilter = new InputFilter();
-        $inputFilter->add($name);
-        $inputFilter->setData($params);
         if (!$inputFilter->isValid()) {
             $this->setErrorHandler($inputFilter);
         }
