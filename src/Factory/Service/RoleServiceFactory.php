@@ -6,6 +6,7 @@ namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\UtilityService;
 use Pi\User\Repository\RoleRepositoryInterface;
 use Pi\User\Service\HistoryService;
 use Pi\User\Service\PermissionService;
@@ -36,6 +37,7 @@ class RoleServiceFactory implements FactoryInterface
             $container->get(PermissionService::class),
             $container->get(CacheService::class),
             $container->get(HistoryService::class),
+            $container->get(UtilityService::class),
             $config
         );
     }

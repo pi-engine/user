@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pi\User\Service;
 
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\UtilityService;
 use Pi\User\Repository\RoleRepositoryInterface;
 use function in_array;
 
@@ -21,6 +22,9 @@ class RoleService implements ServiceInterface
 
     /** @var HistoryService */
     protected HistoryService $historyService;
+
+    /** @var UtilityService */
+    protected UtilityService $utilityService;
 
     protected array $defaultRoles
         = [
@@ -45,12 +49,14 @@ class RoleService implements ServiceInterface
         PermissionService       $permissionService,
         CacheService            $cacheService,
         HistoryService          $historyService,
+        UtilityService             $utilityService,
                                 $config
     ) {
         $this->roleRepository    = $roleRepository;
         $this->permissionService = $permissionService;
         $this->cacheService      = $cacheService;
         $this->historyService    = $historyService;
+        $this->utilityService       = $utilityService;
         $this->config            = $config;
     }
 
@@ -327,7 +333,7 @@ class RoleService implements ServiceInterface
     {
         // Set role params
         $addParams = [
-            'name'    => $params['name'],
+            'name'    => $this->utilityService->slug($params['name']),
             'title'   => $params['title'],
             'section' => $params['section'] ?? 'api',
             'status'  => $params['status'] ?? 1,
