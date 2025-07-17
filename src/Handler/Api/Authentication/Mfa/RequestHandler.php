@@ -28,11 +28,11 @@ class RequestHandler implements RequestHandlerInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        MultiFactorService           $multiFactorService
+        MultiFactorService       $multiFactorService
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory   = $streamFactory;
-        $this->multiFactorService  = $multiFactorService;
+        $this->responseFactory    = $responseFactory;
+        $this->streamFactory      = $streamFactory;
+        $this->multiFactorService = $multiFactorService;
     }
 
     /**

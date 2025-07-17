@@ -152,8 +152,8 @@ class AccountRepository implements AccountRepositoryInterface
             $where[] = new NotIn('id', $params['not_allowed_id']);
         }
 
-        $sql       = new Sql($this->db);
-        $select    = $sql->select($this->tableAccount)->where($where);
+        $sql    = new Sql($this->db);
+        $select = $sql->select($this->tableAccount)->where($where);
         if (isset($params['order']) && !empty($params['order'])) {
             $select->order($params['order']);
         }

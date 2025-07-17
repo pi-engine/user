@@ -28,7 +28,7 @@ class CsrfHandler implements RequestHandlerInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        CsrfService $csrfService
+        CsrfService              $csrfService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;

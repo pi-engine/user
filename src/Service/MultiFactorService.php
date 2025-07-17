@@ -79,6 +79,7 @@ class MultiFactorService implements ServiceInterface
 
     /**
      * Secret for app method should be save in database and secret for other methods just save on cache
+     *
      * @param $account
      * @param $params
      * @param $tokenId

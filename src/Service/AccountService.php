@@ -2484,7 +2484,7 @@ class AccountService implements ServiceInterface
                     'multi_factor_status' => $newMultiFactor['multi_factor_status'] ?? null,
                     'multi_factor_method' => $newMultiFactor['multi_factor_method'] ?? null,
                     'multi_factor_verify' => $newMultiFactor['multi_factor_verify'] ?? null,
-                    'secret'                => $newMultiFactor['secret'] ?? null,
+                    'secret'              => $newMultiFactor['secret'] ?? null,
                     'create'              => $newMultiFactor['create'],
                     'expire'              => $newMultiFactor['expire'],
                 ];

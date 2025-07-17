@@ -29,7 +29,7 @@ class ProfileRepositoryFactory implements FactoryInterface
         return new ProfileRepository(
             $container->get(AdapterInterface::class),
             new ReflectionHydrator(),
-            new Profile(0, '','','','', '', '', 0)
+            new Profile(0, '', '', '', '', '', '', 0)
         );
     }
 }
