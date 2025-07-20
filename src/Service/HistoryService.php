@@ -76,8 +76,9 @@ class HistoryService implements ServiceInterface
 
     public function cleanupForbiddenKeys(array $params): array
     {
+        $forbidden = array_flip($this->forbiddenParams);
         foreach ($params as $key => $value) {
-            if (in_array($key, $this->forbiddenParams)) {
+            if (isset($forbidden[$key])) {
                 unset($params[$key]);
             } elseif (is_array($value)) {
                 $params[$key] = $this->cleanupForbiddenKeys($value);
