@@ -84,17 +84,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         // Get access token by Authorization Bearer
         if (!empty($authorization)) {
-            preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches);
-            if (!empty($matches[1])) {
+            if (preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
                 $token = $matches[1];
+            } else {
+                $token = $authorization;
             }
-        }
-
-        // Set refresh-token to token if its be on true module and handler
-        $type = 'access';
-        if ($this->isValidRefreshToken($routeParams, $refreshToken)) {
-            $type  = 'refresh';
-            $token = $refreshToken;
         }
 
         // Check a token set
@@ -108,6 +102,13 @@ class AuthenticationMiddleware implements MiddlewareInterface
                 ]
             );
             return $this->errorHandler->handle($request);
+        }
+
+        // Set refresh-token to token if its be on true module and handler
+        $type = 'access';
+        if ($this->isValidRefreshToken($routeParams, $refreshToken)) {
+            $type  = 'refresh';
+            $token = $refreshToken;
         }
 
         // parse token
