@@ -50,6 +50,7 @@ class VerifyHandler implements RequestHandlerInterface
             'data'   => [],
             'error'  => [
                 'message' => 'Unable to verify the captcha',
+                'key'     => 'unable-to-verify-the-captcha',
             ],
             'status' => StatusCodeInterface::STATUS_FORBIDDEN,
         ];
@@ -64,6 +65,7 @@ class VerifyHandler implements RequestHandlerInterface
                 'result' => true,
                 'data'   => [
                     'message' => 'The captcha verified successfully !',
+                    'key'     => 'the-captcha-verified-successfully',
                     'score'   => $response->getScore(),
                 ],
                 'error'  => [],
@@ -71,6 +73,7 @@ class VerifyHandler implements RequestHandlerInterface
         } else {
             $result['error'] = [
                 'message' => 'Verification failed',
+                'key'     => 'verification-failed',
                 'code'    => $response->getErrorCodes(),
                 'score'   => $response->getScore(),
             ];

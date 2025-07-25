@@ -122,7 +122,9 @@ class MultiFactorService implements ServiceInterface
                         'result' => false,
                         'data'   => [],
                         'error'  => [
-                            'message' => "No {$contactType} found. Please use another verification method.",
+                            'message'      => "No {$contactType} found. Please use another verification method.",
+                            'key'          => 'no-contact-type-found-please-use-another-verification-method',
+                            'contact_type' => $contactType,
                         ],
                     ];
                 }
@@ -161,6 +163,7 @@ class MultiFactorService implements ServiceInterface
                     'data'   => [],
                     'error'  => [
                         'message' => 'Please select a valid verification method.',
+                        'key'     => 'please-select-a-valid-verification-method',
                     ],
                 ];
         }
@@ -217,6 +220,7 @@ class MultiFactorService implements ServiceInterface
                 'data'   => [],
                 'error'  => [
                     'message' => 'No request set for your current login',
+                    'key'     => 'no-request-set-for-your-current-login',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ],
                 'status' => StatusCodeInterface::STATUS_FORBIDDEN,
@@ -259,6 +263,7 @@ class MultiFactorService implements ServiceInterface
                     'data'   => [],
                     'error'  => [
                         'message' => 'Please select a valid verification method.',
+                        'key'     => 'please-select-a-valid-verification-method',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                     ],
                     'status' => StatusCodeInterface::STATUS_FORBIDDEN,

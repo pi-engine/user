@@ -169,7 +169,7 @@ class PermissionService implements ServiceInterface
         // Set result
         return [
             'message' => 'New resource and all related roles added successfully',
-
+            'key'     => 'new-resource-and-all-related-roles-added-successfully',
         ];
     }
 

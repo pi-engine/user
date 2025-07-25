@@ -98,6 +98,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
                 'error',
                 [
                     'message' => 'Token is not set !',
+                    'key'     => 'token-is-not-set',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );

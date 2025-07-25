@@ -45,6 +45,7 @@ class PersistHandler implements RequestHandlerInterface
             'result' => true,
             'data'   => [
                 'message' => 'Cache persist set !',
+                'key'     => 'cache-persist-set',
             ],
             'error'  => new \stdClass(),
         ];

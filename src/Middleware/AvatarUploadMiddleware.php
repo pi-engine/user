@@ -28,6 +28,7 @@ class AvatarUploadMiddleware implements MiddlewareInterface
             'status'  => true,
             'code'    => StatusCodeInterface::STATUS_OK,
             'message' => '',
+            'key'     => '',
         ];
 
     /** @var ResponseFactoryInterface */

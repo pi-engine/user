@@ -45,6 +45,7 @@ class CleanHandler implements RequestHandlerInterface
             'result' => true,
             'data'   => [
                 'message' => 'User data reset successfully !',
+                'key'     => 'user-data-reset-successfully',
             ],
             'error'  => [],
         ];

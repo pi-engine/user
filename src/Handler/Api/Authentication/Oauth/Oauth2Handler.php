@@ -53,6 +53,7 @@ class Oauth2Handler implements RequestHandlerInterface
                 'data'   => null,
                 'error'  => [
                     'message' => 'Invalid authentication data. please try again!',
+                    'key'     => 'invalid-authentication-data-please-try-again',
                 ],
             ];
             return new EscapingJsonResponse($errorResponse, StatusCodeInterface::STATUS_UNAUTHORIZED);

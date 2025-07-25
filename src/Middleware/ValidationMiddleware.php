@@ -33,6 +33,7 @@ class ValidationMiddleware implements MiddlewareInterface
             'status'  => true,
             'code'    => StatusCodeInterface::STATUS_OK,
             'message' => '',
+            'key'     => '',
         ];
     /** @var ResponseFactoryInterface */
     protected ResponseFactoryInterface $responseFactory;
@@ -138,6 +139,7 @@ class ValidationMiddleware implements MiddlewareInterface
                     'error',
                     [
                         'message' => 'Validator not set !',
+                        'key'     => 'validator-not-set',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                     ]
                 );

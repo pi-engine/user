@@ -69,6 +69,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
                     'error',
                     [
                         'message' => 'Section not set !',
+                        'key'     => 'section-not-set',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                     ]
                 );
@@ -91,7 +92,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
             $request = $request->withAttribute(
                 'error',
                 [
-                    'message' => 'You dont have access to this area ! 1',
+                    'message' => 'You dont have a true role to access to this area !',
+                    'key'     => 'you-dont-have-a-true-role-to-access-to-this-area',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ]
             );

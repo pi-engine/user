@@ -45,6 +45,7 @@ class DeleteHandler implements RequestHandlerInterface
             'result' => true,
             'data'   => [
                 'message' => 'Cache deleted !',
+                'key'     => 'cache-deleted',
             ],
             'error'  => new \stdClass(),
         ];

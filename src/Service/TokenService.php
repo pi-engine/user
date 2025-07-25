@@ -107,6 +107,7 @@ class TokenService implements ServiceInterface
                 return [
                     'status'  => false,
                     'message' => 'Invalid token structure.',
+                    'key'     => 'invalid-token-structure',
                 ];
             }
 
@@ -115,6 +116,7 @@ class TokenService implements ServiceInterface
                 return [
                     'status'  => false,
                     'message' => 'Token expired.',
+                    'key'     => 'token-expired',
                 ];
             }
 
@@ -123,6 +125,7 @@ class TokenService implements ServiceInterface
                 return [
                     'status'  => false,
                     'message' => 'Invalid issued time.',
+                    'key'     => 'invalid-issued-time',
                 ];
             }
 
@@ -131,6 +134,7 @@ class TokenService implements ServiceInterface
                 return [
                     'status'  => false,
                     'message' => 'Invalid issuer or audience',
+                    'key'     => 'invalid-issuer-or-audience',
                 ];
             }
 
@@ -153,6 +157,7 @@ class TokenService implements ServiceInterface
                     return [
                         'status'  => false,
                         'message' => 'Invalid IP address',
+                        'key'     => 'invalid-ip-address',
                     ];
                 }
             }
@@ -163,6 +168,7 @@ class TokenService implements ServiceInterface
                     return [
                         'status'  => false,
                         'message' => 'Invalid IP address',
+                        'key'     => 'invalid-ip-address',
                     ];
                 }
             }
@@ -173,6 +179,7 @@ class TokenService implements ServiceInterface
                 return [
                     'status'  => false,
                     'message' => 'User not found.',
+                    'key'     => 'user-not-found',
                 ];
             }
 
@@ -202,6 +209,7 @@ class TokenService implements ServiceInterface
             return [
                 'status'  => false,
                 'message' => 'Token not valid!',
+                'key'     => 'token-not-valid',
             ];
         } catch (Exception $e) {
             return [

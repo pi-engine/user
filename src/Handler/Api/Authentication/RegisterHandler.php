@@ -59,6 +59,7 @@ class RegisterHandler implements RequestHandlerInterface
                 'data'   => [],
                 'error'  => [
                     'message' => 'Error to register user account',
+                    'key'     => 'error-to-register-user-account',
                 ],
                 'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ];

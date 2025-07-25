@@ -51,6 +51,7 @@ class DeviceTokenHandler implements RequestHandlerInterface
             'result' => true,
             'data'   => [
                 'message' => 'This device token added !',
+                'key'     => 'this-device-token-added',
             ],
             'error'  => [],
         ];
