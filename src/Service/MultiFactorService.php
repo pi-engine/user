@@ -277,6 +277,7 @@ class MultiFactorService implements ServiceInterface
                 'data'   => [],
                 'error'  => [
                     'message' => 'Error to verify code !',
+                    'key'     => 'error-to-verify-code',
                     'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                 ],
                 'status' => StatusCodeInterface::STATUS_FORBIDDEN,

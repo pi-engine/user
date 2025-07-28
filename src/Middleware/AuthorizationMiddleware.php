@@ -117,7 +117,8 @@ class AuthorizationMiddleware implements MiddlewareInterface
                 $request = $request->withAttribute(
                     'error',
                     [
-                        'message' => 'You dont have access to this area ! 2',
+                        'message' => 'You dont have a permission to access to this area !',
+                        'key'     => 'you-dont-have-a-permission-to-access-to-this-area',
                         'code'    => StatusCodeInterface::STATUS_FORBIDDEN,
                     ]
                 );
