@@ -121,7 +121,8 @@ class AuthenticationMiddleware implements MiddlewareInterface
             $request = $request->withAttribute(
                 'error',
                 [
-                    'message' => $tokenParsed['message'] ?? 'Invalid token!',
+                    'message' => $tokenParsed['message'] ?? 'Invalid token !',
+                    'key' => $tokenParsed['key'] ?? 'invalid-token',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );
