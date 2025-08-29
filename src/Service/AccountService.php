@@ -351,7 +351,6 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = true;
         $account['company_id']       = $user['authorization']['company_id'] ?? 0;
         $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
@@ -1213,7 +1212,6 @@ class AccountService implements ServiceInterface
         $user = $this->cacheService->getUser($account['id']);
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = true;
         $account['company_id']       = $user['authorization']['company_id'] ?? 0;
         $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
@@ -1414,7 +1412,6 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set company data and Get company details if company module loaded
-        $account['is_company_setup'] = true;
         $account['company_id']       = $user['authorization']['company_id'] ?? 0;
         $account['company_title']    = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
@@ -2512,7 +2509,6 @@ class AccountService implements ServiceInterface
                 'multi_factor_status' => $account['multi_factor_status'] ?? $user['account']['multi_factor_status'] ?? null,
                 'multi_factor_method' => $account['multi_factor_method'] ?? $user['account']['multi_factor_method'] ?? null,
                 'multi_factor_verify' => $account['multi_factor_verify'] ?? $user['account']['multi_factor_verify'] ?? null,
-                'is_company_setup'    => true, // ToDo: remove it
                 'company_id'          => $account['company_id'] ?? $user['account']['company_id'] ?? 0,
                 'company_title'       => $account['company_title'] ?? $user['account']['company_title'] ?? null,
             ],

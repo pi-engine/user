@@ -35,7 +35,6 @@ class HistoryService implements ServiceInterface
             'multi_factor_status',
             'multi_factor_method',
             'multi_factor_verify',
-            'is_company_setup',
             'token_payload',
             'permission',
         ];
