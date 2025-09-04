@@ -450,13 +450,14 @@ class AccountService implements ServiceInterface
         $account['permission'] = array_values($account['permission']);
 
         // Set source roles params
-        if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
+        // ToDo: Make this part secure
+        /* if (isset($params['source']) && !empty($params['source']) && is_string($params['source']) && !in_array($params['source'], $account['roles'])) {
             $this->roleService->addRoleAccount($account, $params['source']);
 
             // Set new role
             $account['roles'][] = $params['source'];
             $account['roles']   = array_values($account['roles']);
-        }
+        } */
 
         // Add or update user data to cache
         $this->manageUserCache($account, $accessToken, $refreshToken, $multiFactor);
