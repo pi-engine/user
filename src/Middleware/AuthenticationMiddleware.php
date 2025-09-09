@@ -122,7 +122,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
                 'error',
                 [
                     'message' => $tokenParsed['message'] ?? 'Invalid token !',
-                    'key' => $tokenParsed['key'] ?? 'invalid-token',
+                    'key'     => $tokenParsed['key'] ?? 'invalid-token',
                     'code'    => StatusCodeInterface::STATUS_UNAUTHORIZED,
                 ]
             );

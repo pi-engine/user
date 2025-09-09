@@ -8,7 +8,8 @@ use AllowDynamicProperties;
 use Laminas\Validator\AbstractValidator;
 use Pi\User\Service\RoleService;
 
-#[AllowDynamicProperties] class RoleNameValidator extends AbstractValidator
+#[AllowDynamicProperties]
+class RoleNameValidator extends AbstractValidator
 {
     /** @var string */
     const string INVALID = 'nameInvalid';

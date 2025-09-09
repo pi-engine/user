@@ -351,8 +351,8 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set company data and Get company details if company module loaded
-        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
-        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
+        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
+        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
@@ -1213,8 +1213,8 @@ class AccountService implements ServiceInterface
         $user = $this->cacheService->getUser($account['id']);
 
         // Set company data and Get company details if company module loaded
-        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
-        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
+        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
+        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
@@ -1413,8 +1413,8 @@ class AccountService implements ServiceInterface
         $account['roles_full'] = $this->roleService->canonizeAccountRole($account['roles']);
 
         // Set company data and Get company details if company module loaded
-        $account['company_id']       = $user['authorization']['company_id'] ?? 0;
-        $account['company_title']    = $user['authorization']['company']['title'] ?? '';
+        $account['company_id']    = $user['authorization']['company_id'] ?? 0;
+        $account['company_title'] = $user['authorization']['company']['title'] ?? '';
         if ($this->hasCompanyService()) {
             $company = $this->companyService->getCompanyDetails((int)$account['id']);
             if (!empty($company)) {
