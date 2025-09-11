@@ -245,7 +245,7 @@ return [
                                             SecurityMiddleware::class,
                                             Middleware\AuthenticationMiddleware::class,
                                             Middleware\AuthorizationMiddleware::class,
-                                            Middleware\RoleAddMiddleware::class,
+                                            Middleware\AvatarUploadMiddleware::class,
                                             LoggerRequestResponseMiddleware::class,
                                             ErrorMiddleware::class,
                                             Handler\Api\Avatar\UploadHandler::class
