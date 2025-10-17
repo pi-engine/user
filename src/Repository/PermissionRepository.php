@@ -229,13 +229,30 @@ class PermissionRepository implements PermissionRepositoryInterface
     }
 
     /**
-     * @param string $roleKey
+     * @param array $params
      */
-    public function deletePermissionResource(string $roleKey): void
+    public function deletePermissionResource(array $params = []): void
     {
-        // TODO: Implement deletePermissionResource() method.
+        // Delete from role table
+        $delete = new Delete($this->tablePermissionResource);
+        $delete->where($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
     }
 
+    /**
+     * @param array $params
+     *
+     * @return int
+     */
     public function getPermissionResourceCount($params = []): int
     {
         // Set columns
@@ -613,9 +630,26 @@ class PermissionRepository implements PermissionRepositoryInterface
      */
     public function deletePermissionPage(array $params = []): void
     {
-        // TODO: Implement deletePermissionPage() method.
+        // Delete from role table
+        $delete = new Delete($this->tablePermissionPage);
+        $delete->where($params);
+
+        $sql       = new Sql($this->db);
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $result    = $statement->execute();
+
+        if (!$result instanceof ResultInterface) {
+            throw new RuntimeException(
+                'Database error occurred during update operation'
+            );
+        }
     }
 
+    /**
+     * @param array $params
+     *
+     * @return int
+     */
     public function getPermissionPageCount($params = []): int
     {
         // Set columns

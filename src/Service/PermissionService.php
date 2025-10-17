@@ -206,6 +206,17 @@ class PermissionService implements ServiceInterface
         return $result;
     }
 
+    /**
+     * @param $params
+     *
+     * @return void
+     */
+    public function cleanInstallerList($params): void
+    {
+        $this->permissionRepository->deletePermissionPage(['module' => $params['module']]);
+        $this->permissionRepository->deletePermissionResource(['module' => $params['module']]);
+        $this->permissionRepository->deletePermissionRole(['module' => $params['module']]);
+    }
 
     /**
      * For admin aria

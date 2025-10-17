@@ -19,7 +19,7 @@ interface PermissionRepositoryInterface
 
     public function updatePermissionResource(string $resourceKey, array $params = []): void;
 
-    public function deletePermissionResource(string $roleKey): void;
+    public function deletePermissionResource(array $params = []): void;
 
     public function getPermissionResourceCount($params = []): int;
 
