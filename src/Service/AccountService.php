@@ -374,6 +374,7 @@ class AccountService implements ServiceInterface
             [
                 'account' => $account,
                 'type'    => 'access',
+                'scope' => 'public',
             ],
             [
                 'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
@@ -387,6 +388,7 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'refresh',
                 'id'      => $accessToken['id'],
+                'scope' => 'public',
             ],
             [
                 'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
@@ -1936,6 +1938,7 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'access',
                 'id'      => $tokenId,
+                'scope' => 'public',
             ],
             [
                 'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',

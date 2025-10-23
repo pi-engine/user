@@ -33,8 +33,8 @@ return [
             'http://service-a.local',
             'http://service-b.local',
         ],
-        'public_check_ip'    => 0,
-        'public_allowed_ips' => [
+        'check_ip'    => 0,
+        'allowed_ips' => [
             '203.0.113.5',  // Example static IP
             '198.51.100.0/24', // Example subnet (all IPs in 198.51.100.0 - 198.51.100.255)
             '10.0.0.1',      // Private network IP (e.g., internal microservice)

@@ -76,6 +76,9 @@ return [
             Handler\Admin\Cache\DeleteHandler::class                 => Factory\Handler\Admin\Cache\DeleteHandlerFactory::class,
             Handler\Admin\Online\ListHandler::class                  => Factory\Handler\Admin\Online\ListHandlerFactory::class,
             Handler\Admin\Online\DeleteHandler::class                => Factory\Handler\Admin\Online\DeleteHandlerFactory::class,
+            Handler\Admin\Token\AddHandler::class                    => Factory\Handler\Admin\Token\AddHandlerFactory::class,
+            Handler\Admin\Token\DeleteHandler::class                 => Factory\Handler\Admin\Token\DeleteHandlerFactory::class,
+            Handler\Admin\Token\ListHandler::class                   => Factory\Handler\Admin\Token\ListHandlerFactory::class,
             Handler\Api\Profile\ViewHandler::class                   => Factory\Handler\Api\Profile\ViewHandlerFactory::class,
             Handler\Api\Profile\UpdateHandler::class                 => Factory\Handler\Api\Profile\UpdateHandlerFactory::class,
             Handler\Api\Profile\DeviceTokenHandler::class            => Factory\Handler\Api\Profile\DeviceTokenHandlerFactory::class,
@@ -1563,6 +1566,85 @@ return [
                                             LoggerRequestResponseMiddleware::class,
                                             ErrorMiddleware::class,
                                             Handler\Admin\Online\DeleteHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    // Admin token section
+                    'token'      => [
+                        'type'         => Literal::class,
+                        'options'      => [
+                            'route'    => '/token',
+                            'defaults' => [],
+                        ],
+                        'child_routes' => [
+                            'list'   => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/list',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'token',
+                                        'handler'     => 'list',
+                                        'permissions' => 'user-token-list',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            RequestPreparationMiddleware::class,
+                                            SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
+                                            ErrorMiddleware::class,
+                                            Handler\Admin\Token\ListHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'add'    => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/add',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'token',
+                                        'handler'     => 'add',
+                                        'permissions' => 'user-token-add',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            RequestPreparationMiddleware::class,
+                                            SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
+                                            ErrorMiddleware::class,
+                                            Handler\Admin\Token\AddHandler::class
+                                        ),
+                                    ],
+                                ],
+                            ],
+                            'delete' => [
+                                'type'    => Literal::class,
+                                'options' => [
+                                    'route'    => '/delete',
+                                    'defaults' => [
+                                        'module'      => 'user',
+                                        'section'     => 'admin',
+                                        'package'     => 'token',
+                                        'handler'     => 'delete',
+                                        'permissions' => 'user-token-delete',
+                                        'controller'  => PipeSpec::class,
+                                        'middleware'  => new PipeSpec(
+                                            RequestPreparationMiddleware::class,
+                                            SecurityMiddleware::class,
+                                            Middleware\AuthenticationMiddleware::class,
+                                            Middleware\AuthorizationMiddleware::class,
+                                            LoggerRequestResponseMiddleware::class,
+                                            ErrorMiddleware::class,
+                                            Handler\Admin\Token\DeleteHandler::class
                                         ),
                                     ],
                                 ],

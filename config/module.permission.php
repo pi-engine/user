@@ -335,6 +335,36 @@ return [
                 'admin',
             ],
         ],
+        [
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'token',
+            'handler'     => 'list',
+            'permissions' => 'user-token-list',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'token',
+            'handler'     => 'add',
+            'permissions' => 'user-token-add',
+            'role'        => [
+                'admin',
+            ],
+        ],
+        [
+            'module'      => 'user',
+            'section'     => 'admin',
+            'package'     => 'token',
+            'handler'     => 'delete',
+            'permissions' => 'user-token-delete',
+            'role'        => [
+                'admin',
+            ],
+        ],
     ],
     'api'   => [
         [

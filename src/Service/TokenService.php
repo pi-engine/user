@@ -65,15 +65,16 @@ class TokenService implements ServiceInterface
 
         // Build the payload
         $payload = [
-            'id'   => $tokenId,
-            'uid'  => $params['account']['id'],
-            'iat'  => time(),
-            'exp'  => $params['exp'] ?? time() + $ttl,
-            'type' => $params['type'],
-            'iss'  => $this->config['iss'] ?? '',
-            'aud'  => $options['client_url'] ?? $this->config['aud'] ?? '',
-            'sub'  => sprintf('user-%s', $params['account']['id']),
-            'ip'   => $options['client_ip'],
+            'id'    => $tokenId,
+            'uid'   => $params['account']['id'],
+            'iat'   => time(),
+            'exp'   => $params['exp'] ?? time() + $ttl,
+            'type'  => $params['type'],
+            'iss'   => $this->config['iss'] ?? '',
+            'aud'   => $options['client_url'] ?? $this->config['aud'] ?? '',
+            'sub'   => sprintf('user-%s', $params['account']['id']),
+            'ip'    => $options['client_ip'],
+            'scope' => $params['scope'] ?? 'public',
         ];
 
         // Add additional payload fields if configured
@@ -83,14 +84,9 @@ class TokenService implements ServiceInterface
             }
         }
 
-        // Add additional user IP
-        //if (isset($this->config['public_check_ip']) && !empty($this->config['public_check_ip']) && $params['type'] == 'access') {
-        //    $payload['ip'] = $options['client_ip'];
-        //}
-
         // Generate and return the token
         return [
-            'token'   => JWT::encode($payload, $this->setEncryptKey($options), $this->setAlgorithm()),
+            'token'   => JWT::encode($payload, $this->setEncryptKey($params['scope']), $this->setAlgorithm()),
             'id'      => $tokenId,
             'payload' => $payload,
             'ttl'     => $ttl,
@@ -111,6 +107,7 @@ class TokenService implements ServiceInterface
                 empty($decodedToken)
                 || !is_int($decodedToken->uid ?? null)
                 || !in_array($decodedToken->type ?? '', ['access', 'refresh'], true)
+                || !in_array($decodedToken->scope ?? '', ['public', 'internal'], true)
                 || !is_string($decodedToken->id ?? null)
             ) {
                 return [
@@ -148,7 +145,7 @@ class TokenService implements ServiceInterface
             }
 
             // Validate the 'aud' (Audience) claims
-            if ($decodedToken->aud !== $options['client_url'] ?? $this->config['aud']) {
+            if ($decodedToken->scope === 'internal' && $decodedToken->aud !== $options['client_url']) {
                 return [
                     'status'  => false,
                     'message' => 'Invalid audience',
@@ -158,8 +155,8 @@ class TokenService implements ServiceInterface
 
             // Check if the IP is valid or in the allowed list
             if (
-                isset($this->config['public_check_ip'])
-                && !empty($this->config['public_check_ip'])
+                isset($this->config['check_ip'])
+                && !empty($this->config['check_ip'])
                 && isset($decodedToken->ip)
                 && !empty($decodedToken->ip)
                 && $decodedToken->type == 'access'
@@ -167,7 +164,7 @@ class TokenService implements ServiceInterface
                 // Check user ip
                 if (
                     $decodedToken->ip !== $options['client_ip']
-                    && !$this->utilityService->isIpAllowed($options['client_ip'], $this->config['public_allowed_ips'])
+                    && !$this->utilityService->isIpAllowed($options['client_ip'], $this->config['allowed_ips'])
                 ) {
                     return [
                         'status'  => false,
@@ -258,10 +255,10 @@ class TokenService implements ServiceInterface
         return 'RS256';
     }
 
-    private function setEncryptKey(array $options): string
+    private function setEncryptKey($scope): string
     {
         // If internal request, use internal key
-        if ($this->isInternalRequest($options)) {
+        if ($scope === 'internal') {
             return $this->getKey('internal_private_key');
         }
 
