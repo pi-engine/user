@@ -76,7 +76,6 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $refreshToken   = $request->getHeaderLine('refresh-token');
         $token          = $request->getHeaderLine('token');
         $authorization  = $request->getHeaderLine('Authorization');
-        $clientIp       = $this->utilityService->getClientIp();
 
         // get route match
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
@@ -113,7 +112,13 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // parse token
-        $tokenParsed = $this->tokenService->decryptToken($token);
+        $tokenParsed = $this->tokenService->decryptToken(
+            $token,
+            [
+                'client_ip'  => $securityStream['ip']['data']['client_ip'],
+                'client_url' => $securityStream['url']['data']['client_url'],
+            ]
+        );
 
         // Check parsed token
         if (!$tokenParsed['status'] || $tokenParsed['type'] !== $type) {
@@ -199,7 +204,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         // Update user online list
-        $this->accountService->updateUserOnline($user['account']['id'], $tokenParsed['id'], $clientIp);
+        $this->accountService->updateUserOnline($user['account']['id'], $tokenParsed['id'], $securityStream['ip']['data']['client_ip']);
 
         // Set attribute
         return $handler->handle(

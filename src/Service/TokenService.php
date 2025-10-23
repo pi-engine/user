@@ -35,14 +35,24 @@ class TokenService implements ServiceInterface
         $this->config         = $config;
 
         // Validate config keys
-        if (empty($this->config['private_key']) || empty($this->config['public_key'])) {
+        if (empty($this->config['private_key'])
+            || empty($this->config['public_key'])
+            || empty($this->config['local_public_key'])
+            || empty($this->config['local_private_key'])
+        ) {
             throw new RuntimeException('JWT private key and public key paths must be provided in config.');
         }
 
         // If either key is missing, regenerate both
         if (!file_exists($this->config['private_key']) || !file_exists($this->config['public_key'])) {
             //throw new RuntimeException('JWT private key and public key files not exist.');
-            $this->createKeys();
+            $this->createKeys($this->config['private_key'], $this->config['public_key']);
+        }
+
+        // If either key is missing, regenerate both
+        if (!file_exists($this->config['local_private_key']) || !file_exists($this->config['local_public_key'])) {
+            //throw new RuntimeException('JWT private key and public key files not exist.');
+            $this->createKeys($this->config['local_private_key'], $this->config['local_public_key']);
         }
     }
 
@@ -75,7 +85,7 @@ class TokenService implements ServiceInterface
         }
 
         // Add additional user IP
-        if (isset($this->config['check_ip']) && !empty($this->config['check_ip']) && $params['type'] == 'access') {
+        if (isset($this->config['public_check_ip']) && !empty($this->config['public_check_ip']) && $params['type'] == 'access') {
             $payload['ip'] = $this->utilityService->getClientIp();
         }
 
@@ -88,7 +98,7 @@ class TokenService implements ServiceInterface
         ];
     }
 
-    public function decryptToken($token): array
+    public function decryptToken($token, array $options = []): array
     {
         try {
             // Decode the token
@@ -140,19 +150,16 @@ class TokenService implements ServiceInterface
 
             // Check if the IP is valid or in the allowed list
             if (
-                isset($this->config['check_ip'])
-                && !empty($this->config['check_ip'])
+                isset($this->config['public_check_ip'])
+                && !empty($this->config['public_check_ip'])
                 && isset($decodedToken->ip)
                 && !empty($decodedToken->ip)
                 && $decodedToken->type == 'access'
             ) {
-                // Get current user IP
-                $currentIp = $this->utilityService->getClientIp();
-
                 // Check user ip
                 if (
-                    $decodedToken->ip !== $currentIp
-                    && !$this->utilityService->isIpAllowed($currentIp, $this->config['allowed_ips'])
+                    $decodedToken->ip !== $options['c']
+                    && !$this->utilityService->isIpAllowed($currentIp, $this->config['public_allowed_ips'])
                 ) {
                     return [
                         'status'  => false,
@@ -258,7 +265,29 @@ class TokenService implements ServiceInterface
         return file_get_contents($this->config[$keyType]);
     }
 
-    private function createKeys(): void
+    private function isLocalRequest(?ServerRequestInterface $request = null): bool
+    {
+        // Get current IP
+        $currentIp = $this->utilityService->getClientIp();
+
+        // 1️⃣ Check if IP is in the allowed local/internal list
+        $localAllowedIps = $this->config['jwt']['local_allowed_ips'] ?? [];
+        if (!empty($localAllowedIps) && $this->utilityService->isIpAllowed($currentIp, $localAllowedIps)) {
+            return true;
+        }
+
+        // 2️⃣ Check if request URL is in allowed local URLs
+        $allowedUrls = $this->config['jwt']['local_allowed_urls'] ?? [];
+        if (!empty($allowedUrls) && $this->utilityService->isUrlAllowed($request, $allowedUrls)) {
+            return true;
+        }
+
+        // Not local
+        return false;
+    }
+
+
+    private function createKeys($privateKeyPath, $publicKeyPath): void
     {
         try {
             // Generate a 4096-bit RSA private key
@@ -266,12 +295,12 @@ class TokenService implements ServiceInterface
             $publicKey  = $privateKey->getPublicKey();
 
             // Save PEM-formatted keys
-            if (!file_put_contents($this->config['private_key'], $privateKey->toString('PKCS8'))) {
-                throw new RuntimeException("Failed to save private key to {$this->config['private_key']}");
+            if (!file_put_contents($privateKeyPath, $privateKey->toString('PKCS8'))) {
+                throw new RuntimeException("Failed to save private key to {$privateKeyPath}");
             }
 
-            if (!file_put_contents($this->config['public_key'], $publicKey->toString('PKCS8'))) {
-                throw new RuntimeException("Failed to save public key to {$this->config['public_key']}");
+            if (!file_put_contents($publicKeyPath, $publicKey->toString('PKCS8'))) {
+                throw new RuntimeException("Failed to save public key to {$publicKeyPath}");
             }
         } catch (Throwable $e) {
             // Log the error
