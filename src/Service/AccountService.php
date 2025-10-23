@@ -366,6 +366,10 @@ class AccountService implements ServiceInterface
             [
                 'account' => $account,
                 'type'    => 'access',
+            ],
+            [
+                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'],
+                'client_url' => $params['security_stream']['url']['data']['client_url'],
             ]
         );
 
@@ -375,6 +379,10 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'refresh',
                 'id'      => $accessToken['id'],
+            ],
+            [
+                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'],
+                'client_url' => $params['security_stream']['url']['data']['client_url'],
             ]
         );
 
@@ -394,7 +402,7 @@ class AccountService implements ServiceInterface
         // Set extra info
         $account['last_login']          = time();
         $account['last_login_view']     = $this->utilityService->date($account['last_login']);
-        $account['access_ip']           = $this->utilityService->getClientIp();
+        $account['access_ip']           = $params['security_stream']['ip']['data']['client_ip'];
         $account['has_password']        = $this->hasPassword($account['id']);
         $account['multi_factor_global'] = $multiFactorGlobal;
         $account['multi_factor_status'] = $multiFactorStatus;

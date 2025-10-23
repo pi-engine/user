@@ -37,29 +37,27 @@ class TokenService implements ServiceInterface
         // Validate config keys
         if (empty($this->config['private_key'])
             || empty($this->config['public_key'])
-            || empty($this->config['local_public_key'])
-            || empty($this->config['local_private_key'])
+            || empty($this->config['internal_public_key'])
+            || empty($this->config['internal_private_key'])
         ) {
             throw new RuntimeException('JWT private key and public key paths must be provided in config.');
         }
 
         // If either key is missing, regenerate both
         if (!file_exists($this->config['private_key']) || !file_exists($this->config['public_key'])) {
-            //throw new RuntimeException('JWT private key and public key files not exist.');
             $this->createKeys($this->config['private_key'], $this->config['public_key']);
         }
 
         // If either key is missing, regenerate both
-        if (!file_exists($this->config['local_private_key']) || !file_exists($this->config['local_public_key'])) {
-            //throw new RuntimeException('JWT private key and public key files not exist.');
-            $this->createKeys($this->config['local_private_key'], $this->config['local_public_key']);
+        if (!file_exists($this->config['internal_private_key']) || !file_exists($this->config['internal_public_key'])) {
+            $this->createKeys($this->config['internal_private_key'], $this->config['internal_public_key']);
         }
     }
 
     /**
      * @throws RandomException
      */
-    public function encryptToken($params): array
+    public function encryptToken($params, array $options = []): array
     {
         // Generate a unique ID
         $tokenId = $params['id'] ?? $this->setTokenKey($params);
@@ -73,8 +71,9 @@ class TokenService implements ServiceInterface
             'exp'  => $params['exp'] ?? time() + $ttl,
             'type' => $params['type'],
             'iss'  => $this->config['iss'] ?? '',
-            'aud'  => $this->config['aud'] ?? '',
+            'aud'  => $options['client_url'] ?? $this->config['aud'] ?? '',
             'sub'  => sprintf('user-%s', $params['account']['id']),
+            'ip'   => $options['client_ip'],
         ];
 
         // Add additional payload fields if configured
@@ -85,13 +84,13 @@ class TokenService implements ServiceInterface
         }
 
         // Add additional user IP
-        if (isset($this->config['public_check_ip']) && !empty($this->config['public_check_ip']) && $params['type'] == 'access') {
-            $payload['ip'] = $this->utilityService->getClientIp();
-        }
+        //if (isset($this->config['public_check_ip']) && !empty($this->config['public_check_ip']) && $params['type'] == 'access') {
+        //    $payload['ip'] = $options['client_ip'];
+        //}
 
         // Generate and return the token
         return [
-            'token'   => JWT::encode($payload, $this->setEncryptKey(), $this->setAlgorithm()),
+            'token'   => JWT::encode($payload, $this->setEncryptKey($options), $this->setAlgorithm()),
             'id'      => $tokenId,
             'payload' => $payload,
             'ttl'     => $ttl,
@@ -104,7 +103,7 @@ class TokenService implements ServiceInterface
             // Decode the token
             $decodedToken = JWT::decode(
                 $token,
-                new Key($this->setDecryptKey(), $this->setAlgorithm())
+                new Key($this->setDecryptKey($options), $this->setAlgorithm())
             );
 
             // Validate token structure
@@ -139,12 +138,21 @@ class TokenService implements ServiceInterface
                 ];
             }
 
-            // Validate the 'iss' (Issuer) and 'aud' (Audience) claims
-            if ($decodedToken->iss !== $this->config['iss'] || $decodedToken->aud !== $this->config['aud']) {
+            // Validate the 'iss' (Issuer)
+            if ($decodedToken->iss !== $this->config['iss']) {
                 return [
                     'status'  => false,
-                    'message' => 'Invalid issuer or audience',
-                    'key'     => 'invalid-issuer-or-audience',
+                    'message' => 'Invalid issuer',
+                    'key'     => 'invalid-issuer',
+                ];
+            }
+
+            // Validate the 'aud' (Audience) claims
+            if ($decodedToken->aud !== $options['client_url'] ?? $this->config['aud']) {
+                return [
+                    'status'  => false,
+                    'message' => 'Invalid audience',
+                    'key'     => 'invalid-audience',
                 ];
             }
 
@@ -158,8 +166,8 @@ class TokenService implements ServiceInterface
             ) {
                 // Check user ip
                 if (
-                    $decodedToken->ip !== $options['c']
-                    && !$this->utilityService->isIpAllowed($currentIp, $this->config['public_allowed_ips'])
+                    $decodedToken->ip !== $options['client_ip']
+                    && !$this->utilityService->isIpAllowed($options['client_ip'], $this->config['public_allowed_ips'])
                 ) {
                     return [
                         'status'  => false,
@@ -171,7 +179,7 @@ class TokenService implements ServiceInterface
 
             // Validate IP
             if (isset($decodedToken->ip) && !empty($decodedToken->ip) && $decodedToken->type == 'access') {
-                if ($decodedToken->ip !== $this->utilityService->getClientIp()) {
+                if ($decodedToken->ip !== $options['client_ip']) {
                     return [
                         'status'  => false,
                         'message' => 'Invalid IP address',
@@ -250,13 +258,25 @@ class TokenService implements ServiceInterface
         return 'RS256';
     }
 
-    private function setEncryptKey(): string
+    private function setEncryptKey(array $options): string
     {
+        // If internal request, use internal key
+        if ($this->isInternalRequest($options)) {
+            return $this->getKey('internal_private_key');
+        }
+
+        // Otherwise, use standard private key
         return $this->getKey('private_key');
     }
 
-    private function setDecryptKey(): string
+    private function setDecryptKey(array $options): string
     {
+        // If internal request, use internal key
+        if ($this->isInternalRequest($options)) {
+            return $this->getKey('internal_public_key');
+        }
+
+        // Otherwise, use public key
         return $this->getKey('public_key');
     }
 
@@ -265,27 +285,22 @@ class TokenService implements ServiceInterface
         return file_get_contents($this->config[$keyType]);
     }
 
-    private function isLocalRequest(?ServerRequestInterface $request = null): bool
+    private function isInternalRequest($options): bool
     {
-        // Get current IP
-        $currentIp = $this->utilityService->getClientIp();
-
-        // 1️⃣ Check if IP is in the allowed local/internal list
-        $localAllowedIps = $this->config['jwt']['local_allowed_ips'] ?? [];
-        if (!empty($localAllowedIps) && $this->utilityService->isIpAllowed($currentIp, $localAllowedIps)) {
+        // Check if IP is in the allowed internal list
+        $internalAllowedIps = $this->config['internal_allowed_ips'] ?? [];
+        if (!empty($internalAllowedIps) && $this->utilityService->isIpAllowed($options['client_ip'], $internalAllowedIps)) {
             return true;
         }
 
-        // 2️⃣ Check if request URL is in allowed local URLs
-        $allowedUrls = $this->config['jwt']['local_allowed_urls'] ?? [];
-        if (!empty($allowedUrls) && $this->utilityService->isUrlAllowed($request, $allowedUrls)) {
+        // Check if request URL is in allowed internal URLs
+        $allowedUrls = $this->config['internal_allowed_urls'] ?? [];
+        if (!empty($allowedUrls) && $this->utilityService->isUrlAllowed($options['client_url'], $allowedUrls)) {
             return true;
         }
 
-        // Not local
         return false;
     }
-
 
     private function createKeys($privateKeyPath, $publicKeyPath): void
     {

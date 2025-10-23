@@ -18,17 +18,17 @@ return [
         'exp_refresh' => 7776000, // 90 days
         'public_key'  => $basePath . '/data/keys/public_key.pem',
         'private_key' => $basePath . '/data/keys/private_key.pem',
-        'local_public_key'   => $basePath . '/data/keys/local_public_key.pem',
-        'local_private_key'  => $basePath . '/data/keys/local_private_key.pem'
+        'internal_public_key'   => $basePath . '/data/keys/internal_public_key.pem',
+        'internal_private_key'  => $basePath . '/data/keys/internal_private_key.pem'
         'iss'         => $baseUrl,
         'aud'         => $baseUrl,
-        'local_allowed_ips'  => [
+        'internal_allowed_ips'  => [
             '127.0.0.1',       // localhost
             '10.0.0.1',        // internal microservice
             '10.0.0.2',        // another internal microservice
             '172.20.0.0/16',   // internal Docker network
         ],
-        'local_allowed_urls' => [
+        'internal_allowed_urls' => [
             'http://core-service.local',
             'http://service-a.local',
             'http://service-b.local',

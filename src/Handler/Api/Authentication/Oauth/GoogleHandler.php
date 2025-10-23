@@ -60,7 +60,7 @@ class GoogleHandler implements RequestHandlerInterface
         $userData    = $authService->verifyToken($params);
 
         // Do log in
-        $result = $this->accountService->loginOauth($userData);
+        $result = $this->accountService->loginOauth(array_merge($userData, ['security_stream' => $securityStream]));
 
         return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
     }
