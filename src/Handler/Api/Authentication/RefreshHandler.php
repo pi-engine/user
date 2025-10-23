@@ -46,10 +46,11 @@ class RefreshHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $account   = $request->getAttribute('account');
-        $roles     = $request->getAttribute('roles');
-        $tokenId   = $request->getAttribute('token_id');
-        $tokenData = $request->getAttribute('token_data');
+        $account        = $request->getAttribute('account');
+        $roles          = $request->getAttribute('roles');
+        $tokenId        = $request->getAttribute('token_id');
+        $tokenData      = $request->getAttribute('token_data');
+        $securityStream = $request->getAttribute('security_stream');
 
         // Set account
         $account = array_merge(
@@ -62,7 +63,7 @@ class RefreshHandler implements RequestHandlerInterface
         );
 
         // Do refresh
-        $result = $this->accountService->refreshToken($account, $tokenId);
+        $result = $this->accountService->refreshToken($account, $tokenId, ['security_stream' => $securityStream]);
 
         // Set result
         return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);

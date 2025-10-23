@@ -274,6 +274,7 @@ class AccountService implements ServiceInterface
      * @param       $params
      *
      * @return array
+     * @throws RandomException
      */
     public function loginOauth2($params): array
     {
@@ -314,8 +315,15 @@ class AccountService implements ServiceInterface
      */
     public function postLoginSuccess($account, $params): array
     {
+        // Set account lock params
+        $lockParams = [
+            'type'            => 'id',
+            'user_id'         => (int)$account['id'],
+            'security_stream' => $params['security_stream'],
+        ];
+
         // Check account is lock or not
-        if ($this->accountLocked->isLocked(['type' => 'id', 'user_id' => (int)$account['id'], 'security_stream' => $params['security_stream']])) {
+        if ($this->accountLocked->isLocked($lockParams)) {
             return [
                 'result' => false,
                 'data'   => [],
@@ -368,8 +376,8 @@ class AccountService implements ServiceInterface
                 'type'    => 'access',
             ],
             [
-                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'],
-                'client_url' => $params['security_stream']['url']['data']['client_url'],
+                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
+                'client_url' => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
         );
 
@@ -381,8 +389,8 @@ class AccountService implements ServiceInterface
                 'id'      => $accessToken['id'],
             ],
             [
-                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'],
-                'client_url' => $params['security_stream']['url']['data']['client_url'],
+                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
+                'client_url' => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
         );
 
@@ -1912,11 +1920,12 @@ class AccountService implements ServiceInterface
     /**
      * @param $account
      * @param $tokenId
+     * @param $params
      *
      * @return array
      * @throws RandomException
      */
-    public function refreshToken($account, $tokenId): array
+    public function refreshToken($account, $tokenId, $params): array
     {
         // Get user
         $user = $this->cacheService->getUser($account['id']);
@@ -1927,6 +1936,10 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'access',
                 'id'      => $tokenId,
+            ],
+            [
+                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
+                'client_url' => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
         );
 
