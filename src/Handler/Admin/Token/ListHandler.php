@@ -35,7 +35,7 @@ class ListHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $list = $this->tokenService->getInternalList();
+        $list = $this->tokenService->getCustomTokenList();
 
         return new EscapingJsonResponse(
             [

@@ -41,7 +41,7 @@ class AddHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
         $operator    = $request->getAttribute('account');
-        $result      = $this->tokenService->addInternalToken($requestBody, $operator);
+        $result      = $this->tokenService->addCustomToken($requestBody, $operator);
 
         return new EscapingJsonResponse($result);
     }

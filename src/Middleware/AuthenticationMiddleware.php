@@ -115,8 +115,9 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $tokenParsed = $this->tokenService->decryptToken(
             $token,
             [
-                'ip'  => $securityStream['ip']['data']['client_ip'],
-                'aud' => $securityStream['url']['data']['client_url'],
+                'ip'     => $securityStream['ip']['data']['client_ip'],
+                'aud'    => $securityStream['url']['data']['client_url'],
+                'origin' => $securityStream['origin']['data']['origin'],
             ]
         );
 

@@ -9,7 +9,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use phpseclib3\Crypt\RSA;
 use Pi\Core\Service\CacheService;
-use Pi\Core\Service\Utility\Ip;
+use Pi\Core\Service\Utility\Ip as IpUtility;
+use Pi\Core\Service\Utility\Url as UrlUtility;
 use Pi\Core\Service\UtilityService;
 use Random\RandomException;
 use RuntimeException;
@@ -60,7 +61,7 @@ class TokenService implements ServiceInterface
     /**
      * @throws RandomException
      */
-    public function addInternalToken($params, $operator): array
+    public function addCustomToken($params, $operator): array
     {
         // Get a user fron redis cache
         $user = $this->cacheService->getUser((int)$params['user_id']);
@@ -80,7 +81,7 @@ class TokenService implements ServiceInterface
             [
                 'account' => array_merge($user['account'], ['roles' => $user['roles']]),
                 'type'    => 'access',
-                'scope'   => 'internal',
+                'origin'  => 'internal',
                 'ip'      => $params['ip'],
                 'aud'     => $params['aud'],
                 'ttl'     => $params['ttl'],
@@ -93,7 +94,7 @@ class TokenService implements ServiceInterface
             'id'     => $token['id'],
             'create' => $token['payload']['iat'],
             'expire' => $token['payload']['exp'],
-            'scope'  => $token['payload']['scope'] ?? 'internal',
+            'origin' => $token['payload']['origin'] ?? 'internal',
         ];
 
         // Update user cache
@@ -110,12 +111,12 @@ class TokenService implements ServiceInterface
         ];
     }
 
-    public function deleteInternalToken($params, $operator): array
+    public function deleteCustomToken($params, $operator): array
     {
         return [];
     }
 
-    public function getInternalList(): array
+    public function getCustomTokenList(): array
     {
         return $this->cacheService->getItem($this->internalKey);
     }
@@ -131,17 +132,17 @@ class TokenService implements ServiceInterface
 
         // Build the payload
         $payload = [
-            'id'    => $tokenId,
-            'uid'   => $params['account']['id'],
-            'iat'   => time(),
-            'exp'   => time() + $ttl,
-            'type'  => $params['type'],
-            'iss'   => $this->config['iss'] ?? '',
-            'aud'   => $params['aud'] ?? $this->config['aud'] ?? '',
-            'sub'   => sprintf('user-%s', $params['account']['id']),
-            'ip'    => $params['ip'],
-            'scope' => $params['scope'] ?? 'public',
-            'desc'  => $params['desc'] ?? '',
+            'id'     => $tokenId,
+            'uid'    => $params['account']['id'],
+            'iat'    => time(),
+            'exp'    => time() + $ttl,
+            'type'   => $params['type'],
+            'iss'    => $this->config['iss'] ?? '',
+            'aud'    => $params['aud'] ?? $this->config['aud'] ?? '',
+            'sub'    => sprintf('user-%s', $params['account']['id']),
+            'ip'     => $params['ip'],
+            'origin' => $params['origin'] ?? 'public',
+            'desc'   => $params['desc'] ?? '',
         ];
 
         // Add additional payload fields if configured
@@ -153,7 +154,7 @@ class TokenService implements ServiceInterface
 
         // Generate and return the token
         return [
-            'token'   => JWT::encode($payload, $this->setEncryptKey($params['scope']), $this->setAlgorithm()),
+            'token'   => JWT::encode($payload, $this->setEncryptKey($params['origin']), $this->setAlgorithm()),
             'id'      => $tokenId,
             'payload' => $payload,
             'ttl'     => $ttl,
@@ -166,7 +167,7 @@ class TokenService implements ServiceInterface
             // Decode the token
             $decodedToken = JWT::decode(
                 $token,
-                new Key($this->setDecryptKey($params), $this->setAlgorithm())
+                new Key($this->setDecryptKey($params['origin']), $this->setAlgorithm())
             );
 
             // Validate token structure
@@ -174,7 +175,7 @@ class TokenService implements ServiceInterface
                 empty($decodedToken)
                 || !is_int($decodedToken->uid ?? null)
                 || !in_array($decodedToken->type ?? '', ['access', 'refresh'], true)
-                || !in_array($decodedToken->scope ?? '', ['public', 'internal'], true)
+                || !in_array($decodedToken->origin ?? '', ['public', 'internal', 'local'], true)
                 || !is_string($decodedToken->id ?? null)
             ) {
                 return [
@@ -212,7 +213,8 @@ class TokenService implements ServiceInterface
             }
 
             // Validate the 'aud' (Audience) claims
-            if (/*$decodedToken->scope === 'internal' && */!$this->utilityService->isUrlAllowed($params['aud'], (array)$decodedToken->aud)) {
+            $url = new UrlUtility();
+            if (!$url->isUrlAllowed($params['aud'], (array)$decodedToken->aud)) {
                 return [
                     'status'  => false,
                     'message' => 'Invalid audience',
@@ -228,13 +230,9 @@ class TokenService implements ServiceInterface
                 && !empty($decodedToken->ip)
                 && $decodedToken->type == 'access'
             ) {
-                $ip = new Ip();
-
                 // Check user ip
-                if (
-                    !$ip->areIpsEqual($decodedToken->ip, $params['ip'])
-                    || !$ip->isIpAllowed($params['ip'], $this->config['allowed_ips'])
-                ) {
+                $ip = new IpUtility($this->config['ip']);
+                if (!$ip->areIpsEqual($decodedToken->ip, $params['ip'])) {
                     return [
                         'status'  => false,
                         'message' => 'Invalid IP address',
@@ -305,7 +303,7 @@ class TokenService implements ServiceInterface
     private function setTtl(array $params): int
     {
         if (!empty($params['ttl'])) {
-            return (int) $params['ttl'];
+            return (int)$params['ttl'];
         }
 
         $type = $params['type'] === 'refresh' ? 'exp_refresh' : 'exp_access';
@@ -317,10 +315,10 @@ class TokenService implements ServiceInterface
         return 'RS256';
     }
 
-    private function setEncryptKey($scope): string
+    private function setEncryptKey($origin): string
     {
-        // If internal request, use internal key
-        if ($scope === 'internal') {
+        // If internal or local request, use internal key
+        if ($origin === 'internal' || $origin === 'local') {
             return $this->getKey('internal_private_key');
         }
 
@@ -328,10 +326,10 @@ class TokenService implements ServiceInterface
         return $this->getKey('private_key');
     }
 
-    private function setDecryptKey(array $params): string
+    private function setDecryptKey($origin): string
     {
-        // If internal request, use internal key
-        if ($this->isInternalRequest($params)) {
+        // If internal or local request, use internal key
+        if ($origin === 'internal' || $origin === 'local') {
             return $this->getKey('internal_public_key');
         }
 
@@ -342,23 +340,6 @@ class TokenService implements ServiceInterface
     private function getKey(string $keyType): string
     {
         return file_get_contents($this->config[$keyType]);
-    }
-
-    private function isInternalRequest($params): bool
-    {
-        // Check if IP is in the allowed internal list
-        $internalAllowedIps = $this->config['internal_allowed_ips'] ?? [];
-        if (!empty($internalAllowedIps) && $this->utilityService->isIpAllowed($params['ip'], $internalAllowedIps)) {
-            return true;
-        }
-
-        // Check if request URL is in allowed internal URLs
-        $allowedUrls = $this->config['internal_allowed_urls'] ?? [];
-        if (!empty($allowedUrls) && $this->utilityService->isUrlAllowed($params['aud'], $allowedUrls)) {
-            return true;
-        }
-
-        return false;
     }
 
     private function createKeys($privateKeyPath, $publicKeyPath): void

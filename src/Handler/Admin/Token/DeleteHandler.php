@@ -37,7 +37,7 @@ class DeleteHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
         $operator    = $request->getAttribute('account');
-        $result      = $this->tokenService->deleteInternalToken($requestBody, $operator);
+        $result      = $this->tokenService->deleteCustomToken($requestBody, $operator);
 
         return new EscapingJsonResponse(
             [

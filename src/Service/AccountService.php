@@ -395,7 +395,7 @@ class AccountService implements ServiceInterface
             [
                 'account' => $account,
                 'type'    => 'access',
-                'scope'   => 'public',
+                'origin'  => $params['security_stream']['origin']['data']['origin'] ?? 'public',
                 'ip'      => $params['security_stream']['ip']['data']['client_ip'] ?? '',
                 'aud'     => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
@@ -407,7 +407,7 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'refresh',
                 'id'      => $accessToken['id'],
-                'scope'   => 'public',
+                'origin'  => $params['security_stream']['origin']['data']['origin'] ?? 'public',
                 'ip'      => $params['security_stream']['ip']['data']['client_ip'] ?? '',
                 'aud'     => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
@@ -430,6 +430,7 @@ class AccountService implements ServiceInterface
         $account['last_login']          = time();
         $account['last_login_view']     = $this->utilityService->date($account['last_login']);
         $account['access_ip']           = $params['security_stream']['ip']['data']['client_ip'];
+        $account['origin']              = $params['security_stream']['origin']['data']['origin'];
         $account['has_password']        = $this->hasPassword($account['id']);
         $account['multi_factor_global'] = $multiFactorGlobal;
         $account['multi_factor_status'] = $multiFactorStatus;
@@ -1958,7 +1959,7 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'access',
                 'id'      => $tokenId,
-                'scope'   => 'public',
+                'origin'  => $params['security_stream']['origin']['data']['origin'] ?? 'public',
                 'ip'      => $params['security_stream']['ip']['data']['client_ip'] ?? '',
                 'aud'     => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
@@ -2506,7 +2507,7 @@ class AccountService implements ServiceInterface
                     'id'     => $newToken['id'],
                     'create' => $newToken['payload']['iat'],
                     'expire' => $newToken['payload']['exp'],
-                    'scope'  => $newToken['payload']['scope'] ?? 'public',
+                    'origin' => $newToken['payload']['origin'] ?? 'public',
                 ];
             }
 
