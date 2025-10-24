@@ -6,6 +6,7 @@ namespace Pi\User\Service;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Authentication\Adapter\DbTable\CallbackCheckAdapter;
+use Laminas\Filter\StringToLower;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
@@ -374,7 +375,7 @@ class AccountService implements ServiceInterface
             [
                 'account' => $account,
                 'type'    => 'access',
-                'scope' => 'public',
+                'scope'   => 'public',
             ],
             [
                 'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
@@ -388,7 +389,7 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'refresh',
                 'id'      => $accessToken['id'],
-                'scope' => 'public',
+                'scope'   => 'public',
             ],
             [
                 'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
@@ -762,10 +763,14 @@ class AccountService implements ServiceInterface
             $otp = $this->generatePassword((string)$params['otp']);
         }
 
+        // Normalize Email
+        $email = $params['email'] ?? null;
+        $email = $this->normalizeEmail($email);
+
         // Set add account params
         $paramsAccount = [
             'name'         => $params['name'] ?? null,
-            'email'        => $params['email'] ?? null,
+            'email'        => $email,
             'identity'     => $params['identity'] ?? null,
             'mobile'       => $params['mobile'] ?? null,
             'credential'   => $credential,
@@ -1938,7 +1943,7 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'access',
                 'id'      => $tokenId,
-                'scope' => 'public',
+                'scope'   => 'public',
             ],
             [
                 'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
@@ -2089,6 +2094,22 @@ class AccountService implements ServiceInterface
         }
 
         return $params['name'] ?? null;
+    }
+
+    /**
+     * @param string|null $email
+     *
+     * @return string|null
+     */
+    public function normalizeEmail(?string $email): ?string
+    {
+        $email = trim((string)$email);
+        if ($email === '') {
+            return null;
+        }
+
+        $filter = new StringToLower(['encoding' => 'UTF-8']);
+        return $filter->filter($email);
     }
 
     /**
