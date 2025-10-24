@@ -1540,7 +1540,6 @@ class AccountService implements ServiceInterface
                 break;
 
             case'argon2id':
-                // ToDo: Fix it by minimum php 8.3
                 // Set option for a High-Security ARGON2ID
                 $options = [
                     'memory_cost' => 1 << 17, // 131072 KB (128 MB)
@@ -1549,7 +1548,7 @@ class AccountService implements ServiceInterface
                 ];
 
                 // Make a High-Security hash password
-                $hash = password_hash($password, PASSWORD_ARGON2ID /*, $options*/);
+                $hash = password_hash($password, PASSWORD_ARGON2ID , $options);
                 break;
 
             case'sha512':
