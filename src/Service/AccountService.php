@@ -10,6 +10,7 @@ use Laminas\Filter\StringToLower;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\SignatureService;
 use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
 use Pi\Notification\Service\NotificationService;
@@ -56,6 +57,9 @@ class AccountService implements ServiceInterface
 
     /** @var AccountLocked */
     protected AccountLocked $accountLocked;
+
+    /** @var SignatureService */
+    protected SignatureService $signatureService;
 
     protected ?\Pi\Company\Service\CompanyLightService $companyService = null;
 
@@ -136,6 +140,7 @@ class AccountService implements ServiceInterface
      * @param TranslatorService          $translatorService
      * @param AccountLoginAttempts       $accountLoginAttempts
      * @param AccountLocked              $accountLocked
+     * @param SignatureService           $signatureService
      * @param                            $config
      */
     public function __construct(
@@ -150,6 +155,7 @@ class AccountService implements ServiceInterface
         TranslatorService          $translatorService,
         AccountLoginAttempts       $accountLoginAttempts,
         AccountLocked              $accountLocked,
+        SignatureService           $signatureService,
                                    $config
     ) {
         $this->accountRepository    = $accountRepository;
@@ -163,6 +169,7 @@ class AccountService implements ServiceInterface
         $this->translatorService    = $translatorService;
         $this->accountLoginAttempts = $accountLoginAttempts;
         $this->accountLocked        = $accountLocked;
+        $this->signatureService     = $signatureService;
         $this->config               = $config;
         $this->hashPattern          = $config['hash_pattern'] ?? 'argon2id';
     }
@@ -316,6 +323,19 @@ class AccountService implements ServiceInterface
      */
     public function postLoginSuccess($account, $params): array
     {
+        // Check account signature
+        if ($this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
+            return [
+                'result' => false,
+                'data'   => [],
+                'error'  => [
+                    'message' => 'Signature validation failed: one or more fields have been modified or corrupted.',
+                    'key'     => 'signature-validation-failed',
+                ],
+                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
+            ];
+        }
+
         // Set account lock params
         $lockParams = [
             'type'            => 'id',
@@ -1548,7 +1568,7 @@ class AccountService implements ServiceInterface
                 ];
 
                 // Make a High-Security hash password
-                $hash = password_hash($password, PASSWORD_ARGON2ID , $options);
+                $hash = password_hash($password, PASSWORD_ARGON2ID, $options);
                 break;
 
             case'sha512':

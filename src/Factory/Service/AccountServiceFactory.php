@@ -8,6 +8,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
+use Pi\Core\Service\SignatureService;
 use Pi\Core\Service\TranslatorService;
 use Pi\Core\Service\UtilityService;
 use Pi\Notification\Service\NotificationService;
@@ -54,6 +55,7 @@ class AccountServiceFactory implements FactoryInterface
             $container->get(TranslatorService::class),
             $container->get(AccountLoginAttempts::class),
             $container->get(AccountLocked::class),
+            $container->get(SignatureService::class),
             $config
         );
 
