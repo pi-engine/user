@@ -37,13 +37,12 @@ class DeleteHandler implements RequestHandlerInterface
     {
         $requestBody = $request->getParsedBody();
         $operator    = $request->getAttribute('account');
-
-
+        $result      = $this->tokenService->deleteInternalToken($requestBody, $operator);
 
         return new EscapingJsonResponse(
             [
                 'result' => true,
-                'data'   => [2,2,2],
+                'data'   => $result,
                 'error'  => [],
             ]
         );

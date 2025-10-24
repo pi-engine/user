@@ -26,24 +26,21 @@ class ListHandler implements RequestHandlerInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        TokenService              $tokenService
+        TokenService             $tokenService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->tokenService     = $tokenService;
+        $this->tokenService    = $tokenService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody = $request->getParsedBody();
-        $operator    = $request->getAttribute('account');
-
-
+        $list = $this->tokenService->getInternalList();
 
         return new EscapingJsonResponse(
             [
                 'result' => true,
-                'data'   => [3,3,3],
+                'data'   => array_values($list),
                 'error'  => [],
             ]
         );

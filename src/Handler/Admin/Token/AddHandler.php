@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Random\RandomException;
 
 class AddHandler implements RequestHandlerInterface
 {
@@ -26,26 +27,22 @@ class AddHandler implements RequestHandlerInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        TokenService              $tokenService
+        TokenService             $tokenService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->tokenService     = $tokenService;
+        $this->tokenService    = $tokenService;
     }
 
+    /**
+     * @throws RandomException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $requestBody = $request->getParsedBody();
         $operator    = $request->getAttribute('account');
+        $result      = $this->tokenService->addInternalToken($requestBody, $operator);
 
-
-
-        return new EscapingJsonResponse(
-            [
-                'result' => true,
-                'data'   => [1,1,1],
-                'error'  => [],
-            ]
-        );
+        return new EscapingJsonResponse($result);
     }
 }

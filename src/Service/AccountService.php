@@ -396,10 +396,8 @@ class AccountService implements ServiceInterface
                 'account' => $account,
                 'type'    => 'access',
                 'scope'   => 'public',
-            ],
-            [
-                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
-                'client_url' => $params['security_stream']['url']['data']['client_url'] ?? '',
+                'ip'      => $params['security_stream']['ip']['data']['client_ip'] ?? '',
+                'aud'     => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
         );
 
@@ -410,10 +408,8 @@ class AccountService implements ServiceInterface
                 'type'    => 'refresh',
                 'id'      => $accessToken['id'],
                 'scope'   => 'public',
-            ],
-            [
-                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
-                'client_url' => $params['security_stream']['url']['data']['client_url'] ?? '',
+                'ip'      => $params['security_stream']['ip']['data']['client_ip'] ?? '',
+                'aud'     => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
         );
 
@@ -1963,10 +1959,8 @@ class AccountService implements ServiceInterface
                 'type'    => 'access',
                 'id'      => $tokenId,
                 'scope'   => 'public',
-            ],
-            [
-                'client_ip'  => $params['security_stream']['ip']['data']['client_ip'] ?? '',
-                'client_url' => $params['security_stream']['url']['data']['client_url'] ?? '',
+                'ip'      => $params['security_stream']['ip']['data']['client_ip'] ?? '',
+                'aud'     => $params['security_stream']['url']['data']['client_url'] ?? '',
             ]
         );
 
@@ -2512,6 +2506,7 @@ class AccountService implements ServiceInterface
                     'id'     => $newToken['id'],
                     'create' => $newToken['payload']['iat'],
                     'expire' => $newToken['payload']['exp'],
+                    'scope'  => $newToken['payload']['scope'] ?? 'public',
                 ];
             }
 
