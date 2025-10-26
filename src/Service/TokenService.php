@@ -217,7 +217,7 @@ class TokenService implements ServiceInterface
             if (!$url->isUrlAllowed($params['aud'], (array)$decodedToken->aud)) {
                 return [
                     'status'  => false,
-                    'message' => 'Invalid audience',
+                    'message' => 'Invalid audience, requested audience is : ' . $params['aud'] . ' token audience: ' . $decodedToken->aud,
                     'key'     => 'invalid-audience',
                 ];
             }
