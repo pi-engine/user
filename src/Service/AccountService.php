@@ -325,7 +325,7 @@ class AccountService implements ServiceInterface
     {
         // Check account signature
         if ($this->config['login']['check_signature']) {
-            if ($this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
+            if (!$this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
                 return [
                     'result' => false,
                     'data'   => [],
