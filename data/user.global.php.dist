@@ -102,11 +102,12 @@ return [
             'status' => 1,
         ],
         'login'        => [
-            'session_policy'     => 'multi', // multi,single
-            'get_company'        => 1,
-            'permission'         => 1,
-            'permission_package' => 1,
-            'permission_role'    => ['api', 'admin'],
+            'session_policy'       => 'multi', // multi,single
+            'check_signature'      => 1,
+            'get_company'          => 1,
+            'permission'           => 1,
+            'permission_package'   => 1,
+            'permission_role'      => ['api', 'admin'],
             'permission_blacklist' => [],
         ],
     ],

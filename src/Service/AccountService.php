@@ -324,17 +324,19 @@ class AccountService implements ServiceInterface
     public function postLoginSuccess($account, $params): array
     {
         // Check account signature
-        /* if ($this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
-            return [
-                'result' => false,
-                'data'   => [],
-                'error'  => [
-                    'message' => 'Signature validation failed: one or more fields have been modified or corrupted.',
-                    'key'     => 'signature-validation-failed',
-                ],
-                'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
-            ];
-        } */
+        if ($this->config['login']['check_signature']) {
+            if ($this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
+                return [
+                    'result' => false,
+                    'data'   => [],
+                    'error'  => [
+                        'message' => 'Signature validation failed: one or more fields have been modified or corrupted.',
+                        'key'     => 'signature-validation-failed',
+                    ],
+                    'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
+                ];
+            }
+        }
 
         // Set account lock params
         $lockParams = [
