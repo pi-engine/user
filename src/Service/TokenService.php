@@ -213,13 +213,21 @@ class TokenService implements ServiceInterface
             }
 
             // Validate the 'aud' (Audience) claims
-            $url = new UrlUtility();
-            if (!$url->isUrlAllowed($params['aud'], (array)$decodedToken->aud)) {
-                return [
-                    'status'  => false,
-                    'message' => 'Invalid audience, requested audience is : ' . $params['aud'] . ' token audience: ' . $decodedToken->aud,
-                    'key'     => 'invalid-audience',
-                ];
+            if (
+                isset($this->config['check_aud'])
+                && !empty($this->config['check_aud'])
+                && isset($decodedToken->aud)
+                && !empty($decodedToken->aud)
+                && $decodedToken->type == 'access'
+            ) {
+                $url = new UrlUtility();
+                if (!$url->isUrlAllowed($params['aud'], (array)$decodedToken->aud)) {
+                    return [
+                        'status'  => false,
+                        'message' => sprintf('Invalid audience, requested audience is : %s token audience: %s' ,$params['aud'], $decodedToken->aud),
+                        'key'     => 'invalid-audience',
+                    ];
+                }
             }
 
             // Check if the IP is valid or in the allowed list
@@ -235,7 +243,7 @@ class TokenService implements ServiceInterface
                 if (!$ip->areIpsEqual($decodedToken->ip, $params['ip'])) {
                     return [
                         'status'  => false,
-                        'message' => 'Invalid IP address',
+                        'message' => sprintf('Invalid IP address, requested audience is : %s token audience: %s' ,$params['ip'], $decodedToken->ip),
                         'key'     => 'invalid-ip-address',
                     ];
                 }

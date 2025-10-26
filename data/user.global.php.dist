@@ -21,18 +21,7 @@ return [
         'internal_public_key'   => $basePath . '/data/keys/internal_public_key.pem',
         'internal_private_key'  => $basePath . '/data/keys/internal_private_key.pem'
         'iss'         => $baseUrl,
-        'aud'         => $baseUrl,
-        'internal_allowed_ips'  => [
-            '127.0.0.1',       // localhost
-            '10.0.0.1',        // internal microservice
-            '10.0.0.2',        // another internal microservice
-            '172.20.0.0/16',   // internal Docker network
-        ],
-        'internal_allowed_urls' => [
-            'http://core-service.local',
-            'http://service-a.local',
-            'http://service-b.local',
-        ],
+        'check_aud'   => 0,
         'check_ip'    => 0,
         'additional'  => [
             'company_id',
