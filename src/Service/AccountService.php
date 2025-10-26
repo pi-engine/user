@@ -324,7 +324,7 @@ class AccountService implements ServiceInterface
     public function postLoginSuccess($account, $params): array
     {
         // Check account signature
-        if ($this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
+        /* if ($this->signatureService->checkSignature('user_account', ['id' => $account['id']])) {
             return [
                 'result' => false,
                 'data'   => [],
@@ -334,7 +334,7 @@ class AccountService implements ServiceInterface
                 ],
                 'status' => StatusCodeInterface::STATUS_UNAUTHORIZED,
             ];
-        }
+        } */
 
         // Set account lock params
         $lockParams = [
