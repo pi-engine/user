@@ -326,8 +326,10 @@ class TokenService implements ServiceInterface
     private function setEncryptKey($origin): string
     {
         // If internal or local request, use internal key
-        if ($origin === 'internal' || $origin === 'local') {
-            return $this->getKey('internal_private_key');
+        if ($this->config['use_origin']) {
+            if ($origin === 'internal' || $origin === 'local') {
+                return $this->getKey('internal_private_key');
+            }
         }
 
         // Otherwise, use standard private key
@@ -337,8 +339,10 @@ class TokenService implements ServiceInterface
     private function setDecryptKey($origin): string
     {
         // If internal or local request, use internal key
-        if ($origin === 'internal' || $origin === 'local') {
-            return $this->getKey('internal_public_key');
+        if ($this->config['use_origin']) {
+            if ($origin === 'internal' || $origin === 'local') {
+                return $this->getKey('internal_public_key');
+            }
         }
 
         // Otherwise, use public key
