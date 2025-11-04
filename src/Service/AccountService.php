@@ -126,7 +126,7 @@ class AccountService implements ServiceInterface
     protected int $onlineTimeout = 900; // 15 minutes (900 seconds)
 
     /* @var string */
-    protected string $hashPattern;
+    protected string $hashPattern = 'argon2id';
 
     /**
      * @param AccountRepositoryInterface $accountRepository
@@ -171,7 +171,6 @@ class AccountService implements ServiceInterface
         $this->accountLocked        = $accountLocked;
         $this->signatureService     = $signatureService;
         $this->config               = $config;
-        $this->hashPattern          = $config['hash_pattern'] ?? 'argon2id';
     }
 
     /**
@@ -1552,12 +1551,8 @@ class AccountService implements ServiceInterface
      */
     public function generatePassword(mixed $password): string
     {
-        switch ($this->hashPattern) {
+        /* switch ($this->hashPattern) {
             default:
-            case'bcrypt':
-                $hash = password_hash($password, PASSWORD_BCRYPT);
-                break;
-
             case'argon2id':
                 // Set option for a High-Security ARGON2ID
                 $options = [
@@ -1570,12 +1565,24 @@ class AccountService implements ServiceInterface
                 $hash = password_hash($password, PASSWORD_ARGON2ID, $options);
                 break;
 
+            case'bcrypt':
+                $hash = password_hash($password, PASSWORD_BCRYPT);
+                break;
+
             case'sha512':
                 $hash = hash('sha512', $password);
                 break;
-        }
+        } */
 
-        return $hash;
+        // Set option for a High-Security ARGON2ID
+        $options = [
+            'memory_cost' => 1 << 17, // 131072 KB (128 MB)
+            'time_cost'   => 4,         // 4 iterations (same as default)
+            'threads'     => 2,            // 2 parallel threads
+        ];
+
+        // Make a High-Security hash password
+        return password_hash($password, PASSWORD_ARGON2ID, $options);
     }
 
     /**
@@ -1586,7 +1593,7 @@ class AccountService implements ServiceInterface
      */
     public function passwordEqualityCheck(mixed $credential, mixed $hash): bool
     {
-        switch ($this->hashPattern) {
+        /* switch ($this->hashPattern) {
             default:
             case'argon2id':
             case'bcrypt':
@@ -1596,9 +1603,9 @@ class AccountService implements ServiceInterface
             case'sha512':
                 $result = hash_equals($hash, hash('sha512', $credential));
                 break;
-        }
+        } */
 
-        return $result;
+        return password_verify($credential, $hash);
     }
 
     /**

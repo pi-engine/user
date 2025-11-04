@@ -552,11 +552,13 @@ class AccountRepository implements AccountRepositoryInterface
             $credentialColumn,
             function (string $hash, string $password) use ($hashPattern): bool {
                 // Match hash and password based on the specified pattern
-                return match ($hashPattern) {
+                /* return match ($hashPattern) {
                     'argon2id', 'bcrypt' => password_verify($password, $hash),
                     'sha512'             => hash_equals($hash, hash('sha512', $password)),
                     default              => throw new InvalidArgumentException('Unsupported hash pattern.'),
-                };
+                }; */
+
+                return password_verify($password, $hash);
             }
         );
 
