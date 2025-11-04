@@ -109,3 +109,6 @@ CREATE TABLE IF NOT EXISTS `permission_role`
 INSERT INTO `role_resource` (`id`, `name`, `title`, `status`, `section`)
 VALUES (NULL, 'member', 'Member', '1', 'api'),
        (NULL, 'admin', 'Full Admin', '1', 'admin');
+
+-- Indexes on lookup tables
+CREATE INDEX idx_user_account_id ON user_account(id);
