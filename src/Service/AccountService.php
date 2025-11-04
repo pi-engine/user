@@ -1613,7 +1613,8 @@ class AccountService implements ServiceInterface
      */
     public function userRegisterStatus(): int
     {
-        return (int)$this->config['register']['status'] ?? 1;
+        //return (int)$this->config['register']['status'] ?? 1;
+        return 1;
     }
 
     /**
