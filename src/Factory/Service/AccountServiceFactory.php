@@ -61,8 +61,8 @@ class AccountServiceFactory implements FactoryInterface
 
         // Set light company service
         $modules = $container->get('ModuleManager')->getLoadedModules();
-        if (isset($modules['Pi\Company'])) {
-            $companyService = $container->get('Pi\Company\Service\CompanyLightService');
+        if (isset($modules['Grc\Company'])) {
+            $companyService = $container->get('Grc\Company\Service\CompanyLightService');
             $accountService->setCompanyService($companyService);
         }
 

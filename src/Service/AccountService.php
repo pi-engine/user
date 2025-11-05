@@ -61,7 +61,7 @@ class AccountService implements ServiceInterface
     /** @var SignatureService */
     protected SignatureService $signatureService;
 
-    protected ?\Pi\Company\Service\CompanyLightService $companyService = null;
+    protected ?\Grc\Company\Service\CompanyLightService $companyService = null;
 
     /* @var array */
     protected array $config;
