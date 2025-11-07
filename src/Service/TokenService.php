@@ -11,7 +11,6 @@ use phpseclib3\Crypt\RSA;
 use Pi\Core\Service\CacheService;
 use Pi\Core\Service\Utility\Ip as IpUtility;
 use Pi\Core\Service\Utility\Url as UrlUtility;
-use Pi\Core\Service\UtilityService;
 use Random\RandomException;
 use RuntimeException;
 use Throwable;
@@ -19,49 +18,52 @@ use Throwable;
 class TokenService implements ServiceInterface
 {
     /* @var CacheService */
-    protected CacheService $cacheService;
-
-    /** @var UtilityService */
-    protected UtilityService $utilityService;
+    private CacheService $cacheService;
 
     /* @var array */
-    protected array $config;
+    private array $config;
 
-    protected string $internalKey = 'internal_tokens';
+    private string $internalKey = 'internal_tokens';
+
+    private string $privateKey;
+    private string $publicKey;
+    private string $internalPrivateKey;
+    private string $internalPublicKey;
 
     public function __construct(
-        CacheService   $cacheService,
-        UtilityService $utilityService,
-                       $config
+        CacheService $cacheService,
+                     $config
     ) {
-        $this->cacheService   = $cacheService;
-        $this->utilityService = $utilityService;
-        $this->config         = $config;
+        $this->cacheService = $cacheService;
+        $this->config       = $config;
 
-        // Validate config keys
-        if (empty($this->config['private_key'])
-            || empty($this->config['public_key'])
-            || empty($this->config['internal_public_key'])
-            || empty($this->config['internal_private_key'])
-        ) {
-            throw new RuntimeException('JWT private key and public key paths must be provided in config.');
-        }
-
-        // If either key is missing, regenerate both
-        if (!file_exists($this->config['private_key']) || !file_exists($this->config['public_key'])) {
-            $this->createKeys($this->config['private_key'], $this->config['public_key']);
-        }
-
-        // If either key is missing, regenerate both
-        if (!file_exists($this->config['internal_private_key']) || !file_exists($this->config['internal_public_key'])) {
-            $this->createKeys($this->config['internal_private_key'], $this->config['internal_public_key']);
-        }
+        $this->loadKeys();
     }
 
     /**
-     * @throws RandomException
+     * Generate and register a new internal custom access token for a specific user.
+     *
+     * This method retrieves the user's cached data from Redis, generates an internal
+     * (non-public) access token using RSA signing, stores the token in both the user’s
+     * access list and a global internal token registry, and returns the token payload.
+     *
+     * @param array $params    Token generation parameters including:
+     *                         - user_id (int): Target user ID
+     *                         - ip (string): Request IP address
+     *                         - aud (string): Token audience (optional)
+     *                         - ttl (int): Token lifetime in seconds (optional)
+     *                         - desc (string): Optional token description
+     * @param array $operator  Operator or service creating the token (for audit purposes)
+     *
+     * @return array{
+     *     result: bool,
+     *     data: array,
+     *     error: array{message?: string, key?: string}
+     * }
+     *
+     * @throws RandomException If random key generation fails.
      */
-    public function addCustomToken($params, $operator): array
+    public function addCustomToken(array $params, array $operator): array
     {
         // Get a user fron redis cache
         $user = $this->cacheService->getUser((int)$params['user_id']);
@@ -111,20 +113,68 @@ class TokenService implements ServiceInterface
         ];
     }
 
-    public function deleteCustomToken($params, $operator): array
+    /**
+     * Delete an existing custom token from cache.
+     *
+     * Intended for future implementation. This method should locate and remove
+     * a specific internal access token based on provided parameters.
+     *
+     * @param array $params   Parameters identifying the token (e.g. token ID, user ID).
+     * @param array $operator Operator or service performing the deletion.
+     *
+     * @return array{
+     *     result: bool,
+     *     data: array,
+     *     error: array{message?: string, key?: string}
+     * }
+     */
+    public function deleteCustomToken(array $params, array $operator): array
     {
         return [];
     }
 
+    /**
+     * Retrieve the list of all active internal custom tokens.
+     *
+     * This method fetches the internal token registry from cache, containing
+     * all tokens generated through {@see addCustomToken()}.
+     *
+     * @return array<string, array> Associative array of tokens indexed by token ID.
+     */
     public function getCustomTokenList(): array
     {
         return $this->cacheService->getItem($this->internalKey);
     }
 
     /**
+     * Encrypt (sign) a new JWT token for an authenticated user.
+     *
+     * This method builds a secure JWT payload, applies origin-based key selection,
+     * and returns the signed token with metadata.
+     *
+     * @param array $params  {
+     *
+     * @type array  $account User account data (must include 'id')
+     * @type string $type    Token type: 'access' or 'refresh'
+     * @type string $origin  Token origin: 'public', 'internal', or 'local'
+     * @type string $ip      IP address of the requester
+     * @type string $desc    Optional description
+     * @type string $aud     Optional audience
+     * @type string $id      Optional token ID (if not auto-generated)
+     * @type int    $ttl     Optional TTL override
+     *                       }
+     *
+     * @return array{
+     *     token: string,
+     *     id: string,
+     *     payload: array,
+     *     ttl: int
+     * }
+     *
      * @throws RandomException
+     * @throws RuntimeException if key loading or signing fails
      */
-    public function encryptToken($params): array
+    public function encryptToken(array $params): array
     {
         // Generate a unique ID
         $tokenId = $params['id'] ?? $this->setTokenKey($params);
@@ -161,7 +211,31 @@ class TokenService implements ServiceInterface
         ];
     }
 
-    public function decryptToken($token, array $params = []): array
+    /**
+     * Decrypt (verify) a JWT and validate its structure and claims.
+     *
+     * This method ensures the JWT is properly signed, unexpired, matches
+     * issuer/audience expectations, and references a valid user session.
+     *
+     * @param string $token  The raw JWT string.
+     * @param array  $params {
+     *
+     * @type string  $origin Token origin (required for key selection)
+     * @type string  $ip     Requester IP for IP validation (optional)
+     * @type string  $aud    Audience value for validation (optional)
+     *                       }
+     *
+     * @return array{
+     *     status: bool,
+     *     id?: string,
+     *     user_id?: int,
+     *     type?: string,
+     *     data?: array,
+     *     message?: string,
+     *     key?: string
+     * }
+     */
+    public function decryptToken(string $token, array $params = []): array
     {
         try {
             // Decode the token
@@ -224,7 +298,7 @@ class TokenService implements ServiceInterface
                 if (!$url->isUrlAllowed($params['aud'], (array)$decodedToken->aud)) {
                     return [
                         'status'  => false,
-                        'message' => sprintf('Invalid audience, requested audience is : %s token audience: %s' ,$params['aud'], $decodedToken->aud),
+                        'message' => sprintf('Invalid audience, requested audience is : %s token audience: %s', $params['aud'], $decodedToken->aud),
                         'key'     => 'invalid-audience',
                     ];
                 }
@@ -243,7 +317,7 @@ class TokenService implements ServiceInterface
                 if (!$ip->areIpsEqual($decodedToken->ip, $params['ip'])) {
                     return [
                         'status'  => false,
-                        'message' => sprintf('Invalid IP address, requested audience is : %s token audience: %s' ,$params['ip'], $decodedToken->ip),
+                        'message' => sprintf('Invalid IP address, requested audience is : %s token audience: %s', $params['ip'], $decodedToken->ip),
                         'key'     => 'invalid-ip-address',
                     ];
                 }
@@ -296,9 +370,25 @@ class TokenService implements ServiceInterface
     }
 
     /**
-     * @throws RandomException
+     * Generates a unique SHA-256 token key identifier for a JWT.
+     *
+     * The key is derived from the token type (access/refresh), the associated
+     * account ID, and a securely generated random salt. This ensures that
+     * each token — even for the same account — is cryptographically unique.
+     *
+     * Example output:
+     *   a-42-fd82ac0a9134de9a
+     *
+     * @param array{
+     *     type: string,
+     *     account: array{id: int|string}
+     * } $params Token metadata.
+     *
+     * @return string The generated token key hash (SHA-256).
+     * @throws RandomException If secure random bytes cannot be generated.
+     *
      */
-    private function setTokenKey($params): string
+    private function setTokenKey(array $params): string
     {
         $typePrefix = $params['type'] === 'refresh' ? 'r' : 'a';
 
@@ -308,6 +398,21 @@ class TokenService implements ServiceInterface
         );
     }
 
+    /**
+     * Determines the token's time-to-live (TTL) in seconds.
+     *
+     * If the `$params` array includes a custom `ttl` value, that value
+     * is used. Otherwise, the default expiration time is read from
+     * the configuration array, using either `exp_access` or `exp_refresh`
+     * depending on token type.
+     *
+     * @param array{
+     *     type: string,
+     *     ttl?: int
+     * } $params Token metadata.
+     *
+     * @return int TTL value in seconds.
+     */
     private function setTtl(array $params): int
     {
         if (!empty($params['ttl'])) {
@@ -318,43 +423,190 @@ class TokenService implements ServiceInterface
         return (int)($this->config[$type] ?? 0);
     }
 
+    /**
+     * Returns the algorithm used for JWT signing and verification.
+     *
+     * Currently, this implementation uses RSA SHA-256 (RS256) for asymmetric
+     * signing operations. If a different algorithm is required, this method
+     * should be adapted accordingly.
+     *
+     * @return string The JWT signing algorithm (default: RS256).
+     */
     private function setAlgorithm(): string
     {
         return 'RS256';
     }
 
-    private function setEncryptKey($origin): string
+    /**
+     * Returns the appropriate private key used for signing JWTs.
+     *
+     * This method selects between the standard and internal RSA private keys
+     * based on the request origin. Internal or local service calls (such as
+     * microservice-to-microservice communication) use a separate internal key
+     * pair for stronger isolation and security boundaries.
+     *
+     * @param string $origin The origin of the request (e.g. "internal", "local", or "external").
+     *
+     * @return string PEM-formatted private key for JWT signing.
+     */
+    private function setEncryptKey(string $origin): string
     {
         // If internal or local request, use internal key
-        if ($this->config['use_origin']) {
-            if ($origin === 'internal' || $origin === 'local') {
-                return $this->getKey('internal_private_key');
-            }
+        if (!empty($this->config['use_origin']) && in_array($origin, ['internal', 'local'], true)) {
+            return $this->internalPrivateKey;
         }
 
         // Otherwise, use standard private key
-        return $this->getKey('private_key');
+        return $this->privateKey;
     }
 
-    private function setDecryptKey($origin): string
+    /**
+     * Returns the appropriate public key used for verifying JWTs.
+     *
+     * This method mirrors {@see setEncryptKey()} by choosing the correct
+     * public key based on request origin. Internal or local requests will use
+     * the internal public key to validate tokens signed by internal services.
+     *
+     * @param string $origin The origin of the request (e.g. "internal", "local", or "external").
+     *
+     * @return string PEM-formatted public key for JWT verification.
+     */
+    private function setDecryptKey(string $origin): string
     {
         // If internal or local request, use internal key
-        if ($this->config['use_origin']) {
-            if ($origin === 'internal' || $origin === 'local') {
-                return $this->getKey('internal_public_key');
+        if (!empty($this->config['use_origin']) && in_array($origin, ['internal', 'local'], true)) {
+            return $this->internalPublicKey;
+        }
+
+        // Otherwise, use standard public key
+        return $this->publicKey;
+    }
+
+    /**
+     * Loads RSA signing and verification keys used for JWT operations.
+     *
+     * This method first attempts to load PEM-formatted keys injected by EnvKeys
+     * (via environment variables such as `PRIVATE_KEY_PEM` and `INTERNAL_PRIVATE_KEY_PEM`).
+     *
+     * If EnvKeys keys are not present, it falls back to reading the keys from configured
+     * file paths (e.g., `private_key`, `public_key`, `internal_private_key`, `internal_public_key`).
+     *
+     * When key files are missing, new RSA key pairs are automatically generated and stored
+     * using {@see self::loadOrCreateKeyPair()}.
+     *
+     * The method also validates all loaded keys using OpenSSL to ensure they are valid
+     * and correctly formatted PEM strings.
+     *
+     * @return void
+     * @throws RuntimeException If any required key is missing, malformed, or fails validation.
+     *
+     */
+    private function loadKeys(): void
+    {
+        // Load possible EnvKeys-injected PEM keys
+        $envKeys = [
+            'private'          => getenv('PRIVATE_KEY_PEM') ?: null,
+            'public'           => getenv('PUBLIC_KEY_PEM') ?: null,
+            'internal_private' => getenv('INTERNAL_PRIVATE_KEY_PEM') ?: null,
+            'internal_public'  => getenv('INTERNAL_PUBLIC_KEY_PEM') ?: null,
+        ];
+
+        // Normalize newline characters
+        foreach ($envKeys as $key => $value) {
+            if ($value !== null) {
+                $envKeys[$key] = str_replace(['\\n', "\r"], "\n", $value);
             }
         }
 
-        // Otherwise, use public key
-        return $this->getKey('public_key');
+        // Main JWT key pair
+        if (!empty($envKeys['private']) || !empty($envKeys['public'])) {
+            if (
+                empty($envKeys['private'])
+                || empty($envKeys['public'])
+                || !openssl_pkey_get_private($envKeys['private'])
+                || !openssl_pkey_get_public($envKeys['public'])
+            ) {
+                throw new RuntimeException('InvalidEnvKeysKeys: EnvKeys-injected JWT keys are missing or invalid.');
+            }
+
+            $this->privateKey = $envKeys['private'];
+            $this->publicKey  = $envKeys['public'];
+        } else {
+            $keys             = $this->loadOrCreateKeyPair('private_key', 'public_key');
+            $this->privateKey = $keys['private'];
+            $this->publicKey  = $keys['public'];
+        }
+
+        // Internal JWT key pair
+        if (!empty($envKeys['internal_private']) || !empty($envKeys['internal_public'])) {
+            if (
+                empty($envKeys['internal_private'])
+                || empty($envKeys['internal_public'])
+                || !openssl_pkey_get_private($envKeys['internal_private'])
+                || !openssl_pkey_get_public($envKeys['internal_public'])
+            ) {
+                throw new RuntimeException('InvalidEnvKeysKeys: EnvKeys-injected INTERNAL JWT keys are missing or invalid.');
+            }
+
+            $this->internalPrivateKey = $envKeys['internal_private'];
+            $this->internalPublicKey  = $envKeys['internal_public'];
+        } else {
+            $keys                     = $this->loadOrCreateKeyPair('internal_private_key', 'internal_public_key');
+            $this->internalPrivateKey = $keys['private'];
+            $this->internalPublicKey  = $keys['public'];
+        }
     }
 
-    private function getKey(string $keyType): string
+    /**
+     * Loads an RSA key pair from configured file paths, or creates new ones if missing.
+     *
+     * This method checks the provided config entries for the private and public key paths.
+     * If the specified key files do not exist, new RSA keys are generated and saved using
+     * {@see self::createKeys()}. The method then returns both keys as PEM-formatted strings.
+     *
+     * @param string $privateKeyConfig The configuration key name for the private key path.
+     * @param string $publicKeyConfig  The configuration key name for the public key path.
+     *
+     * @return array{private: string, public: string} Associative array containing the loaded
+     *                                               private and public PEM key contents.
+     * @throws RuntimeException If configuration paths are missing, unreadable, or file operations fail.
+     *
+     */
+    private function loadOrCreateKeyPair(string $privateKeyConfig, string $publicKeyConfig): array
     {
-        return file_get_contents($this->config[$keyType]);
+        $privatePath = $this->config[$privateKeyConfig] ?? null;
+        $publicPath  = $this->config[$publicKeyConfig] ?? null;
+
+        if (empty($privatePath) || empty($publicPath)) {
+            throw new RuntimeException("Missing key paths in config: {$privateKeyConfig}, {$publicKeyConfig}");
+        }
+
+        if (!file_exists($privatePath) || !file_exists($publicPath)) {
+            $this->createKeys($privatePath, $publicPath);
+        }
+
+        return [
+            'private' => file_get_contents($privatePath),
+            'public'  => file_get_contents($publicPath),
+        ];
     }
 
-    private function createKeys($privateKeyPath, $publicKeyPath): void
+    /**
+     * Generates a new RSA key pair and saves them as PEM files.
+     *
+     * This method creates a 4096-bit RSA private key using phpseclib's RSA library,
+     * derives the corresponding public key, and writes both keys to the specified
+     * file paths in PKCS8 PEM format. If any file operation fails or an exception
+     * occurs during key generation, a RuntimeException is thrown.
+     *
+     * @param string $privateKeyPath Absolute or relative file path where the private key will be saved.
+     * @param string $publicKeyPath  Absolute or relative file path where the public key will be saved.
+     *
+     * @return void
+     * @throws RuntimeException If key generation fails or files cannot be written.
+     *
+     */
+    private function createKeys(string $privateKeyPath, string $publicKeyPath): void
     {
         try {
             // Generate a 4096-bit RSA private key

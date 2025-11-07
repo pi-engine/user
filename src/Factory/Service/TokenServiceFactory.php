@@ -6,7 +6,6 @@ namespace Pi\User\Factory\Service;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Pi\Core\Service\CacheService;
-use Pi\Core\Service\UtilityService;
 use Pi\User\Service\TokenService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -34,7 +33,6 @@ class TokenServiceFactory implements FactoryInterface
 
         return new TokenService(
             $container->get(CacheService::class),
-            $container->get(UtilityService::class),
             $config
         );
     }
