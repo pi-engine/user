@@ -29,7 +29,7 @@ class PasswordValidator extends AbstractValidator
     /** @var array */
     protected $options
         = [
-            'min'          => 8,
+            'min'          => 12,
             'max'          => 32,
             'check_strong' => 1,
         ];
