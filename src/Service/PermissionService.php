@@ -336,7 +336,7 @@ class PermissionService implements ServiceInterface
     public function managePermissionResource($params): array
     {
         switch ($params['action']) {
-            case 'grant':
+            case 'addAccess':
                 // Set delete params
                 $deleteParams = [
                     'role'     => $params['role'],
@@ -367,7 +367,7 @@ class PermissionService implements ServiceInterface
                 $this->permissionRepository->addPermissionRole($roleParams);
                 break;
 
-            case 'revoke':
+            case 'removeAccess':
                 // Set delete params
                 $deleteParams = [
                     'role'     => $params['role'],
