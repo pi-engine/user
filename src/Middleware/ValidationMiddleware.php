@@ -202,7 +202,7 @@ class ValidationMiddleware implements MiddlewareInterface
             // Set input filter
             $option = [
                 'check_duplication' => false,
-                'country'           => $option['country'] ?? 'IR',
+                'country'           => $option['country'] ?? 'US',
             ];
             $mobile = new Input('mobile');
             $mobile->getValidatorChain()->attach(new MobileValidator($this->accountService, $option));
@@ -221,7 +221,9 @@ class ValidationMiddleware implements MiddlewareInterface
 
         // Check credential
         $credential = new Input('credential');
-        $credential->getValidatorChain()->attach(new PasswordValidator($this->accountService, $this->utilityService, $this->configService));
+        $credential->getValidatorChain()->attach(
+            new PasswordValidator($this->accountService, $this->utilityService, $this->configService, ['check_strong' => false, 'check_length' => false])
+        );
         $inputFilter->add($credential);
 
         // Set data and check
