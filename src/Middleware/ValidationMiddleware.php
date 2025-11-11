@@ -358,7 +358,7 @@ class ValidationMiddleware implements MiddlewareInterface
         // Set option
         $option = [
             'user_id'            => $params['user_id'] ?? $account['id'],
-            'check_has_password' => 1,
+            'check_has_password' => true,
         ];
 
         $credential = new Input('credential');

@@ -33,6 +33,7 @@ class PasswordValidator extends AbstractValidator
             'max'          => 32,
             'check_strong' => true,
             'check_length' => true,
+            'check_has_password' => false,
         ];
 
     /** @var AccountService */
@@ -69,7 +70,8 @@ class PasswordValidator extends AbstractValidator
     {
         $this->setValue($value);
 
-        if (isset($this->options['check_length'])) {
+        // Check password length
+        if ($this->options['check_length']) {
             if (!empty($this->options['max']) && $this->options['max'] < strlen($value)) {
                 $this->error(static::TOO_LONG);
                 return false;
@@ -81,7 +83,7 @@ class PasswordValidator extends AbstractValidator
         }
 
         // Check user has password for set new password
-        if (isset($this->options['check_has_password']) && $this->options['check_has_password'] === 1) {
+        if ($this->options['check_has_password']) {
             $hash = $this->accountService->hasPassword($this->options['user_id']);
             if (!empty($hash)) {
                 $this->error(static::HAS_PASSWORD);
@@ -90,7 +92,7 @@ class PasswordValidator extends AbstractValidator
         }
 
         // Check password is strong
-        if (isset($this->options['check_strong'])) {
+        if ($this->options['check_strong']) {
             // Set pattern
             $pattern = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).+$/';
 
