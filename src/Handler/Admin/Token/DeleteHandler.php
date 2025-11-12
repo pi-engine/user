@@ -26,11 +26,11 @@ class DeleteHandler implements RequestHandlerInterface
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
-        TokenService              $tokenService
+        TokenService             $tokenService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
-        $this->tokenService     = $tokenService;
+        $this->tokenService    = $tokenService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
