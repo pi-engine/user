@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS `user_account`
 	UNIQUE KEY `mobile` (`mobile`),
 	KEY `name` (`name`),
 	KEY `status` (`status`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `user_profile`
 (
@@ -36,7 +37,8 @@ CREATE TABLE IF NOT EXISTS `user_profile`
 	`information` JSON                               DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `user_id` (`user_id`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `role_resource`
 (
@@ -48,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `role_resource`
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `name` (`name`),
 	KEY `status` (`status`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `role_account`
 (
@@ -59,7 +62,8 @@ CREATE TABLE IF NOT EXISTS `role_account`
 	`signature` TEXT                           DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `section_user` (`section`, `user_id`, `role`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `permission_resource`
 (
@@ -72,7 +76,8 @@ CREATE TABLE IF NOT EXISTS `permission_resource`
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `key` (`key`),
 	UNIQUE KEY `keys` (`key`, `section`, `module`, `type`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `permission_page`
 (
@@ -90,7 +95,8 @@ CREATE TABLE IF NOT EXISTS `permission_page`
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `key` (`key`),
 	UNIQUE KEY `keys` (`key`, `resource`, `section`, `module`, `package`, `handler`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `permission_role`
 (
@@ -104,8 +110,10 @@ CREATE TABLE IF NOT EXISTS `permission_role`
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `key` (`key`),
 	UNIQUE KEY `keys` (`key`, `resource`, `section`, `module`, `role`)
-);
+) DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci;
 
+-- Insert base data
 INSERT INTO `role_resource` (`id`, `name`, `title`, `status`, `section`)
 VALUES (NULL, 'member', 'Member', '1', 'api'),
        (NULL, 'admin', 'Full Admin', '1', 'admin');
