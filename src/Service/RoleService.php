@@ -164,13 +164,13 @@ class RoleService implements ServiceInterface
             ];
 
             // Get list
-            $list   = [];
+            $roles   = [];
             $rowSet = $this->roleRepository->getRoleResourceList($listParams);
             foreach ($rowSet as $row) {
-                $list[] = $this->canonizeRole($row);
+                $roles[] = $this->canonizeRole($row);
             }
 
-            $roles = $this->cacheService->setItem('role_list', $list);
+            $this->cacheService->setItem('role_list', $roles);
         }
 
         return $roles;
