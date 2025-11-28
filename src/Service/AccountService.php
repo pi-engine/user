@@ -842,8 +842,8 @@ class AccountService implements ServiceInterface
         $this->notificationService->send(
             [
                 'information' => [
-                    'sender_id'   => (int)$operator['id'] ?? 0,
-                    'receiver_id' => (int)$account['id'],
+                    'sender_id'   => $operator['id'] ?? 0,
+                    'receiver_id' => $account['id'],
                     'type'        => 'info',
                     'title'       => $this->translatorService->translate('add-account'),
                     'body'        => $this->translatorService->translate('add-account-message'),
