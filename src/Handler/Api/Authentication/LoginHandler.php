@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pi\User\Handler\Api\Authentication;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Laminas\Http\Header\SetCookie;
 use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Service\AccountService;
 use Pi\User\Service\TokenService;
@@ -30,9 +31,9 @@ class LoginHandler implements RequestHandlerInterface
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface   $streamFactory,
-        AccountService           $accountService,
-        TokenService             $tokenService
+        StreamFactoryInterface $streamFactory,
+        AccountService $accountService,
+        TokenService $tokenService
     ) {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
@@ -69,6 +70,15 @@ class LoginHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->login($params);
 
-        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        // Make a escaping json response
+        $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+
+        // Set httponly cookie
+        if (isset($result['data']['access_token']) && !empty($result['data']['access_token'])) {
+            $cookie   = new SetCookie('access_token', $result['data']['access_token'], $result['data']['token_payload']['exp'], '/', null, true, true);
+            $response = $response->withAddedHeader('Set-Cookie', $cookie->toString());
+        }
+
+        return $response;
     }
 }
