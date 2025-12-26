@@ -81,12 +81,19 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
         $routeParams = $routeMatch->getParams();
 
+        // Get cookies
+        $cookies = $request->getCookieParams();
+
         // Get access token by Authorization Bearer
-        if (!empty($authorization)) {
-            if (preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
-                $token = $matches[1];
-            } else {
-                $token = $authorization;
+        if (isset($cookies['Authorization']) && !empty($cookies['Authorization'])) {
+            $token = $cookies['Authorization'];
+        } else {
+            if (!empty($authorization)) {
+                if (preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
+                    $token = $matches[1];
+                } else {
+                    $token = $authorization;
+                }
             }
         }
 

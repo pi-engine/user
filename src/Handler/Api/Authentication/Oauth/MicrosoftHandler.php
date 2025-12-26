@@ -71,7 +71,7 @@ class MicrosoftHandler implements RequestHandlerInterface
         // Set httponly cookie
         if (isset($result['data']['access_token']) && !empty($result['data']['access_token'])) {
             $cookie   = new SetCookie('access_token', $result['data']['access_token'], $result['data']['token_payload']['exp'], '/', null, true, true);
-            $response = $response->withAddedHeader('Set-Cookie', $cookie->toString());
+            $response = $response->withHeader('Set-Cookie', $cookie->getFieldValue());
         }
 
         return $response;
