@@ -84,6 +84,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         // Get cookies
         $cookies = $request->getCookieParams();
 
+
         // Get access token by Authorization Bearer
         if (isset($cookies['Authorization']) && !empty($cookies['Authorization'])) {
             $token = $cookies['Authorization'];

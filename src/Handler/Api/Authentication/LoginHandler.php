@@ -73,6 +73,7 @@ class LoginHandler implements RequestHandlerInterface
         // Make a escaping json response
         $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
 
+
         // Set httponly cookie
         if (isset($result['data']['access_token']) && !empty($result['data']['access_token'])) {
             $cookie   = new SetCookie('access_token', $result['data']['access_token'], $result['data']['token_payload']['exp'], '/', null, true, true);
