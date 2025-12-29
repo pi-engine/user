@@ -429,19 +429,20 @@ class AccountService implements ServiceInterface
         ];
 
         // Set extra info
-        $account['last_login']          = time();
-        $account['last_login_view']     = $this->utilityService->date($account['last_login']);
-        $account['access_ip']           = $params['security_stream']['ip']['data']['client_ip'];
-        $account['origin']              = $params['security_stream']['origin']['data']['origin'];
-        $account['has_password']        = $this->hasPassword($account['id']);
-        $account['multi_factor_global'] = $multiFactorGlobal;
-        $account['multi_factor_status'] = $multiFactorStatus;
-        $account['multi_factor_method'] = $multiFactorMethod;
-        $account['multi_factor_verify'] = $multiFactorVerify;
-        $account['access_token']        = $accessToken['token'];
-        $account['refresh_token']       = $refreshToken['token'];
-        $account['permission']          = [];
-        $account['token_payload']       = [
+        $account['last_login']           = time();
+        $account['last_login_view']      = $this->utilityService->date($account['last_login']);
+        $account['access_ip']            = $params['security_stream']['ip']['data']['client_ip'];
+        $account['origin']               = $params['security_stream']['origin']['data']['origin'];
+        $account['has_password']         = $this->hasPassword($account['id']);
+        $account['multi_factor_global']  = $multiFactorGlobal;
+        $account['multi_factor_status']  = $multiFactorStatus;
+        $account['multi_factor_method']  = $multiFactorMethod;
+        $account['multi_factor_verify']  = $multiFactorVerify;
+        $account['access_token']         = $accessToken['token'];
+        $account['refresh_token']        = $refreshToken['token'];
+        $account['idle_timeout_minutes'] = intdiv((int) $accessToken['ttl'], 60);
+        $account['permission']           = [];
+        $account['token_payload']        = [
             'iat' => $accessToken['payload']['iat'],
             'exp' => $accessToken['payload']['exp'],
             'ttl' => $accessToken['ttl'],
@@ -2601,43 +2602,58 @@ class AccountService implements ServiceInterface
         return $cacheParams;
     }
 
-
-    public function accessTokenCookie($result): string
+    /**
+     * Generate access and refresh token cookies for the response.
+     *
+     * This method creates two HttpOnly cookies:
+     *  - "Authorization" for the access token
+     *  - "refresh-token" for the refresh token
+     *
+     * Cookies are configured with path "/", optional Secure flag, HttpOnly,
+     * SameSite="none", and the appropriate expiration and Max-Age from config.
+     *
+     * @param array $result Login result array, expected to contain:
+     *                      - ['data']['access_token'] (string)  Access token value
+     *                      - ['data']['refresh_token'] (string) Refresh token value
+     *
+     * @return array<string, string> An associative array with keys:
+     *                               - 'access'  => access token cookie string
+     *                               - 'refresh' => refresh token cookie string
+     *                               Each value is a formatted Set-Cookie header string
+     */
+    public function tokenCookies(array $result): array
     {
-        if (isset($result['data']['access_token']) && !empty($result['data']['access_token'])) {
-            $cookie = new SetCookie();
-            $cookie->setName('Authorization');
-            $cookie->setValue($result['data']['access_token']);
-            $cookie->setExpires(time() + $this->config['exp_access']);
-            $cookie->setPath('/');
-            $cookie->setDomain(null);
-            $cookie->setSecure(false);
-            $cookie->setHttponly(true);
-            $cookie->setSamesite('none');
-            $cookie->setMaxAge($this->config['exp_access']);
-            return $cookie->getFieldValue();
-        } else {
-            return '';
-        }
-    }
+        $cookies = [];
 
-    public function refreshTokenCookie($result): string
-    {
-        if (isset($result['data']['refresh_token']) && !empty($result['data']['refresh_token'])) {
-            $cookie = new SetCookie();
-            $cookie->setName('refresh-token');
-            $cookie->setValue($result['data']['refresh_token']);
-            $cookie->setExpires(time() + $this->config['exp_refresh']);
-            $cookie->setPath('/');
-            $cookie->setDomain(null);
-            $cookie->setSecure(false);
-            $cookie->setHttponly(true);
-            $cookie->setSamesite('none');
-            $cookie->setMaxAge($this->config['exp_refresh']);
-            return $cookie->getFieldValue();
-        } else {
-            return '';
+        // Access token
+        if (!empty($result['data']['access_token']) && !empty($result['data']['refresh_token'])) {
+            $accessCookie = new SetCookie();
+            $accessCookie->setName('Authorization');
+            $accessCookie->setValue($result['data']['access_token']);
+            $accessCookie->setExpires(time() + $this->config['exp_access']);
+            $accessCookie->setPath('/');
+            $accessCookie->setDomain(null);
+            $accessCookie->setSecure(false);
+            $accessCookie->setHttponly(true);
+            $accessCookie->setSamesite('lax');
+            $accessCookie->setMaxAge($this->config['exp_access']);
+
+            $refreshCookie = new SetCookie();
+            $refreshCookie->setName('refresh-token');
+            $refreshCookie->setValue($result['data']['refresh_token']);
+            $refreshCookie->setExpires(time() + $this->config['exp_refresh']);
+            $refreshCookie->setPath('/');
+            $refreshCookie->setDomain(null);
+            $refreshCookie->setSecure(false);
+            $refreshCookie->setHttponly(true);
+            $refreshCookie->setSamesite('lax');
+            $refreshCookie->setMaxAge($this->config['exp_refresh']);
+
+            $cookies['access']  = $accessCookie->getFieldValue();
+            $cookies['refresh'] = $refreshCookie->getFieldValue();
         }
+
+        return $cookies;
     }
 
     /**

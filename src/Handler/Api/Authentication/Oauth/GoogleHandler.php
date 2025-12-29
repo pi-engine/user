@@ -66,12 +66,9 @@ class GoogleHandler implements RequestHandlerInterface
         $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
 
         // Set httponly cookie for access token and refresh token
-        $accessTokenCookie  = $this->accountService->accessTokenCookie($result);
-        $refreshTokenCookie = $this->accountService->refreshTokenCookie($result);
-        if (!empty($accessTokenCookie) && !empty($refreshTokenCookie)) {
-            $response = $response
-                ->withAddedHeader('Set-Cookie', $accessTokenCookie)
-                ->withAddedHeader('Set-Cookie', $refreshTokenCookie);
+        $cookies = $this->accountService->tokenCookies($result);
+        foreach ($cookies as $cookie) {
+            $response = $response->withAddedHeader('Set-Cookie', $cookie);
         }
 
         return $response;
