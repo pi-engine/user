@@ -65,7 +65,15 @@ class RefreshHandler implements RequestHandlerInterface
         // Do refresh
         $result = $this->accountService->refreshToken($account, $tokenId, ['security_stream' => $securityStream]);
 
-        // Set result
-        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        // Make a escaping json response
+        $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+
+        // Set httponly cookie for access token and refresh token
+        $cookies = $this->accountService->tokenCookies($result);
+        foreach ($cookies as $cookie) {
+            $response = $response->withAddedHeader('Set-Cookie', $cookie);
+        }
+
+        return $response;
     }
 }

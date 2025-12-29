@@ -440,7 +440,7 @@ class AccountService implements ServiceInterface
         $account['multi_factor_verify']  = $multiFactorVerify;
         $account['access_token']         = $accessToken['token'];
         $account['refresh_token']        = $refreshToken['token'];
-        $account['idle_timeout_minutes'] = intdiv((int) $accessToken['ttl'], 60);
+        $account['idle_timeout_minutes'] = 15;
         $account['permission']           = [];
         $account['token_payload']        = [
             'iat' => $accessToken['payload']['iat'],
@@ -2625,32 +2625,42 @@ class AccountService implements ServiceInterface
     {
         $cookies = [];
 
-        // Access token
-        if (!empty($result['data']['access_token']) && !empty($result['data']['refresh_token'])) {
-            $accessCookie = new SetCookie();
-            $accessCookie->setName('Authorization');
-            $accessCookie->setValue($result['data']['access_token']);
-            $accessCookie->setExpires(time() + $this->config['exp_access']);
-            $accessCookie->setPath('/');
-            $accessCookie->setDomain(null);
-            $accessCookie->setSecure(false);
-            $accessCookie->setHttponly(true);
-            $accessCookie->setSamesite('lax');
-            $accessCookie->setMaxAge($this->config['exp_access']);
+        // Check
+        if ($this->config['token_cookies']['cookie_active']) {
 
-            $refreshCookie = new SetCookie();
-            $refreshCookie->setName('refresh-token');
-            $refreshCookie->setValue($result['data']['refresh_token']);
-            $refreshCookie->setExpires(time() + $this->config['exp_refresh']);
-            $refreshCookie->setPath('/');
-            $refreshCookie->setDomain(null);
-            $refreshCookie->setSecure(false);
-            $refreshCookie->setHttponly(true);
-            $refreshCookie->setSamesite('lax');
-            $refreshCookie->setMaxAge($this->config['exp_refresh']);
+            // Set cookie for a access token
+            if (!empty($result['data']['access_token'])) {
+                $accessCookie = new SetCookie();
+                $accessCookie->setName('Authorization');
+                $accessCookie->setValue($result['data']['access_token']);
+                $accessCookie->setExpires(time() + $this->config['exp_access']);
+                $accessCookie->setPath($this->config['token_cookies']['path']);
+                $accessCookie->setDomain($this->config['token_cookies']['domain']);
+                $accessCookie->setSecure($this->config['token_cookies']['secure']);
+                $accessCookie->setHttponly(true);
+                $accessCookie->setSamesite($this->config['token_cookies']['same_site']);
+                $accessCookie->setMaxAge($this->config['exp_access']);
 
-            $cookies['access']  = $accessCookie->getFieldValue();
-            $cookies['refresh'] = $refreshCookie->getFieldValue();
+                // Add cookies to result
+                $cookies['access']  = $accessCookie->getFieldValue();
+            }
+
+            // Set cookie for a refresh token
+            if (!empty($result['data']['refresh_token'])) {
+                $refreshCookie = new SetCookie();
+                $refreshCookie->setName('refresh-token');
+                $refreshCookie->setValue($result['data']['refresh_token']);
+                $refreshCookie->setExpires(time() + $this->config['exp_refresh']);
+                $refreshCookie->setPath($this->config['token_cookies']['path']);
+                $refreshCookie->setDomain($this->config['token_cookies']['domain']);
+                $refreshCookie->setSecure($this->config['token_cookies']['secure']);
+                $refreshCookie->setHttponly(true);
+                $refreshCookie->setSamesite($this->config['token_cookies']['same_site']);
+                $refreshCookie->setMaxAge($this->config['exp_refresh']);
+
+                // Add cookies to result
+                $cookies['refresh'] = $refreshCookie->getFieldValue();
+            }
         }
 
         return $cookies;

@@ -35,6 +35,13 @@ return [
             'avatar',
             'roles',
         ],
+        'token_cookies'        => [
+            'cookie_active' => 1,
+            'path'          => '/',
+            'domain'        => null,
+            'secure'        => false,
+            'same_site'     => 'lax',
+        ],
     ],
     'account' => [
         'otp_sms'      => [
