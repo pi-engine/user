@@ -47,6 +47,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
     /* @var array */
     protected array $config;
 
+    protected string $accessToken = '';
+    protected string $refreshToken = '';
+
+    protected string $typeToken = '';
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface   $streamFactory,
@@ -71,31 +76,11 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Get token
+        // Get security stream
         $securityStream = $request->getAttribute('security_stream');
-        $refreshToken   = $request->getHeaderLine('refresh-token');
-        $token          = $request->getHeaderLine('token');
-        $authorization  = $request->getHeaderLine('Authorization');
 
-        // get route match
-        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
-        $routeParams = $routeMatch->getParams();
-
-        // Get cookies
-        $cookies = $request->getCookieParams();
-
-        // Get access token by Authorization Bearer
-        if (isset($cookies['Authorization']) && !empty($cookies['Authorization'])) {
-            $token = $cookies['Authorization'];
-        } else {
-            if (!empty($authorization)) {
-                if (preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
-                    $token = $matches[1];
-                } else {
-                    $token = $authorization;
-                }
-            }
-        }
+        // Set token
+        $token = $this->resolveToken($request);
 
         // Check a token set
         if (empty($token)) {
@@ -111,13 +96,6 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $this->errorHandler->handle($request);
         }
 
-        // Set refresh-token to token if its be on true module and handler
-        $type = 'access';
-        if ($this->isValidRefreshToken($routeParams, $refreshToken)) {
-            $type  = 'refresh';
-            $token = $refreshToken;
-        }
-
         // parse token
         $tokenParsed = $this->tokenService->decryptToken(
             $token,
@@ -129,7 +107,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         );
 
         // Check parsed token
-        if (!$tokenParsed['status'] || $tokenParsed['type'] !== $type) {
+        if (!$tokenParsed['status'] || $tokenParsed['type'] !== $this->typeToken) {
             $request = $request->withAttribute('status', StatusCodeInterface::STATUS_UNAUTHORIZED);
             $request = $request->withAttribute(
                 'error',
@@ -225,11 +203,45 @@ class AuthenticationMiddleware implements MiddlewareInterface
         );
     }
 
-    private function isValidRefreshToken(array $routeParams, string $refreshToken): bool
+    private function resolveToken(ServerRequestInterface $request): ?string
     {
-        return !empty($refreshToken)
-               && isset($routeParams['module'], $routeParams['handler'])
-               && in_array($routeParams['module'], ['user', 'company'], true)
-               && $routeParams['handler'] === 'refresh';
+        // Get route parameters safely
+        $routeMatch  = $request->getAttribute('Laminas\Router\RouteMatch');
+        $routeParams = $routeMatch->getParams();
+
+        // Get headers and cookies
+        $authorizationHeader = $request->getHeaderLine('Authorization');
+        $tokenHeader         = $request->getHeaderLine('token');
+        $refreshHeader       = $request->getHeaderLine('refresh-token');
+        $cookies             = $request->getCookieParams();
+
+        // Helper to extract Bearer token
+        $getBearerToken = fn(string $header) => preg_match('/^Bearer\s+(.+)$/i', $header, $matches) ? $matches[1] : $header;
+
+        // Resolve access token (priority: cookie > Authorization header > token header)
+        $this->accessToken = $cookies['Authorization'] ?? (
+        !empty($authorizationHeader) ? $getBearerToken($authorizationHeader) : ($tokenHeader ?? null)
+        );
+
+        // Resolve refresh token (priority: cookie > refresh header)
+        $this->refreshToken = $cookies['refresh-token'] ?? ($refreshHeader ?? null);
+
+        // Determine token type
+        $this->typeToken = $this->isValidRefreshToken($routeParams) ? 'refresh' : 'access';
+
+        // Return the appropriate token
+        return match ($this->typeToken) {
+            'access'  => $this->accessToken,
+            'refresh' => $this->refreshToken,
+            default   => null,
+        };
+    }
+
+    private function isValidRefreshToken(array $routeParams): bool
+    {
+        return !empty($this->refreshToken)
+            && isset($routeParams['module'], $routeParams['handler'])
+            && in_array($routeParams['module'], ['user', 'company'], true)
+            && $routeParams['handler'] === 'refresh';
     }
 }

@@ -39,7 +39,9 @@ class AccountServiceFactory implements FactoryInterface
         $config = $container->get('config');
         $config = array_merge(
             $config['global'] ?? [],
-            $config['account'] ?? []
+            $config['account'] ?? [],
+            $config['jwt'] ?? [],
+            $config['security'] ?? [],
         );
 
         // Set account

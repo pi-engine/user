@@ -6,7 +6,6 @@ namespace Pi\User\Handler\Api\Authentication\Oauth;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Hybridauth\Exception\UnexpectedApiResponseException;
-use Laminas\Http\Header\SetCookie;
 use Pi\Core\Response\EscapingJsonResponse;
 use Pi\User\Authentication\Oauth\Microsoft;
 use Pi\User\Service\AccountService;
@@ -68,10 +67,13 @@ class MicrosoftHandler implements RequestHandlerInterface
         // Make a escaping json response
         $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
 
-        // Set httponly cookie
-        if (isset($result['data']['access_token']) && !empty($result['data']['access_token'])) {
-            $cookie   = new SetCookie('Authorization', $result['data']['access_token'], $result['data']['token_payload']['exp'], '/', null, true, true);
-            $response = $response->withHeader('Set-Cookie', $cookie->getFieldValue());
+        // Set httponly cookie for access token and refresh token
+        $accessTokenCookie  = $this->accountService->accessTokenCookie($result);
+        $refreshTokenCookie = $this->accountService->refreshTokenCookie($result);
+        if (!empty($accessTokenCookie) && !empty($refreshTokenCookie)) {
+            $response = $response
+                ->withAddedHeader('Set-Cookie', $accessTokenCookie)
+                ->withAddedHeader('Set-Cookie', $refreshTokenCookie);
         }
 
         return $response;

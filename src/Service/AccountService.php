@@ -7,6 +7,7 @@ namespace Pi\User\Service;
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Authentication\Adapter\DbTable\CallbackCheckAdapter;
 use Laminas\Filter\StringToLower;
+use Laminas\Http\Header\SetCookie;
 use Pi\Core\Security\Account\AccountLocked;
 use Pi\Core\Security\Account\AccountLoginAttempts;
 use Pi\Core\Service\CacheService;
@@ -735,17 +736,18 @@ class AccountService implements ServiceInterface
         // Get and check user
         $user = $this->cacheService->getUser($params['user_id']);
         if (!empty($user)) {
-            // Save log
-            $this->historyService->logger('logout', ['request' => $params, 'account' => $user['account']]);
-
             // Check and clean user cache for logout
             if (isset($params['all_session']) && (int)$params['all_session'] === 1) {
                 $this->cacheService->deleteUserItem($params['user_id'], 'all_keys', '');
                 $message = 'You are logout successfully from all of your sessions !';
             } else {
                 $this->cacheService->deleteUserItem($params['user_id'], 'access_keys', $params['token_id']);
+                $this->cacheService->deleteUserItem($params['user_id'], 'refresh_keys', $params['token_id']);
                 $this->cacheService->deleteUserItem($params['user_id'], 'multi_factor', $params['token_id']);
             }
+
+            // Save log
+            $this->historyService->logger('logout', ['request' => $params, 'account' => $user['account']]);
         }
 
         return [
@@ -2597,6 +2599,45 @@ class AccountService implements ServiceInterface
         $this->cacheService->setUser($account['id'], $cacheParams);
 
         return $cacheParams;
+    }
+
+
+    public function accessTokenCookie($result): string
+    {
+        if (isset($result['data']['access_token']) && !empty($result['data']['access_token'])) {
+            $cookie = new SetCookie();
+            $cookie->setName('Authorization');
+            $cookie->setValue($result['data']['access_token']);
+            $cookie->setExpires(time() + $this->config['exp_access']);
+            $cookie->setPath('/');
+            $cookie->setDomain(null);
+            $cookie->setSecure(false);
+            $cookie->setHttponly(true);
+            $cookie->setSamesite('none');
+            $cookie->setMaxAge($this->config['exp_access']);
+            return $cookie->getFieldValue();
+        } else {
+            return '';
+        }
+    }
+
+    public function refreshTokenCookie($result): string
+    {
+        if (isset($result['data']['refresh_token']) && !empty($result['data']['refresh_token'])) {
+            $cookie = new SetCookie();
+            $cookie->setName('refresh-token');
+            $cookie->setValue($result['data']['refresh_token']);
+            $cookie->setExpires(time() + $this->config['exp_refresh']);
+            $cookie->setPath('/');
+            $cookie->setDomain(null);
+            $cookie->setSecure(false);
+            $cookie->setHttponly(true);
+            $cookie->setSamesite('none');
+            $cookie->setMaxAge($this->config['exp_refresh']);
+            return $cookie->getFieldValue();
+        } else {
+            return '';
+        }
     }
 
     /**

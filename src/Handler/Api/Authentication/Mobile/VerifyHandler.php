@@ -52,6 +52,18 @@ class VerifyHandler implements RequestHandlerInterface
         // Do log in
         $result = $this->accountService->login($params);
 
-        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        // Make a escaping json response
+        $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+
+        // Set httponly cookie for access token and refresh token
+        $accessTokenCookie  = $this->accountService->accessTokenCookie($result);
+        $refreshTokenCookie = $this->accountService->refreshTokenCookie($result);
+        if (!empty($accessTokenCookie) && !empty($refreshTokenCookie)) {
+            $response = $response
+                ->withAddedHeader('Set-Cookie', $accessTokenCookie)
+                ->withAddedHeader('Set-Cookie', $refreshTokenCookie);
+        }
+
+        return $response;
     }
 }
