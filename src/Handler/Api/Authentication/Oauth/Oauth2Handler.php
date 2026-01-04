@@ -74,7 +74,7 @@ class Oauth2Handler implements RequestHandlerInterface
         $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
 
         // Set httponly cookie for access token and refresh token
-        $cookies = $this->accountService->tokenCookies($result);
+        $cookies = $this->accountService->setTokenCookies($result, $securityStream);
         foreach ($cookies as $cookie) {
             $response = $response->withAddedHeader('Set-Cookie', $cookie);
         }

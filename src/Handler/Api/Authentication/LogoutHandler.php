@@ -42,9 +42,10 @@ class LogoutHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $tokenId     = $request->getAttribute('token_id');
-        $account     = $request->getAttribute('account');
-        $requestBody = $request->getParsedBody();
+        $tokenId        = $request->getAttribute('token_id');
+        $account        = $request->getAttribute('account');
+        $securityStream = $request->getAttribute('security_stream');
+        $requestBody    = $request->getParsedBody();
 
         $params = [
             'user_id'     => $account['id'],
@@ -54,6 +55,15 @@ class LogoutHandler implements RequestHandlerInterface
 
         $result = $this->accountService->logout($params);
 
-        return new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+        // Make a escaping json response
+        $response = new EscapingJsonResponse($result, $result['status'] ?? StatusCodeInterface::STATUS_OK);
+
+        // Set httponly cookie for access token and refresh token
+        $cookies = $this->accountService->unsetTokenCookies($result, $securityStream);
+        foreach ($cookies as $cookie) {
+            $response = $response->withAddedHeader('Set-Cookie', $cookie);
+        }
+
+        return $response;
     }
 }

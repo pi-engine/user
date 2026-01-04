@@ -41,6 +41,7 @@ return [
             'domain'        => null,
             'secure'        => false,
             'same_site'     => 'lax',
+            'local_support' => 1,
         ],
     ],
     'account' => [
