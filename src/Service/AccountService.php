@@ -2629,12 +2629,16 @@ class AccountService implements ServiceInterface
         if ($this->config['token_cookies']['cookie_active']) {
 
             // Set domain
-            $domain = $this->config['token_cookies']['domain'];
+            $domain   = $this->config['token_cookies']['domain'];
+            $secure   = $this->config['token_cookies']['secure'];
+            $sameSite = $this->config['token_cookies']['same_site'];
             if (
                 $this->config['token_cookies']['local_support']
                 && $securityStream['origin']['data']['origin'] === 'local'
             ) {
-                $domain = null;
+                $domain   = null;
+                $secure   = false;
+                $sameSite = 'lax';
             }
 
             // Set cookie for a access token
@@ -2645,9 +2649,9 @@ class AccountService implements ServiceInterface
                 $accessCookie->setExpires(time() + $this->config['exp_access']);
                 $accessCookie->setPath($this->config['token_cookies']['path']);
                 $accessCookie->setDomain($domain);
-                $accessCookie->setSecure($this->config['token_cookies']['secure']);
+                $accessCookie->setSecure($secure);
                 $accessCookie->setHttponly(true);
-                $accessCookie->setSamesite($this->config['token_cookies']['same_site']);
+                $accessCookie->setSamesite($sameSite);
                 $accessCookie->setMaxAge($this->config['exp_access']);
 
                 // Add cookies to result
@@ -2662,9 +2666,9 @@ class AccountService implements ServiceInterface
                 $refreshCookie->setExpires(time() + $this->config['exp_refresh']);
                 $refreshCookie->setPath($this->config['token_cookies']['path']);
                 $refreshCookie->setDomain($domain);
-                $refreshCookie->setSecure($this->config['token_cookies']['secure']);
+                $refreshCookie->setSecure($secure);
                 $refreshCookie->setHttponly(true);
-                $refreshCookie->setSamesite($this->config['token_cookies']['same_site']);
+                $refreshCookie->setSamesite($sameSite);
                 $refreshCookie->setMaxAge($this->config['exp_refresh']);
 
                 // Add cookies to result
@@ -2683,15 +2687,19 @@ class AccountService implements ServiceInterface
         if ($this->config['token_cookies']['cookie_active']) {
 
             // Set max age time
-            $maxAge = 1;
+            $maxAge = 0;
 
             // Set domain
-            $domain = $this->config['token_cookies']['domain'];
+            $domain   = $this->config['token_cookies']['domain'];
+            $secure   = $this->config['token_cookies']['secure'];
+            $sameSite = $this->config['token_cookies']['same_site'];
             if (
                 $this->config['token_cookies']['local_support']
                 && $securityStream['origin']['data']['origin'] === 'local'
             ) {
-                $domain = null;
+                $domain   = null;
+                $secure   = false;
+                $sameSite = 'lax';
             }
 
             // Set cookie for a access token
@@ -2701,9 +2709,9 @@ class AccountService implements ServiceInterface
             $accessCookie->setExpires(time() + $maxAge);
             $accessCookie->setPath($this->config['token_cookies']['path']);
             $accessCookie->setDomain($domain);
-            $accessCookie->setSecure($this->config['token_cookies']['secure']);
+            $accessCookie->setSecure($secure);
             $accessCookie->setHttponly(true);
-            $accessCookie->setSamesite($this->config['token_cookies']['same_site']);
+            $accessCookie->setSamesite($sameSite);
             $accessCookie->setMaxAge($maxAge);
 
             // Set cookie for a refresh token
@@ -2713,13 +2721,13 @@ class AccountService implements ServiceInterface
             $accessCookie->setExpires(time() + $maxAge);
             $refreshCookie->setPath($this->config['token_cookies']['path']);
             $refreshCookie->setDomain($domain);
-            $refreshCookie->setSecure($this->config['token_cookies']['secure']);
+            $refreshCookie->setSecure($secure);
             $refreshCookie->setHttponly(true);
-            $refreshCookie->setSamesite($this->config['token_cookies']['same_site']);
+            $refreshCookie->setSamesite($sameSite);
             $refreshCookie->setMaxAge($maxAge);
 
             // Add cookies to result
-            $cookies['access'] = $accessCookie->getFieldValue();
+            $cookies['access']  = $accessCookie->getFieldValue();
             $cookies['refresh'] = $refreshCookie->getFieldValue();
         }
 
